@@ -1,0 +1,3479 @@
+/**
+ * Viscora Level Editor
+ * An interactive, visual level designer for Viscora.
+ * Activated by appending ?editor=true to the URL.
+ */
+import { Enemy } from './enemies.js?v=v6';
+import { audio } from './audio.js?v=v6';
+import { LevelGenerator } from './generator.js?v=v6';
+
+export class LevelEditor {
+    constructor(game) {
+        this.game = game;
+        this.active = false;
+        this.initialized = false;
+        
+        // Editor State
+        this.selectedObject = null;
+        this.selectedObjectType = ''; // 'platform', 'hazard', 'movingPlatform', 'gate', 'collectible', 'enemy', 'portal', 'spawn'
+        this.activeTool = 'select'; // 'select', 'create_platform_normal', ...
+        this.gridSnap = true;
+        this.gridSize = 20;
+        
+        // Panning state
+        this.isPanning = false;
+        this.panStartX = 0;
+        this.panStartY = 0;
+        this.cameraStartX = 0;
+        this.cameraStartY = 0;
+
+        // Dragging object state
+        this.isDragging = false;
+        this.dragOffsetX = 0;
+        this.dragOffsetY = 0;
+
+        // Touch states for mobile pinch zoom
+        this.touchStartDistance = 0;
+        this.touchStartZoom = 1.0;
+
+        // UI Panel DOM Element
+        this.panel = null;
+
+        // Keyboard navigation keys focused state
+        this.inputFocused = false;
+
+        // Keyboard movement keys states
+        this.keys = {
+            w: false,
+            a: false,
+            s: false,
+            d: false,
+            ArrowUp: false,
+            ArrowDown: false,
+            ArrowLeft: false,
+            ArrowRight: false,
+            Shift: false
+        };
+    }
+
+    /**
+     * Editoru başlatır ve DOM elemanlarını enjekte eder
+     */
+    init() {
+        this.active = true;
+        this.game.state = 'EDITOR';
+        this.game.ui.resetKeys();
+        
+        // Change cursor to crosshair for editor mode
+        this.game.canvas.style.cursor = 'crosshair';
+
+        // Reset camera zoom when starting editor
+        if (this.game.camera) {
+            this.game.camera.zoom = 1.0;
+        }
+
+        if (!this.initialized) {
+            // Canvas mouse olaylarını dinle
+            this.game.canvas.addEventListener('mousedown', (e) => this.onMouseDown(e));
+            window.addEventListener('mousemove', (e) => this.onMouseMove(e));
+            window.addEventListener('mouseup', (e) => this.onMouseUp(e));
+            this.game.canvas.addEventListener('contextmenu', (e) => e.preventDefault()); // Sağ tık menüsünü engelle
+
+            // Klavye ile yön tuşları pan kontrolü
+            window.addEventListener('keydown', (e) => this.onKeyDown(e));
+            window.addEventListener('keyup', (e) => this.onKeyUp(e));
+
+            // Zoom ve Touch olayları
+            this.game.canvas.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
+            this.game.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+            this.game.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+            this.game.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+            this.game.canvas.addEventListener('touchcancel', (e) => this.handleTouchEnd(e));
+
+            this.initialized = true;
+        }
+
+        // UI Panelini oluştur
+        this.createEditorUI();
+        this.updateInspector();
+
+        // Editor moduna özel arka plan stili enjekte et
+        const style = document.createElement('style');
+        style.id = 'editor-custom-styles';
+        style.innerHTML = `
+            #viscora-editor-panel {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 320px;
+                height: 100vh;
+                background: rgba(11, 15, 25, 0.85);
+                backdrop-filter: blur(12px);
+                border-left: 2px solid rgba(217, 70, 239, 0.3);
+                box-shadow: -5px 0 25px rgba(0, 0, 0, 0.6);
+                color: #e2e8f0;
+                font-family: 'Outfit', sans-serif;
+                z-index: 999999;
+                display: flex;
+                flex-direction: column;
+                padding: 15px;
+                box-sizing: border-box;
+                overflow-y: auto;
+                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            #viscora-editor-panel.collapsed {
+                transform: translateX(320px);
+            }
+            .panel-toggle-btn {
+                position: absolute;
+                left: -32px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 30px;
+                height: 70px;
+                background: rgba(11, 15, 25, 0.85);
+                backdrop-filter: blur(12px);
+                border: 2px solid rgba(217, 70, 239, 0.3);
+                border-right: none;
+                border-radius: 8px 0 0 8px;
+                color: #d946ef;
+                font-size: 20px;
+                font-weight: 800;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+                box-shadow: -5px 5px 15px rgba(0,0,0,0.3);
+                outline: none;
+            }
+            .panel-toggle-btn:hover {
+                color: #fff;
+                background: rgba(217, 70, 239, 0.2);
+                border-color: rgba(217, 70, 239, 0.6);
+            }
+            .editor-title {
+                font-size: 18px;
+                font-weight: 800;
+                color: #d946ef;
+                text-shadow: 0 0 10px rgba(217, 70, 239, 0.3);
+                margin-bottom: 5px;
+                letter-spacing: 1px;
+                text-align: center;
+            }
+            .editor-subtitle {
+                font-size: 11px;
+                color: #10b981;
+                text-align: center;
+                margin-bottom: 20px;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+            .editor-section {
+                margin-bottom: 18px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                padding-bottom: 12px;
+            }
+            .section-lbl {
+                font-size: 12px;
+                font-weight: 600;
+                color: #94a3b8;
+                margin-bottom: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .tools-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .editor-btn {
+                background: rgba(30, 41, 59, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: #cbd5e1;
+                padding: 8px 10px;
+                font-size: 12px;
+                font-weight: 600;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: all 0.2s;
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 5px;
+            }
+            .editor-btn:hover {
+                background: rgba(217, 70, 239, 0.15);
+                border-color: rgba(217, 70, 239, 0.5);
+                color: #fff;
+            }
+            .editor-btn.active {
+                background: #d946ef;
+                border-color: #d946ef;
+                color: #fff;
+                box-shadow: 0 0 10px rgba(217, 70, 239, 0.4);
+            }
+            .editor-btn.primary {
+                background: #10b981;
+                border-color: #10b981;
+                color: #fff;
+                grid-column: span 2;
+                font-size: 14px;
+                padding: 10px;
+                margin-top: 5px;
+            }
+            .editor-btn.primary:hover {
+                background: #059669;
+                box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+            }
+            .editor-btn.danger {
+                background: rgba(239, 68, 68, 0.2);
+                border-color: rgba(239, 68, 68, 0.4);
+                color: #f87171;
+            }
+            .editor-btn.danger:hover {
+                background: #ef4444;
+                color: #fff;
+            }
+            .editor-input-group {
+                display: flex;
+                align-items: center;
+                margin-bottom: 6px;
+                font-size: 12px;
+            }
+            .editor-input-group label {
+                width: 100px;
+                color: #94a3b8;
+            }
+            .editor-input-group input, .editor-input-group select {
+                flex: 1;
+                background: rgba(15, 23, 42, 0.8);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 4px;
+                color: #fff;
+                padding: 4px 6px;
+                font-size: 12px;
+                outline: none;
+                font-family: inherit;
+            }
+            .editor-input-group input:focus, .editor-input-group select:focus {
+                border-color: #d946ef;
+            }
+            .editor-checkbox-group {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 12px;
+                margin-bottom: 10px;
+            }
+            .editor-checkbox-group input {
+                cursor: pointer;
+            }
+            #editor-json-modal {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 600px;
+                max-width: 90vw;
+                height: 450px;
+                background: #0f172a;
+                border: 2px solid #d946ef;
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+                border-radius: 12px;
+                z-index: 1000000;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                color: #fff;
+            }
+            #editor-json-modal textarea {
+                flex: 1;
+                background: #020617;
+                border: 1px solid rgba(255,255,255,0.1);
+                color: #38bdf8;
+                font-family: monospace;
+                font-size: 11px;
+                padding: 10px;
+                border-radius: 6px;
+                resize: none;
+                outline: none;
+                margin-bottom: 12px;
+            }
+            #editor-json-modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0,0,0,0.6);
+                backdrop-filter: blur(4px);
+                z-index: 999999;
+            }
+            .modal-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+            }
+            .editor-sub-section {
+                background: rgba(30, 41, 59, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 6px;
+                margin-bottom: 8px;
+                overflow: hidden;
+            }
+            .editor-sub-section summary {
+                padding: 8px 10px;
+                font-size: 12px;
+                font-weight: bold;
+                color: #cbd5e1;
+                cursor: pointer;
+                user-select: none;
+                background: rgba(15, 23, 42, 0.5);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                outline: none;
+            }
+            .editor-sub-section summary::-webkit-details-marker {
+                display: none;
+            }
+            .editor-sub-section[open] summary {
+                border-bottom: 1px solid rgba(217, 70, 239, 0.3);
+                color: #d946ef;
+            }
+            .editor-sub-section .tools-grid {
+                padding: 8px;
+            }
+            /* Hide HTML Screens when editing */
+            .editor-active-screen-override {
+                display: none !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Gizle menü ekranlarını
+        this.hideAllScreens();
+    }
+
+    hideAllScreens() {
+        document.querySelectorAll('.screen').forEach(scr => {
+            scr.classList.add('editor-active-screen-override');
+        });
+        document.getElementById('hud').classList.add('hidden');
+    }
+
+    showAllScreens() {
+        document.querySelectorAll('.screen').forEach(scr => {
+            scr.classList.remove('editor-active-screen-override');
+        });
+        const styles = document.getElementById('editor-custom-styles');
+        if (styles) styles.remove();
+        if (this.panel) this.panel.remove();
+    }
+
+    /**
+     * Editör modunu tamamen kapatır ve normal oyuna döner
+     */
+    deactivate() {
+        this.active = false;
+        
+        // Remove panel from DOM
+        if (this.panel) {
+            this.panel.remove();
+            this.panel = null;
+        }
+
+        // Remove custom styles
+        const styles = document.getElementById('editor-custom-styles');
+        if (styles) styles.remove();
+
+        // Restore UI screens
+        this.showAllScreens();
+
+        // Reset cursor
+        this.game.canvas.style.cursor = 'default';
+
+        // Return to gameplay state with edited level instead of reloading campaign level
+        this.game.state = 'PLAYING';
+        this.game.ui.showScreen('hud');
+        
+        // Initialize enemies from edited state
+        this.game.enemies = [];
+        if (this.game.level.enemies) {
+            this.game.enemies = this.game.level.enemies.map(e => 
+                new Enemy(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, !!e.isVertical, e.color || '#f43f5e')
+            );
+        }
+
+        // Respawn player
+        this.game.player.respawn(this.game.level.spawnX, this.game.level.spawnY);
+        this.game.ui.updateHUDHealth(this.game.player.health);
+        this.game.ui.updateHUDViscosity(this.game.player.viscosity);
+        
+        // Remove tip if playtesting
+        const tip = document.getElementById('editor-playtest-tip');
+        if (tip) tip.remove();
+    }
+
+    /**
+     * Editör UI Sidebar panelini kurar
+     */
+    createEditorUI() {
+        if (document.getElementById('viscora-editor-panel')) return;
+
+        this.panel = document.createElement('div');
+        this.panel.id = 'viscora-editor-panel';
+
+        this.panel.innerHTML = `
+            <div class="editor-title">VISCORA EDITOR</div>
+            <div class="editor-subtitle">BÖLÜM TASARIMCISI</div>
+
+            <!-- Sistem Kontrolleri -->
+            <div class="editor-section">
+                <div class="section-lbl">Sistem</div>
+                <div class="tools-grid">
+                    <button class="editor-btn primary" id="editor-playtest-btn">▶ PLAY TEST (P)</button>
+                    <button class="editor-btn" id="editor-export-btn">💾 SAVE LEVEL</button>
+                    <button class="editor-btn" id="editor-import-btn">📂 LOAD LEVEL</button>
+                    <button class="editor-btn" id="editor-share-btn" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee; border-color: rgba(6, 182, 212, 0.35);">📤 PAYLAŞ</button>
+                    <button class="editor-btn danger" id="editor-clear-btn" style="grid-column: span 2;">⚠️ CLEAR LEVEL</button>
+                    <button class="editor-btn warning" id="editor-reset-campaign-btn" style="grid-column: span 2; margin-top: 5px; background: rgba(234, 179, 8, 0.15); color: #facc15; border-color: rgba(234, 179, 8, 0.35);">🔄 SIFIRLA (VARSAYILAN HARİTA)</button>
+                    <button class="editor-btn danger" id="editor-exit-btn" style="grid-column: span 2; margin-top: 5px; background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.35);">🏠 EXIT TO MENU</button>
+                </div>
+            </div>
+
+            <!-- Rastgele Bölüm Üretici -->
+            <div class="editor-section" style="border-bottom: 1px solid rgba(217, 70, 239, 0.2); padding-bottom: 15px;">
+                <div class="section-lbl" style="color: #d946ef; display: flex; align-items: center; gap: 5px;">
+                    ⚡ RASTGELE BÖLÜM ÜRETİCİ
+                </div>
+                <div class="editor-input-group" style="margin-top: 8px;">
+                    <label style="width: 75px;">Seed (Tohum)</label>
+                    <input type="text" id="generator-seed-input" placeholder="Rastgele (Boş bırakın)" style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(217, 70, 239, 0.4); box-shadow: 0 0 5px rgba(217, 70, 239, 0.1);">
+                </div>
+                <div class="editor-input-group" style="margin-top: 6px;">
+                    <label style="width: 75px;">Zorluk</label>
+                    <select id="generator-difficulty-sel" style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(217, 70, 239, 0.4); color: #fff;">
+                        <option value="random" selected>Rastgele</option>
+                        <option value="easy">Kolay</option>
+                        <option value="medium">Orta</option>
+                        <option value="hard">Zor</option>
+                    </select>
+                </div>
+                <button class="editor-btn" id="editor-generate-btn" style="width: 100%; margin-top: 10px; background: linear-gradient(135deg, #d946ef 0%, #a855f7 100%); color: #fff; border: none; font-weight: 800; font-size: 13px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); box-shadow: 0 0 15px rgba(217, 70, 239, 0.2); transition: all 0.3s ease;">
+                    ⚡ BÖLÜMÜ BASTAN YARAT
+                </button>
+            </div>
+
+            <!-- Ayarlar -->
+            <div class="editor-section">
+                <div class="section-lbl">Seviye & Izgara</div>
+                <div class="editor-checkbox-group">
+                    <input type="checkbox" id="editor-grid-snap-chk" ${this.gridSnap ? 'checked' : ''}>
+                    <label for="editor-grid-snap-chk">Izgaraya Hizala (Snap)</label>
+                </div>
+                <div class="editor-input-group">
+                    <label>Izgara Boyutu</label>
+                    <select id="editor-grid-size-sel">
+                        <option value="10">10 px</option>
+                        <option value="20" selected>20 px</option>
+                        <option value="50">50 px</option>
+                    </select>
+                </div>
+                <div class="editor-input-group">
+                    <label>Harita Genişlik</label>
+                    <input type="number" id="editor-level-width" value="${this.game.level.width}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Harita Yükseklik</label>
+                    <input type="number" id="editor-level-height" value="${this.game.level.height}">
+                </div>
+            </div>
+
+            <!-- Araçlar / Objeler -->
+            <div class="editor-section">
+                <div class="section-lbl">Araçlar & Objeler</div>
+                
+                <details open class="editor-sub-section">
+                    <summary>🔍 Temel Araçlar</summary>
+                    <div class="tools-grid">
+                        <button class="editor-btn active" data-tool="select" style="grid-column: span 2;">🔍 Seç / Taşı</button>
+                        <button class="editor-btn" data-tool="create_spawn">🟢 Oyuncu Başlangıç</button>
+                        <button class="editor-btn" data-tool="create_portal">🌀 Bitiş Portalı</button>
+                        <button class="editor-btn" data-tool="create_collectible_yellow">💛 Sarı Kristal</button>
+                        <button class="editor-btn" data-tool="create_collectible_blue">💙 Mavi Kristal</button>
+                        <button class="editor-btn" data-tool="create_collectible_pink">💗 Pembe Kristal</button>
+                        <button class="editor-btn" data-tool="create_collectible_green">💚 Yeşil Kristal</button>
+                        <button class="editor-btn" data-tool="create_collectible_diamond" style="grid-column: span 2;">💎 Kırmızı Elmas</button>
+                    </div>
+                </details>
+
+                <details class="editor-sub-section">
+                    <summary>🧱 Zeminler & Duvarlar</summary>
+                    <div class="tools-grid">
+                        <button class="editor-btn" data-tool="create_platform_normal">🧱 Normal Zemin</button>
+                        <button class="editor-btn" data-tool="create_platform_long">🧱 Uzun Zemin</button>
+                        <button class="editor-btn" data-tool="create_platform_narrow">🧱 Dar Zemin</button>
+                        <button class="editor-btn" data-tool="create_wall_normal">🧱 Normal Duvar</button>
+                        <button class="editor-btn" data-tool="create_platform_sticky">🟣 Pembe Yapışkan</button>
+                        <button class="editor-btn" data-tool="create_platform_sticky_purple">💜 Mor Yapışkan</button>
+                        <button class="editor-btn" data-tool="create_platform_slippery">🔵 Mavi Kaygan</button>
+                        <button class="editor-btn" data-tool="create_moving">🟡 Hareketli Zemin</button>
+                        <button class="editor-btn" data-tool="create_platform_falling">⏳ Düşen Zemin</button>
+                        <button class="editor-btn" data-tool="create_platform_breakable">💥 Kırılabilir Zemin</button>
+                        <button class="editor-btn" data-tool="create_wall_breakable">💥 Kırılabilir Duvar</button>
+                        <button class="editor-btn" data-tool="create_hidden_passage">👁️ Gizli Geçit (İnce)</button>
+                    </div>
+                </details>
+
+                <details class="editor-sub-section">
+                    <summary>⚙️ Mekanikler & Etkileşim</summary>
+                    <div class="tools-grid">
+                        <button class="editor-btn" data-tool="create_plate">🟨 Basınç Plakası</button>
+                        <button class="editor-btn" data-tool="create_pushblock">📦 İtilebilir Blok</button>
+                        <button class="editor-btn" data-tool="create_conveyor">🧡 Konveyör Bant</button>
+                        <button class="editor-btn" data-tool="create_bouncepad">🦘 Zıplama Pedi</button>
+                        <button class="editor-btn" data-tool="create_teleport" style="grid-column: span 2;">🌌 Işınlanma Portalı (Pair)</button>
+                        <button class="editor-btn" data-tool="create_button">🔘 Buton (Bas/Çek)</button>
+                        <button class="editor-btn" data-tool="create_lever">🕹️ Kol (Şalter)</button>
+                        <button class="editor-btn" data-tool="create_vantuz" style="grid-column: span 2;">🧲 Vantuz Noktası (Pembe)</button>
+                    </div>
+                </details>
+
+                <details class="editor-sub-section">
+                    <summary>🚧 Engeller & Kapılar</summary>
+                    <div class="tools-grid">
+                        <button class="editor-btn" data-tool="create_gate_blue">🔵 Mavi Lazer</button>
+                        <button class="editor-btn" data-tool="create_gate_pink">💗 Pembe Lazer</button>
+                        <button class="editor-btn" data-tool="create_gate_green">💚 Yeşil Lazer</button>
+                        <button class="editor-btn" data-tool="create_gate_yellow">💛 Sarı Lazer</button>
+                        <button class="editor-btn" data-tool="create_gate_net" style="grid-column: span 2;">🟣 Mor Ağ Kapısı</button>
+                    </div>
+                </details>
+
+                <details class="editor-sub-section">
+                    <summary>👾 Düşmanlar & Tehlikeler</summary>
+                    <div class="tools-grid">
+                        <button class="editor-btn" data-tool="create_enemy">🔴 Yatay Diken</button>
+                        <button class="editor-btn" data-tool="create_enemy_vertical">🔵 Dikey Diken</button>
+                        <button class="editor-btn" data-tool="create_enemy_jumping">🟣 Zıplayan Diken</button>
+                        <button class="editor-btn" data-tool="create_enemy_flying">🟡 Uçan Diken</button>
+                        <button class="editor-btn" data-tool="create_hazard_acid" style="grid-column: span 2;">🧪 Asit Havuzu</button>
+                        <button class="editor-btn" data-tool="create_hazard_spike">🔺 Yer Dikeni</button>
+                        <button class="editor-btn" data-tool="create_hazard_spike_down">🔻 Tavan Dikeni</button>
+                        <button class="editor-btn" data-tool="create_hazard_spike_left">◀️ Duvar Dikeni (S)</button>
+                        <button class="editor-btn" data-tool="create_hazard_spike_right">▶️ Duvar Dikeni (D)</button>
+                        <button class="editor-btn" data-tool="create_trap_falling_block" style="grid-column: span 2;">🗿 Düşen Blok Tuzağı</button>
+                    </div>
+                </details>
+
+                <details class="editor-sub-section">
+                    <summary>🎀 Dekoratif Objeler</summary>
+                    <div class="tools-grid">
+                        <button class="editor-btn" data-tool="create_deco_neon">💡 Neon Işık</button>
+                        <button class="editor-btn" data-tool="create_deco_box">📦 Kutu</button>
+                        <button class="editor-btn" data-tool="create_deco_pipe">🔧 Boru</button>
+                        <button class="editor-btn" data-tool="create_deco_cable">🔌 Kablo</button>
+                        <button class="editor-btn" data-tool="create_deco_pano">🖥️ Pano</button>
+                        <button class="editor-btn" data-tool="create_deco_fan">🌀 Fan</button>
+                        <button class="editor-btn" data-tool="create_deco_warning">🚨 Arıza Işığı</button>
+                        <button class="editor-btn" data-tool="create_deco_steam">💨 Sis / Buhar</button>
+                        <button class="editor-btn" data-tool="create_deco_pillar">🏛️ Sütun (Pillar)</button>
+                        <button class="editor-btn" data-tool="create_deco_gear">⚙️ Dişli (Gear)</button>
+                        <button class="editor-btn" data-tool="create_deco_window_space">🌌 Hologram Pencere</button>
+                        <button class="editor-btn" data-tool="create_deco_server_rack">🖥️ Sunucu Konsolu</button>
+                        <button class="editor-btn" data-tool="create_deco_textbox" style="grid-column: span 2;">💬 Bilgi / Yazı Kutusu</button>
+                    </div>
+                </details>
+            </div>
+
+            <!-- Tetikleyici Yardım Rehberi -->
+            <details class="editor-sub-section" style="margin-bottom: 15px;">
+                <summary>💡 Tetikleyiciler Nasıl Çalışır?</summary>
+                <div style="font-size: 11px; padding: 10px; line-height: 1.45; color: #94a3b8; background: rgba(30, 41, 59, 0.2); border-radius: 4px;">
+                    <strong>Kapı Açma / Tetikleme Sistemi:</strong><br>
+                    1. Bir Lazer veya Ağ kapısı yerleştirin ve seçerek müfettişteki <strong>Bariyer ID</strong> değerine bakın (örn. <code>101</code>).<br>
+                    2. Bir <strong>Basınç Plakası</strong>, <strong>Buton</strong> veya <strong>Şalter (Kol)</strong> yerleştirin.<br>
+                    3. Tetikleyiciyi seçip müfettişteki <strong>Bağlı Kapı ID</strong> değerini kapı ID'si ile aynı yapın (örn. <code>101</code>).<br><br>
+                    <strong>Tetikleyici Farkları:</strong><br>
+                    - <strong>Plaka</strong>: Üzerine basıldığı sürece kapıyı açık tutar (İtilebilir Blok da yerleştirilebilir).<br>
+                    - <strong>Buton</strong>: Basıldığında kapıyı 3 saniye boyunca açık tutar, sonra kapanır.<br>
+                    - <strong>Şalter</strong>: Her etkileşimde kapıyı kalıcı açar/kapatır.
+                </div>
+            </details>
+
+            <!-- Müfettiş (Inspector) -->
+            <div class="editor-section" style="flex: 1; border-bottom: none;">
+                <div class="section-lbl">Obje Detayları (Müfettiş)</div>
+                <div id="editor-inspector-content">
+                    <span style="color:#64748b; font-style:italic; font-size:12px;">Seçili obje yok.</span>
+                </div>
+            </div>
+            
+            <div style="font-size: 10px; color:#64748b; text-align:center; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">
+                Sağ Tık + Sürükle: Kamerayı Kaydır<br>
+                Yön Tuşları: Kamerayı Kaydır<br>
+                Delete / Backspace: Seçiliyi Sil
+            </div>
+        `;
+
+        document.getElementById('game-container').appendChild(this.panel);
+
+        // Olay Dinleyicileri Ekle
+        this.panel.querySelectorAll('.editor-btn[data-tool]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.panel.querySelectorAll('.editor-btn[data-tool]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.activeTool = btn.getAttribute('data-tool');
+                this.selectedObject = null;
+                this.selectedObjectType = '';
+                this.updateInspector();
+            });
+        });
+
+        // Grid Snap ve Izgara Ayarları
+        const snapChk = document.getElementById('editor-grid-snap-chk');
+        snapChk.addEventListener('change', (e) => {
+            this.gridSnap = snapChk.checked;
+        });
+
+        const sizeSel = document.getElementById('editor-grid-size-sel');
+        sizeSel.addEventListener('change', (e) => {
+            this.gridSize = parseInt(sizeSel.value);
+        });
+
+        // Harita Boyutları
+        const widthInput = document.getElementById('editor-level-width');
+        widthInput.addEventListener('change', (e) => {
+            this.game.level.width = Math.max(800, parseInt(widthInput.value) || 2000);
+        });
+        const heightInput = document.getElementById('editor-level-height');
+        heightInput.addEventListener('change', (e) => {
+            this.game.level.height = Math.max(600, parseInt(heightInput.value) || 600);
+        });
+
+        // Klavye alanına tıklanınca klavye navigasyonunu durdur
+        this.panel.addEventListener('focusin', () => { this.inputFocused = true; });
+        this.panel.addEventListener('focusout', () => { this.inputFocused = false; });
+
+        // Sistem butonları
+        document.getElementById('editor-playtest-btn').addEventListener('click', () => this.startPlaytest());
+        document.getElementById('editor-export-btn').addEventListener('click', () => this.exportLevelJSON());
+        document.getElementById('editor-import-btn').addEventListener('click', () => this.importLevelJSON());
+        document.getElementById('editor-share-btn').addEventListener('click', () => this.publishToCommunity());
+        document.getElementById('editor-clear-btn').addEventListener('click', () => {
+            if (confirm('Bölümdeki tüm objeler silinecek! Emin misiniz?')) {
+                this.clearLevel();
+            }
+        });
+        document.getElementById('editor-reset-campaign-btn').addEventListener('click', () => {
+            if (confirm('Bu seviye için yaptığınız tüm düzenlemeler silinecek ve kampanya varsayılanına sıfırlanacak! Emin misiniz?')) {
+                localStorage.removeItem('viscora_custom_level_' + this.game.currentLevel);
+                this.game.level.loadLevel(this.game.currentLevel);
+                
+                // Clear editor and game state to default campaign levels
+                this.game.enemies = [];
+                this.game.particles = [];
+                this.game.splatters = [];
+                this.game.initEnemies(this.game.currentLevel);
+                this.game.player.respawn(this.game.level.spawnX, this.game.level.spawnY);
+                this.game.camera.x = Math.max(0, this.game.level.spawnX - this.game.cssWidth / 2);
+                this.game.camera.y = Math.max(0, this.game.level.spawnY - this.game.cssHeight / 2);
+                
+                this.selectedObject = null;
+                this.selectedObjectType = '';
+                this.updateInspector();
+                audio.playPlateActivate();
+                alert('Seviye başarıyla kampanya varsayılanına sıfırlandı!');
+            }
+        });
+        document.getElementById('editor-exit-btn').addEventListener('click', () => {
+            if (confirm('Editörden çıkıp ana menüye dönmek istiyor musunuz? Kaydedilmemiş değişiklikler kaybolabilir.')) {
+                this.deactivate();
+                // Clean the ?editor=true parameter from URL and reload to main menu
+                window.location.href = window.location.origin + window.location.pathname;
+            }
+        });
+
+        // Rastgele Seviye Üretme Butonu
+        document.getElementById('editor-generate-btn').addEventListener('click', () => {
+            let seedInput = document.getElementById('generator-seed-input').value.trim();
+            if (!seedInput) {
+                // Generate a random seed if none is provided
+                seedInput = Math.floor(Math.random() * 90000 + 10000).toString();
+                document.getElementById('generator-seed-input').value = seedInput;
+            }
+            
+            let difficulty = document.getElementById('generator-difficulty-sel').value;
+            if (difficulty === 'random') {
+                // Procedurally determine difficulty based on the seed
+                let hash = 0;
+                const s = String(seedInput);
+                for (let i = 0; i < s.length; i++) {
+                    hash = (hash << 5) - hash + s.charCodeAt(i);
+                    hash |= 0;
+                }
+                const diffs = ['easy', 'medium', 'hard'];
+                difficulty = diffs[Math.abs(hash) % 3];
+            }
+            
+            // Clear current level
+            this.clearLevel();
+            
+            // Generate using LevelGenerator
+            LevelGenerator.generate(this.game, seedInput, difficulty);
+            
+            // Update input values on the screen
+            document.getElementById('editor-level-width').value = this.game.level.width;
+            document.getElementById('editor-level-height').value = this.game.level.height;
+            
+            // Select nothing, refresh inspector
+            this.selectedObject = null;
+            this.selectedObjectType = '';
+            this.updateInspector();
+            
+            // Save to localStorage immediately
+            this.saveToLocalStorage();
+            
+            // Center the camera on the spawn point
+            this.game.camera.x = Math.max(0, this.game.level.spawnX - this.game.cssWidth / 2);
+            this.game.camera.y = Math.max(0, this.game.level.spawnY - this.game.cssHeight / 2);
+            
+            audio.playCollect(); // Play sound effect
+        });
+
+        // Panel Aç/Kapat Butonu (Toggle Handle Button) enjekte et
+        const toggleBtn = document.createElement('button');
+        toggleBtn.id = 'editor-panel-toggle';
+        toggleBtn.className = 'panel-toggle-btn';
+        toggleBtn.innerHTML = '›';
+        toggleBtn.title = 'Paneli Kapat / Aç (Tab)';
+        this.panel.appendChild(toggleBtn);
+
+        toggleBtn.addEventListener('click', () => {
+            this.togglePanel();
+        });
+    }
+
+    /**
+     * Editör yan panelinin görünürlüğünü açar/kapatır (Drawer Slide)
+     */
+    togglePanel() {
+        if (!this.panel) return;
+        
+        const isCollapsed = this.panel.classList.toggle('collapsed');
+        const toggleBtn = document.getElementById('editor-panel-toggle');
+        if (toggleBtn) {
+            toggleBtn.innerHTML = isCollapsed ? '‹' : '›';
+        }
+        audio.playPlateActivate(); // Sesli geribildirim
+    }
+
+    /**
+     * Tüm bölüm verilerini sıfırlar
+     */
+    clearLevel() {
+        // Clear saved custom level from localStorage
+        localStorage.removeItem('viscora_custom_level_' + this.game.currentLevel);
+
+        const lvl = this.game.level;
+        lvl.platforms = [{ x: 0, y: 460, w: 400, h: 140, type: 'normal' }]; // En azından bir başlangıç zemini
+        lvl.hazards = [];
+        lvl.movingPlatforms = [];
+        lvl.gates = [];
+        lvl.collectibles = [];
+        lvl.enemies = [];
+        lvl.pressurePlates = [];
+        lvl.pushBlocks = [];
+        lvl.conveyors = [];
+        lvl.teleportPairs = [];
+        lvl.bouncePads = [];
+        lvl.buttons = [];
+        lvl.levers = [];
+        lvl.fallingPlatforms = [];
+        lvl.breakablePlatforms = [];
+        lvl.hiddenPassages = [];
+        lvl.fallingBlockTraps = [];
+        lvl.vantuzPoints = [];
+        lvl.decorations = [];
+        lvl.spawnX = 80;
+        lvl.spawnY = 350;
+        lvl.portal = { x: 300, y: 380, w: 60, h: 80, angle: 0 };
+        
+        // Center the camera on the spawn point
+        this.game.camera.x = 0;
+        this.game.camera.y = 0;
+        
+        this.selectedObject = null;
+        this.selectedObjectType = '';
+        this.updateInspector();
+    }
+
+    /**
+     * Mevcut seviye verilerini tarayıcı hafızasına (localStorage) otomatik kaydeder.
+     */
+    saveToLocalStorage() {
+        const lvl = this.game.level;
+        
+        const platforms = lvl.platforms.map(p => ({
+            x: Math.round(p.x),
+            y: Math.round(p.y),
+            w: Math.round(p.w),
+            h: Math.round(p.h),
+            type: p.type || 'normal'
+        }));
+
+        const spikes = lvl.hazards
+            .filter(h => h.type === 'spike')
+            .map(h => ({ x: Math.round(h.x), y: Math.round(h.y), w: Math.round(h.w), h: Math.round(h.h), direction: h.direction || 'up' }));
+
+        const acidPools = lvl.hazards
+            .filter(h => h.type === 'acid')
+            .map(h => ({ x: Math.round(h.x), y: Math.round(h.y), w: Math.round(h.w), h: Math.round(h.h) }));
+
+        const lasers = lvl.gates
+            .filter(g => g.type === 'laser' || g.type === 'pinkLaser' || g.type === 'greenLaser' || g.type === 'yellowLaser')
+            .map(g => ({
+                x: Math.round(g.x),
+                y: Math.round(g.y),
+                w: Math.round(g.w),
+                h: Math.round(g.h),
+                type: g.type,
+                id: g.id
+            }));
+
+        const netGates = lvl.gates
+            .filter(g => g.type === 'net')
+            .map(g => ({ x: Math.round(g.x), y: Math.round(g.y), w: Math.round(g.w), h: Math.round(g.h), id: g.id }));
+
+        const movingPlatforms = lvl.movingPlatforms.map(p => ({
+            startX: Math.round(p.startX),
+            startY: Math.round(p.startY),
+            targetX: Math.round(p.targetX),
+            targetY: Math.round(p.targetY),
+            w: Math.round(p.w),
+            h: Math.round(p.h),
+            speed: p.speed || 0.015
+        }));
+
+        const crystals = lvl.collectibles.map(c => ({ x: Math.round(c.x), y: Math.round(c.y), color: c.color || '#eab308' }));
+
+        const enemies = lvl.enemies.map(e => ({
+            x: Math.round(e.x),
+            y: Math.round(e.y),
+            rangeX: Math.round(e.rangeX || 120),
+            speed: e.speed || 1.2,
+            isVertical: !!e.isVertical,
+            color: e.color || '#f43f5e'
+        }));
+
+        const pressurePlates = (lvl.pressurePlates || []).map(pp => ({
+            x: Math.round(pp.x),
+            y: Math.round(pp.y),
+            w: Math.round(pp.w),
+            h: Math.round(pp.h),
+            linkedGateId: pp.linkedGateId
+        }));
+
+        const pushBlocks = (lvl.pushBlocks || []).map(pb => ({
+            x: Math.round(pb.startX !== undefined ? pb.startX : pb.x),
+            y: Math.round(pb.startY !== undefined ? pb.startY : pb.y),
+            w: Math.round(pb.w),
+            h: Math.round(pb.h),
+            startX: Math.round(pb.startX !== undefined ? pb.startX : pb.x),
+            startY: Math.round(pb.startY !== undefined ? pb.startY : pb.y)
+        }));
+
+        const conveyors = (lvl.conveyors || []).map(c => ({
+            x: Math.round(c.x),
+            y: Math.round(c.y),
+            w: Math.round(c.w),
+            h: Math.round(c.h),
+            direction: c.direction,
+            speed: c.speed
+        }));
+
+        const teleportPairs = (lvl.teleportPairs || []).map(tp => ({
+            x1: Math.round(tp.x1),
+            y1: Math.round(tp.y1),
+            x2: Math.round(tp.x2),
+            y2: Math.round(tp.y2),
+            color: tp.color || '#a855f7'
+        }));
+
+        const bouncePads = (lvl.bouncePads || []).map(bp => ({
+            x: Math.round(bp.x),
+            y: Math.round(bp.y),
+            w: Math.round(bp.w),
+            h: Math.round(bp.h),
+            force: bp.force
+        }));
+
+        const buttons = (lvl.buttons || []).map(b => ({
+            x: Math.round(b.x),
+            y: Math.round(b.y),
+            w: Math.round(b.w),
+            h: Math.round(b.h),
+            linkedGateId: b.linkedGateId
+        }));
+
+        const levers = (lvl.levers || []).map(l => ({
+            x: Math.round(l.x),
+            y: Math.round(l.y),
+            w: Math.round(l.w),
+            h: Math.round(l.h),
+            linkedGateId: l.linkedGateId
+        }));
+
+        const fallingPlatforms = (lvl.fallingPlatforms || []).map(p => ({
+            startX: Math.round(p.startX !== undefined ? p.startX : p.x),
+            startY: Math.round(p.startY !== undefined ? p.startY : p.y),
+            x: Math.round(p.startX !== undefined ? p.startX : p.x),
+            y: Math.round(p.startY !== undefined ? p.startY : p.y),
+            w: Math.round(p.w),
+            h: Math.round(p.h),
+            timer: 0,
+            triggered: false,
+            vy: 0,
+            fallen: false
+        }));
+
+        const breakablePlatforms = (lvl.breakablePlatforms || []).map(p => ({
+            x: Math.round(p.x),
+            y: Math.round(p.y),
+            w: Math.round(p.w),
+            h: Math.round(p.h),
+            type: p.type || 'platform',
+            broken: false,
+            timer: 0,
+            triggered: false
+        }));
+
+        const hiddenPassages = (lvl.hiddenPassages || []).map(p => ({
+            x: Math.round(p.x),
+            y: Math.round(p.y),
+            w: Math.round(p.w),
+            h: Math.round(p.h)
+        }));
+
+        const fallingBlockTraps = (lvl.fallingBlockTraps || []).map(t => ({
+            startX: Math.round(t.startX !== undefined ? t.startX : t.x),
+            startY: Math.round(t.startY !== undefined ? t.startY : t.y),
+            x: Math.round(t.startX !== undefined ? t.startX : t.x),
+            y: Math.round(t.startY !== undefined ? t.startY : t.y),
+            w: Math.round(t.w),
+            h: Math.round(t.h),
+            state: 'idle',
+            vy: 0,
+            timer: 0
+        }));
+
+        const vantuzPoints = (lvl.vantuzPoints || []).map(v => ({
+            x: Math.round(v.x),
+            y: Math.round(v.y)
+        }));
+
+        const decorations = (lvl.decorations || []).map(d => ({
+            x: Math.round(d.x),
+            y: Math.round(d.y),
+            w: Math.round(d.w),
+            h: Math.round(d.h),
+            type: d.type || 'neon_light',
+            rotation: d.rotation || 0,
+            state: d.state || 0,
+            text: d.text || '',
+            color: d.color || ''
+        }));
+
+        const exportObj = {
+            levelWidth: lvl.width,
+            levelHeight: lvl.height,
+            spawn: { x: Math.round(lvl.spawnX), y: Math.round(lvl.spawnY) },
+            portal: { x: Math.round(lvl.portal.x), y: Math.round(lvl.portal.y) },
+            platforms,
+            spikes,
+            acidPools,
+            lasers,
+            netGates,
+            movingPlatforms,
+            crystals,
+            enemies,
+            pressurePlates,
+            pushBlocks,
+            conveyors,
+            teleportPairs,
+            bouncePads,
+            buttons,
+            levers,
+            fallingPlatforms,
+            breakablePlatforms,
+            hiddenPassages,
+            fallingBlockTraps,
+            vantuzPoints,
+            decorations
+        };
+
+        const jsonStr = JSON.stringify(exportObj, null, 4);
+        localStorage.setItem('viscora_custom_level_' + this.game.currentLevel, jsonStr);
+    }
+
+    /**
+     * Müfettiş alanını seçili objeye göre günceller
+     */
+    updateInspector() {
+        const container = document.getElementById('editor-inspector-content');
+        if (!container) return;
+
+        if (!this.selectedObject) {
+            container.innerHTML = `<span style="color:#64748b; font-style:italic; font-size:12px;">Seçili obje yok.</span>`;
+            return;
+        }
+
+        const obj = this.selectedObject;
+        const type = this.selectedObjectType;
+
+        let html = `<div style="font-size:13px; font-weight:bold; margin-bottom:10px; color:#10b981;">TÜR: ${type.toUpperCase()}</div>`;
+        
+        // Temel Boyutlar
+        if (type !== 'spawn' && type !== 'portal' && type !== 'collectible' && type !== 'teleportPair' && type !== 'vantuzPoint') {
+            html += `
+                <div class="editor-input-group">
+                    <label>X Konum</label>
+                    <input type="number" id="inspect-x" value="${Math.round(obj.x)}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Y Konum</label>
+                    <input type="number" id="inspect-y" value="${Math.round(obj.y)}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Genişlik (W)</label>
+                    <input type="number" id="inspect-w" value="${Math.round(obj.w)}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Yükseklik (H)</label>
+                    <input type="number" id="inspect-h" value="${Math.round(obj.h)}">
+                </div>
+            `;
+        } else if (type === 'teleportPair') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Portal 1 X</label>
+                    <input type="number" id="inspect-x1" value="${Math.round(obj.x1)}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Portal 1 Y</label>
+                    <input type="number" id="inspect-y1" value="${Math.round(obj.y1)}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Portal 2 X</label>
+                    <input type="number" id="inspect-x2" value="${Math.round(obj.x2)}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Portal 2 Y</label>
+                    <input type="number" id="inspect-y2" value="${Math.round(obj.y2)}">
+                </div>
+            `;
+        } else if (type === 'portal' || type === 'collectible' || type === 'vantuzPoint') {
+            html += `
+                <div class="editor-input-group">
+                    <label>X Konum</label>
+                    <input type="number" id="inspect-x" value="${Math.round(obj.x)}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Y Konum</label>
+                    <input type="number" id="inspect-y" value="${Math.round(obj.y)}">
+                </div>
+            `;
+        } else if (type === 'spawn') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Spawn X</label>
+                    <input type="number" id="inspect-spawn-x" value="${Math.round(this.game.level.spawnX)}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Spawn Y</label>
+                    <input type="number" id="inspect-spawn-y" value="${Math.round(this.game.level.spawnY)}">
+                </div>
+            `;
+        }
+
+        // Objeye Özgü Ek Parametreler
+        if (type === 'platform') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Yüzey Türü</label>
+                    <select id="inspect-plat-type">
+                        <option value="normal" ${obj.type === 'normal' ? 'selected' : ''}>Normal</option>
+                        <option value="sticky" ${obj.type === 'sticky' ? 'selected' : ''}>Pembe Yapışkan</option>
+                        <option value="slippery" ${obj.type === 'slippery' ? 'selected' : ''}>Mavi Kaygan</option>
+                    </select>
+                </div>
+            `;
+        } else if (type === 'movingPlatform') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Hedef X</label>
+                    <input type="number" id="inspect-target-x" value="${Math.round(obj.targetX)}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Hedef Y</label>
+                    <input type="number" id="inspect-target-y" value="${Math.round(obj.targetY)}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Hız Katsayısı</label>
+                    <input type="number" step="0.001" id="inspect-speed" value="${obj.speed || 0.015}">
+                </div>
+                <div style="margin-top: 8px; display:flex; gap:5px;">
+                    <button class="editor-btn" id="inspect-set-start-btn" style="flex:1; padding:4px; font-size:10px;">Mevcutu Başlangıç Yap</button>
+                    <button class="editor-btn" id="inspect-set-target-btn" style="flex:1; padding:4px; font-size:10px;">Mevcutu Hedef Yap</button>
+                </div>
+            `;
+        } else if (type === 'gate') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Bariyer Türü</label>
+                    <select id="inspect-gate-type">
+                        <option value="laser" ${obj.type === 'laser' ? 'selected' : ''}>Mavi Lazer</option>
+                        <option value="pinkLaser" ${obj.type === 'pinkLaser' ? 'selected' : ''}>Pembe Lazer</option>
+                        <option value="greenLaser" ${obj.type === 'greenLaser' ? 'selected' : ''}>Yeşil Lazer</option>
+                        <option value="yellowLaser" ${obj.type === 'yellowLaser' ? 'selected' : ''}>Sarı Lazer</option>
+                        <option value="net" ${obj.type === 'net' ? 'selected' : ''}>Mor Ağ Kapısı</option>
+                    </select>
+                </div>
+                <div class="editor-input-group">
+                    <label>Bariyer ID</label>
+                    <input type="number" id="inspect-gate-id" value="${obj.id || 101}">
+                </div>
+                <div style="font-size: 10px; color: #64748b; margin-top: -3px; margin-bottom: 8px; line-height: 1.2;">
+                    * Tetikleyiciyi bu kapıya bağlamak için tetikleyicinin 'Bağlı Kapı ID' değerini bu ID ile eşleştirin.
+                </div>
+            `;
+        } else if (type === 'enemy') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Patrol Menzil</label>
+                    <input type="number" id="inspect-enemy-range" value="${obj.rangeX || 150}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Devriye Hızı</label>
+                    <input type="number" step="0.1" id="inspect-enemy-speed" value="${obj.speed || 1.2}">
+                </div>
+                <div class="editor-checkbox-group">
+                    <input type="checkbox" id="inspect-enemy-vertical" ${obj.isVertical ? 'checked' : ''}>
+                    <label for="inspect-enemy-vertical">Dikey Devriye</label>
+                </div>
+                <div class="editor-input-group">
+                    <label>Renk</label>
+                    <select id="inspect-enemy-color">
+                        <option value="#f43f5e" ${obj.color === '#f43f5e' || !obj.color ? 'selected' : ''}>Kırmızı</option>
+                        <option value="#06b6d4" ${obj.color === '#06b6d4' ? 'selected' : ''}>Mavi</option>
+                        <option value="#d946ef" ${obj.color === '#d946ef' ? 'selected' : ''}>Mor/Pembe</option>
+                        <option value="#eab308" ${obj.color === '#eab308' ? 'selected' : ''}>Sarı</option>
+                    </select>
+                </div>
+            `;
+        } else if (type === 'collectible') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Renk</label>
+                    <select id="inspect-collectible-color">
+                        <option value="#eab308" ${obj.color === '#eab308' || !obj.color ? 'selected' : ''}>Altın (Sarı)</option>
+                        <option value="#06b6d4" ${obj.color === '#06b6d4' ? 'selected' : ''}>Mavi</option>
+                        <option value="#d946ef" ${obj.color === '#d946ef' ? 'selected' : ''}>Pembe</option>
+                        <option value="#10b981" ${obj.color === '#10b981' ? 'selected' : ''}>Yeşil</option>
+                        <option value="#f43f5e" ${obj.color === '#f43f5e' ? 'selected' : ''}>Kırmızı (Elmas)</option>
+                    </select>
+                </div>
+            `;
+        } else if (type === 'conveyor') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Yön</label>
+                    <select id="inspect-conveyor-dir">
+                        <option value="1" ${obj.direction === 1 ? 'selected' : ''}>Sağa</option>
+                        <option value="-1" ${obj.direction === -1 ? 'selected' : ''}>Sola</option>
+                    </select>
+                </div>
+                <div class="editor-input-group">
+                    <label>Hız</label>
+                    <input type="number" step="0.1" id="inspect-conveyor-speed" value="${obj.speed || 1.5}">
+                </div>
+            `;
+        } else if (type === 'bouncePad') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Zıplatma Gücü</label>
+                    <input type="number" step="0.5" id="inspect-bounce-force" value="${obj.force || 12.0}">
+                </div>
+            `;
+        } else if (type === 'teleportPair') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Portal Rengi</label>
+                    <input type="color" id="inspect-teleport-color" value="${obj.color || '#a855f7'}">
+                </div>
+            `;
+        } else if (type === 'pressurePlate' || type === 'button' || type === 'lever') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Bağlı Kapı ID</label>
+                    <input type="number" id="inspect-trigger-gate" value="${obj.linkedGateId || 101}">
+                </div>
+                <div style="font-size: 10px; color: #64748b; margin-top: -3px; margin-bottom: 8px; line-height: 1.2;">
+                    * Bu tetikleyici aktif olduğunda yukarıdaki ID'ye sahip olan kapı devre dışı bırakılır (açılır).
+                </div>
+            `;
+        } else if (type === 'hazard' && obj.type === 'spike') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Diken Yönü</label>
+                    <select id="inspect-spike-dir">
+                        <option value="up" ${obj.direction === 'up' || !obj.direction ? 'selected' : ''}>Yukarı (Yer)</option>
+                        <option value="down" ${obj.direction === 'down' ? 'selected' : ''}>Aşağı (Tavan)</option>
+                        <option value="left" ${obj.direction === 'left' ? 'selected' : ''}>Sola (Sağ Duvar)</option>
+                        <option value="right" ${obj.direction === 'right' ? 'selected' : ''}>Sağa (Sol Duvar)</option>
+                    </select>
+                </div>
+            `;
+        } else if (type === 'decoration') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Süs Tipi</label>
+                    <select id="inspect-deco-type">
+                        <option value="neon_light" ${obj.type === 'neon_light' ? 'selected' : ''}>Neon Işık</option>
+                        <option value="textbox" ${obj.type === 'textbox' ? 'selected' : ''}>Yazı Kutusu (Text)</option>
+                        <option value="box" ${obj.type === 'box' ? 'selected' : ''}>Kutu</option>
+                        <option value="pipe" ${obj.type === 'pipe' ? 'selected' : ''}>Boru</option>
+                        <option value="cable" ${obj.type === 'cable' ? 'selected' : ''}>Kablo</option>
+                        <option value="pano" ${obj.type === 'pano' ? 'selected' : ''}>Pano</option>
+                        <option value="fan" ${obj.type === 'fan' ? 'selected' : ''}>Fan</option>
+                        <option value="warning_light" ${obj.type === 'warning_light' ? 'selected' : ''}>Arıza Işığı</option>
+                        <option value="steam" ${obj.type === 'steam' ? 'selected' : ''}>Sis / Buhar</option>
+                        <option value="pillar" ${obj.type === 'pillar' ? 'selected' : ''}>Sütun (Pillar)</option>
+                        <option value="gear" ${obj.type === 'gear' ? 'selected' : ''}>Dişli (Gear)</option>
+                        <option value="window_space" ${obj.type === 'window_space' ? 'selected' : ''}>Pencere (Window)</option>
+                        <option value="server_rack" ${obj.type === 'server_rack' ? 'selected' : ''}>Sunucu Konsolu (Server Rack)</option>
+                    </select>
+                </div>
+            `;
+            
+            if (obj.type === 'textbox') {
+                html += `
+                    <div class="editor-input-group">
+                        <label>Yazı Metni</label>
+                        <input type="text" id="inspect-deco-text" value="${obj.text || ''}">
+                    </div>
+                    <div class="editor-input-group">
+                        <label>Neon Rengi</label>
+                        <select id="inspect-deco-color">
+                            <option value="#06b6d4" ${obj.color === '#06b6d4' || !obj.color ? 'selected' : ''}>Siyan (Mavi)</option>
+                            <option value="#d946ef" ${obj.color === '#d946ef' ? 'selected' : ''}>Fuşya (Pembe)</option>
+                            <option value="#10b981" ${obj.color === '#10b981' ? 'selected' : ''}>Yeşil</option>
+                            <option value="#eab308" ${obj.color === '#eab308' ? 'selected' : ''}>Sarı</option>
+                        </select>
+                    </div>
+                `;
+            }
+
+            const rotDegrees = Math.round((obj.rotation || 0) * (180 / Math.PI));
+            html += `
+                <div class="editor-input-group" style="margin-top: 8px;">
+                    <label>Rotasyon</label>
+                    <div style="flex: 1; display: flex; gap: 5px;">
+                        <input type="text" readonly id="inspect-deco-rotation-text" value="${rotDegrees}°" style="width: 50px; text-align: center; background: rgba(15,23,42,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff; font-size: 11px;">
+                        <button class="editor-btn" id="inspect-deco-rotate-btn" style="flex: 1; padding: 2px 5px; font-size: 11px;">90° Döndür 🔄</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `<button class="editor-btn danger" id="inspect-delete-btn" style="width:100%; margin-top:12px;">🔴 OBJEYİ SİL (DEL)</button>`;
+
+        container.innerHTML = html;
+
+        // Olay Dinleyicileri Ekle
+        const deleteBtn = document.getElementById('inspect-delete-btn');
+        if (deleteBtn) deleteBtn.addEventListener('click', () => this.deleteSelected());
+
+        // Değer Değişimlerini Kaydet
+        const addUpdateEvent = (elementId, callback) => {
+            const el = document.getElementById(elementId);
+            if (el) {
+                const eventType = el.tagName === 'SELECT' ? 'change' : 'input';
+                el.addEventListener(eventType, (e) => {
+                    callback(e.target.value);
+                    this.saveToLocalStorage(); // Auto-save on change!
+                });
+                
+                // Track focus/blur explicitly to disable key shortcuts
+                el.addEventListener('focus', () => {
+                    this.inputFocused = true;
+                });
+                el.addEventListener('blur', () => {
+                    this.inputFocused = false;
+                });
+            }
+        };
+
+        if (type !== 'spawn' && type !== 'teleportPair') {
+            addUpdateEvent('inspect-x', (val) => { obj.x = parseInt(val) || 0; if(obj.startX !== undefined) obj.startX = obj.x; });
+            addUpdateEvent('inspect-y', (val) => { obj.y = parseInt(val) || 0; if(obj.startY !== undefined) obj.startY = obj.y; });
+            addUpdateEvent('inspect-w', (val) => { obj.w = parseInt(val) || 0; });
+            addUpdateEvent('inspect-h', (val) => { obj.h = parseInt(val) || 0; });
+        } else if (type === 'teleportPair') {
+            addUpdateEvent('inspect-x1', (val) => { obj.x1 = parseInt(val) || 0; });
+            addUpdateEvent('inspect-y1', (val) => { obj.y1 = parseInt(val) || 0; });
+            addUpdateEvent('inspect-x2', (val) => { obj.x2 = parseInt(val) || 0; });
+            addUpdateEvent('inspect-y2', (val) => { obj.y2 = parseInt(val) || 0; });
+        } else {
+            addUpdateEvent('inspect-spawn-x', (val) => { this.game.level.spawnX = parseInt(val) || 80; });
+            addUpdateEvent('inspect-spawn-y', (val) => { this.game.level.spawnY = parseInt(val) || 350; });
+        }
+
+        addUpdateEvent('inspect-spike-dir', (val) => {
+            const oldDir = obj.direction || 'up';
+            const newDir = val;
+            obj.direction = newDir;
+
+            const wasHorizontal = (oldDir === 'up' || oldDir === 'down');
+            const isHorizontal = (newDir === 'up' || newDir === 'down');
+
+            if (wasHorizontal !== isHorizontal) {
+                const temp = obj.w;
+                obj.w = obj.h;
+                obj.h = temp;
+            }
+            this.updateInspector();
+        });
+
+        addUpdateEvent('inspect-deco-type', (val) => {
+            obj.type = val;
+            if (val === 'neon_light') { obj.w = 20; obj.h = 80; }
+            else if (val === 'textbox') { obj.w = 200; obj.h = 80; }
+            else if (val === 'box') { obj.w = 40; obj.h = 40; }
+            else if (val === 'pipe') { obj.w = 80; obj.h = 20; }
+            else if (val === 'cable') { obj.w = 80; obj.h = 40; }
+            else if (val === 'pano') { obj.w = 50; obj.h = 40; }
+            else if (val === 'warning_light' || val === 'steam') { obj.w = 32; obj.h = 32; }
+            else if (val === 'pillar') { obj.w = 32; obj.h = 120; }
+            else if (val === 'gear') { obj.w = 40; obj.h = 40; }
+            else if (val === 'window_space') { obj.w = 60; obj.h = 60; }
+            else if (val === 'server_rack') { obj.w = 40; obj.h = 60; }
+            this.updateInspector();
+        });
+
+        if (type === 'decoration') {
+            addUpdateEvent('inspect-deco-text', (val) => {
+                obj.text = val;
+            });
+            
+            addUpdateEvent('inspect-deco-color', (val) => {
+                obj.color = val;
+            });
+            
+            const rotateBtn = document.getElementById('inspect-deco-rotate-btn');
+            if (rotateBtn) {
+                rotateBtn.addEventListener('click', () => {
+                    obj.rotation = (obj.rotation || 0) + Math.PI / 2;
+                    if (obj.rotation >= Math.PI * 2) {
+                        obj.rotation = 0;
+                    }
+                    obj.startRotation = obj.rotation;
+                    const deg = Math.round(obj.rotation * (180 / Math.PI));
+                    const rotText = document.getElementById('inspect-deco-rotation-text');
+                    if (rotText) rotText.value = deg + "°";
+                    this.saveToLocalStorage();
+                });
+            }
+        }
+
+        addUpdateEvent('inspect-plat-type', (val) => { 
+            obj.type = val; 
+            if (val === 'sticky') { obj.sticky = true; obj.slippery = false; }
+            else if (val === 'slippery') { obj.sticky = false; obj.slippery = true; }
+            else { obj.sticky = false; obj.slippery = false; }
+        });
+
+        addUpdateEvent('inspect-target-x', (val) => { obj.targetX = parseInt(val) || 0; });
+        addUpdateEvent('inspect-target-y', (val) => { obj.targetY = parseInt(val) || 0; });
+        addUpdateEvent('inspect-speed', (val) => { obj.speed = parseFloat(val) || 0.015; });
+        
+        const setStartBtn = document.getElementById('inspect-set-start-btn');
+        if (setStartBtn) {
+            setStartBtn.addEventListener('click', () => {
+                obj.startX = obj.x;
+                obj.startY = obj.y;
+                alert('Platform başlangıç noktası olarak güncellendi.');
+                this.saveToLocalStorage(); // Auto-save start pos
+            });
+        }
+        const setTargetBtn = document.getElementById('inspect-set-target-btn');
+        if (setTargetBtn) {
+            setTargetBtn.addEventListener('click', () => {
+                obj.targetX = obj.x;
+                obj.targetY = obj.y;
+                alert('Platform hedef noktası olarak güncellendi.');
+                this.updateInspector();
+                this.saveToLocalStorage(); // Auto-save target pos
+            });
+        }
+
+        addUpdateEvent('inspect-gate-type', (val) => { obj.type = val; });
+        addUpdateEvent('inspect-gate-id', (val) => { obj.id = parseInt(val) || 101; });
+
+        addUpdateEvent('inspect-enemy-range', (val) => { obj.rangeX = parseInt(val) || 150; });
+        addUpdateEvent('inspect-enemy-speed', (val) => { obj.speed = parseFloat(val) || 1.2; });
+        
+        const enemyVert = document.getElementById('inspect-enemy-vertical');
+        if (enemyVert) {
+            enemyVert.addEventListener('change', () => {
+                obj.isVertical = enemyVert.checked;
+                this.saveToLocalStorage();
+            });
+        }
+        addUpdateEvent('inspect-enemy-color', (val) => { obj.color = val; });
+        addUpdateEvent('inspect-collectible-color', (val) => { obj.color = val; });
+        addUpdateEvent('inspect-conveyor-dir', (val) => { obj.direction = parseInt(val) || 1; });
+        addUpdateEvent('inspect-conveyor-speed', (val) => { obj.speed = parseFloat(val) || 1.5; });
+        addUpdateEvent('inspect-bounce-force', (val) => { obj.force = parseFloat(val) || 12.0; });
+        addUpdateEvent('inspect-teleport-color', (val) => { obj.color = val; });
+        addUpdateEvent('inspect-trigger-gate', (val) => { obj.linkedGateId = parseInt(val) || 101; });
+    }
+
+    /**
+     * Seçili objeyi siler
+     */
+    deleteSelected() {
+        if (!this.selectedObject) return;
+        const lvl = this.game.level;
+        const obj = this.selectedObject;
+
+        if (this.selectedObjectType === 'platform') {
+            lvl.platforms = lvl.platforms.filter(p => p !== obj);
+        } else if (this.selectedObjectType === 'hazard') {
+            lvl.hazards = lvl.hazards.filter(h => h !== obj);
+        } else if (this.selectedObjectType === 'movingPlatform') {
+            lvl.movingPlatforms = lvl.movingPlatforms.filter(p => p !== obj);
+        } else if (this.selectedObjectType === 'gate') {
+            lvl.gates = lvl.gates.filter(g => g !== obj);
+        } else if (this.selectedObjectType === 'collectible') {
+            lvl.collectibles = lvl.collectibles.filter(c => c !== obj);
+        } else if (this.selectedObjectType === 'enemy') {
+            lvl.enemies = lvl.enemies.filter(e => e !== obj);
+        } else if (this.selectedObjectType === 'pressurePlate') {
+            lvl.pressurePlates = lvl.pressurePlates.filter(pp => pp !== obj);
+        } else if (this.selectedObjectType === 'pushBlock') {
+            lvl.pushBlocks = lvl.pushBlocks.filter(pb => pb !== obj);
+        } else if (this.selectedObjectType === 'conveyor') {
+            lvl.conveyors = lvl.conveyors.filter(c => c !== obj);
+        } else if (this.selectedObjectType === 'bouncePad') {
+            lvl.bouncePads = lvl.bouncePads.filter(bp => bp !== obj);
+        } else if (this.selectedObjectType === 'teleportPair') {
+            lvl.teleportPairs = lvl.teleportPairs.filter(tp => tp !== obj);
+        } else if (this.selectedObjectType === 'button') {
+            lvl.buttons = lvl.buttons.filter(b => b !== obj);
+        } else if (this.selectedObjectType === 'lever') {
+            lvl.levers = lvl.levers.filter(l => l !== obj);
+        } else if (this.selectedObjectType === 'fallingPlatform') {
+            lvl.fallingPlatforms = lvl.fallingPlatforms.filter(fp => fp !== obj);
+        } else if (this.selectedObjectType === 'breakablePlatform') {
+            lvl.breakablePlatforms = lvl.breakablePlatforms.filter(bp => bp !== obj);
+        } else if (this.selectedObjectType === 'hiddenPassage') {
+            lvl.hiddenPassages = lvl.hiddenPassages.filter(hp => hp !== obj);
+        } else if (this.selectedObjectType === 'fallingBlockTrap') {
+            lvl.fallingBlockTraps = lvl.fallingBlockTraps.filter(fbt => fbt !== obj);
+        } else if (this.selectedObjectType === 'vantuzPoint') {
+            lvl.vantuzPoints = lvl.vantuzPoints.filter(vp => vp !== obj);
+        } else if (this.selectedObjectType === 'decoration') {
+            lvl.decorations = lvl.decorations.filter(d => d !== obj);
+        } else if (this.selectedObjectType === 'portal') {
+            alert('Bitiş portalı silinemez. Sadece yerini değiştirebilirsiniz.');
+            return;
+        } else if (this.selectedObjectType === 'spawn') {
+            alert('Oyuncu başlangıç noktası silinemez. Sadece yerini değiştirebilirsiniz.');
+            return;
+        }
+
+        this.selectedObject = null;
+        this.selectedObjectType = '';
+        this.updateInspector();
+        this.saveToLocalStorage(); // Auto-save after delete
+        audio.playDamage(); // Silme efekti sesi
+    }
+
+    /**
+     * Playtest modunu başlatır
+     */
+    startPlaytest() {
+        audio.playCollect();
+        // Editor panelini geçici olarak gizle
+        this.panel.style.display = 'none';
+
+        // Playtest ekran uyarısı oluştur (Nasıl çıkılacağını göstermek için)
+        const tip = document.createElement('div');
+        tip.id = 'editor-playtest-tip';
+        tip.style.position = 'fixed';
+        tip.style.top = '10px';
+        tip.style.left = '50%';
+        tip.style.transform = 'translateX(-50%)';
+        tip.style.background = 'rgba(15, 23, 42, 0.8)';
+        tip.style.color = '#10b981';
+        tip.style.padding = '8px 16px';
+        tip.style.borderRadius = '20px';
+        tip.style.fontSize = '12px';
+        tip.style.fontWeight = 'bold';
+        tip.style.border = '1px solid #10b981';
+        tip.style.zIndex = '999999';
+        tip.innerHTML = '🎮 PLAYTEST MODU — Çıkmak ve Düzenlemeye Dönmek için ESC veya T tuşuna basın';
+        document.body.appendChild(tip);
+
+        // Reset level state first
+        this.game.level.resetLevelRuntimeState();
+
+        // Seviye ve Düşmanları yükle
+        this.game.state = 'PLAYING';
+        document.getElementById('hud').classList.remove('hidden');
+
+        // Düşmanları başlat
+        this.game.enemies = [];
+        if (this.game.level.enemies) {
+            this.game.enemies = this.game.level.enemies.map(e => 
+                new Enemy(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, !!e.isVertical, e.color || '#f43f5e')
+            );
+        }
+
+        // Oyuncuyu canlandır
+        this.game.player.respawn(this.game.level.spawnX, this.game.level.spawnY);
+        this.game.ui.updateHUDHealth(this.game.player.health);
+        this.game.ui.updateHUDViscosity(this.game.player.viscosity);
+    }
+
+    /**
+     * Playtest modundan çıkıp editöre geri döner
+     */
+    stopPlaytest() {
+        this.game.state = 'EDITOR';
+        this.hideAllScreens();
+        
+        const tip = document.getElementById('editor-playtest-tip');
+        if (tip) tip.remove();
+
+        this.panel.style.display = 'flex';
+        this.game.enemies = [];
+        this.game.particles = [];
+        this.game.splatters = [];
+        
+        // Reset level state back to pristine editor state
+        this.game.level.resetLevelRuntimeState();
+
+        // Kamerayı başlangıca odakla
+        this.game.camera.x = Math.max(0, this.game.level.spawnX - this.game.cssWidth / 2);
+        this.game.camera.y = Math.max(0, this.game.level.spawnY - this.game.cssHeight / 2);
+    }
+
+    /**
+     * Seviyedeki tüm elemanları bir JSON nesnesi olarak derler
+     */
+    getLevelDataObj() {
+        const lvl = this.game.level;
+        
+        const platforms = lvl.platforms.map(p => ({
+            x: Math.round(p.x),
+            y: Math.round(p.y),
+            w: Math.round(p.w),
+            h: Math.round(p.h),
+            type: p.type || 'normal'
+        }));
+
+        const spikes = lvl.hazards
+            .filter(h => h.type === 'spike')
+            .map(h => ({ x: Math.round(h.x), y: Math.round(h.y), w: Math.round(h.w), h: Math.round(h.h), direction: h.direction || 'up' }));
+
+        const acidPools = lvl.hazards
+            .filter(h => h.type === 'acid')
+            .map(h => ({ x: Math.round(h.x), y: Math.round(h.y), w: Math.round(h.w), h: Math.round(h.h) }));
+
+        const lasers = lvl.gates
+            .filter(g => g.type === 'laser' || g.type === 'pinkLaser' || g.type === 'greenLaser' || g.type === 'yellowLaser')
+            .map(g => ({
+                x: Math.round(g.x),
+                y: Math.round(g.y),
+                w: Math.round(g.w),
+                h: Math.round(g.h),
+                type: g.type,
+                id: g.id
+            }));
+
+        const netGates = lvl.gates
+            .filter(g => g.type === 'net')
+            .map(g => ({ x: Math.round(g.x), y: Math.round(g.y), w: Math.round(g.w), h: Math.round(g.h), id: g.id }));
+
+        const movingPlatforms = lvl.movingPlatforms.map(p => ({
+            startX: Math.round(p.startX),
+            startY: Math.round(p.startY),
+            targetX: Math.round(p.targetX),
+            targetY: Math.round(p.targetY),
+            w: Math.round(p.w),
+            h: Math.round(p.h),
+            speed: p.speed || 0.015
+        }));
+
+        const crystals = lvl.collectibles.map(c => ({ x: Math.round(c.x), y: Math.round(c.y), color: c.color || '#eab308' }));
+
+        const enemies = lvl.enemies.map(e => ({
+            x: Math.round(e.x),
+            y: Math.round(e.y),
+            rangeX: Math.round(e.rangeX || 120),
+            speed: e.speed || 1.2,
+            isVertical: !!e.isVertical,
+            color: e.color || '#f43f5e'
+        }));
+
+        const pressurePlates = (lvl.pressurePlates || []).map(pp => ({
+            x: Math.round(pp.x),
+            y: Math.round(pp.y),
+            w: Math.round(pp.w),
+            h: Math.round(pp.h),
+            linkedGateId: pp.linkedGateId
+        }));
+
+        const pushBlocks = (lvl.pushBlocks || []).map(pb => ({
+            x: Math.round(pb.startX !== undefined ? pb.startX : pb.x),
+            y: Math.round(pb.startY !== undefined ? pb.startY : pb.y),
+            w: Math.round(pb.w),
+            h: Math.round(pb.h),
+            startX: Math.round(pb.startX !== undefined ? pb.startX : pb.x),
+            startY: Math.round(pb.startY !== undefined ? pb.startY : pb.y)
+        }));
+
+        const conveyors = (lvl.conveyors || []).map(c => ({
+            x: Math.round(c.x),
+            y: Math.round(c.y),
+            w: Math.round(c.w),
+            h: Math.round(c.h),
+            direction: c.direction,
+            speed: c.speed
+        }));
+
+        const teleportPairs = (lvl.teleportPairs || []).map(tp => ({
+            x1: Math.round(tp.x1),
+            y1: Math.round(tp.y1),
+            x2: Math.round(tp.x2),
+            y2: Math.round(tp.y2),
+            color: tp.color || '#a855f7'
+        }));
+
+        const bouncePads = (lvl.bouncePads || []).map(bp => ({
+            x: Math.round(bp.x),
+            y: Math.round(bp.y),
+            w: Math.round(bp.w),
+            h: Math.round(bp.h),
+            force: bp.force
+        }));
+
+        const buttons = (lvl.buttons || []).map(b => ({
+            x: Math.round(b.x),
+            y: Math.round(b.y),
+            w: Math.round(b.w),
+            h: Math.round(b.h),
+            linkedGateId: b.linkedGateId
+        }));
+
+        const levers = (lvl.levers || []).map(l => ({
+            x: Math.round(l.x),
+            y: Math.round(l.y),
+            w: Math.round(l.w),
+            h: Math.round(l.h),
+            linkedGateId: l.linkedGateId
+        }));
+
+        const fallingPlatforms = (lvl.fallingPlatforms || []).map(p => ({
+            startX: Math.round(p.startX !== undefined ? p.startX : p.x),
+            startY: Math.round(p.startY !== undefined ? p.startY : p.y),
+            x: Math.round(p.startX !== undefined ? p.startX : p.x),
+            y: Math.round(p.startY !== undefined ? p.startY : p.y),
+            w: Math.round(p.w),
+            h: Math.round(p.h),
+            timer: 0,
+            triggered: false,
+            vy: 0,
+            fallen: false
+        }));
+
+        const breakablePlatforms = (lvl.breakablePlatforms || []).map(p => ({
+            x: Math.round(p.x),
+            y: Math.round(p.y),
+            w: Math.round(p.w),
+            h: Math.round(p.h),
+            type: p.type || 'platform',
+            broken: false,
+            timer: 0,
+            triggered: false
+        }));
+
+        const hiddenPassages = (lvl.hiddenPassages || []).map(p => ({
+            x: Math.round(p.x),
+            y: Math.round(p.y),
+            w: Math.round(p.w),
+            h: Math.round(p.h)
+        }));
+
+        const fallingBlockTraps = (lvl.fallingBlockTraps || []).map(t => ({
+            startX: Math.round(t.startX !== undefined ? t.startX : t.x),
+            startY: Math.round(t.startY !== undefined ? t.startY : t.y),
+            x: Math.round(t.startX !== undefined ? t.startX : t.x),
+            y: Math.round(t.startY !== undefined ? t.startY : t.y),
+            w: Math.round(t.w),
+            h: Math.round(t.h),
+            state: 'idle',
+            vy: 0,
+            timer: 0
+        }));
+
+        const vantuzPoints = (lvl.vantuzPoints || []).map(v => ({
+            x: Math.round(v.x),
+            y: Math.round(v.y)
+        }));
+
+        const decorations = (lvl.decorations || []).map(d => ({
+            x: Math.round(d.x),
+            y: Math.round(d.y),
+            w: Math.round(d.w),
+            h: Math.round(d.h),
+            type: d.type || 'neon_light',
+            rotation: d.rotation || 0,
+            state: d.state || 0,
+            text: d.text || '',
+            color: d.color || ''
+        }));
+
+        return {
+            levelWidth: lvl.width,
+            levelHeight: lvl.height,
+            spawn: { x: Math.round(lvl.spawnX), y: Math.round(lvl.spawnY) },
+            portal: { x: Math.round(lvl.portal.x), y: Math.round(lvl.portal.y) },
+            platforms,
+            spikes,
+            acidPools,
+            lasers,
+            netGates,
+            movingPlatforms,
+            crystals,
+            enemies,
+            pressurePlates,
+            pushBlocks,
+            conveyors,
+            teleportPairs,
+            bouncePads,
+            buttons,
+            levers,
+            fallingPlatforms,
+            breakablePlatforms,
+            hiddenPassages,
+            fallingBlockTraps,
+            vantuzPoints,
+            decorations
+        };
+    }
+
+    /**
+     * Level verilerini JSON koduna dönüştürür ve gösterir
+     */
+    exportLevelJSON() {
+        const exportObj = this.getLevelDataObj();
+        const jsonStr = JSON.stringify(exportObj, null, 4);
+
+        // Modal oluştur
+        const overlay = document.createElement('div');
+        overlay.id = 'editor-json-modal-overlay';
+        
+        const modal = document.createElement('div');
+        modal.id = 'editor-json-modal';
+        
+        modal.innerHTML = `
+            <div style="font-size:16px; font-weight:800; color:#d946ef; margin-bottom:10px;">💾 SAVE LEVEL (JSON EXPORT)</div>
+            <div style="font-size:11px; color:#94a3b8; margin-bottom:12px;">Seviye verileriniz aşağıdaki formatta oluşturuldu. Kopyalayabilir veya dosya olarak indirebilirsiniz:</div>
+            <textarea readonly onclick="this.select()">${jsonStr}</textarea>
+            <div class="modal-actions">
+                <button class="editor-btn" id="modal-download-btn">📥 DOSYA İNDİR</button>
+                <button class="editor-btn" id="modal-copy-btn">📋 KOPYALA</button>
+                <button class="editor-btn primary" id="modal-close-btn">KAPAT</button>
+            </div>
+        `;
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        document.getElementById('modal-close-btn').addEventListener('click', () => overlay.remove());
+        
+        document.getElementById('modal-copy-btn').addEventListener('click', () => {
+            navigator.clipboard.writeText(jsonStr);
+            alert('Bölüm verisi panoya kopyalandı!');
+        });
+
+        // Dosya İndirme Desteği
+        document.getElementById('modal-download-btn').addEventListener('click', () => {
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `viscora_level_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    }
+
+    /**
+     * Seviyeyi topluluk sunucusunda paylaşır
+     */
+    publishToCommunity() {
+        const mapName = prompt("Lütfen Harita Adını Girin:", "Özel Harita");
+        if (mapName === null) return;
+        if (!mapName.trim()) {
+            alert("Harita adı boş olamaz!");
+            return;
+        }
+
+        const authorName = prompt("Lütfen Yapımcı Adını Girin:", "Tasarımcı");
+        if (authorName === null) return;
+        if (!authorName.trim()) {
+            alert("Yapımcı adı boş olamaz!");
+            return;
+        }
+
+        const exportObj = this.getLevelDataObj();
+
+        // Sunucuya gönder
+        fetch('/api/levels', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: mapName,
+                author: authorName,
+                data: exportObj
+            })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Sunucu hatası.");
+            return res.json();
+        })
+        .then(data => {
+            alert(`Haritanız "${data.name}" başarıyla topluluk sunucusunda paylaşıldı!`);
+        })
+        .catch(err => {
+            console.error("Paylaşım hatası:", err);
+            alert("Harita paylaşılamadı. Topluluk API sunucusunun (server.py) arka planda çalıştığından emin olun!");
+        });
+    }
+
+    /**
+     * Dışarıdan kopyalanan JSON verisini seviyeye yükler
+     */
+    importLevelJSON() {
+        const overlay = document.createElement('div');
+        overlay.id = 'editor-json-modal-overlay';
+        
+        const modal = document.createElement('div');
+        modal.id = 'editor-json-modal';
+        
+        modal.innerHTML = `
+            <div style="font-size:16px; font-weight:800; color:#10b981; margin-bottom:10px;">📂 BÖLÜMÜ İÇE AKTAR (JSON IMPORT)</div>
+            <div style="font-size:11px; color:#94a3b8; margin-bottom:12px;">JSON formatındaki bölüm kodunu aşağıya yapıştırın:</div>
+            <textarea id="import-textarea" placeholder="Buraya yapıştırın..."></textarea>
+            <div class="modal-actions">
+                <button class="editor-btn danger" id="modal-cancel-btn">İPTAL</button>
+                <button class="editor-btn primary" id="modal-import-btn">İÇE AKTAR</button>
+            </div>
+        `;
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        document.getElementById('modal-cancel-btn').addEventListener('click', () => overlay.remove());
+        
+        document.getElementById('modal-import-btn').addEventListener('click', () => {
+            const code = document.getElementById('import-textarea').value;
+            try {
+                const data = JSON.parse(code);
+                
+                const lvl = this.game.level;
+                
+                // Clear existing level objects first to prevent leftovers
+                lvl.platforms = [];
+                lvl.hazards = [];
+                lvl.movingPlatforms = [];
+                lvl.gates = [];
+                lvl.collectibles = [];
+                lvl.enemies = [];
+                lvl.pressurePlates = [];
+                lvl.pushBlocks = [];
+                lvl.conveyors = [];
+                lvl.teleportPairs = [];
+                lvl.bouncePads = [];
+                lvl.buttons = [];
+                lvl.levers = [];
+                lvl.fallingPlatforms = [];
+                lvl.breakablePlatforms = [];
+                lvl.hiddenPassages = [];
+                lvl.fallingBlockTraps = [];
+                lvl.vantuzPoints = [];
+                lvl.decorations = [];
+
+                // Parse dimensions
+                lvl.width = Math.max(800, data.levelWidth || data.width || 2000);
+                lvl.height = Math.max(600, data.levelHeight || data.height || 600);
+
+                // Parse spawn point
+                if (data.spawn) {
+                    lvl.spawnX = data.spawn.x !== undefined ? data.spawn.x : 80;
+                    lvl.spawnY = data.spawn.y !== undefined ? data.spawn.y : 350;
+                } else {
+                    lvl.spawnX = data.spawnX !== undefined ? data.spawnX : 80;
+                    lvl.spawnY = data.spawnY !== undefined ? data.spawnY : 350;
+                }
+
+                // Parse portal
+                if (data.portal) {
+                    lvl.portal = {
+                        x: data.portal.x !== undefined ? data.portal.x : 300,
+                        y: data.portal.y !== undefined ? data.portal.y : 380,
+                        w: data.portal.w || 60,
+                        h: data.portal.h || 80,
+                        angle: data.portal.angle || 0
+                    };
+                } else {
+                    lvl.portal = { x: 300, y: 380, w: 60, h: 80, angle: 0 };
+                }
+
+                // Parse platforms
+                if (Array.isArray(data.platforms)) {
+                    lvl.platforms = data.platforms.map(p => ({
+                        x: p.x,
+                        y: p.y,
+                        w: p.w || 120,
+                        h: p.h || 40,
+                        type: p.type || 'normal',
+                        sticky: p.type === 'sticky',
+                        slippery: p.type === 'slippery'
+                    }));
+                }
+
+                // Parse hazards (spikes & acid pools)
+                if (Array.isArray(data.spikes)) {
+                    data.spikes.forEach(s => {
+                        let dir = s.direction || 'up';
+                        if (s.type === 'spike_down') dir = 'down';
+                        else if (s.type === 'spike_left') dir = 'left';
+                        else if (s.type === 'spike_right') dir = 'right';
+
+                        let w = s.w;
+                        let h = s.h;
+                        if (w === undefined || h === undefined) {
+                            if (dir === 'left' || dir === 'right') {
+                                w = 20;
+                                h = 60;
+                            } else {
+                                w = 60;
+                                h = 20;
+                            }
+                        }
+
+                        lvl.hazards.push({
+                            x: s.x,
+                            y: s.y,
+                            w: w,
+                            h: h,
+                            type: 'spike',
+                            direction: dir
+                        });
+                    });
+                }
+                if (Array.isArray(data.acidPools)) {
+                    data.acidPools.forEach(a => {
+                        lvl.hazards.push({
+                            x: a.x,
+                            y: a.y,
+                            w: a.w !== undefined ? a.w : 120,
+                            h: a.h !== undefined ? a.h : 70,
+                            type: 'acid'
+                        });
+                    });
+                }
+                // Fallback for hazards array in pasted JSON
+                if (Array.isArray(data.hazards)) {
+                    data.hazards.forEach(h => {
+                        // Avoid duplicates if spikes or acidPools already parsed them
+                        if (!lvl.hazards.some(exist => exist.x === h.x && exist.y === h.y)) {
+                            let dir = h.direction || 'up';
+                            if (h.type === 'spike_down') dir = 'down';
+                            else if (h.type === 'spike_left') dir = 'left';
+                            else if (h.type === 'spike_right') dir = 'right';
+
+                            let w = h.w;
+                            let hVal = h.h;
+                            if (w === undefined || hVal === undefined) {
+                                if (dir === 'left' || dir === 'right') {
+                                    w = 20;
+                                    hVal = 60;
+                                } else if (h.type === 'acid') {
+                                    w = 120;
+                                    hVal = 70;
+                                } else {
+                                    w = 60;
+                                    hVal = 20;
+                                }
+                            }
+
+                            lvl.hazards.push({
+                                x: h.x,
+                                y: h.y,
+                                w: w,
+                                h: hVal,
+                                type: h.type === 'acid' ? 'acid' : 'spike',
+                                direction: dir
+                            });
+                        }
+                    });
+                }
+
+                // Parse moving platforms
+                if (Array.isArray(data.movingPlatforms)) {
+                    lvl.movingPlatforms = data.movingPlatforms.map(mp => ({
+                        startX: mp.startX !== undefined ? mp.startX : mp.x,
+                        startY: mp.startY !== undefined ? mp.startY : mp.y,
+                        targetX: mp.targetX !== undefined ? mp.targetX : (mp.x !== undefined ? mp.x + 150 : 150),
+                        targetY: mp.targetY !== undefined ? mp.targetY : (mp.y !== undefined ? mp.y : 0),
+                        x: mp.startX !== undefined ? mp.startX : mp.x,
+                        y: mp.startY !== undefined ? mp.startY : mp.y,
+                        w: mp.w !== undefined ? mp.w : 100,
+                        h: mp.h !== undefined ? mp.h : 20,
+                        type: 'moving',
+                        speed: mp.speed || 0.015,
+                        dir: 1,
+                        progress: 0
+                    }));
+                }
+
+                // Parse lasers
+                if (Array.isArray(data.lasers)) {
+                    data.lasers.forEach(l => {
+                        let ltype = l.type;
+                        if (ltype === 'pink') ltype = 'pinkLaser';
+                        else if (ltype === 'green') ltype = 'greenLaser';
+                        else if (ltype === 'yellow') ltype = 'yellowLaser';
+                        else if (ltype === 'blue') ltype = 'laser';
+
+                        lvl.gates.push({
+                            x: l.x,
+                            y: l.y,
+                            w: l.w !== undefined ? l.w : 20,
+                            h: l.h !== undefined ? l.h : 220,
+                            type: ltype || 'laser',
+                            id: l.id !== undefined ? l.id : (100 + Math.floor(Math.random() * 900)),
+                            disabled: false
+                        });
+                    });
+                }
+
+                // Parse net gates
+                if (Array.isArray(data.netGates)) {
+                    data.netGates.forEach(n => {
+                        lvl.gates.push({
+                            x: n.x,
+                            y: n.y,
+                            w: n.w !== undefined ? n.w : 20,
+                            h: n.h !== undefined ? n.h : 220,
+                            type: 'net',
+                            id: n.id !== undefined ? n.id : (100 + Math.floor(Math.random() * 900)),
+                            disabled: false
+                        });
+                    });
+                }
+
+                // Fallback for gates array in pasted JSON
+                if (Array.isArray(data.gates)) {
+                    data.gates.forEach(g => {
+                        // Avoid duplicates if lasers or netGates already parsed them
+                        if (!lvl.gates.some(exist => exist.x === g.x && exist.y === g.y)) {
+                            lvl.gates.push({
+                                x: g.x,
+                                y: g.y,
+                                w: g.w || 20,
+                                h: g.h || 220,
+                                type: g.type || 'laser',
+                                id: g.id || (100 + Math.floor(Math.random() * 900)),
+                                disabled: g.disabled || false
+                            });
+                        }
+                    });
+                }
+
+                // Parse crystals (collectibles)
+                if (Array.isArray(data.crystals)) {
+                    lvl.collectibles = data.crystals.map(c => ({
+                        x: c.x,
+                        y: c.y,
+                        collected: false,
+                        color: c.color || '#eab308'
+                    }));
+                } else if (Array.isArray(data.collectibles)) {
+                    lvl.collectibles = data.collectibles.map(c => ({
+                        x: c.x,
+                        y: c.y,
+                        collected: false,
+                        color: c.color || '#eab308'
+                    }));
+                }
+
+                // Parse enemies
+                if (Array.isArray(data.enemies)) {
+                    lvl.enemies = data.enemies.map(e => ({
+                        x: e.x,
+                        y: e.y,
+                        rangeX: e.rangeX !== undefined ? e.rangeX : 120,
+                        speed: e.speed !== undefined ? e.speed : 1.2,
+                        isVertical: !!e.isVertical,
+                        color: e.color || '#f43f5e'
+                    }));
+                }
+
+                // Parse pressurePlates
+                if (Array.isArray(data.pressurePlates)) {
+                    lvl.pressurePlates = data.pressurePlates.map(pp => ({
+                        x: pp.x,
+                        y: pp.y,
+                        w: pp.w || 50,
+                        h: pp.h || 10,
+                        activated: pp.activated || false,
+                        linkedGateId: pp.linkedGateId
+                    }));
+                }
+
+                // Parse pushBlocks
+                if (Array.isArray(data.pushBlocks)) {
+                    lvl.pushBlocks = data.pushBlocks.map(pb => ({
+                        startX: pb.startX !== undefined ? pb.startX : pb.x,
+                        startY: pb.startY !== undefined ? pb.startY : pb.y,
+                        x: pb.x,
+                        y: pb.y,
+                        w: pb.w || 50,
+                        h: pb.h || 50,
+                        vx: pb.vx || 0,
+                        vy: pb.vy || 0
+                    }));
+                }
+
+                // Parse conveyors
+                if (Array.isArray(data.conveyors)) {
+                    lvl.conveyors = data.conveyors.map(c => ({
+                        x: c.x,
+                        y: c.y,
+                        w: c.w || 120,
+                        h: c.h || 20,
+                        direction: c.direction !== undefined ? c.direction : 1,
+                        speed: c.speed !== undefined ? c.speed : 1.5
+                    }));
+                }
+
+                // Parse teleportPairs
+                if (Array.isArray(data.teleportPairs)) {
+                    lvl.teleportPairs = data.teleportPairs.map(tp => ({
+                        x1: tp.x1,
+                        y1: tp.y1,
+                        x2: tp.x2,
+                        y2: tp.y2,
+                        color: tp.color || '#a855f7',
+                        cooldown: 0
+                    }));
+                }
+
+                // Parse bouncePads
+                if (Array.isArray(data.bouncePads)) {
+                    lvl.bouncePads = data.bouncePads.map(bp => ({
+                        x: bp.x,
+                        y: bp.y,
+                        w: bp.w || 50,
+                        h: bp.h || 20,
+                        force: bp.force !== undefined ? bp.force : 12.0,
+                        active: false,
+                        timer: 0
+                    }));
+                }
+
+                // Parse buttons
+                if (Array.isArray(data.buttons)) {
+                    lvl.buttons = data.buttons.map(b => ({
+                        x: b.x,
+                        y: b.y,
+                        w: b.w || 32,
+                        h: b.h || 32,
+                        activated: b.activated || false,
+                        linkedGateId: b.linkedGateId,
+                        timer: b.timer || 0
+                    }));
+                }
+
+                // Parse levers
+                if (Array.isArray(data.levers)) {
+                    lvl.levers = data.levers.map(l => ({
+                        x: l.x,
+                        y: l.y,
+                        w: l.w || 32,
+                        h: l.h || 32,
+                        activated: l.activated || false,
+                        linkedGateId: l.linkedGateId,
+                        cooldown: 0
+                    }));
+                }
+
+                // Parse fallingPlatforms
+                if (Array.isArray(data.fallingPlatforms)) {
+                    lvl.fallingPlatforms = data.fallingPlatforms.map(p => ({
+                        startX: p.startX !== undefined ? p.startX : p.x,
+                        startY: p.startY !== undefined ? p.startY : p.y,
+                        x: p.x,
+                        y: p.y,
+                        w: p.w || 120,
+                        h: p.h || 40,
+                        timer: p.timer !== undefined ? p.timer : 0,
+                        triggered: !!p.triggered,
+                        vy: p.vy || 0,
+                        fallen: !!p.fallen
+                    }));
+                }
+
+                // Parse breakablePlatforms
+                if (Array.isArray(data.breakablePlatforms)) {
+                    lvl.breakablePlatforms = data.breakablePlatforms.map(p => ({
+                        x: p.x,
+                        y: p.y,
+                        w: p.w || 120,
+                        h: p.h || 40,
+                        type: p.type || 'platform',
+                        broken: !!p.broken,
+                        timer: p.timer !== undefined ? p.timer : 0,
+                        triggered: !!p.triggered
+                    }));
+                }
+
+                // Parse hiddenPassages
+                if (Array.isArray(data.hiddenPassages)) {
+                    lvl.hiddenPassages = data.hiddenPassages.map(p => ({
+                        x: p.x,
+                        y: p.y,
+                        w: p.w || 120,
+                        h: p.h || 40
+                    }));
+                }
+
+                // Parse fallingBlockTraps
+                if (Array.isArray(data.fallingBlockTraps)) {
+                    lvl.fallingBlockTraps = data.fallingBlockTraps.map(t => ({
+                        startX: t.startX !== undefined ? t.startX : t.x,
+                        startY: t.startY !== undefined ? t.startY : t.y,
+                        x: t.x,
+                        y: t.y,
+                        w: t.w || 60,
+                        h: t.h || 60,
+                        state: t.state || 'idle',
+                        vy: t.vy || 0,
+                        timer: t.timer || 0
+                    }));
+                }
+
+                // Parse vantuzPoints
+                if (Array.isArray(data.vantuzPoints)) {
+                    lvl.vantuzPoints = data.vantuzPoints.map(v => ({
+                        x: v.x,
+                        y: v.y,
+                        cooldown: 0
+                    }));
+                }
+
+                // Parse decorations
+                if (Array.isArray(data.decorations)) {
+                    lvl.decorations = data.decorations.map(d => {
+                        let dtype = d.type || 'neon_light';
+                        if (dtype === 'neon') dtype = 'neon_light';
+                        if (dtype === 'warning') dtype = 'warning_light';
+                        return {
+                            x: d.x,
+                            y: d.y,
+                            w: d.w || 40,
+                            h: d.h || 40,
+                            type: dtype,
+                            rotation: d.rotation || 0,
+                            state: d.state || 0,
+                            text: d.text || '',
+                            color: d.color || ''
+                        };
+                    });
+                }
+
+                document.getElementById('editor-level-width').value = lvl.width;
+                document.getElementById('editor-level-height').value = lvl.height;
+                
+                // Center the camera on the new level spawn position
+                this.game.camera.x = Math.max(0, lvl.spawnX - this.game.cssWidth / 2);
+                this.game.camera.y = Math.max(0, lvl.spawnY - this.game.cssHeight / 2);
+                
+                this.selectedObject = null;
+                this.selectedObjectType = '';
+                this.updateInspector();
+                this.saveToLocalStorage(); // Auto-save after import
+
+                overlay.remove();
+                alert('Bölüm başarıyla yüklendi!');
+                audio.playCollect();
+            } catch (err) {
+                alert('Geçersiz JSON formatı! Lütfen kodu kontrol edin.');
+            }
+        });
+    }
+
+    /**
+     * Mouse tıklamaları ile obje seçimi ve yaratımı
+     */
+    onMouseDown(e) {
+        if (!this.active || this.game.state !== 'EDITOR') return;
+
+        // Tıklanan koordinatları oyun dünyasına çevir (Kamera kayması ve Zoom dahil)
+        const rect = this.game.canvas.getBoundingClientRect();
+        const clientX = e.clientX - rect.left;
+        const clientY = e.clientY - rect.top;
+        const zoom = this.game.camera.zoom || 1.0;
+        const halfW = this.game.cssWidth / 2;
+        const halfH = this.game.cssHeight / 2;
+        
+        const mouseX = (clientX - halfW) / zoom + this.game.camera.x + halfW;
+        const mouseY = (clientY - halfH) / zoom + this.game.camera.y + halfH;
+
+        // Sağ tık veya Shift tık kamerayı sürükler (Pan)
+        if (e.button === 2 || (e.button === 0 && e.shiftKey)) {
+            this.isPanning = true;
+            this.panStartX = e.clientX;
+            this.panStartY = e.clientY;
+            this.cameraStartX = this.game.camera.x;
+            this.cameraStartY = this.game.camera.y;
+            return;
+        }
+
+        if (e.button !== 0) return; // Sadece sol tık ile obje yönetilir
+
+        // 1. SEÇİM MODU
+        if (this.activeTool === 'select') {
+            const hit = this.getObjectAt(mouseX, mouseY);
+            if (hit) {
+                this.selectedObject = hit.obj;
+                this.selectedObjectType = hit.type;
+                this.isDragging = true;
+                
+                if (hit.type === 'spawn') {
+                    this.dragOffsetX = mouseX - this.game.level.spawnX;
+                    this.dragOffsetY = mouseY - this.game.level.spawnY;
+                } else if (hit.type === 'portal' || hit.type === 'collectible') {
+                    this.dragOffsetX = mouseX - (hit.obj.x + 20); // portal center
+                    this.dragOffsetY = mouseY - (hit.obj.y + 30);
+                } else if (hit.type === 'teleportPair') {
+                    if (this.draggedPortalEnd === 1) {
+                        this.dragOffsetX = mouseX - hit.obj.x1;
+                        this.dragOffsetY = mouseY - hit.obj.y1;
+                    } else {
+                        this.dragOffsetX = mouseX - hit.obj.x2;
+                        this.dragOffsetY = mouseY - hit.obj.y2;
+                    }
+                } else {
+                    this.dragOffsetX = mouseX - hit.obj.x;
+                    this.dragOffsetY = mouseY - hit.obj.y;
+                }
+
+                audio.playPlateActivate(); // Hafif çıt sesi
+            } else {
+                this.selectedObject = null;
+                this.selectedObjectType = '';
+                
+                // Boş alana sol tıklayınca kamerayı kaydırmayı (Pan) başlat
+                this.isPanning = true;
+                this.panStartX = e.clientX;
+                this.panStartY = e.clientY;
+                this.cameraStartX = this.game.camera.x;
+                this.cameraStartY = this.game.camera.y;
+            }
+            this.updateInspector();
+        } 
+        // 2. YARATMA MODU
+        else {
+            let snapX = mouseX;
+            let snapY = mouseY;
+            
+            if (this.gridSnap) {
+                snapX = Math.round(mouseX / this.gridSize) * this.gridSize;
+                snapY = Math.round(mouseY / this.gridSize) * this.gridSize;
+            }
+
+            const lvl = this.game.level;
+            
+            if (this.activeTool === 'create_platform_normal') {
+                lvl.platforms.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 120,
+                    h: 40,
+                    type: 'normal',
+                    sticky: false,
+                    slippery: false
+                });
+            } else if (this.activeTool === 'create_platform_long') {
+                lvl.platforms.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 240,
+                    h: 40,
+                    type: 'normal',
+                    sticky: false,
+                    slippery: false
+                });
+            } else if (this.activeTool === 'create_platform_narrow') {
+                lvl.platforms.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 60,
+                    h: 20,
+                    type: 'normal',
+                    sticky: false,
+                    slippery: false
+                });
+            } else if (this.activeTool === 'create_wall_normal') {
+                lvl.platforms.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 40,
+                    h: 120,
+                    type: 'normal',
+                    sticky: false,
+                    slippery: false
+                });
+            } else if (this.activeTool === 'create_platform_sticky') {
+                lvl.platforms.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 120,
+                    h: 40,
+                    type: 'sticky',
+                    sticky: true,
+                    slippery: false
+                });
+            } else if (this.activeTool === 'create_platform_sticky_purple') {
+                lvl.platforms.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 40,
+                    h: 120,
+                    type: 'sticky',
+                    sticky: true,
+                    slippery: false,
+                    color: '#a855f7'
+                });
+            } else if (this.activeTool === 'create_platform_slippery') {
+                lvl.platforms.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 120,
+                    h: 40,
+                    type: 'slippery',
+                    sticky: false,
+                    slippery: true
+                });
+            } else if (this.activeTool === 'create_platform_falling') {
+                if (!lvl.fallingPlatforms) lvl.fallingPlatforms = [];
+                lvl.fallingPlatforms.push({
+                    startX: snapX,
+                    startY: snapY,
+                    x: snapX,
+                    y: snapY,
+                    w: 120,
+                    h: 40,
+                    timer: 0,
+                    triggered: false,
+                    fallen: false
+                });
+            } else if (this.activeTool === 'create_platform_breakable') {
+                if (!lvl.breakablePlatforms) lvl.breakablePlatforms = [];
+                lvl.breakablePlatforms.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 120,
+                    h: 40,
+                    type: 'platform',
+                    broken: false,
+                    timer: 0,
+                    triggered: false
+                });
+            } else if (this.activeTool === 'create_wall_breakable') {
+                if (!lvl.breakablePlatforms) lvl.breakablePlatforms = [];
+                lvl.breakablePlatforms.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 40,
+                    h: 120,
+                    type: 'wall',
+                    broken: false,
+                    timer: 0,
+                    triggered: false
+                });
+            } else if (this.activeTool === 'create_hidden_passage') {
+                if (!lvl.hiddenPassages) lvl.hiddenPassages = [];
+                lvl.hiddenPassages.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 120,
+                    h: 40
+                });
+            } else if (this.activeTool.startsWith('create_collectible')) {
+                let color = '#eab308'; // Default yellow
+                if (this.activeTool === 'create_collectible_blue') color = '#06b6d4';
+                else if (this.activeTool === 'create_collectible_pink') color = '#d946ef';
+                else if (this.activeTool === 'create_collectible_green') color = '#10b981';
+                else if (this.activeTool === 'create_collectible_diamond') color = '#f43f5e';
+
+                lvl.collectibles.push({
+                    x: snapX,
+                    y: snapY,
+                    collected: false,
+                    color: color
+                });
+            } else if (this.activeTool.startsWith('create_hazard_')) {
+                const hType = this.activeTool.replace('create_hazard_', '');
+                let dir = 'up';
+                let w = 60;
+                let h = 20;
+                if (hType === 'spike_down') {
+                    dir = 'down';
+                } else if (hType === 'spike_left') {
+                    dir = 'left';
+                    w = 20;
+                    h = 60;
+                } else if (hType === 'spike_right') {
+                    dir = 'right';
+                    w = 20;
+                    h = 60;
+                } else if (hType === 'acid') {
+                    w = 120;
+                    h = 70;
+                }
+                lvl.hazards.push({
+                    x: snapX,
+                    y: snapY,
+                    w: w,
+                    h: h,
+                    type: hType.startsWith('spike') ? 'spike' : 'acid',
+                    direction: dir
+                });
+            } else if (this.activeTool === 'create_moving') {
+                lvl.movingPlatforms.push({
+                    startX: snapX,
+                    startY: snapY,
+                    targetX: snapX + 150,
+                    targetY: snapY,
+                    x: snapX,
+                    y: snapY,
+                    w: 100,
+                    h: 20,
+                    type: 'moving',
+                    speed: 0.015,
+                    dir: 1,
+                    progress: 0
+                });
+            } else if (this.activeTool.startsWith('create_gate_')) {
+                const gType = this.activeTool.replace('create_gate_', '');
+                let gateType = 'laser';
+                if (gType === 'pink') gateType = 'pinkLaser';
+                else if (gType === 'green') gateType = 'greenLaser';
+                else if (gType === 'yellow') gateType = 'yellowLaser';
+                else if (gType === 'net') gateType = 'net';
+                
+                lvl.gates.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 20,
+                    h: 220,
+                    type: gateType,
+                    id: 100 + Math.floor(Math.random() * 900),
+                    disabled: false
+                });
+            } else if (this.activeTool === 'create_enemy') {
+                lvl.enemies.push({
+                    x: snapX,
+                    y: snapY,
+                    rangeX: 120,
+                    speed: 1.2,
+                    isVertical: false,
+                    color: '#f43f5e'
+                });
+            } else if (this.activeTool === 'create_enemy_vertical') {
+                lvl.enemies.push({
+                    x: snapX,
+                    y: snapY,
+                    rangeX: 120,
+                    speed: 1.2,
+                    isVertical: true,
+                    color: '#06b6d4'
+                });
+            } else if (this.activeTool === 'create_enemy_jumping') {
+                lvl.enemies.push({
+                    x: snapX,
+                    y: snapY,
+                    rangeX: 120,
+                    speed: 1.5,
+                    isVertical: true,
+                    color: '#d946ef'
+                });
+            } else if (this.activeTool === 'create_enemy_flying') {
+                lvl.enemies.push({
+                    x: snapX,
+                    y: snapY,
+                    rangeX: 180,
+                    speed: 2.0,
+                    isVertical: false,
+                    color: '#eab308'
+                });
+            } else if (this.activeTool === 'create_plate') {
+                if (!lvl.pressurePlates) lvl.pressurePlates = [];
+                lvl.pressurePlates.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 50,
+                    h: 10,
+                    activated: false,
+                    linkedGateId: 101
+                });
+            } else if (this.activeTool === 'create_pushblock') {
+                if (!lvl.pushBlocks) lvl.pushBlocks = [];
+                lvl.pushBlocks.push({
+                    startX: snapX,
+                    startY: snapY,
+                    x: snapX,
+                    y: snapY,
+                    w: 50,
+                    h: 50,
+                    vx: 0,
+                    vy: 0
+                });
+            } else if (this.activeTool === 'create_conveyor') {
+                if (!lvl.conveyors) lvl.conveyors = [];
+                lvl.conveyors.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 120,
+                    h: 20,
+                    direction: 1,
+                    speed: 1.5
+                });
+            } else if (this.activeTool === 'create_bouncepad') {
+                if (!lvl.bouncePads) lvl.bouncePads = [];
+                lvl.bouncePads.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 50,
+                    h: 20,
+                    force: 12.0,
+                    active: false,
+                    timer: 0
+                });
+            } else if (this.activeTool === 'create_teleport') {
+                if (!lvl.teleportPairs) lvl.teleportPairs = [];
+                lvl.teleportPairs.push({
+                    x1: snapX,
+                    y1: snapY,
+                    x2: snapX + 100,
+                    y2: snapY,
+                    color: '#a855f7',
+                    cooldown: 0
+                });
+            } else if (this.activeTool === 'create_button') {
+                if (!lvl.buttons) lvl.buttons = [];
+                lvl.buttons.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 32,
+                    h: 32,
+                    activated: false,
+                    linkedGateId: 101,
+                    timer: 0
+                });
+            } else if (this.activeTool === 'create_lever') {
+                if (!lvl.levers) lvl.levers = [];
+                lvl.levers.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 32,
+                    h: 32,
+                    activated: false,
+                    linkedGateId: 101,
+                    cooldown: 0
+                });
+            } else if (this.activeTool === 'create_vantuz') {
+                if (!lvl.vantuzPoints) lvl.vantuzPoints = [];
+                lvl.vantuzPoints.push({
+                    x: snapX,
+                    y: snapY,
+                    cooldown: 0
+                });
+            } else if (this.activeTool === 'create_trap_falling_block') {
+                if (!lvl.fallingBlockTraps) lvl.fallingBlockTraps = [];
+                lvl.fallingBlockTraps.push({
+                    startX: snapX,
+                    startY: snapY,
+                    x: snapX,
+                    y: snapY,
+                    w: 60,
+                    h: 60,
+                    state: 'idle',
+                    vy: 0,
+                    timer: 0
+                });
+            } else if (this.activeTool.startsWith('create_deco_')) {
+                let dType = this.activeTool.replace('create_deco_', '');
+                if (dType === 'neon') dType = 'neon_light';
+                if (dType === 'warning') dType = 'warning_light';
+                
+                if (!lvl.decorations) lvl.decorations = [];
+                let w = 40, h = 40;
+                if (dType === 'neon_light') { w = 20; h = 80; }
+                else if (dType === 'textbox') { w = 200; h = 80; }
+                else if (dType === 'pipe') { w = 80; h = 20; }
+                else if (dType === 'cable') { w = 80; h = 40; }
+                else if (dType === 'pano') { w = 50; h = 40; }
+                else if (dType === 'warning_light' || dType === 'steam') { w = 32; h = 32; }
+                else if (dType === 'pillar') { w = 32; h = 120; }
+                else if (dType === 'gear') { w = 40; h = 40; }
+                else if (dType === 'window_space') { w = 60; h = 60; }
+                else if (dType === 'server_rack') { w = 40; h = 60; }
+
+                lvl.decorations.push({
+                    x: snapX,
+                    y: snapY,
+                    w: w,
+                    h: h,
+                    type: dType,
+                    rotation: 0,
+                    startRotation: 0,
+                    state: 0,
+                    text: dType === 'textbox' ? 'Yeni Bilgi Kutusu' : '',
+                    color: dType === 'textbox' ? '#06b6d4' : ''
+                });
+            } else if (this.activeTool === 'create_portal') {
+                lvl.portal.x = snapX;
+                lvl.portal.y = snapY;
+            } else if (this.activeTool === 'create_spawn') {
+                lvl.spawnX = snapX;
+                lvl.spawnY = snapY;
+            }
+
+            this.saveToLocalStorage(); // Auto-save after creation
+            audio.playCollect(); // Ekleme onay sesi
+
+            // Seç aracı durumuna dön
+            this.activeTool = 'select';
+            this.panel.querySelectorAll('.editor-btn[data-tool]').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-tool') === 'select') btn.classList.add('active');
+            });
+            
+            // Yeni yaratılan objeyi seçili yap
+            const hit = this.getObjectAt(mouseX, mouseY);
+            if (hit) {
+                this.selectedObject = hit.obj;
+                this.selectedObjectType = hit.type;
+            }
+            this.updateInspector();
+        }
+    }
+
+    /**
+     * Mouse koordinatlarında duran objeyi bulur
+     */
+    getObjectAt(mx, my) {
+        const lvl = this.game.level;
+
+        // 1. Oyuncu Spawn
+        const dxs = mx - lvl.spawnX;
+        const dys = my - lvl.spawnY;
+        if (Math.sqrt(dxs*dxs + dys*dys) < 20) {
+            return { type: 'spawn', obj: { x: lvl.spawnX, y: lvl.spawnY } };
+        }
+
+        // 2. Portal
+        if (mx > lvl.portal.x && mx < lvl.portal.x + lvl.portal.w &&
+            my > lvl.portal.y && my < lvl.portal.y + lvl.portal.h) {
+            return { type: 'portal', obj: lvl.portal };
+        }
+
+        // 3. Collectibles
+        for (const c of lvl.collectibles) {
+            const dx = mx - c.x;
+            const dy = my - c.y;
+            if (Math.sqrt(dx*dx + dy*dy) < 15) {
+                return { type: 'collectible', obj: c };
+            }
+        }
+
+        // 4. Enemies
+        for (const e of lvl.enemies) {
+            const dx = mx - e.x;
+            const dy = my - e.y;
+            if (Math.sqrt(dx*dx + dy*dy) < 18) {
+                return { type: 'enemy', obj: e };
+            }
+        }
+
+        // 5. Gates
+        for (const g of lvl.gates) {
+            if (mx > g.x && mx < g.x + g.w && my > g.y && my < g.y + g.h) {
+                return { type: 'gate', obj: g };
+            }
+        }
+
+        // 6. Moving platforms
+        for (const mp of lvl.movingPlatforms) {
+            if (mx > mp.x && mx < mp.x + mp.w && my > mp.y && my < mp.y + mp.h) {
+                return { type: 'movingPlatform', obj: mp };
+            }
+        }
+
+        // 7. Hazards
+        for (const h of lvl.hazards) {
+            if (mx > h.x && mx < h.x + h.w && my > h.y && my < h.y + h.h) {
+                return { type: 'hazard', obj: h };
+            }
+        }
+
+        // --- NEW INTERACTIVE MECHANICS DETECTIONS ---
+        if (lvl.pressurePlates) {
+            for (const pp of lvl.pressurePlates) {
+                if (mx > pp.x && mx < pp.x + pp.w && my > pp.y && my < pp.y + pp.h) {
+                    return { type: 'pressurePlate', obj: pp };
+                }
+            }
+        }
+
+        if (lvl.pushBlocks) {
+            for (const pb of lvl.pushBlocks) {
+                if (mx > pb.x && mx < pb.x + pb.w && my > pb.y && my < pb.y + pb.h) {
+                    return { type: 'pushBlock', obj: pb };
+                }
+            }
+        }
+
+        if (lvl.conveyors) {
+            for (const c of lvl.conveyors) {
+                if (mx > c.x && mx < c.x + c.w && my > c.y && my < c.y + c.h) {
+                    return { type: 'conveyor', obj: c };
+                }
+            }
+        }
+
+        if (lvl.bouncePads) {
+            for (const bp of lvl.bouncePads) {
+                if (mx > bp.x && mx < bp.x + bp.w && my > bp.y && my < bp.y + bp.h) {
+                    return { type: 'bouncePad', obj: bp };
+                }
+            }
+        }
+
+        if (lvl.buttons) {
+            for (const b of lvl.buttons) {
+                if (mx > b.x && mx < b.x + b.w && my > b.y && my < b.y + b.h) {
+                    return { type: 'button', obj: b };
+                }
+            }
+        }
+
+        if (lvl.levers) {
+            for (const l of lvl.levers) {
+                if (mx > l.x && mx < l.x + l.w && my > l.y && my < l.y + l.h) {
+                    return { type: 'lever', obj: l };
+                }
+            }
+        }
+
+        if (lvl.teleportPairs) {
+            for (const tp of lvl.teleportPairs) {
+                // Portal 1: 40x60
+                if (mx > tp.x1 && mx < tp.x1 + 40 && my > tp.y1 && my < tp.y1 + 60) {
+                    this.draggedPortalEnd = 1;
+                    return { type: 'teleportPair', obj: tp };
+                }
+                // Portal 2: 40x60
+                if (mx > tp.x2 && mx < tp.x2 + 40 && my > tp.y2 && my < tp.y2 + 60) {
+                    this.draggedPortalEnd = 2;
+                    return { type: 'teleportPair', obj: tp };
+                }
+            }
+        }
+        if (lvl.fallingPlatforms) {
+            for (const fp of lvl.fallingPlatforms) {
+                if (mx > fp.x && mx < fp.x + fp.w && my > fp.y && my < fp.y + fp.h) {
+                    return { type: 'fallingPlatform', obj: fp };
+                }
+            }
+        }
+
+        if (lvl.breakablePlatforms) {
+            for (const bp of lvl.breakablePlatforms) {
+                if (mx > bp.x && mx < bp.x + bp.w && my > bp.y && my < bp.y + bp.h) {
+                    return { type: 'breakablePlatform', obj: bp };
+                }
+            }
+        }
+
+        if (lvl.hiddenPassages) {
+            for (const hp of lvl.hiddenPassages) {
+                if (mx > hp.x && mx < hp.x + hp.w && my > hp.y && my < hp.y + hp.h) {
+                    return { type: 'hiddenPassage', obj: hp };
+                }
+            }
+        }
+
+        if (lvl.fallingBlockTraps) {
+            for (const fbt of lvl.fallingBlockTraps) {
+                if (mx > fbt.x && mx < fbt.x + fbt.w && my > fbt.y && my < fbt.y + fbt.h) {
+                    return { type: 'fallingBlockTrap', obj: fbt };
+                }
+            }
+        }
+
+        if (lvl.vantuzPoints) {
+            for (const vp of lvl.vantuzPoints) {
+                const dx = mx - vp.x;
+                const dy = my - vp.y;
+                if (Math.sqrt(dx*dx + dy*dy) < 15) {
+                    return { type: 'vantuzPoint', obj: vp };
+                }
+            }
+        }
+
+        if (lvl.decorations) {
+            for (const d of lvl.decorations) {
+                if (mx > d.x && mx < d.x + d.w && my > d.y && my < d.y + d.h) {
+                    return { type: 'decoration', obj: d };
+                }
+            }
+        }
+
+        // 8. Platforms (Tersten arat ki üsttekiler önce seçilsin)
+        for (let i = lvl.platforms.length - 1; i >= 0; i--) {
+            const p = lvl.platforms[i];
+            if (mx > p.x && mx < p.x + p.w && my > p.y && my < p.y + p.h) {
+                return { type: 'platform', obj: p };
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Mouse sürükleme güncellemeleri
+     */
+    onMouseMove(e) {
+        if (!this.active || this.game.state !== 'EDITOR') return;
+
+        // 1. Kamera Kaydırma (Pan)
+        if (this.isPanning) {
+            const dx = e.clientX - this.panStartX;
+            const dy = e.clientY - this.panStartY;
+            const zoom = this.game.camera.zoom || 1.0;
+            this.game.camera.x = this.cameraStartX - dx / zoom;
+            this.game.camera.y = this.cameraStartY - dy / zoom;
+            this.clampCamera();
+            return;
+        }
+
+        // 2. Obje Sürükleme (Drag)
+        if (this.isDragging && this.selectedObject) {
+            const rect = this.game.canvas.getBoundingClientRect();
+            const clientX = e.clientX - rect.left;
+            const clientY = e.clientY - rect.top;
+            const zoom = this.game.camera.zoom || 1.0;
+            const halfW = this.game.cssWidth / 2;
+            const halfH = this.game.cssHeight / 2;
+            
+            const mouseX = (clientX - halfW) / zoom + this.game.camera.x + halfW;
+            const mouseY = (clientY - halfH) / zoom + this.game.camera.y + halfH;
+            
+            let newX = mouseX - this.dragOffsetX;
+            let newY = mouseY - this.dragOffsetY;
+
+            if (this.gridSnap) {
+                newX = Math.round(newX / this.gridSize) * this.gridSize;
+                newY = Math.round(newY / this.gridSize) * this.gridSize;
+            }
+
+            const type = this.selectedObjectType;
+            const obj = this.selectedObject;
+
+            if (type === 'spawn') {
+                this.game.level.spawnX = newX;
+                this.game.level.spawnY = newY;
+            } else if (type === 'portal') {
+                obj.x = newX;
+                obj.y = newY;
+            } else if (type === 'collectible' || type === 'enemy') {
+                obj.x = newX;
+                obj.y = newY;
+            } else if (type === 'movingPlatform') {
+                const diffX = newX - obj.x;
+                const diffY = newY - obj.y;
+                obj.x = newX;
+                obj.y = newY;
+                obj.startX = newX;
+                obj.startY = newY;
+                obj.targetX += diffX;
+                obj.targetY += diffY;
+            } else if (type === 'teleportPair') {
+                if (this.draggedPortalEnd === 1) {
+                    obj.x1 = newX;
+                    obj.y1 = newY;
+                } else {
+                    obj.x2 = newX;
+                    obj.y2 = newY;
+                }
+            } else {
+                obj.x = newX;
+                obj.y = newY;
+                if (obj.startX !== undefined) {
+                    obj.startX = newX;
+                    obj.startY = newY;
+                }
+            }
+
+            this.updateInspector();
+        }
+    }
+
+    onMouseUp(e) {
+        if (this.isDragging) {
+            this.saveToLocalStorage(); // Auto-save after dragging
+        }
+        this.isPanning = false;
+        this.isDragging = false;
+    }
+
+    /**
+     * Klavye kısayol tuşları (Basma)
+     */
+    onKeyDown(e) {
+        if (!this.active) return;
+        
+        // Eğer bir input alanı seçiliyse kısayol tuşlarını devre dışı bırak
+        if (this.inputFocused) return;
+
+        // 1. Playtest modundayken (PLAYING, GAMEOVER veya WIN) ESC/T basılırsa editöre dön
+        if (this.game.state === 'PLAYING' || this.game.state === 'GAMEOVER' || this.game.state === 'WIN') {
+            if (e.key === 'Escape' || e.key === 't' || e.key === 'T') {
+                this.stopPlaytest();
+                e.preventDefault();
+            }
+            return;
+        }
+
+        if (this.game.state !== 'EDITOR') return;
+
+        // Yön ve WASD tuşlarını takip et
+        if (e.key in this.keys) {
+            this.keys[e.key] = true;
+        }
+        const lowerKey = e.key.toLowerCase();
+        if (lowerKey === 'w' || lowerKey === 'a' || lowerKey === 's' || lowerKey === 'd') {
+            this.keys[lowerKey] = true;
+        }
+        if (e.key === 'Shift') {
+            this.keys['Shift'] = true;
+        }
+
+        // 2. Playtest Başlat (P)
+        if (e.key === 'p' || e.key === 'P') {
+            this.startPlaytest();
+            e.preventDefault();
+        }
+
+        // 3. Seçili Objeyi Sil (Delete / Backspace)
+        if ((e.key === 'Delete' || e.key === 'Backspace') && this.selectedObject) {
+            this.deleteSelected();
+            e.preventDefault();
+        }
+
+        // 4. Yan Paneli Gizle / Göster (Tab)
+        if (e.key === 'Tab') {
+            this.togglePanel();
+            e.preventDefault();
+        }
+    }
+
+    /**
+     * Klavye kısayol tuşları (Bırakma)
+     */
+    onKeyUp(e) {
+        if (!this.active) return;
+        
+        if (e.key in this.keys) {
+            this.keys[e.key] = false;
+        }
+        const lowerKey = e.key.toLowerCase();
+        if (lowerKey === 'w' || lowerKey === 'a' || lowerKey === 's' || lowerKey === 'd') {
+            this.keys[lowerKey] = false;
+        }
+        if (e.key === 'Shift') {
+            this.keys['Shift'] = false;
+        }
+    }
+
+    /**
+     * Mouse tekerleği ile zoom kontrolü
+     */
+    onWheel(e) {
+        if (!this.active || this.game.state !== 'EDITOR') return;
+        e.preventDefault(); // Sayfa kaydırmayı engelle
+
+        const oldZoom = this.game.camera.zoom || 1.0;
+        const zoomFactor = 1.15;
+        let newZoom = oldZoom;
+
+        if (e.deltaY < 0) {
+            // Zoom In (Max 3.0x)
+            newZoom = Math.min(3.0, oldZoom * zoomFactor);
+        } else {
+            // Zoom Out (Min 0.3x)
+            newZoom = Math.max(0.3, oldZoom / zoomFactor);
+        }
+
+        if (newZoom !== oldZoom) {
+            const rect = this.game.canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const halfW = this.game.cssWidth / 2;
+            const halfH = this.game.cssHeight / 2;
+
+            // Zoom'u fare imlecine göre odakla (Centering)
+            this.game.camera.x += (mouseX - halfW) * (1 / oldZoom - 1 / newZoom);
+            this.game.camera.y += (mouseY - halfH) * (1 / oldZoom - 1 / newZoom);
+
+            this.game.camera.zoom = newZoom;
+            this.clampCamera();
+        }
+    }
+
+    /**
+     * Mobil dokunmatik pinch zoom başlangıcı
+     */
+    handleTouchStart(e) {
+        if (!this.active || this.game.state !== 'EDITOR') return;
+
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            const t1 = e.touches[0];
+            const t2 = e.touches[1];
+            const dx = t1.clientX - t2.clientX;
+            const dy = t1.clientY - t2.clientY;
+            this.touchStartDistance = Math.sqrt(dx * dx + dy * dy);
+            this.touchStartZoom = this.game.camera.zoom || 1.0;
+        } else if (e.touches.length === 1) {
+            // Tek parmak ile haritayı kaydırma (Pan)
+            const t = e.touches[0];
+            this.isPanning = true;
+            this.panStartX = t.clientX;
+            this.panStartY = t.clientY;
+            this.cameraStartX = this.game.camera.x;
+            this.cameraStartY = this.game.camera.y;
+        }
+    }
+
+    /**
+     * Mobil dokunmatik pinch zoom ve kaydırma hareketi
+     */
+    handleTouchMove(e) {
+        if (!this.active || this.game.state !== 'EDITOR') return;
+
+        if (e.touches.length === 2 && this.touchStartDistance > 0) {
+            e.preventDefault();
+            const t1 = e.touches[0];
+            const t2 = e.touches[1];
+            const dx = t1.clientX - t2.clientX;
+            const dy = t1.clientY - t2.clientY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            const scale = dist / this.touchStartDistance;
+            let newZoom = Math.max(0.3, Math.min(3.0, this.touchStartZoom * scale));
+
+            const rect = this.game.canvas.getBoundingClientRect();
+            const centerX = ((t1.clientX + t2.clientX) / 2) - rect.left;
+            const centerY = ((t1.clientY + t2.clientY) / 2) - rect.top;
+
+            const oldZoom = this.game.camera.zoom || 1.0;
+            if (newZoom !== oldZoom) {
+                const halfW = this.game.cssWidth / 2;
+                const halfH = this.game.cssHeight / 2;
+
+                this.game.camera.x += (centerX - halfW) * (1 / oldZoom - 1 / newZoom);
+                this.game.camera.y += (centerY - halfH) * (1 / oldZoom - 1 / newZoom);
+
+                this.game.camera.zoom = newZoom;
+                this.clampCamera();
+            }
+        } else if (e.touches.length === 1 && this.isPanning) {
+            e.preventDefault();
+            const t = e.touches[0];
+            const dx = t.clientX - this.panStartX;
+            const dy = t.clientY - this.panStartY;
+            const zoom = this.game.camera.zoom || 1.0;
+            this.game.camera.x = this.cameraStartX - dx / zoom;
+            this.game.camera.y = this.cameraStartY - dy / zoom;
+            this.clampCamera();
+        }
+    }
+
+    /**
+     * Dokunma bitişi
+     */
+    handleTouchEnd(e) {
+        this.touchStartDistance = 0;
+        this.isPanning = false;
+    }
+
+    /**
+     * Kamera koordinatlarını harita sınırları içinde tutar (Zoom-aware)
+     */
+    clampCamera() {
+        const zoom = this.game.camera.zoom || 1.0;
+        const visibleW = this.game.cssWidth / zoom;
+        const visibleH = this.game.cssHeight / zoom;
+
+        // Harita dışına çıkmayı engelle (Sınırlar)
+        const minX = 0;
+        const maxX = Math.max(0, this.game.level.width - visibleW);
+        const minY = -350; // Üst boşluk toleransı (Artırıldı)
+        const maxY = Math.max(0, this.game.level.height - visibleH + 350);
+
+        this.game.camera.x = Math.max(minX, Math.min(this.game.camera.x, maxX));
+        this.game.camera.y = Math.max(minY, Math.min(this.game.camera.y, maxY));
+    }
+
+    /**
+     * Her karede akıcı kamera hareketi ve güncellemeler (Game loop)
+     */
+    update(dt) {
+        if (!this.active || this.game.state !== 'EDITOR') return;
+
+        // Akıcı kamera kaydırma hızı (Shift basılırsa 2.5 kat hızlı)
+        const baseSpeed = 8;
+        const speed = this.keys['Shift'] ? baseSpeed * 2.5 : baseSpeed;
+        
+        let dx = 0;
+        let dy = 0;
+
+        if (this.keys['ArrowLeft'] || this.keys['a']) dx -= speed;
+        if (this.keys['ArrowRight'] || this.keys['d']) dx += speed;
+        if (this.keys['ArrowUp'] || this.keys['w']) dy -= speed;
+        if (this.keys['ArrowDown'] || this.keys['s']) dy += speed;
+
+        if (dx !== 0 || dy !== 0) {
+            const zoom = this.game.camera.zoom || 1.0;
+            this.game.camera.x += (dx / zoom) * dt;
+            this.game.camera.y += (dy / zoom) * dt;
+            this.clampCamera();
+        }
+    }
+
+    /**
+     * Editör Çizim Arayüzü (Grid ve Seçim Alanı)
+     */
+    draw(ctx) {
+        if (!this.active || this.game.state !== 'EDITOR') return;
+
+        // Visual Watermark Feedback (displays EDITOR MODE on screen)
+        ctx.save();
+        ctx.fillStyle = 'rgba(217, 70, 239, 0.8)'; // Bright Fuchsia
+        ctx.shadowColor = '#d946ef';
+        ctx.shadowBlur = 8;
+        ctx.font = '800 13px Outfit';
+        ctx.fillText('🛠️ EDITOR MODE (F1 to Exit)', 20, 30);
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(-this.game.camera.x, -this.game.camera.y);
+
+        // 1. Izgara (Grid Lines) Çizimi
+        if (this.gridSnap) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+            ctx.lineWidth = 1;
+            
+            const startX = Math.floor(this.game.camera.x / this.gridSize) * this.gridSize;
+            const endX = startX + this.game.cssWidth + this.gridSize;
+            const startY = Math.floor(this.game.camera.y / this.gridSize) * this.gridSize;
+            const endY = startY + this.game.cssHeight + this.gridSize;
+
+            for (let x = startX; x < endX; x += this.gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, startY);
+                ctx.lineTo(x, endY);
+                ctx.stroke();
+            }
+            for (let y = startY; y < endY; y += this.gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(startX, y);
+                ctx.lineTo(endX, y);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        // 2. Oyuncu Spawn Noktası Göstergesi
+        ctx.save();
+        ctx.strokeStyle = '#10b981';
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(this.game.level.spawnX, this.game.level.spawnY, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = '#10b981';
+        ctx.font = '10px Outfit';
+        ctx.textAlign = 'center';
+        ctx.fillText('SPAWN', this.game.level.spawnX, this.game.level.spawnY - 24);
+        ctx.restore();
+
+        // 3. Seçim Kutusu Çizimi (Selected Object Highlight)
+        if (this.selectedObject) {
+            ctx.save();
+            ctx.strokeStyle = '#d946ef';
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = '#d946ef';
+            ctx.shadowBlur = 10;
+
+            const obj = this.selectedObject;
+            const type = this.selectedObjectType;
+
+            if (type === 'spawn') {
+                ctx.beginPath();
+                ctx.arc(this.game.level.spawnX, this.game.level.spawnY, 21, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (type === 'portal') {
+                ctx.strokeRect(obj.x - 4, obj.y - 4, obj.w + 8, obj.h + 8);
+            } else if (type === 'collectible') {
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, 16, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (type === 'enemy') {
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, 22, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Düşman devriye menzil çizgisi
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = 'rgba(239, 68, 68, 0.35)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(obj.x - obj.rangeX, obj.y);
+                ctx.lineTo(obj.x + obj.rangeX, obj.y);
+                ctx.stroke();
+
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
+                ctx.fillRect(obj.x - obj.rangeX - 2, obj.y - 6, 4, 12);
+                ctx.fillRect(obj.x + obj.rangeX - 2, obj.y - 6, 4, 12);
+            } else if (type === 'movingPlatform') {
+                ctx.strokeRect(obj.x - 4, obj.y - 4, obj.w + 8, obj.h + 8);
+
+                // Yol rotasını çiz (hedef noktaya kesikli çizgi)
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#eab308';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(obj.startX + obj.w / 2, obj.startY + obj.h / 2);
+                ctx.lineTo(obj.targetX + obj.w / 2, obj.targetY + obj.h / 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Hedefte hayali bir platform kutusu
+                ctx.fillStyle = 'rgba(234, 179, 8, 0.1)';
+                ctx.strokeStyle = 'rgba(234, 179, 8, 0.4)';
+                ctx.strokeRect(obj.targetX, obj.targetY, obj.w, obj.h);
+                ctx.fillRect(obj.targetX, obj.targetY, obj.w, obj.h);
+            } else if (type === 'teleportPair') {
+                ctx.strokeRect(obj.x1 - 4, obj.y1 - 4, 48, 68);
+                ctx.strokeRect(obj.x2 - 4, obj.y2 - 4, 48, 68);
+                
+                // Draw connecting dashed line
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#a855f7';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(obj.x1 + 20, obj.y1 + 30);
+                ctx.lineTo(obj.x2 + 20, obj.y2 + 30);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            } else if (type === 'decoration') {
+                ctx.save();
+                if (obj.rotation) {
+                    ctx.translate(obj.x + obj.w / 2, obj.y + obj.h / 2);
+                    ctx.rotate(obj.rotation);
+                    ctx.translate(-(obj.x + obj.w / 2), -(obj.y + obj.h / 2));
+                }
+                ctx.strokeRect(obj.x - 3, obj.y - 3, obj.w + 6, obj.h + 6);
+                ctx.restore();
+            } else {
+                ctx.strokeRect(obj.x - 3, obj.y - 3, obj.w + 6, obj.h + 6);
+            }
+
+            ctx.restore();
+        }
+
+        // 4. Sağ Kenar Sınır Çizgisi
+        ctx.save();
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.5)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(this.game.level.width, 0);
+        ctx.lineTo(this.game.level.width, this.game.level.height);
+        ctx.stroke();
+        
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
+        ctx.font = '10px Outfit';
+        ctx.fillText('HARİTA SAĞ SINIRI', this.game.level.width - 100, 20);
+        ctx.restore();
+
+        // 5. Düşmanları Çiz (Static Editor view for dev)
+        const lvl = this.game.level;
+        if (lvl.enemies) {
+            lvl.enemies.forEach(e => {
+                ctx.save();
+                ctx.fillStyle = '#f43f5e';
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, 16, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Diken topu olduğunu belirtmek için ufak bir artı işareti çiz
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(e.x - 8, e.y); ctx.lineTo(e.x + 8, e.y);
+                ctx.moveTo(e.x, e.y - 8); ctx.lineTo(e.x, e.y + 8);
+                ctx.stroke();
+                ctx.restore();
+            });
+        }
+
+        ctx.restore();
+    }
+}

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Viscora - 2D Physics Mobile Platformer</title>
+    <!-- Gelişmiş PWA & Android Meta Etiketleri -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0d0d12">
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css?v=9">
+    <link rel="manifest" href="manifest.json">
+    <script>
+        // Service Worker Kaydı (PWA & Offline Desteği)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker başarıyla kaydedildi:', reg.scope))
+                    .catch(err => console.error('Service Worker kayıt hatası:', err));
+            });
+        }
+
+        // Android/Mobil Cihazlar İçin FPS Optimizasyonu: Yoğun işlem gerektiren canvas gölge özelliklerini devredışı bırak
+        const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        if (isTouch) {
+            Object.defineProperty(CanvasRenderingContext2D.prototype, 'shadowBlur', {
+                set(val) { /* Gölgeleri yoksay */ },
+                get() { return 0; },
+                configurable: true
+            });
+            Object.defineProperty(CanvasRenderingContext2D.prototype, 'shadowColor', {
+                set(val) { /* Gölgeleri yoksay */ },
+                get() { return 'transparent'; },
+                configurable: true
+            });
+        }
+
+        window.addEventListener('error', function(e) {
+            var div = document.getElementById('debug-error-console');
+            if (!div) {
+                div = document.createElement('div');
+                div.id = 'debug-error-console';
+                div.style.position = 'fixed';
+                div.style.top = '10px';
+                div.style.left = '10px';
+                div.style.right = '10px';
+                div.style.background = 'rgba(30, 0, 0, 0.95)';
+                div.style.color = '#ff6b6b';
+                div.style.padding = '15px';
+                div.style.borderRadius = '8px';
+                div.style.border = '2px solid #ff4a4a';
+                div.style.fontFamily = 'monospace';
+                div.style.fontSize = '14px';
+                div.style.zIndex = '999999';
+                div.style.boxShadow = '0 0 20px rgba(255,0,0,0.5)';
+                div.style.whiteSpace = 'pre-wrap';
+                div.style.overflowY = 'auto';
+                div.style.maxHeight = '80vh';
+                
+                var closeBtn = document.createElement('button');
+                closeBtn.innerText = 'Kapat [X]';
+                closeBtn.style.float = 'right';
+                closeBtn.style.background = '#ff4a4a';
+                closeBtn.style.color = '#fff';
+                closeBtn.style.border = 'none';
+                closeBtn.style.padding = '5px 10px';
+                closeBtn.style.cursor = 'pointer';
+                closeBtn.style.borderRadius = '4px';
+                closeBtn.style.fontWeight = 'bold';
+                closeBtn.onclick = function() { div.remove(); };
+                div.appendChild(closeBtn);
+                
+                var title = document.createElement('h3');
+                title.innerText = '⚠️ OYUN HATASI TESPİT EDİLDİ';
+                title.style.margin = '0 0 10px 0';
+                title.style.color = '#ff4a4a';
+                div.appendChild(title);
+                
+                var content = document.createElement('div');
+                content.id = 'debug-error-content';
+                div.appendChild(content);
+                
+                document.body.appendChild(div);
+            }
+            var msg = e.error ? (e.error.stack || e.error.message) : e.message;
+            document.getElementById('debug-error-content').innerText += msg + '\n\n';
+        });
+    </script>
+</head>
+<body>
+    <!-- Yönlendirme Uyarısı (Sadece Dikey Ekranlarda Görünür) -->
+    <div id="orientation-warning" class="screen overlay-screen active">
+        <div class="warning-card">
+            <div class="phone-icon-wrapper">
+                <svg class="phone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="5" y="2" width="14" height="20" rx="2" transform="rotate(0 12 12)"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                </svg>
+            </div>
+            <h2>Lütfen Cihazınızı Döndürün</h2>
+            <p>Viscora en iyi yatay (landscape) modda oynanır.</p>
+        </div>
+    </div>
+
+    <!-- Ana Oyun Kapsayıcısı -->
+    <div id="game-container">
+        <!-- Oyun Çizim Alanı -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- HUD (Oyun İçi Gösterge Paneli) -->
+        <div id="hud" class="hud-layer hidden">
+            <div class="hud-top">
+                <!-- Sol Üst Panel (Harita ve Altında Can Barı) -->
+                <div class="hud-left-panel">
+                    <!-- Minimap Yer Tutucu -->
+                    <div id="minimap-container" class="minimap-placeholder"></div>
+                    <!-- Can Göstergesi -->
+                    <div class="health-container" id="health-container">
+                        <span class="health-drop active"></span>
+                        <span class="health-drop active"></span>
+                        <span class="health-drop active"></span>
+                    </div>
+                </div>
+
+                <!-- Sağ Üst Panel (Duraklatma) -->
+                <div class="hud-right-panel">
+                    <button id="btn-pause" class="hud-btn" aria-label="Duraklat">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+                            <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="hud-bottom-info">
+                <!-- Viskozite Durumu -->
+                <div class="viscosity-badge" id="viscosity-badge">
+                    <span class="badge-dot"></span>
+                    <span class="badge-text">NORMAL</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobil Kontroller (Dokunmatik Ekranlar İçin) -->
+        <div id="mobile-controls" class="controls-layer hidden">
+            <!-- Sol D-Pad: Sadece Hareket -->
+            <div class="dpad-left">
+                <button id="btn-left" class="control-btn" aria-label="Sol">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </button>
+                <button id="btn-right" class="control-btn" aria-label="Sağ">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </div>
+            <!-- Sağ Aksiyon Kontrolleri: Shift + Zıpla + Eğil -->
+            <div class="dpad-right">
+                <!-- Viskozite Değiştirme Butonu (Shift) -->
+                <button id="btn-shift" class="control-btn shift-btn" aria-label="Viskozite Değiştir">
+                    <div class="shift-inner">SHIFT</div>
+                </button>
+                <!-- Zıplama Butonu -->
+                <button id="btn-jump" class="control-btn jump-btn" aria-label="Zıpla">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="19" x2="12" y2="5"></line>
+                        <polyline points="5 12 12 5 19 12"></polyline>
+                    </svg>
+                </button>
+                <!-- Eğilme / Yuvarlanma Butonu -->
+                <button id="btn-down" class="control-btn down-btn" aria-label="Eğil / Yuvarlan">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <polyline points="19 12 12 19 5 12"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- EKRANLAR (MENÜLER) -->
+
+        <!-- Başlangıç Ekranı -->
+        <div id="start-screen" class="screen active">
+            <div class="menu-card animate-fade-in">
+                <div class="brand">
+                    <h1 class="game-title">VISCORA</h1>
+                    <div class="game-subtitle">VISCOUS ODYSSEY</div>
+                </div>
+                <!-- Rehber butonu her zaman görünür -->
+                <button id="btn-codex" class="codex-btn" type="button" aria-label="Nesne Rehberi" title="Nesne ve Canavar Rehberi">📖 Rehber</button>
+                <div class="instructions">
+                    <div class="inst-item">
+                        <span class="key">A / D</span> veya <span class="key">← / →</span> Hareket et
+                    </div>
+                    <div class="inst-item">
+                        <span class="key">W / BOŞLUK</span> Zıpla
+                    </div>
+                    <div class="inst-item">
+                        <span class="key">SHIFT / E</span> Viskozite Değiştir (Sıvı/Katı)
+                    </div>
+                </div>
+                <!-- Zorluk Derecesi Seçimi -->
+                <div class="difficulty-container">
+                    <span class="difficulty-title">⚙️ ZORLUK DERECESİ</span>
+                    <div class="difficulty-buttons">
+                        <button type="button" class="diff-btn" data-diff="easy">🟢 KOLAY <span class="diff-sub">3 Can + Checkpoint</span></button>
+                        <button type="button" class="diff-btn active" data-diff="normal">🔵 NORMAL <span class="diff-sub">3 Can</span></button>
+                        <button type="button" class="diff-btn" data-diff="hard">🟡 ZOR <span class="diff-sub">2 Can</span></button>
+                        <button type="button" class="diff-btn" data-diff="hardcore">🔴 HARDCORE <span class="diff-sub">1 Can</span></button>
+                    </div>
+                </div>
+                <!-- Bölüm Seçimi (Grup Tasarımı) -->
+                <div id="level-selector-wrapper"></div>
+                <div class="menu-settings" style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 320px; margin: 10px auto;">
+                    <div class="settings-control" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                        <span style="font-size: 0.85rem; color: var(--text-secondary); width: 80px; text-align: left;">MÜZİK</span>
+                        <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
+                            <button id="btn-menu-music" class="sound-toggle-mini-btn" type="button" aria-label="Müziği Aç/Kapat">🎵</button>
+                            <div class="slider-wrapper" style="flex: 1; max-width: 140px;">
+                                <input type="range" id="slider-menu-music" class="volume-slider" min="0" max="100" value="50">
+                                <span id="menu-music-text" class="volume-val-text">50%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-control" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                        <span style="font-size: 0.85rem; color: var(--text-secondary); width: 80px; text-align: left;">EFEKTLER</span>
+                        <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
+                            <button id="btn-menu-sfx" class="sound-toggle-mini-btn" type="button" aria-label="Efektleri Aç/Kapat">🔊</button>
+                            <div class="slider-wrapper" style="flex: 1; max-width: 140px;">
+                                <input type="range" id="slider-menu-sfx" class="volume-slider" min="0" max="100" value="80">
+                                <span id="menu-sfx-text" class="volume-val-text">80%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="menu-actions-wrapper" style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 320px; margin: 10px auto 0 auto;">
+                    <button id="btn-play" class="menu-btn primary-btn" style="margin-top: 0;">OYNA</button>
+                    <button id="btn-community" class="menu-btn secondary-btn" type="button" style="margin-top: 0;">🌐 TOPLULUK SUNUCULARI</button>
+                </div>
+        </div>
+        </div>
+ 
+        <!-- Yıldız Kapısı Modalı (Boss bölümünü kilitli olduğunda gösterilir) -->
+        <div id="star-gate-modal" class="star-gate-overlay hidden">
+            <div class="star-gate-card">
+                <div class="star-gate-lock-icon">🔒</div>
+                <h2 id="star-gate-chapter-name" class="star-gate-title">BÖLÜM 10</h2>
+                <div class="star-gate-req">Bu boss bölümünü açmak için</div>
+                <div class="star-gate-req-stars">⭐ <strong>24 yıldız</strong> gerekli</div>
+                <div id="star-gate-count" class="star-gate-count">0 / 30</div>
+                <div class="star-gate-bar-wrap">
+                    <div id="star-gate-bar" class="star-gate-bar"></div>
+                    <div class="star-gate-threshold-line"></div>
+                </div>
+                <button id="btn-close-star-gate" class="menu-btn danger-btn" style="margin-top:1.2rem; width:100%;">Tamam</button>
+            </div>
+        </div>
+
+        <!-- Duraklatma Ekranı -->
+        <div id="pause-screen" class="screen hidden">
+            <div class="menu-card">
+                <h2>OYUN DURDURULDU</h2>
+                <div class="menu-options">
+                    <button id="btn-resume" class="menu-btn primary-btn">DEVAM ET</button>
+                    <button id="btn-codex-pause" class="menu-btn secondary-btn">📖 NESNE REHBERİ</button>
+                    <button id="btn-restart-pause" class="menu-btn secondary-btn">YENİDEN BAŞLAT</button>
+                    <div class="menu-settings" style="display: flex; flex-direction: column; gap: 8px; width: 100%; margin: 10px 0;">
+                        <div class="settings-control inline-settings" style="display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 0.85rem; color: var(--text-secondary); width: 80px; text-align: left;">MÜZİK</span>
+                            <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
+                                <button id="btn-pause-music" class="sound-toggle-mini-btn" type="button" aria-label="Müziği Aç/Kapat">🎵</button>
+                                <div class="slider-wrapper" style="flex: 1; max-width: 140px;">
+                                    <input type="range" id="slider-pause-music" class="volume-slider" min="0" max="100" value="50">
+                                    <span id="pause-music-text" class="volume-val-text">50%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settings-control inline-settings" style="display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 0.85rem; color: var(--text-secondary); width: 80px; text-align: left;">EFEKTLER</span>
+                            <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
+                                <button id="btn-pause-sfx" class="sound-toggle-mini-btn" type="button" aria-label="Efektleri Aç/Kapat">🔊</button>
+                                <div class="slider-wrapper" style="flex: 1; max-width: 140px;">
+                                    <input type="range" id="slider-pause-sfx" class="volume-slider" min="0" max="100" value="80">
+                                    <span id="pause-sfx-text" class="volume-val-text">80%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="btn-main-menu" class="menu-btn danger-btn">🏠 ANA MENÜYE DÖN</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bölüm Sonu / Başarı Ekranı -->
+        <div id="win-screen" class="screen hidden">
+            <div class="menu-card pulse-border">
+                <h2 id="win-title" class="win-title">BÖLÜM TAMAMLANDI!</h2>
+                <p>Viscora güvenli bölgeye ulaştı.</p>
+                <!-- Yıldız Gösterimi: 3 yıldız, kazanılmayanlar içi boş -->
+                <div id="win-stars-display" class="win-stars-display">
+                    <span id="win-star-1" class="win-star">☆</span>
+                    <span id="win-star-2" class="win-star">☆</span>
+                    <span id="win-star-3" class="win-star">☆</span>
+                </div>
+                <div class="win-stats">
+                    <div>Süre: <span id="win-time">00:00</span></div>
+                    <div id="win-crystals-container" style="display:none; margin-top: 8px;">Kristaller: <span id="win-crystals">0 / 0</span><span id="win-crystals-perfect" style="color: #10b981; font-weight: bold; margin-left: 5px;"></span></div>
+                </div>
+                <button id="btn-next" class="menu-btn primary-btn">TEKRAR OYNA</button>
+                <button id="btn-main-menu-win" class="menu-btn danger-btn">🏠 ANA MENÜYE DÖN</button>
+            </div>
+        </div>
+
+        <!-- Oyun Bitti Ekranı -->
+        <div id="gameover-screen" class="screen hidden">
+            <div class="menu-card hazard-border">
+                <h2 class="gameover-title">VISCORA DAĞILDI</h2>
+                <p>Hücre bütünlüğü korunamadı.</p>
+                <button id="btn-retry" class="menu-btn primary-btn">YENİDEN DENE</button>
+                <button id="btn-main-menu-gameover" class="menu-btn danger-btn">🏠 ANA MENÜYE DÖN</button>
+            </div>
+        </div>
+
+        <!-- Nesne ve Canavar Rehberi (Codex Overlay) -->
+        <div id="codex-screen" class="screen hidden">
+            <div class="menu-card codex-card animate-fade-in">
+                <div class="codex-header">
+                    <h2>📖 VİSCORA KILAVUZU</h2>
+                    <button id="btn-close-codex" class="close-btn" type="button" aria-label="Kapat">❌</button>
+                </div>
+                
+                <!-- Kılavuz Sekmeleri -->
+                <div class="codex-tabs">
+                    <button class="codex-tab-btn active" data-tab="forms">🧪 FORM DURUMLARI</button>
+                    <button class="codex-tab-btn" data-tab="objects">🧩 ETKİLEŞİMLİ NESNELER</button>
+                    <button class="codex-tab-btn" data-tab="hazards">⚠️ ENGELLER & CANAVARLAR</button>
+                    <button class="codex-tab-btn" data-tab="controls">🎮 KONTROLLER & GAMEPAD</button>
+                </div>
+                
+                <!-- Sekme İçerikleri -->
+                <div class="codex-content-container">
+                    
+                    <!-- 1. Sekme: Formlar -->
+                    <div id="tab-forms" class="codex-tab-content active">
+                        <div class="codex-row">
+                            <div class="codex-icon green-icon">🟢</div>
+                            <div class="codex-info">
+                                <h3>Normal Form (Yeşil)</h3>
+                                <p>Dengeli hız ve zıplama gücüne sahiptir. <strong>Aşağı Ok / S tuşuna basarak yuvarlanabilir (küçülebilir) ve dar tünellerden/boşluklardan sızabilir.</strong> Sadece <strong>Yeşil lazer kapılarından</strong> hasar almadan geçebilir.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon blue-icon">🔵</div>
+                            <div class="codex-info">
+                                <h3>Sıvı Form (Mavi - Düşük Viskozite)</h3>
+                                <p>Zıplama yüksekliği azalır ancak <strong>çift zıplama (double-jump)</strong> yapabilir. <strong>Dar aralıklardan sızamaz.</strong> Sadece <strong>Mavi lazer kapılarından</strong> hasar almadan geçebilir.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon pink-icon">🟣</div>
+                            <div class="codex-info">
+                                <h3>Jel Form (Pembe - Yüksek Viskozite)</h3>
+                                <p>Çok yavaştır ancak <strong>yapışkan pembe duvarlara tutunabilir</strong> ve yukarı tırmanabilir. <strong>Ağ kapılarından (Net Gate)</strong> yavaşlayarak da olsa geçebilen tek formdur. Sadece <strong>Pembe lazer kapılarından</strong> hasar almadan geçebilir.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 2. Sekme: Nesneler -->
+                    <div id="tab-objects" class="codex-tab-content">
+                        <div class="codex-row">
+                            <div class="codex-icon">⚙️</div>
+                            <div class="codex-info">
+                                <h3>Şalter & Düğme</h3>
+                                <p>Haritadaki lazer kapılarını açıp kapatır. Şalterler kalıcı, düğmeler ise süre kısıtlamalıdır.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">🟡</div>
+                            <div class="codex-info">
+                                <h3>Basınç Plakası</h3>
+                                <p>Üzerine oyuncu veya itilebilir kutu geldiğinde aktif olur. Kapıları açmak için kullanılır.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">📦</div>
+                            <div class="codex-info">
+                                <h3>İtilebilir Enerji Kutusu (Kutu)</h3>
+                                <p>Sadece oyuncu tarafından itilebilir. Basınç plakalarını basılı tutmak için idealdir. Boss uyanıkken kafasına düşürülürse boss'a 1 hasar verir.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">⚡</div>
+                            <div class="codex-info">
+                                <h3>Işınlanma Portalları</h3>
+                                <p>Karakteri ve kutuları anında birbirine bağlı olan diğer portal çıkışına ışınlar.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">🔼</div>
+                            <div class="codex-info">
+                                <h3>Zıplatma Pedi</h3>
+                                <p>Üzerine gelen karakteri yüksek dikey hıza ulaştırarak havaya fırlatır.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">⏩</div>
+                            <div class="codex-info">
+                                <h3>Konveyör Bant</h3>
+                                <p>Üzerindeki oyuncuyu ve kutuları ok yönünde sabit bir hızla sürükler.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 3. Sekme: Engeller ve Canavarlar -->
+                    <div id="tab-hazards" class="codex-tab-content">
+                        <div class="codex-row">
+                            <div class="codex-icon">🚨</div>
+                            <div class="codex-info">
+                                <h3>Lazer Kapıları</h3>
+                                <p>Mavi lazerlerden Sıvı (Mavi) form, Pembe lazerlerden Jel (Pembe) form, Yeşil lazerlerden ise Normal (Yeşil) form hasar almadan geçebilir. <strong>Sarı lazerler ise temas anında karakteri eritecek şekilde anında öldürür!</strong></p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">⚠️</div>
+                            <div class="codex-info">
+                                <h3>Düşen ve Kırılan Platformlar</h3>
+                                <p>Düşen zeminler üzerine basıldıktan sonra düşer. Kırılan zeminler ise çatlayarak yok olur ve geçit verir.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">🪨</div>
+                            <div class="codex-info">
+                                <h3>Düşen Blok Tuzağı</h3>
+                                <p>Altından geçmeye çalıştığınızda tetiklenir ve hızla aşağı düşerek sizi ezmeye çalışır.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">👾</div>
+                            <div class="codex-info">
+                                <h3>Devriye Robotlar ve Örümcekler</h3>
+                                <p>Yollarda devriye gezen veya sizi gördüğünde takip eden düşmanlar. Üstlerine zıplayarak yok edilebilirler.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">👹</div>
+                            <div class="codex-info">
+                                <h3>Viscoruptor (BÖLÜM 10 BOSS'U)</h3>
+                                <p>Yere basarak geniş fuchsia şok dalgaları yayar, yapıştığınız duvarlardan sizi düşürür. Kafasına kutu düşürerek hasar verilebilir.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 4. Sekme: Kontroller & Gamepad -->
+                    <div id="tab-controls" class="codex-tab-content">
+                        <div class="codex-row">
+                            <div class="codex-icon">⚙️</div>
+                            <div class="codex-info">
+                                <h3>Mobil Kontrol Özelleştirme</h3>
+                                <p>Dokunmatik ekranlı cihazlarda oynarken, ekranın sağ üst köşesindeki <strong>Dişli (⚙️)</strong> simgesine dokunarak buton düzenleme moduna girebilirsiniz.</p>
+                                <p>Butonları dilediğiniz gibi <strong>sürükleyip taşıyabilir</strong> ve alt kısımdaki kaydırıcı ile <strong>boyutlarını (50px - 130px)</strong> değiştirebilirsiniz.</p>
+                                <p>Düzenlemeyi bitirmek için <strong>Kaydet</strong> butonuna basarak ayarlarınızı kaydedebilir veya <strong>Sıfırla</strong> ile varsayılan ayarlara dönebilirsiniz.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row" style="margin-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 15px;">
+                            <div class="codex-icon">🎮</div>
+                            <div class="codex-info">
+                                <h3>Gamepad / Kontrolcü Desteği</h3>
+                                <p>Oyun, standart gamepad'leri (Xbox, PlayStation vb.) otomatik olarak tanır.</p>
+                                <p><strong>Sol Analog / D-Pad:</strong> Karakteri yönlendirir ve eğilmesini sağlar.</p>
+                                <p><strong>A / Cross (Face Button 0):</strong> Zıplamayı sağlar.</p>
+                                <p><strong>Shoulder / Triggers (Tetikler):</strong> Viskozite formları arasında geçiş yapar.</p>
+                                <p><strong>Start / Select / Sol Omuz:</strong> Oyunu duraklatır.</p>
+                                <p>Menülerde de <strong>A / Cross</strong> butonu ile onay verip oynayabilirsiniz.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Topluluk Sunucuları Ekranı (Community Dashboard) -->
+        <div id="community-screen" class="screen hidden">
+            <div class="menu-card community-card animate-fade-in">
+                <div class="community-header">
+                    <h2>🌐 TOPLULUK HARİTALARI</h2>
+                    <button id="btn-close-community" class="close-btn" type="button" aria-label="Kapat">❌</button>
+                </div>
+                
+                <!-- Sekmeler -->
+                <div class="community-tabs">
+                    <button class="community-tab-btn active" data-tab="popular">🔥 POPÜLER</button>
+                    <button class="community-tab-btn" data-tab="new">✨ EN YENİ</button>
+                </div>
+                
+                <!-- Harita Listesi Grid -->
+                <div class="community-content-container">
+                    <div id="community-map-list" class="map-grid">
+                        <div class="no-maps">Yükleniyor...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modüllerimizin Yükleneceği Dosya -->
+    <script src="js/controls_customizer.js?v=9"></script>
+    <script type="module" src="js/main.js?v=9"></script>
+</body>
+</html>
