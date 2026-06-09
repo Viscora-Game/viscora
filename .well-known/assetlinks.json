@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.viscoragame.app",
+        "sha256_cert_fingerprints": ["33:14:7E:BD:BF:8E:68:4E:10:22:DB:B4:0C:95:D6:59:C2:0C:13:97:5A:1D:18:2E:7E:5C:A3:9C:82:0B:0E:22"]
+      }
+    }]
