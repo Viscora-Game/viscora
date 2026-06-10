@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=9">
+    <link rel="stylesheet" href="index.css?v=v18">
     <link rel="manifest" href="manifest.json">
     <script>
         // Service Worker Kaydı (PWA & Offline Desteği)
@@ -40,7 +40,7 @@
             });
         }
 
-        window.addEventListener('error', function(e) {
+        function showError(msg) {
             var div = document.getElementById('debug-error-console');
             if (!div) {
                 div = document.createElement('div');
@@ -87,9 +87,26 @@
                 
                 document.body.appendChild(div);
             }
-            var msg = e.error ? (e.error.stack || e.error.message) : e.message;
             document.getElementById('debug-error-content').innerText += msg + '\n\n';
+        }
+
+        window.addEventListener('error', function(e) {
+            var msg = e.error ? (e.error.stack || e.error.message) : e.message;
+            showError(msg);
         });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            var reason = e.reason;
+            var msg = reason ? (reason.stack || reason.message || reason) : 'Unhandled promise rejection';
+            showError('Promise Rejection: ' + msg);
+        });
+
+        // Intercept console.error
+        const origConsoleError = console.error;
+        console.error = function(...args) {
+            origConsoleError.apply(console, args);
+            showError('Console Error: ' + args.join(' '));
+        };
     </script>
 </head>
 <body>
@@ -514,7 +531,7 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=9"></script>
-    <script type="module" src="js/main.js?v=9"></script>
+    <script src="js/controls_customizer.js?v=v18"></script>
+    <script type="module" src="js/main.js?v=v18"></script>
 </body>
 </html>

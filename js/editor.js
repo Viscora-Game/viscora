@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy } from './enemies.js?v=v6';
-import { audio } from './audio.js?v=v6';
-import { LevelGenerator } from './generator.js?v=v6';
+import { Enemy } from './enemies.js?v=v18';
+import { audio } from './audio.js?v=v18';
+import { LevelGenerator } from './generator.js?v=v18';
 
 export class LevelEditor {
     constructor(game) {
@@ -504,7 +504,8 @@ export class LevelEditor {
                         <button class="editor-btn" data-tool="create_collectible_blue">💙 Mavi Kristal</button>
                         <button class="editor-btn" data-tool="create_collectible_pink">💗 Pembe Kristal</button>
                         <button class="editor-btn" data-tool="create_collectible_green">💚 Yeşil Kristal</button>
-                        <button class="editor-btn" data-tool="create_collectible_diamond" style="grid-column: span 2;">💎 Kırmızı Elmas</button>
+                        <button class="editor-btn" data-tool="create_collectible_diamond">💎 Kırmızı Elmas</button>
+                        <button class="editor-btn" data-tool="create_checkpoint" style="grid-column: span 2; background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.35);">🚩 Checkpoint</button>
                     </div>
                 </details>
 
@@ -985,6 +986,12 @@ export class LevelEditor {
             color: d.color || ''
         }));
 
+        const checkpoints = (lvl.checkpoints || []).map(cp => ({
+            x: Math.round(cp.x),
+            y: Math.round(cp.y),
+            r: Math.round(cp.r || 15)
+        }));
+
         const exportObj = {
             levelWidth: lvl.width,
             levelHeight: lvl.height,
@@ -1010,6 +1017,7 @@ export class LevelEditor {
             hiddenPassages,
             fallingBlockTraps,
             vantuzPoints,
+            checkpoints,
             decorations
         };
 
@@ -1035,7 +1043,7 @@ export class LevelEditor {
         let html = `<div style="font-size:13px; font-weight:bold; margin-bottom:10px; color:#10b981;">TÜR: ${type.toUpperCase()}</div>`;
         
         // Temel Boyutlar
-        if (type !== 'spawn' && type !== 'portal' && type !== 'collectible' && type !== 'teleportPair' && type !== 'vantuzPoint') {
+        if (type !== 'spawn' && type !== 'portal' && type !== 'collectible' && type !== 'teleportPair' && type !== 'vantuzPoint' && type !== 'checkpoint') {
             html += `
                 <div class="editor-input-group">
                     <label>X Konum</label>
@@ -1073,7 +1081,7 @@ export class LevelEditor {
                     <input type="number" id="inspect-y2" value="${Math.round(obj.y2)}">
                 </div>
             `;
-        } else if (type === 'portal' || type === 'collectible' || type === 'vantuzPoint') {
+        } else if (type === 'portal' || type === 'collectible' || type === 'vantuzPoint' || type === 'checkpoint') {
             html += `
                 <div class="editor-input-group">
                     <label>X Konum</label>
@@ -1486,6 +1494,8 @@ export class LevelEditor {
             lvl.vantuzPoints = lvl.vantuzPoints.filter(vp => vp !== obj);
         } else if (this.selectedObjectType === 'decoration') {
             lvl.decorations = lvl.decorations.filter(d => d !== obj);
+        } else if (this.selectedObjectType === 'checkpoint') {
+            lvl.checkpoints = lvl.checkpoints.filter(cp => cp !== obj);
         } else if (this.selectedObjectType === 'portal') {
             alert('Bitiş portalı silinemez. Sadece yerini değiştirebilirsiniz.');
             return;
@@ -2314,6 +2324,18 @@ export class LevelEditor {
                     });
                 }
 
+                // Parse checkpoints
+                if (Array.isArray(data.checkpoints)) {
+                    lvl.checkpoints = data.checkpoints.map(cp => ({
+                        x: cp.x,
+                        y: cp.y,
+                        r: cp.r || 15,
+                        activated: cp.activated || false
+                    }));
+                } else {
+                    lvl.checkpoints = [];
+                }
+
                 document.getElementById('editor-level-width').value = lvl.width;
                 document.getElementById('editor-level-height').value = lvl.height;
                 
@@ -2772,6 +2794,14 @@ export class LevelEditor {
             } else if (this.activeTool === 'create_spawn') {
                 lvl.spawnX = snapX;
                 lvl.spawnY = snapY;
+            } else if (this.activeTool === 'create_checkpoint') {
+                if (!lvl.checkpoints) lvl.checkpoints = [];
+                lvl.checkpoints.push({
+                    x: snapX,
+                    y: snapY,
+                    r: 15,
+                    activated: false
+                });
             }
 
             this.saveToLocalStorage(); // Auto-save after creation
@@ -2805,6 +2835,17 @@ export class LevelEditor {
         const dys = my - lvl.spawnY;
         if (Math.sqrt(dxs*dxs + dys*dys) < 20) {
             return { type: 'spawn', obj: { x: lvl.spawnX, y: lvl.spawnY } };
+        }
+
+        // Checkpoints
+        if (lvl.checkpoints) {
+            for (const cp of lvl.checkpoints) {
+                const dx = mx - cp.x;
+                const dy = my - cp.y;
+                if (Math.sqrt(dx*dx + dy*dy) < 18) {
+                    return { type: 'checkpoint', obj: cp };
+                }
+            }
         }
 
         // 2. Portal
@@ -3420,6 +3461,10 @@ export class LevelEditor {
                 ctx.lineTo(obj.x2 + 20, obj.y2 + 30);
                 ctx.stroke();
                 ctx.setLineDash([]);
+            } else if (type === 'checkpoint') {
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, obj.r + 3, 0, Math.PI * 2);
+                ctx.stroke();
             } else if (type === 'decoration') {
                 ctx.save();
                 if (obj.rotation) {

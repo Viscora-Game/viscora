@@ -1,23 +1,33 @@
-import { Player } from './player.js?v=v9';
-import { Level } from './level.js?v=v9';
-import { Enemy } from './enemies.js?v=v9';
-import { UIManager } from './ui.js?v=v9';
-import { audio } from './audio.js?v=v9';
-import { LevelEditor } from './editor.js?v=v9';
-import { Boss } from './boss.js?v=v9';
+import { Player } from './player.js?v=v18';
+import { Level } from './level.js?v=v18';
+import { Enemy } from './enemies.js?v=v18';
+import { UIManager } from './ui.js?v=v18';
+import { audio } from './audio.js?v=v18';
+import { LevelEditor } from './editor.js?v=v18';
+import { Boss, CyberBoss } from './boss.js?v=v18';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
     "NEON GİRİŞİ",
     "YAPIŞKAN GEÇİTLER",
     "KONVEYÖR HATTI",
-    "YAPIŞKAN LABİRENT",
-    "PORTAL LABİRENTİ",
+    "YAPIŞKAN DEHLİZ",
+    "BOYUTSAL KORİDOR",
     "KARGO DEPOSU",
     "ÇÖKEN SEKTÖR",
     "TOKSİK HAVZA",
     "KİMYASAL REAKTÖR",
-    "KOZMİK ÇEKİRDEK"
+    "KOZMİK ÇEKİRDEK",
+    "ÖLÜMCÜL BASINÇ ODASI",
+    "MEKANİK HAVALANDIRMA",
+    "TOKSİK PORTAL AĞI",
+    "HAVALANDIRMA ŞAFTI",
+    "ASİT KANALLARI",
+    "MEKANİK KORİDORLAR",
+    "KONTAMİNASYON ODASI",
+    "FİLTRELEME TESİSİ",
+    "SİBER KANALİZASYON",
+    "VISCOREX REAKTÖRÜ"
 ];
 
 export class GameManager {
@@ -434,6 +444,8 @@ export class GameManager {
         this.initEnemies(this.currentLevel);
         if (this.currentLevel === 10) {
             this.boss = new Boss(1200, 300); // Boss spawn at x: 1200, y: 300
+        } else if (this.currentLevel === 20) {
+            this.boss = new CyberBoss(1200, 300); // CyberBoss spawn at x: 1200, y: 300
         } else {
             this.boss = null;
         }
@@ -498,6 +510,8 @@ export class GameManager {
             this.initEnemies(this.currentLevel);
             if (this.currentLevel === 10) {
                 this.boss = new Boss(1200, 300);
+            } else if (this.currentLevel === 20) {
+                this.boss = new CyberBoss(1200, 300);
             }
             let maxH = 3;
             this.player.maxHealth = maxH;
@@ -526,7 +540,7 @@ export class GameManager {
             return;
         }
         const isDev = this.ui && this.ui.devMode;
-        const maxLvl = isDev ? 100 : 10;
+        const maxLvl = isDev ? 100 : 20;
         if (this.currentLevel < maxLvl) {
             this.currentLevel++;
         } else {
@@ -931,8 +945,8 @@ export class GameManager {
         const dy = this.player.y - (p.y + p.h / 2);
         const dist = Math.sqrt(dx * dx + dy * dy);
         
-        // 10. bölüm için boss'un ölmüş olması gerekir
-        const isBossDefeated = (this.currentLevel !== 10) || (this.boss && this.boss.isDead);
+        // 10. ve 20. bölümler için boss'un ölmüş olması gerekir
+        const isBossDefeated = (this.currentLevel !== 10 && this.currentLevel !== 20) || (this.boss && this.boss.isDead);
         
         if (dist < this.player.radius + p.w / 2 - 10 && isBossDefeated) {
             this.state = 'WIN';
@@ -989,7 +1003,7 @@ export class GameManager {
 
             // Bölüm bazlı başlık ve buton yazısı güncellemesi
             const isDev = this.ui && this.ui.devMode;
-            const maxLvl = isDev ? 100 : 10;
+            const maxLvl = isDev ? 100 : 20;
             if (this.currentLevel < maxLvl) {
                 const nextLvl = this.currentLevel + 1;
                 this.unlockedLevel = Math.max(this.unlockedLevel, nextLvl);

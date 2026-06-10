@@ -1,20 +1,20 @@
-const CACHE_NAME = 'viscora-cache-v9';
+const CACHE_NAME = 'viscora-cache-v12';
 const ASSETS = [
   './',
   './index.html',
-  './index.css?v=9',
+  './index.css?v=v12',
   './manifest.json',
-  './js/main.js?v=9',
-  './js/game.js?v=v9',
-  './js/audio.js?v=v9',
-  './js/ui.js?v=v9',
-  './js/level.js?v=v9',
-  './js/player.js?v=v9',
-  './js/enemies.js?v=v9',
-  './js/viscosity.js?v=v9',
-  './js/boss.js?v=v9',
-  './js/editor.js?v=v9',
-  './js/controls_customizer.js?v=9'
+  './js/main.js?v=v12',
+  './js/game.js?v=v12',
+  './js/audio.js?v=v12',
+  './js/ui.js?v=v12',
+  './js/level.js?v=v12',
+  './js/player.js?v=v12',
+  './js/enemies.js?v=v12',
+  './js/viscosity.js?v=v12',
+  './js/boss.js?v=v12',
+  './js/editor.js?v=v12',
+  './js/controls_customizer.js?v=v12'
 ];
 
 self.addEventListener('install', (e) => {

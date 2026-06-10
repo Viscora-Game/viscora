@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v6';
-import { THEMES } from './generator.js?v=v6';
+import { audio } from './audio.js?v=v18';
+import { THEMES } from './generator.js?v=v18';
 
 /**
  * Viscora Level Design & Manager
@@ -38,12 +38,16 @@ export class Level {
         if (typeof levelNumber === 'object' && levelNumber !== null) {
             data = levelNumber;
         } else {
-            const savedLevelData = localStorage.getItem('viscora_custom_level_' + levelNumber);
-            if (savedLevelData) {
-                try {
-                    data = JSON.parse(savedLevelData);
-                } catch (err) {
-                    console.error("Error parsing saved custom level:", err);
+            // Boss bölümleri (10 ve 20) için lokal kayıtlı özel haritaları yükleme, orijinal boss dövüşünü yükle
+            const isBossLvl = (levelNumber === 10 || levelNumber === 20);
+            if (!isBossLvl) {
+                const savedLevelData = localStorage.getItem('viscora_custom_level_' + levelNumber);
+                if (savedLevelData) {
+                    try {
+                        data = JSON.parse(savedLevelData);
+                    } catch (err) {
+                        console.error("Error parsing saved custom level:", err);
+                    }
                 }
             }
         }
@@ -415,7 +419,16 @@ export class Level {
                     });
                 }
 
-                this.generateCheckpoints();
+                if (Array.isArray(data.checkpoints)) {
+                    this.checkpoints = data.checkpoints.map(cp => ({
+                        x: cp.x,
+                        y: cp.y,
+                        r: cp.r || 15,
+                        activated: cp.activated || false
+                    }));
+                } else {
+                    this.generateCheckpoints();
+                }
                 this.resetLevelRuntimeState();
                 return; // Return early, custom level loaded!
             } catch (err) {
@@ -425,9 +438,9 @@ export class Level {
 
         // Assign Visual Theme based on Campaign Level Number
         let campaignThemeId = null;
-        if (levelNumber === 0 || levelNumber === 1 || levelNumber === 6) {
+        if (levelNumber === 0 || levelNumber === 1 || levelNumber === 6 || levelNumber === 12) {
             campaignThemeId = 'neon_sewer';
-        } else if (levelNumber === 2 || levelNumber === 4 || levelNumber === 8 || levelNumber === 9) {
+        } else if (levelNumber === 2 || levelNumber === 4 || levelNumber === 8 || levelNumber === 9 || levelNumber === 11 || levelNumber === 13) {
             campaignThemeId = 'toxic_lab';
         } else if (levelNumber === 3 || levelNumber === 7) {
             campaignThemeId = 'magma_core';
@@ -1406,7 +1419,7 @@ export class Level {
             ];
         } else if (levelNumber === 4) {
             // ═══════════════════════════════════════════════
-            // BÖLÜM 4: YAPIŞKAN LABİRENT — Dar Tüneller
+            // BÖLÜM 4: YAPIŞKAN DEHLİZ — Dar Tüneller
             // ═══════════════════════════════════════════════
             this.width = 2200;
             this.height = 600;
@@ -1529,7 +1542,7 @@ export class Level {
             ];
         } else if (levelNumber === 5) {
             // ═══════════════════════════════════════════════
-            // BÖLÜM 5: PORTAL LABİRENTİ — Uzay-Zaman Bükülmesi
+            // BÖLÜM 5: BOYUTSAL KORİDOR — Uzay-Zaman Bükülmesi
             // ═══════════════════════════════════════════════
             this.width = 3750;
             this.height = 600;
@@ -2108,6 +2121,335 @@ export class Level {
                 h: 80,
                 angle: 0
             };
+        } else if (levelNumber === 11) {
+            // ═══════════════════════════════════════════════
+            // BÖLÜM 11: ÖLÜMCÜL BASINÇ ODASI
+            // ═══════════════════════════════════════════════
+            this.width = 2652;
+            this.height = 600;
+            this.spawnX = 40;
+            this.spawnY = 340;
+
+            this.platforms = [
+                { x: 0, y: 460, w: 1000, h: 140, type: 'normal' },
+                { x: 160, y: 400, w: 60, h: 20, type: 'normal' },
+                { x: 380, y: 300, w: 60, h: 20, type: 'normal' },
+                { x: 160, y: 160, w: 60, h: 20, type: 'normal' },
+                { x: 0, y: 100, w: 60, h: 20, type: 'normal' },
+                { x: 0, y: 0, w: 220, h: 40, type: 'normal' },
+                { x: 380, y: 100, w: 60, h: 20, type: 'normal' },
+                { x: 1120, y: 160, w: 40, h: 200, type: 'sticky', sticky: true },
+                { x: 1240, y: 440, w: 60, h: 20, type: 'normal' },
+                { x: 1380, y: 180, w: 60, h: 20, type: 'normal' },
+                { x: 1540, y: 80, w: 240, h: 40, type: 'normal' },
+                { x: 1040, y: 160, w: 60, h: 20, type: 'normal' },
+                { x: 1900, y: 280, w: 240, h: 40, type: 'normal' },
+                { x: 2320, y: 280, w: 240, h: 40, type: 'normal' },
+                { x: 1760, y: 440, w: 60, h: 20, type: 'normal' },
+                { x: 540, y: -200, w: 40, h: 250, type: 'normal' },
+                { x: 600, y: -40, w: 160, h: 40, type: 'normal' }
+            ];
+
+            this.hazards = [
+                { x: 2060, y: 260, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 2340, y: 260, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1000, y: 460, w: 20, h: 60, type: 'spike', direction: 'right' },
+                { x: 520, y: -200, w: 20, h: 60, type: 'spike', direction: 'left' },
+                { x: 580, y: -200, w: 20, h: 60, type: 'spike', direction: 'right' }
+            ];
+
+            this.conveyors = [
+                { x: 500, y: 460, w: 120, h: 20, direction: 1, speed: 1.5 },
+                { x: 860, y: 460, w: 120, h: 20, direction: 1, speed: 1.5 }
+            ];
+
+            this.gates = [
+                { x: 780, y: -140, w: 20, h: 600, type: 'yellowLaser', id: 1, disabled: false }
+            ];
+
+            this.levers = [
+                { x: 100, y: -20, w: 32, h: 32, linkedGateId: 1, activated: false, cooldown: 0 }
+            ];
+
+            this.enemies = [
+                { x: 1660, y: 60, rangeX: 120, speed: 1.2, isVertical: false, color: '#f43f5e' },
+                { x: 1560, y: 360, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 1480, y: 460, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 1700, y: 260, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 1980, y: 240, rangeX: 120, speed: 1.5, isVertical: true, color: '#d946ef' },
+                { x: 2480, y: 240, rangeX: 120, speed: 1.5, isVertical: true, color: '#d946ef' },
+                { x: 200, y: -60, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 880, y: 120, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' }
+            ];
+
+            this.fallingBlockTraps = [
+                { startX: 2200, startY: 20, x: 2200, y: 20, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
+                { startX: 940, startY: 140, x: 940, y: 140, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
+                { startX: 600, startY: 60, x: 600, y: 60, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
+                { startX: 680, startY: 20, x: 680, y: 20, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 }
+            ];
+
+            this.portal = {
+                x: 2540,
+                y: 80,
+                w: 60,
+                h: 80,
+                angle: 0
+            };
+        } else if (levelNumber === 12) {
+            // ═══════════════════════════════════════════════
+            // BÖLÜM 12: MEKANİK HAVALANDIRMA
+            // ═══════════════════════════════════════════════
+            this.width = 2188;
+            this.height = 600;
+            this.spawnX = 40;
+            this.spawnY = 400;
+
+            this.platforms = [
+                { x: 0, y: 460, w: 400, h: 140, type: 'normal' },
+                { x: 1260, y: 420, w: 60, h: 20, type: 'normal' },
+                { x: 840, y: 80, w: 120, h: 40, type: 'sticky', sticky: true },
+                { x: 1700, y: 20, w: 40, h: 120, type: 'sticky', sticky: true },
+                { x: 1820, y: 80, w: 60, h: 20, type: 'normal' },
+                { x: 1960, y: 180, w: 60, h: 20, type: 'normal' },
+                { x: 1900, y: 520, w: 60, h: 20, type: 'normal' },
+                { x: 2100, y: 420, w: 60, h: 20, type: 'normal' },
+                { x: 1800, y: 300, w: 240, h: 40, type: 'normal' },
+                { x: 1700, y: 140, w: 40, h: 120, type: 'normal' }
+            ];
+
+            this.hazards = [
+                { x: 1800, y: 280, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1860, y: 280, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1920, y: 280, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1980, y: 280, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1740, y: 160, w: 20, h: 60, type: 'spike', direction: 'right' },
+                { x: 1680, y: 160, w: 20, h: 60, type: 'spike', direction: 'left' },
+                { x: 340, y: 440, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 220, y: 440, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 100, y: 440, w: 60, h: 20, type: 'spike', direction: 'up' }
+            ];
+
+            this.movingPlatforms = [
+                { startX: 540, startY: 400, targetX: 690, targetY: 400, x: 540, y: 400, w: 100, h: 20, type: 'moving', speed: 0.015, dir: 1, progress: 0 },
+                { startX: 840, startY: 300, targetX: 990, targetY: 300, x: 840, y: 300, w: 100, h: 20, type: 'moving', speed: 0.015, dir: 1, progress: 0 },
+                { startX: 1220, startY: 200, targetX: 1370, targetY: 200, x: 1220, y: 200, w: 100, h: 20, type: 'moving', speed: 0.015, dir: 1, progress: 0 }
+            ];
+
+            this.collectibles = [
+                { x: 980, y: 220, color: '#eab308', collected: false },
+                { x: 1840, y: 40, color: '#eab308', collected: false }
+            ];
+
+            this.enemies = [
+                { x: 540, y: 360, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4' },
+                { x: 880, y: 360, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4' },
+                { x: 1220, y: 260, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4' },
+                { x: 1580, y: 140, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4' }
+            ];
+
+            this.decorations = [
+                { x: 520, y: 0, w: 60, h: 60, type: 'window_space', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 720, y: 460, w: 40, h: 40, type: 'fan', rotation: 44.25, startRotation: 44.25, state: 0, text: '', color: '' },
+                { x: 1040, y: 460, w: 40, h: 40, type: 'fan', rotation: 44.25, startRotation: 44.25, state: 0, text: '', color: '' },
+                { x: 740, y: 480, w: 80, h: 40, type: 'cable', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 820, y: 480, w: 80, h: 40, type: 'cable', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 900, y: 480, w: 80, h: 40, type: 'cable', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 980, y: 480, w: 80, h: 40, type: 'cable', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 960, y: 460, w: 40, h: 40, type: 'fan', rotation: 44.25, startRotation: 44.25, state: 0, text: '', color: '' },
+                { x: 880, y: 460, w: 40, h: 40, type: 'fan', rotation: 44.25, startRotation: 44.25, state: 0, text: '', color: '' },
+                { x: 800, y: 460, w: 40, h: 40, type: 'fan', rotation: 44.25, startRotation: 44.25, state: 0, text: '', color: '' },
+                { x: 320, y: 460, w: 80, h: 20, type: 'pipe', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 240, y: 460, w: 80, h: 20, type: 'pipe', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 160, y: 460, w: 80, h: 20, type: 'pipe', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 80, y: 460, w: 80, h: 20, type: 'pipe', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 0, y: 460, w: 80, h: 20, type: 'pipe', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 760, y: 420, w: 40, h: 40, type: 'gear', rotation: 8.85, startRotation: 8.85, state: 0, text: '', color: '' },
+                { x: 840, y: 420, w: 40, h: 40, type: 'gear', rotation: 8.85, startRotation: 8.85, state: 0, text: '', color: '' },
+                { x: 920, y: 420, w: 40, h: 40, type: 'gear', rotation: 8.85, startRotation: 8.85, state: 0, text: '', color: '' },
+                { x: 1000, y: 420, w: 40, h: 40, type: 'gear', rotation: 8.85, startRotation: 8.85, state: 0, text: '', color: '' }
+            ];
+
+            this.portal = {
+                x: 1900,
+                y: 440,
+                w: 60,
+                h: 80,
+                angle: 0
+            };
+        } else if (levelNumber === 13) {
+            // ═══════════════════════════════════════════════
+            // BÖLÜM 13: TOKSİK PORTAL AĞI
+            // ═══════════════════════════════════════════════
+            this.width = 2916;
+            this.height = 650;
+            this.spawnX = 60;
+            this.spawnY = 380;
+
+            this.platforms = [
+                { x: 0, y: 460, w: 400, h: 140, type: 'normal' },
+                { x: 740, y: 140, w: 60, h: 20, type: 'normal' },
+                { x: 1280, y: 440, w: 120, h: 40, type: 'normal' },
+                { x: 2080, y: 400, w: 60, h: 20, type: 'normal' },
+                { x: 2380, y: 240, w: 40, h: 120, type: 'sticky', sticky: true },
+                { x: 2240, y: 40, w: 40, h: 120, type: 'sticky', sticky: true },
+                { x: 1980, y: 60, w: 240, h: 40, type: 'normal' },
+                { x: 1640, y: 60, w: 240, h: 40, type: 'normal' },
+                { x: 960, y: 460, w: 65, h: 140, type: 'normal' }
+            ];
+
+            this.hazards = [
+                { x: 2080, y: 40, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1720, y: 40, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 400, y: 460, w: 560, h: 70, type: 'acid' }
+            ];
+
+            this.collectibles = [
+                { x: 1620, y: 140, color: '#eab308', collected: false },
+                { x: 2040, y: 0, color: '#eab308', collected: false },
+                { x: 2280, y: 280, color: '#eab308', collected: false }
+            ];
+
+            this.enemies = [
+                { x: 1920, y: 20, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 560, y: 300, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 1160, y: 220, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 1480, y: 320, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' }
+            ];
+
+            this.teleportPairs = [
+                { x1: 340, y1: 380, x2: 640, y2: 20, color: '#a855f7', cooldown: 0 },
+                { x1: 980, y1: 20, x2: 1220, y2: 340, color: '#55f7b9', cooldown: 0 }
+            ];
+
+            this.breakablePlatforms = [
+                { x: 1500, y: 380, w: 120, h: 40, type: 'platform', broken: false, timer: 0, triggered: false },
+                { x: 1680, y: 320, w: 120, h: 40, type: 'platform', broken: false, timer: 0, triggered: false }
+            ];
+
+            this.fallingBlockTraps = [
+                { startX: 160, startY: 160, x: 160, y: 160, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
+                { startX: 240, startY: 160, x: 240, y: 160, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 }
+            ];
+
+            this.portal = {
+                x: 1500,
+                y: -60,
+                w: 60,
+                h: 80,
+                angle: 0
+            };
+        } else if (levelNumber === 14) {
+            this.width = 1600;
+            this.height = 600;
+            this.spawnX = 100;
+            this.spawnY = 380;
+            this.platforms = [
+                { x: 0, y: 460, w: 1600, h: 140, type: 'normal' }
+            ];
+            this.hazards = [];
+            this.collectibles = [];
+            this.enemies = [];
+            this.portal = { x: 1400, y: 380, w: 60, h: 80, angle: 0 };
+        } else if (levelNumber === 15) {
+            this.width = 1600;
+            this.height = 600;
+            this.spawnX = 100;
+            this.spawnY = 380;
+            this.platforms = [
+                { x: 0, y: 460, w: 1600, h: 140, type: 'normal' }
+            ];
+            this.hazards = [];
+            this.collectibles = [];
+            this.enemies = [];
+            this.portal = { x: 1400, y: 380, w: 60, h: 80, angle: 0 };
+        } else if (levelNumber === 16) {
+            this.width = 1600;
+            this.height = 600;
+            this.spawnX = 100;
+            this.spawnY = 380;
+            this.platforms = [
+                { x: 0, y: 460, w: 1600, h: 140, type: 'normal' }
+            ];
+            this.hazards = [];
+            this.collectibles = [];
+            this.enemies = [];
+            this.portal = { x: 1400, y: 380, w: 60, h: 80, angle: 0 };
+        } else if (levelNumber === 17) {
+            this.width = 1600;
+            this.height = 600;
+            this.spawnX = 100;
+            this.spawnY = 380;
+            this.platforms = [
+                { x: 0, y: 460, w: 1600, h: 140, type: 'normal' }
+            ];
+            this.hazards = [];
+            this.collectibles = [];
+            this.enemies = [];
+            this.portal = { x: 1400, y: 380, w: 60, h: 80, angle: 0 };
+        } else if (levelNumber === 18) {
+            this.width = 1600;
+            this.height = 600;
+            this.spawnX = 100;
+            this.spawnY = 380;
+            this.platforms = [
+                { x: 0, y: 460, w: 1600, h: 140, type: 'normal' }
+            ];
+            this.hazards = [];
+            this.collectibles = [];
+            this.enemies = [];
+            this.portal = { x: 1400, y: 380, w: 60, h: 80, angle: 0 };
+        } else if (levelNumber === 19) {
+            this.width = 1600;
+            this.height = 600;
+            this.spawnX = 100;
+            this.spawnY = 380;
+            this.platforms = [
+                { x: 0, y: 460, w: 1600, h: 140, type: 'normal' }
+            ];
+            this.hazards = [];
+            this.collectibles = [];
+            this.enemies = [];
+            this.portal = { x: 1400, y: 380, w: 60, h: 80, angle: 0 };
+        } else if (levelNumber === 20) {
+            this.width = 2000;
+            this.height = 600;
+            this.spawnX = 300;
+            this.spawnY = 360;
+            this.platforms = [
+                { x: 0, y: 460, w: 2000, h: 140, type: 'normal' },
+                { x: 330, y: 130, w: 120, h: 40, type: 'normal' },
+                { x: 780, y: 130, w: 120, h: 40, type: 'normal' },
+                { x: 1270, y: 130, w: 120, h: 40, type: 'normal' },
+                { x: 130, y: 280, w: 60, h: 20, type: 'normal' },
+                { x: 1540, y: 270, w: 60, h: 20, type: 'normal' },
+                { x: 20, y: 180, w: 60, h: 20, type: 'normal' },
+                { x: 1630, y: 140, w: 60, h: 20, type: 'normal' },
+                { x: 40, y: 310, w: 40, h: 120, type: 'normal' },
+                { x: 1920, y: 310, w: 40, h: 120, type: 'normal' }
+            ];
+            this.hazards = [];
+            this.collectibles = [];
+            this.enemies = [
+                { x: 600, y: 150, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 1080, y: 140, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 20, y: 270, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4' },
+                { x: 1980, y: 310, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4' }
+            ];
+            this.pushBlocks = [
+                { x: 360, y: 70, w: 50, h: 50, startX: 360, startY: 70, broken: false, respawnTimer: 0 },
+                { x: 810, y: 70, w: 50, h: 50, startX: 810, startY: 70, broken: false, respawnTimer: 0 },
+                { x: 1300, y: 70, w: 50, h: 50, startX: 1300, startY: 70, broken: false, respawnTimer: 0 }
+            ];
+            this.conveyors = [
+                { x: 550, y: 460, w: 120, h: 20, direction: 1, speed: 1.5 },
+                { x: 1080, y: 460, w: 120, h: 20, direction: 1, speed: 1.5 }
+            ];
+            this.vantuzPoints = [
+                { x: 280, y: 240 },
+                { x: 1470, y: 230 }
+            ];
+            this.portal = { x: 820, y: 180, w: 60, h: 80, angle: 0 };
         }
         this.generateCheckpoints();
         this.resetLevelRuntimeState();
@@ -4123,8 +4465,8 @@ export class Level {
         });
 
         // --- BİTİŞ PORTALINI ÇİZ ---
-        const isLevel10ActiveBoss = game && game.currentLevel === 10 && game.boss && !game.boss.isDead;
-        if (!isLevel10ActiveBoss) {
+        const isBossActive = game && (game.currentLevel === 10 || game.currentLevel === 20) && game.boss && !game.boss.isDead;
+        if (!isBossActive) {
             ctx.save();
             const p = this.portal;
             ctx.translate(p.x + p.w / 2, p.y + p.h / 2);

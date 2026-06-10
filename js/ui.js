@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v6';
-import { ViscosityList } from './viscosity.js?v=v6';
+import { audio } from './audio.js?v=v18';
+import { ViscosityList } from './viscosity.js?v=v18';
 
 export class UIManager {
     constructor(game) {
@@ -204,9 +204,10 @@ export class UIManager {
         groups.forEach(g => {
             const isCollapsed = g.id !== activeGroupIndex;
             const collapseClass = isCollapsed ? 'collapsed' : '';
-            const statusText = (g.id === 1 || this.devMode) ? `Bölüm ${g.start}-${g.end}` : 'Kilitli 🔒';
-            const unlockedClass = (g.id === 1 || this.devMode) ? 'unlocked' : 'locked';
-            const disabledAttr = (g.id > 1 && !this.devMode) ? 'disabled' : '';
+            const isGroupUnlocked = g.id === 1 || this.devMode || this.game.unlockedLevel >= g.start;
+            const statusText = isGroupUnlocked ? `Bölüm ${g.start}-${g.end}` : 'Kilitli 🔒';
+            const unlockedClass = isGroupUnlocked ? 'unlocked' : 'locked';
+            const disabledAttr = isGroupUnlocked ? '' : 'disabled';
 
             // Chapter star count badge (X/30, only for chapter 1 initially)
             const chapterStars = (() => {
@@ -216,7 +217,7 @@ export class UIManager {
             })();
             const maxStars = (g.end - g.start + 1) * 3; // 10 levels * 3 = 30
             const badgeGolden = chapterStars >= 24 ? 'golden' : '';
-            const starBadgeHtml = (g.id === 1 || this.devMode)
+            const starBadgeHtml = isGroupUnlocked
                 ? `<span id="chapter-badge-${g.id}" class="chapter-star-badge ${badgeGolden}">⭐ ${chapterStars}/${maxStars}</span>`
                 : '';
 
