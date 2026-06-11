@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v19';
-import { audio } from './audio.js?v=v19';
+import { ViscosityStates } from './viscosity.js?v=v20';
+import { audio } from './audio.js?v=v20';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -342,6 +342,11 @@ export class Player {
                 colliders.push(level.fallingBlockTraps[i]);
             }
         }
+        if (level.flamethrowers) {
+            for (let i = 0; i < level.flamethrowers.length; i++) {
+                colliders.push(level.flamethrowers[i]);
+            }
+        }
         this.activeColliders = colliders;
 
         if (this.isDead) {
@@ -522,7 +527,7 @@ export class Player {
             let canStand = true;
             if (this.radius === 12) {
                 this.radius = 18;
-                for (const plat of level.platforms) {
+                for (const plat of this.activeColliders) {
                     if (this.checkAABBIntersection(this.x - 18, this.y - 18, 36, 36, plat)) {
                         canStand = false;
                         break;

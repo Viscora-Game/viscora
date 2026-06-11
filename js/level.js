@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v19';
-import { THEMES } from './generator.js?v=v19';
+import { audio } from './audio.js?v=v20';
+import { THEMES } from './generator.js?v=v20';
 
 /**
  * Viscora Level Design & Manager
@@ -2588,7 +2588,6 @@ export class Level {
 
         const nextX = block.x + dx;
         
-        // Static/moving/falling/breakable platforms and active net gates collision check
         const activeFalling = this.fallingPlatforms ? this.fallingPlatforms.filter(p => !p.fallen) : [];
         const activeBreakable = this.breakablePlatforms ? this.breakablePlatforms.filter(p => !p.broken) : [];
         const activeNetGates = this.gates ? this.gates.filter(g => g.type === 'net' && !g.disabled) : [];
@@ -2597,7 +2596,8 @@ export class Level {
             ...this.movingPlatforms,
             ...activeFalling,
             ...activeBreakable,
-            ...activeNetGates
+            ...activeNetGates,
+            ...(this.flamethrowers || [])
         ];
         
         for (const plat of allPlats) {
@@ -2887,7 +2887,8 @@ export class Level {
                     ...this.movingPlatforms,
                     ...activeFalling,
                     ...activeBreakable,
-                    ...activeNetGates
+                    ...activeNetGates,
+                    ...(this.flamethrowers || [])
                 ];
                 for (const plat of allPlats) {
                     if (block.x + block.w > plat.x && block.x < plat.x + plat.w &&
