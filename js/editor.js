@@ -566,6 +566,7 @@ export class LevelEditor {
                         <button class="editor-btn" data-tool="create_hazard_spike_left">◀️ Duvar Dikeni (S)</button>
                         <button class="editor-btn" data-tool="create_hazard_spike_right">▶️ Duvar Dikeni (D)</button>
                         <button class="editor-btn" data-tool="create_trap_falling_block" style="grid-column: span 2;">🗿 Düşen Blok Tuzağı</button>
+                        <button class="editor-btn" data-tool="create_arrow_shooter" style="grid-column: span 2; background: rgba(6, 182, 212, 0.12); color: #67e8f9; border-color: rgba(6, 182, 212, 0.35);">🏹 Ok Fırlatıcı (Arrow Shooter)</button>
                     </div>
                 </details>
 
@@ -793,6 +794,7 @@ export class LevelEditor {
         lvl.buttons = [];
         lvl.levers = [];
         lvl.flamethrowers = [];
+        lvl.arrowShooters = [];
         lvl.fallingPlatforms = [];
         lvl.breakablePlatforms = [];
         lvl.hiddenPassages = [];
@@ -946,6 +948,18 @@ export class LevelEditor {
             active: f.active !== undefined ? f.active : true
         }));
 
+        const arrowShooters = (lvl.arrowShooters || []).map(a => ({
+            x: Math.round(a.x),
+            y: Math.round(a.y),
+            w: Math.round(a.w || 48),
+            h: Math.round(a.h || 48),
+            dir: a.dir || 'right',
+            detectionRadius: Math.round(a.detectionRadius !== undefined ? a.detectionRadius : 200),
+            fireInterval: a.fireInterval !== undefined ? a.fireInterval : 2.5,
+            arrowSpeed: a.arrowSpeed !== undefined ? a.arrowSpeed : 4.5,
+            arrowRange: Math.round(a.arrowRange !== undefined ? a.arrowRange : 400)
+        }));
+
         const fallingPlatforms = (lvl.fallingPlatforms || []).map(p => ({
             startX: Math.round(p.startX !== undefined ? p.startX : p.x),
             startY: Math.round(p.startY !== undefined ? p.startY : p.y),
@@ -1039,7 +1053,8 @@ export class LevelEditor {
             fallingBlockTraps,
             vantuzPoints,
             checkpoints,
-            decorations
+            decorations,
+            arrowShooters
         };
 
         const jsonStr = JSON.stringify(exportObj, null, 4);
@@ -1250,6 +1265,34 @@ export class LevelEditor {
                 </div>
                 <div style="font-size: 10px; color: #64748b; margin-top: -3px; margin-bottom: 8px; line-height: 1.2;">
                     * Bu tetikleyici aktif olduğunda yukarıdaki ID'ye sahip olan kapı devre dışı bırakılır (açılır).
+                </div>
+            `;
+        } else if (type === 'arrowShooter') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Atış Yönü</label>
+                    <select id="inspect-arrow-dir">
+                        <option value="right" ${obj.dir === 'right' ? 'selected' : ''}>Sağa ➡️</option>
+                        <option value="left" ${obj.dir === 'left' ? 'selected' : ''}>Sola ⬅️</option>
+                        <option value="up" ${obj.dir === 'up' ? 'selected' : ''}>Yukarı ⬆️</option>
+                        <option value="down" ${obj.dir === 'down' ? 'selected' : ''}>Aşağı ⬇️</option>
+                    </select>
+                </div>
+                <div class="editor-input-group">
+                    <label>Algılama Yarıçapı (px)</label>
+                    <input type="number" id="inspect-arrow-radius" value="${obj.detectionRadius !== undefined ? obj.detectionRadius : 200}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Atış Aralığı (sn)</label>
+                    <input type="number" step="0.1" id="inspect-arrow-interval" value="${obj.fireInterval !== undefined ? obj.fireInterval : 2.5}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Ok Hızı</label>
+                    <input type="number" step="0.5" id="inspect-arrow-speed" value="${obj.arrowSpeed !== undefined ? obj.arrowSpeed : 4.5}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Ok Menzili (px)</label>
+                    <input type="number" id="inspect-arrow-range" value="${obj.arrowRange !== undefined ? obj.arrowRange : 400}">
                 </div>
             `;
         } else if (type === 'flamethrower') {
@@ -1546,6 +1589,12 @@ export class LevelEditor {
         addUpdateEvent('inspect-flame-move-axis', (val) => { obj.moveAxis = val; });
         addUpdateEvent('inspect-flame-move-range', (val) => { obj.moveRange = parseInt(val) || 100; });
         addUpdateEvent('inspect-flame-move-speed', (val) => { obj.moveSpeed = parseFloat(val) || 1.5; });
+
+        addUpdateEvent('inspect-arrow-dir', (val) => { obj.dir = val; });
+        addUpdateEvent('inspect-arrow-radius', (val) => { obj.detectionRadius = parseInt(val) || 200; });
+        addUpdateEvent('inspect-arrow-interval', (val) => { obj.fireInterval = parseFloat(val) || 2.5; });
+        addUpdateEvent('inspect-arrow-speed', (val) => { obj.arrowSpeed = parseFloat(val) || 4.5; });
+        addUpdateEvent('inspect-arrow-range', (val) => { obj.arrowRange = parseInt(val) || 400; });
     }
 
     /**
@@ -1582,6 +1631,8 @@ export class LevelEditor {
             lvl.buttons = lvl.buttons.filter(b => b !== obj);
         } else if (this.selectedObjectType === 'lever') {
             lvl.levers = lvl.levers.filter(l => l !== obj);
+        } else if (this.selectedObjectType === 'arrowShooter') {
+            lvl.arrowShooters = (lvl.arrowShooters || []).filter(a => a !== obj);
         } else if (this.selectedObjectType === 'flamethrower') {
             lvl.flamethrowers = (lvl.flamethrowers || []).filter(f => f !== obj);
         } else if (this.selectedObjectType === 'fallingPlatform') {
@@ -2479,6 +2530,25 @@ export class LevelEditor {
                     }));
                 }
 
+                // Parse arrowShooters
+                if (Array.isArray(data.arrowShooters)) {
+                    lvl.arrowShooters = data.arrowShooters.map(a => ({
+                        x: a.x,
+                        y: a.y,
+                        w: a.w || 48,
+                        h: a.h || 48,
+                        dir: a.dir || 'right',
+                        detectionRadius: a.detectionRadius !== undefined ? a.detectionRadius : 200,
+                        fireInterval: a.fireInterval !== undefined ? a.fireInterval : 2.5,
+                        arrowSpeed: a.arrowSpeed !== undefined ? a.arrowSpeed : 4.5,
+                        arrowRange: a.arrowRange !== undefined ? a.arrowRange : 400,
+                        fireTimer: 0,
+                        arrows: []
+                    }));
+                } else {
+                    lvl.arrowShooters = [];
+                }
+
                 document.getElementById('editor-level-width').value = lvl.width;
                 document.getElementById('editor-level-height').value = lvl.height;
                 
@@ -2964,6 +3034,21 @@ export class LevelEditor {
                     disabled: false,
                     active: true
                 });
+            } else if (this.activeTool === 'create_arrow_shooter') {
+                if (!lvl.arrowShooters) lvl.arrowShooters = [];
+                lvl.arrowShooters.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 48,
+                    h: 48,
+                    dir: 'right',
+                    detectionRadius: 200,
+                    fireInterval: 2.5,
+                    arrowSpeed: 4.5,
+                    arrowRange: 400,
+                    fireTimer: 0,
+                    arrows: []
+                });
             }
 
             this.saveToLocalStorage(); // Auto-save after creation
@@ -3172,6 +3257,14 @@ export class LevelEditor {
             for (const f of lvl.flamethrowers) {
                 if (mx > f.x && mx < f.x + f.w && my > f.y && my < f.y + f.h) {
                     return { type: 'flamethrower', obj: f };
+                }
+            }
+        }
+
+        if (lvl.arrowShooters) {
+            for (const a of lvl.arrowShooters) {
+                if (mx > a.x && mx < a.x + a.w && my > a.y && my < a.y + a.h) {
+                    return { type: 'arrowShooter', obj: a };
                 }
             }
         }
@@ -3665,8 +3758,65 @@ export class LevelEditor {
         ctx.fillText('HARİTA SAĞ SINIRI', this.game.level.width - 100, 20);
         ctx.restore();
 
-        // 5. Düşmanları Çiz (Static Editor view for dev)
+        // 5. Ok Fırlatıcıları Çiz (editör statik görünümü)
         const lvl = this.game.level;
+        if (lvl.arrowShooters) {
+            lvl.arrowShooters.forEach(a => {
+                const cx = a.x + a.w / 2;
+                const cy = a.y + a.h / 2;
+
+                // Algılama yarıçapı çemberi
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(cx, cy, a.detectionRadius || 200, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(6, 182, 212, 0.25)';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([6, 4]);
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(6, 182, 212, 0.04)';
+                ctx.fill();
+                ctx.setLineDash([]);
+                ctx.restore();
+
+                // Ok fırlatıcı gövdesi (basit önizleme)
+                ctx.save();
+                ctx.fillStyle = '#1e293b';
+                ctx.strokeStyle = '#c8963c';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(a.x, a.y, a.w, a.h, 6);
+                ctx.fill();
+                ctx.stroke();
+
+                // Mavi kristal
+                ctx.beginPath();
+                ctx.arc(cx, cy, a.w * 0.2, 0, Math.PI * 2);
+                ctx.fillStyle = '#0ea5e9';
+                ctx.shadowColor = '#06b6d4';
+                ctx.shadowBlur = 8;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Yön ok simgesi
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '14px Outfit';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const dirEmoji = a.dir === 'right' ? '➡' : a.dir === 'left' ? '⬅' : a.dir === 'up' ? '⬆' : '⬇';
+                ctx.fillText(dirEmoji, cx, cy + a.h * 0.55);
+                ctx.restore();
+
+                // Etiket
+                ctx.save();
+                ctx.fillStyle = '#67e8f9';
+                ctx.font = '9px Outfit';
+                ctx.textAlign = 'center';
+                ctx.fillText('🏹 OK FIR.', cx, a.y - 6);
+                ctx.restore();
+            });
+        }
+
+        // 6. Düşmanları Çiz (Static Editor view for dev)
         if (lvl.enemies) {
             lvl.enemies.forEach(e => {
                 ctx.save();

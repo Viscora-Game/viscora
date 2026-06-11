@@ -40,6 +40,7 @@ export class Level {
         this.vantuzPoints = [];
         this.decorations = [];
         this.flamethrowers = [];
+        this.arrowShooters = [];
 
         let data = null;
         if (typeof levelNumber === 'object' && levelNumber !== null) {
@@ -490,6 +491,26 @@ export class Level {
                 } else {
                     this.generateCheckpoints();
                 }
+
+                if (Array.isArray(data.arrowShooters)) {
+                    this.arrowShooters = data.arrowShooters.map(a => ({
+                        x: a.x,
+                        y: a.y,
+                        w: a.w || 48,
+                        h: a.h || 48,
+                        dir: a.dir || 'right',
+                        detectionRadius: a.detectionRadius !== undefined ? a.detectionRadius : 200,
+                        fireInterval: a.fireInterval !== undefined ? a.fireInterval : 2.5,
+                        arrowSpeed: a.arrowSpeed !== undefined ? a.arrowSpeed : 4.5,
+                        arrowRange: a.arrowRange !== undefined ? a.arrowRange : 400,
+                        // Runtime state
+                        fireTimer: 0,
+                        arrows: []
+                    }));
+                } else {
+                    this.arrowShooters = [];
+                }
+
                 this.resetLevelRuntimeState();
                 return; // Return early, custom level loaded!
             } catch (err) {
@@ -3478,6 +3499,98 @@ export class Level {
             });
         }
 
+        // --- OK FIRLATICIlar (ARROW SHOOTERS) KONTROLÜ ---
+        if (this.arrowShooters) {
+            this.arrowShooters.forEach(shooter => {
+                const cx = shooter.x + shooter.w / 2;
+                const cy = shooter.y + shooter.h / 2;
+
+                // 1. Oyuncu mesafe kontrolü
+                const dx = player.x - cx;
+                const dy = player.y - cy;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const inRange = dist <= shooter.detectionRadius;
+
+                // 2. Ateşleme zamanlayıcısı
+                if (inRange) {
+                    shooter.fireTimer -= (1 / 60); // Assume 60fps delta
+                    if (shooter.fireTimer <= 0) {
+                        shooter.fireTimer = shooter.fireInterval;
+
+                        // Ok başlangıç noktası ve yön vektörü
+                        let ox = cx, oy = cy;
+                        let vx = 0, vy = 0;
+                        const spd = shooter.arrowSpeed;
+                        if (shooter.dir === 'right')  { ox = shooter.x + shooter.w; vx =  spd; }
+                        else if (shooter.dir === 'left')   { ox = shooter.x;            vx = -spd; }
+                        else if (shooter.dir === 'up')     { oy = shooter.y;            vy = -spd; }
+                        else if (shooter.dir === 'down')   { oy = shooter.y + shooter.h; vy =  spd; }
+
+                        shooter.arrows.push({ x: ox, y: oy, vx, vy, life: shooter.arrowRange, alive: true });
+
+                        // Ses efekti
+                        if (player.game && player.game.audio) {
+                            try { player.game.audio.playCollect && player.game.audio.playCollect(); } catch(e){}
+                        }
+                    }
+                } else {
+                    // Menzil dışındaysa zamanlayıcıyı sıfırla (ama hemen ateşlemesin)
+                    if (shooter.fireTimer <= 0) shooter.fireTimer = 0;
+                }
+
+                // 3. Aktif okları güncelle
+                const checkObjects = [
+                    ...this.platforms,
+                    ...(this.movingPlatforms || []),
+                    ...(this.breakablePlatforms ? this.breakablePlatforms.filter(p => !p.broken) : []),
+                    ...(this.fallingPlatforms ? this.fallingPlatforms.filter(p => !p.fallen) : []),
+                    ...(this.pushBlocks ? this.pushBlocks.filter(pb => !pb.broken) : [])
+                ];
+
+                shooter.arrows = shooter.arrows.filter(arrow => arrow.alive);
+                shooter.arrows.forEach(arrow => {
+                    arrow.x += arrow.vx;
+                    arrow.y += arrow.vy;
+                    arrow.life -= Math.sqrt(arrow.vx * arrow.vx + arrow.vy * arrow.vy);
+
+                    if (arrow.life <= 0) { arrow.alive = false; return; }
+
+                    // Platform çarpışma kontrolü (AABB)
+                    for (const obj of checkObjects) {
+                        if (arrow.x >= obj.x && arrow.x <= obj.x + obj.w &&
+                            arrow.y >= obj.y && arrow.y <= obj.y + obj.h) {
+                            arrow.alive = false;
+                            // Çarpma partikülü
+                            if (player.game && player.game.particles) {
+                                for (let i = 0; i < 5; i++) {
+                                    player.game.particles.push({
+                                        x: arrow.x, y: arrow.y,
+                                        vx: (Math.random() - 0.5) * 3,
+                                        vy: (Math.random() - 0.5) * 3,
+                                        life: 18 + Math.random() * 12,
+                                        maxLife: 30,
+                                        color: '#94a3b8',
+                                        size: 2 + Math.random() * 2
+                                    });
+                                }
+                            }
+                            break;
+                        }
+                    }
+
+                    if (!arrow.alive) return;
+
+                    // Oyuncu çarpışma kontrolü
+                    const adx = arrow.x - player.x;
+                    const ady = arrow.y - player.y;
+                    if (Math.sqrt(adx * adx + ady * ady) < player.radius + 6) {
+                        arrow.alive = false;
+                        player.takeDamage(1);
+                    }
+                });
+            });
+        }
+
         // --- ALEV SİLAHLARI (THERMAL FLAMETHROWERS) KONTROLÜ ---
         if (this.flamethrowers) {
             this.flamethrowers.forEach(f => {
@@ -4526,6 +4639,9 @@ export class Level {
                 ctx.restore();
             });
         }
+
+        // --- OK FIRLATICIlarI ÇİZ ---
+        this.drawArrowShooters(ctx, this.time);
 
         // --- TOPLANABİLİR HÜCRE ÇEKİRDEKLERİNİ ÇİZ ---
         if (this.collectibles) {
@@ -5884,6 +6000,13 @@ export class Level {
             });
         }
 
+        if (this.arrowShooters) {
+            this.arrowShooters.forEach(a => {
+                a.fireTimer = 0;
+                a.arrows = [];
+            });
+        }
+
         if (this.collectibles) {
             this.collectibles.forEach(c => {
                 c.collected = false;
@@ -6000,6 +6123,123 @@ export class Level {
     /**
      * Yuvarlatılmış Köşeli Dikdörtgen Çizim Yardımcısı
      */
+    /**
+     * Ok Fırlatıcıları Çizer (level.js draw loop'undan çağrılır)
+     */
+    drawArrowShooters(ctx, time) {
+        if (!this.arrowShooters || this.arrowShooters.length === 0) return;
+
+        this.arrowShooters.forEach(shooter => {
+            const cx = shooter.x + shooter.w / 2;
+            const cy = shooter.y + shooter.h / 2;
+
+            // --- GÖVDE ÇİZİMİ ---
+            ctx.save();
+            ctx.translate(cx, cy);
+
+            // Yön döndürme
+            if (shooter.dir === 'left')  ctx.rotate(Math.PI);
+            else if (shooter.dir === 'up')    ctx.rotate(-Math.PI / 2);
+            else if (shooter.dir === 'down')  ctx.rotate(Math.PI / 2);
+
+            const r = shooter.w / 2;
+
+            // Taş zemin (arka panel)
+            ctx.fillStyle = '#1e293b';
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(-r, -r, r * 2, r * 2, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            // Dış altın halka
+            const pulse = Math.sin(time * 4) * 0.5 + 0.5;
+            const grad = ctx.createRadialGradient(0, 0, r * 0.35, 0, 0, r * 0.95);
+            grad.addColorStop(0, `rgba(200, 150, 60, ${0.7 + pulse * 0.3})`);
+            grad.addColorStop(0.6, `rgba(180, 120, 30, 0.9)`);
+            grad.addColorStop(1, `rgba(100, 70, 10, 0.4)`);
+            ctx.beginPath();
+            ctx.arc(0, 0, r * 0.92, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // İç taş ring
+            ctx.beginPath();
+            ctx.arc(0, 0, r * 0.92, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(218, 165, 32, ${0.6 + pulse * 0.4})`;
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            // Mavi kristal merkez
+            const crystalGrad = ctx.createRadialGradient(-r * 0.1, -r * 0.1, 0, 0, 0, r * 0.38);
+            crystalGrad.addColorStop(0, '#7dd3fc');
+            crystalGrad.addColorStop(0.5, '#0ea5e9');
+            crystalGrad.addColorStop(1, '#0369a1');
+            ctx.beginPath();
+            ctx.arc(0, 0, r * 0.38, 0, Math.PI * 2);
+            ctx.fillStyle = crystalGrad;
+            ctx.shadowColor = '#06b6d4';
+            ctx.shadowBlur = 8 + pulse * 6;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Ok namlusu (sağa bakan)
+            ctx.fillStyle = '#475569';
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 1.5;
+            ctx.fillRect(r * 0.35, -r * 0.12, r * 0.7, r * 0.24);
+            ctx.strokeRect(r * 0.35, -r * 0.12, r * 0.7, r * 0.24);
+
+            // Namlu ucu (ufak kare)
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(r * 0.95, -r * 0.18, r * 0.15, r * 0.36);
+
+            ctx.restore();
+
+            // --- UÇAN OKLARI ÇİZ ---
+            shooter.arrows.forEach(arrow => {
+                if (!arrow.alive) return;
+                ctx.save();
+                const angle = Math.atan2(arrow.vy, arrow.vx);
+                ctx.translate(arrow.x, arrow.y);
+                ctx.rotate(angle);
+
+                // Ok kuyruk ışıltısı
+                const arrowGrad = ctx.createLinearGradient(-28, 0, 8, 0);
+                arrowGrad.addColorStop(0, 'rgba(6, 182, 212, 0)');
+                arrowGrad.addColorStop(0.5, 'rgba(6, 182, 212, 0.5)');
+                arrowGrad.addColorStop(1, 'rgba(186, 230, 253, 0.9)');
+                ctx.fillStyle = arrowGrad;
+                ctx.fillRect(-28, -2, 36, 4);
+
+                // Ok gövdesi (gri metal)
+                ctx.fillStyle = '#cbd5e1';
+                ctx.fillRect(-16, -2.5, 22, 5);
+
+                // Ok ucu (üçgen)
+                ctx.fillStyle = '#e2e8f0';
+                ctx.beginPath();
+                ctx.moveTo(6, 0);
+                ctx.lineTo(-2, -5);
+                ctx.lineTo(-2, 5);
+                ctx.closePath();
+                ctx.fill();
+
+                // Ok parlama efekti
+                ctx.shadowColor = '#67e8f9';
+                ctx.shadowBlur = 6;
+                ctx.strokeStyle = 'rgba(103, 232, 249, 0.7)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(-16, 0); ctx.lineTo(6, 0);
+                ctx.stroke();
+
+                ctx.restore();
+            });
+        });
+    }
+
     drawRoundedRect(ctx, x, y, w, h, radius) {
         ctx.beginPath();
         ctx.moveTo(x + radius, y);

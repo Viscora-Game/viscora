@@ -1,20 +1,20 @@
-const CACHE_NAME = 'viscora-cache-v23';
+﻿const CACHE_NAME = 'viscora-cache-v24';
 const ASSETS = [
   './',
   './index.html',
-  './index.css?v=v23',
+  './index.css?v=v24',
   './manifest.json',
-  './js/main.js?v=v23',
-  './js/game.js?v=v23',
-  './js/audio.js?v=v23',
-  './js/ui.js?v=v23',
-  './js/level.js?v=v23',
-  './js/player.js?v=v23',
-  './js/enemies.js?v=v23',
-  './js/viscosity.js?v=v23',
-  './js/boss.js?v=v23',
-  './js/editor.js?v=v23',
-  './js/controls_customizer.js?v=v23',
+  './js/main.js?v=v24',
+  './js/game.js?v=v24',
+  './js/audio.js?v=v24',
+  './js/ui.js?v=v24',
+  './js/level.js?v=v24',
+  './js/player.js?v=v24',
+  './js/enemies.js?v=v24',
+  './js/viscosity.js?v=v24',
+  './js/boss.js?v=v24',
+  './js/editor.js?v=v24',
+  './js/controls_customizer.js?v=v24',
   './assets/dragon_head.png'
 ];
 
@@ -41,7 +41,7 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // API isteklerini veya GET dışındaki istekleri önbelleğe alma
+  // API isteklerini veya GET dÄ±ÅŸÄ±ndaki istekleri Ã¶nbelleÄŸe alma
   if (e.request.method !== 'GET' || e.request.url.includes('/api/')) {
     return;
   }
@@ -49,7 +49,7 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Arka planda güncel sürümü sorgula ve önbelleği güncelle (Stale-While-Revalidate)
+        // Arka planda gÃ¼ncel sÃ¼rÃ¼mÃ¼ sorgula ve Ã¶nbelleÄŸi gÃ¼ncelle (Stale-While-Revalidate)
         fetch(e.request).then((networkResponse) => {
           if (networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => cache.put(e.request, networkResponse));
@@ -61,3 +61,4 @@ self.addEventListener('fetch', (e) => {
     })
   );
 });
+
