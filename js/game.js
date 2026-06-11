@@ -91,6 +91,8 @@ export class GameManager {
         this.lastTime = 0;
         this.gameTime = 0; // Toplam saniye
         this.timeString = "00:00";
+        this.bossRespawnsUsed = 0;
+        this.nextBossHealth = null;
 
         // Arka Plan ve Ön Plan Paralaks Süslemeleri
         this.bgCells = [];
@@ -438,17 +440,25 @@ export class GameManager {
         this.gameTime = 0;
         this.particles = [];
         this.splatters = [];
+        this.bossRespawnsUsed = 0;
         this.levelCardTimer = showTitleCard ? this.levelCardMaxTime : 0;
         this.level.loadLevel(this.currentLevel);
         this.initBackgroundCells(); // Refresh theme-specific decoration layout for this level
         this.initEnemies(this.currentLevel);
         if (this.currentLevel === 10) {
             this.boss = new Boss(1200, 300); // Boss spawn at x: 1200, y: 300
+            if (this.nextBossHealth === 1) {
+                this.boss.health = 1;
+            }
         } else if (this.currentLevel === 20) {
             this.boss = new CyberBoss(1200, 300); // CyberBoss spawn at x: 1200, y: 300
+            if (this.nextBossHealth === 1) {
+                this.boss.health = 1;
+            }
         } else {
             this.boss = null;
         }
+        this.nextBossHealth = null;
         let maxH = 3;
         if (this.difficulty === 'easy') maxH = 3;
         else if (this.difficulty === 'normal') maxH = 3;
@@ -508,11 +518,19 @@ export class GameManager {
             this.splatters = [];
             this.level.resetLevelRuntimeState();
             this.initEnemies(this.currentLevel);
+            this.bossRespawnsUsed = 0;
             if (this.currentLevel === 10) {
                 this.boss = new Boss(1200, 300);
+                if (this.nextBossHealth === 1) {
+                    this.boss.health = 1;
+                }
             } else if (this.currentLevel === 20) {
                 this.boss = new CyberBoss(1200, 300);
+                if (this.nextBossHealth === 1) {
+                    this.boss.health = 1;
+                }
             }
+            this.nextBossHealth = null;
             let maxH = 3;
             this.player.maxHealth = maxH;
             this.player.health = 1;
@@ -1034,9 +1052,62 @@ export class GameManager {
                     this.player.deathSplashDone = true;
                 }
                 
-                this.state = 'GAMEOVER';
-                this.ui.showScreen('gameover');
-                this.ui.resetKeys();
+                const isBossFight = (this.currentLevel === 10 || this.currentLevel === 20);
+                const isHardcore = (this.difficulty === 'hardcore');
+                let usedRespawn = false;
+
+                if (isBossFight && !isHardcore) {
+                    const isEasy = (this.difficulty === 'easy');
+                    if (isEasy || (this.bossRespawnsUsed || 0) < 1) {
+                        if (!isEasy) {
+                            this.bossRespawnsUsed = (this.bossRespawnsUsed || 0) + 1;
+                        }
+                        
+                        // Boss'un o anki canını sakla
+                        const savedBossHealth = this.boss ? this.boss.health : null;
+                        
+                        this.particles = [];
+                        this.splatters = [];
+                        
+                        // Oyuncuyu başlangıç noktasında 1 canla canlandır
+                        this.player.respawn(this.level.spawnX, this.level.spawnY, 1);
+                        this.ui.updateHUDHealth(this.player.health);
+                        this.ui.updateHUDViscosity(this.player.viscosity);
+                        
+                        // Başlangıç noktasında güzel bir canlanma efekti
+                        this.emitParticles(this.level.spawnX, this.level.spawnY, 'shift', '#06b6d4', 25);
+                        audio.playShift('LOW');
+                        
+                        // Boss'u başlangıç pozisyonuna çek ama canını koru
+                        if (this.boss) {
+                            this.boss.x = this.boss.startX;
+                            this.boss.y = this.boss.startY;
+                            this.boss.vx = 0;
+                            this.boss.vy = 0;
+                            this.boss.state = (this.currentLevel === 20) ? 'GREEN_ATTACK' : 'GREEN_ROLL';
+                            this.boss.stateTimer = 0;
+                            if (savedBossHealth !== null) {
+                                this.boss.health = savedBossHealth;
+                            }
+                        }
+                        
+                        audio.resume();
+                        this.lastTime = performance.now();
+                        this.physicsAccumulator = 0;
+                        usedRespawn = true;
+                    }
+                }
+
+                if (!usedRespawn) {
+                    if (isBossFight && this.boss && this.boss.health === 1) {
+                        this.nextBossHealth = 1;
+                    } else {
+                        this.nextBossHealth = null;
+                    }
+                    this.state = 'GAMEOVER';
+                    this.ui.showScreen('gameover');
+                    this.ui.resetKeys();
+                }
             }
         }
     }
