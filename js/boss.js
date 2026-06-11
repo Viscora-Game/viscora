@@ -1263,8 +1263,8 @@ export class CyberBoss extends Boss {
             this.laserCharged = false;
         }
 
-        // Overheat every 12 seconds
-        if (this.rageAttackTimer >= 720) {
+        // Overheat every 12 seconds (Only if health > 1. In the final enraged form, it never overheats/sleeps!)
+        if (this.rageAttackTimer >= 720 && this.health > 1) {
             this.state = 'OVERHEAT';
             this.stateTimer = 0;
             this.overheatTimer = 0;
