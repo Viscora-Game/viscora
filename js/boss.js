@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v20';
+import { audio } from './audio.js?v=v21';
 
 export class Boss {
     constructor(x, y) {

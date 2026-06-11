@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v20';
-import { THEMES } from './generator.js?v=v20';
+import { audio } from './audio.js?v=v21';
+import { THEMES } from './generator.js?v=v21';
 
 /**
  * Viscora Level Design & Manager
@@ -2383,29 +2383,145 @@ export class Level {
                 angle: 0
             };
         } else if (levelNumber === 14) {
-            this.width = 1600;
-            this.height = 600;
-            this.spawnX = 100;
+            // ═══════════════════════════════════════════════
+            // BÖLÜM 14: TOKSİK LABİRİNT / ENGEL PARKURU
+            // ═══════════════════════════════════════════════
+            this.width = 3000;
+            this.height = 3000;
+            this.spawnX = 80;
             this.spawnY = 380;
+
             this.platforms = [
-                { x: 0, y: 460, w: 1600, h: 140, type: 'normal' }
+                { x: 0, y: 450, w: 3000, h: 140, type: 'normal' },
+                { x: 0, y: 260, w: 2850, h: 40, type: 'normal' },
+                { x: 150, y: 50, w: 2790, h: 40, type: 'normal' },
+                { x: 0, y: 80, w: 40, h: 120, type: 'sticky', sticky: true },
+                { x: 2950, y: 240, w: 40, h: 120, type: 'sticky', sticky: true }
             ];
-            this.hazards = [];
-            this.collectibles = [];
-            this.enemies = [];
-            this.portal = { x: 1400, y: 380, w: 60, h: 80, angle: 0 };
+
+            this.hazards = [
+                { x: 800, y: 430, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1170, y: 240, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1890, y: 240, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1530, y: 240, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 730, y: 240, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1090, y: 430, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 570, y: 430, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 320, y: 430, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 250, y: 240, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 430, y: 240, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 2050, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 1740, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 1450, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 2270, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 210, y: 30, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 770, y: 30, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1190, y: 30, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1630, y: 30, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 2070, y: 30, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 2370, y: 30, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 2630, y: 30, w: 60, h: 20, type: 'spike', direction: 'up' }
+            ];
+
+            this.gates = [
+                { x: 850, y: -350, w: 20, h: 600, type: 'yellowLaser', id: 1, disabled: false }
+            ];
+
+            this.pressurePlates = [
+                { x: 1600, y: 450, w: 50, h: 10, activated: false, linkedGateId: 1 }
+            ];
+
+            this.pushBlocks = [
+                { x: 1270, y: 400, w: 50, h: 50, startX: 1270, startY: 400 }
+            ];
+
+            this.enemies = [
+                { x: 2490, y: 390, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 2530, y: 200, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 1760, y: 220, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 2090, y: 420, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 1620, y: 420, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 1370, y: 220, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 980, y: 400, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 960, y: 220, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 710, y: 400, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 520, y: 220, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 460, y: 400, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 2800, y: 200, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 560, y: -70, rangeX: 120, speed: 1.5, isVertical: true, color: '#d946ef' },
+                { x: 1000, y: -80, rangeX: 120, speed: 1.5, isVertical: true, color: '#d946ef' },
+                { x: 1410, y: -50, rangeX: 120, speed: 1.5, isVertical: true, color: '#d946ef' },
+                { x: 1850, y: -50, rangeX: 120, speed: 1.5, isVertical: true, color: '#d946ef' }
+            ];
+
+            this.hiddenPassages = [
+                { x: 2930, y: 50, w: 60, h: 40 }
+            ];
+
+            this.fallingBlockTraps = [
+                { startX: 380, startY: -210, x: 380, y: -210, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
+                { startX: 780, startY: -210, x: 780, y: -210, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
+                { startX: 1170, startY: -210, x: 1170, y: -210, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
+                { startX: 1600, startY: -210, x: 1600, y: -210, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
+                { startX: 2020, startY: -210, x: 2020, y: -210, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
+                { startX: 2450, startY: -210, x: 2450, y: -210, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 }
+            ];
+
+            this.portal = { x: 2800, y: -100, w: 60, h: 80, angle: 0 };
         } else if (levelNumber === 15) {
-            this.width = 1600;
+            // ═══════════════════════════════════════════════
+            // BÖLÜM 15: TERMAL KORİDOR
+            // ═══════════════════════════════════════════════
+            this.width = 3200;
             this.height = 600;
             this.spawnX = 100;
             this.spawnY = 380;
+
             this.platforms = [
-                { x: 0, y: 460, w: 1600, h: 140, type: 'normal' }
+                { x: 0, y: 460, w: 400, h: 140, type: 'normal' },
+                { x: 500, y: 460, w: 2200, h: 140, type: 'normal' },
+                { x: 2800, y: 460, w: 400, h: 140, type: 'normal' }
             ];
-            this.hazards = [];
-            this.collectibles = [];
-            this.enemies = [];
-            this.portal = { x: 1400, y: 380, w: 60, h: 80, angle: 0 };
+
+            this.hazards = [
+                { x: 400, y: 460, w: 100, h: 70, type: 'acid' },
+                { x: 2700, y: 460, w: 100, h: 70, type: 'acid' }
+            ];
+
+            this.movingPlatforms = [
+                { startX: 1200, startY: 340, targetX: 1500, targetY: 340, x: 1200, y: 340, w: 100, h: 20, type: 'moving', speed: 0.012, dir: 1, progress: 0 }
+            ];
+
+            this.pushBlocks = [
+                { x: 600, y: 400, w: 50, h: 50, startX: 600, startY: 400 },
+                { x: 2100, y: 400, w: 50, h: 50, startX: 2100, startY: 400 }
+            ];
+
+            this.pressurePlates = [
+                { x: 1000, y: 460, w: 50, h: 10, activated: false, linkedGateId: 1 },
+                { x: 1700, y: 460, w: 50, h: 10, activated: false, linkedGateId: 2 }
+            ];
+
+            this.gates = [
+                { x: 900, y: 100, w: 20, h: 360, type: 'laser', id: 1, disabled: false },
+                { x: 1800, y: 100, w: 20, h: 360, type: 'laser', id: 2, disabled: false }
+            ];
+
+            this.flamethrowers = [
+                { id: 10, startX: 1100, startY: 380, x: 1100, y: 380, w: 32, h: 58, dir: 'right', range: 200, moving: true, moveRange: 150, moveSpeed: 1.2, moveAxis: 'y', moveDir: 1, progress: 0, disabled: false, active: true, currentLength: 0 },
+                { id: 11, startX: 1600, startY: 380, x: 1600, y: 380, w: 32, h: 58, dir: 'left', range: 200, moving: true, moveRange: 150, moveSpeed: 1.2, moveAxis: 'y', moveDir: -1, progress: 0, disabled: false, active: true, currentLength: 0 }
+            ];
+
+            this.enemies = [
+                { x: 750, y: 420, rangeX: 100, speed: 1.5, isVertical: false, color: '#eab308' },
+                { x: 1950, y: 420, rangeX: 100, speed: 1.5, isVertical: false, color: '#eab308' }
+            ];
+
+            this.collectibles = [
+                { x: 1350, y: 280, color: '#eab308', collected: false }
+            ];
+
+            this.portal = { x: 3000, y: 380, w: 60, h: 80, angle: 0 };
         } else if (levelNumber === 16) {
             this.width = 1600;
             this.height = 600;
