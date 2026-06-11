@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v22';
-import { THEMES } from './generator.js?v=v22';
+import { audio } from './audio.js?v=v23';
+import { THEMES } from './generator.js?v=v23';
 
 /**
  * Viscora Level Design & Manager
@@ -2058,24 +2058,24 @@ export class Level {
                 { x: 800, y: 320, w: 120, h: 40, type: 'slippery', slippery: true },
                 { x: 1040, y: 400, w: 120, h: 40, type: 'slippery', slippery: true },
                 { x: 1300, y: 340, w: 120, h: 40, type: 'slippery', slippery: true },
-                { x: 1540, y: 260, w: 120, h: 40, type: 'slippery', slippery: true },
-                { x: 1880, y: 220, w: 120, h: 40, type: 'slippery', slippery: true },
+                { x: 1600, y: 280, w: 120, h: 40, type: 'slippery', slippery: true },
+                { x: 1900, y: 220, w: 120, h: 40, type: 'slippery', slippery: true },
                 { x: 2220, y: 360, w: 120, h: 40, type: 'slippery', slippery: true },
                 { x: 2720, y: 160, w: 120, h: 40, type: 'slippery', slippery: true },
                 { x: 2560, y: -20, w: 40, h: 120, type: 'sticky', sticky: true },
                 { x: 2300, y: -20, w: 120, h: 40, type: 'sticky', sticky: true },
                 { x: 1660, y: -20, w: 500, h: 40, type: 'normal' },
-                { x: 1380, y: 0, w: 60, h: 20, type: 'normal' },
-                { x: 1100, y: 0, w: 60, h: 20, type: 'normal' },
+                { x: 1400, y: 0, w: 60, h: 20, type: 'normal' },
+                { x: 1220, y: 30, w: 40, h: 20, type: 'normal' },
                 { x: 1760, y: 520, w: 60, h: 20, type: 'normal' },
                 { x: 2620, y: 520, w: 60, h: 20, type: 'normal' },
                 { x: 2260, y: 520, w: 60, h: 20, type: 'normal' },
-                { x: 860, y: 60, w: 120, h: 40, type: 'normal' }
+                { x: 860, y: 20, w: 120, h: 40, type: 'normal' },
+                { x: 980, y: 70, w: 240, h: 90, type: 'normal' },
+                { x: 590, y: -20, w: 60, h: 20, type: 'normal' }
             ];
 
-            this.hazards = [
-
-            ];
+            this.hazards = [];
 
             this.movingPlatforms = [
                 { startX: 2420, startY: 260, targetX: 2570, targetY: 260, x: 2420, y: 260, w: 100, h: 20, type: 'moving', speed: 0.015, dir: 1, progress: 0 }
@@ -2096,9 +2096,9 @@ export class Level {
             ];
 
             this.pushBlocks = [
-                { x: 860, y: 0, w: 50, h: 50, startX: 860, startY: 0, vx: 0, vy: 0 },
-                { x: 860, y: -60, w: 50, h: 50, startX: 860, startY: -60, vx: 0, vy: 0 },
-                { x: 860, y: -120, w: 50, h: 50, startX: 860, startY: -120, vx: 0, vy: 0 },
+                { x: 860, y: -30, w: 50, h: 50, startX: 860, startY: -30, vx: 0, vy: 0 },
+                { x: 860, y: -80, w: 50, h: 50, startX: 860, startY: -80, vx: 0, vy: 0 },
+                { x: 860, y: -130, w: 50, h: 50, startX: 860, startY: -130, vx: 0, vy: 0 },
                 { x: 860, y: -180, w: 50, h: 50, startX: 860, startY: -180, vx: 0, vy: 0 }
             ];
 
@@ -2109,11 +2109,11 @@ export class Level {
                 { x: 2640, y: 500, w: 32, h: 32, linkedGateId: 69, cooldown: 0 }
             ];
             this.buttons = [
-                { x: 1084, y: 368, w: 32, h: 32, activated: false, linkedGateId: 9002, timer: 0 }
+                { x: 850, y: 290, w: 32, h: 32, activated: false, linkedGateId: 1, timer: 0 }
             ];
             this.flamethrowers = [
-                { id: 9001, startX: 440, startY: 160, x: 440, y: 160, w: 32, h: 58, dir: 'right', range: 160, moving: true, moveRange: 160, moveSpeed: 1.2, moveAxis: 'y', moveDir: 1, progress: 0, disabled: false, active: true, currentLength: 0 },
-                { id: 9002, startX: 1340, startY: 100, x: 1340, y: 100, w: 58, h: 32, dir: 'down', range: 240, moving: false, disabled: false, active: true, currentLength: 0 }
+                { id: 9588, startX: 490, startY: 250, x: 490, y: 315, w: 32, h: 58, dir: 'right', range: 200, moving: true, moveRange: 100, moveSpeed: 1.5, moveAxis: 'y', moveDir: 1, progress: 0, disabled: false, active: true, currentLength: 0 },
+                { id: 1, startX: 1080, startY: 160, x: 1080, y: 160, w: 58, h: 32, dir: 'down', range: 200, moving: false, moveRange: 100, moveSpeed: 1.5, moveAxis: 'y', moveDir: 1, progress: 0, disabled: false, active: true, currentLength: 0 }
             ];
             this.fallingPlatforms = [];
             this.fallingBlockTraps = [
@@ -2123,11 +2123,12 @@ export class Level {
             ];
             this.vantuzPoints = [];
             this.decorations = [
-                { x: 200, y: 180, w: 200, h: 80, type: 'textbox', rotation: 0, startRotation: 0, state: 0, text: 'DOĞRU ŞALTERİ BUL VE LAZER KAPIYI AÇ !', color: '#06b6d4' }
+                { x: 200, y: 180, w: 200, h: 80, type: 'textbox', rotation: 0, startRotation: 0, state: 0, text: 'DOĞRU ŞALTERİ BUL VE LAZER KAPIYI AÇ !', color: '#06b6d4' },
+                { x: 560, y: 80, w: 200, h: 50, type: 'textbox', rotation: 0, startRotation: 0, state: 0, text: 'Alev silahlarına dikkat et yakar :D', color: '#06b6d4' }
             ];
             this.portal = {
-                x: 580,
-                y: -80,
+                x: 590,
+                y: -110,
                 w: 60,
                 h: 80,
                 angle: 0
