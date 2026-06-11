@@ -1578,24 +1578,65 @@ export class CyberBoss extends Boss {
         ctx.arc(0, -6, 4.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Armor Ring
+        // Armor Ring & Cyber Spikes
         ctx.shadowBlur = 0;
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = '#64748b';
 
         const drawArmorArc = (startAngle, endAngle) => {
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = '#64748b';
             ctx.beginPath();
             ctx.arc(0, 0, currentRadius + 5, startAngle, endAngle);
             ctx.stroke();
         };
 
+        const drawSpikesOnArc = (startAngle, endAngle, numSpikes) => {
+            ctx.fillStyle = '#334155'; // Dark metallic base
+            ctx.strokeStyle = color; // Glow outline using state color
+            ctx.lineWidth = 1.5;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 6;
+            
+            for (let i = 0; i < numSpikes; i++) {
+                const fraction = numSpikes > 1 ? i / (numSpikes - 1) : 0.5;
+                const ang = startAngle + 0.12 + fraction * (endAngle - startAngle - 0.24);
+                
+                const rBase = currentRadius + 4;
+                const rTip = currentRadius + 15 + Math.sin(this.pulseTime * 5 + i) * 1.5;
+                const halfBaseAngle = 0.07;
+                
+                const ax = Math.cos(ang - halfBaseAngle) * rBase;
+                const ay = Math.sin(ang - halfBaseAngle) * rBase;
+                const bx = Math.cos(ang + halfBaseAngle) * rBase;
+                const by = Math.sin(ang + halfBaseAngle) * rBase;
+                const tx = Math.cos(ang) * rTip;
+                const ty = Math.sin(ang) * rTip;
+                
+                ctx.beginPath();
+                ctx.moveTo(ax, ay);
+                ctx.lineTo(tx, ty);
+                ctx.lineTo(bx, by);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+            ctx.shadowBlur = 0;
+        };
+
         if (this.health === 4) {
+            drawSpikesOnArc(0.1, 1.9, 5);
+            drawSpikesOnArc(2.2, 4.0, 5);
+            drawSpikesOnArc(4.3, 6.1, 5);
+            
             drawArmorArc(0.1, 1.9);
             drawArmorArc(2.2, 4.0);
             drawArmorArc(4.3, 6.1);
         } else if (this.health === 3) {
+            drawSpikesOnArc(0.1, 1.5, 4);
+            drawSpikesOnArc(2.4, 4.0, 4);
+            
             drawArmorArc(0.1, 1.5);
             drawArmorArc(2.4, 4.0);
+            
             ctx.strokeStyle = '#ef4444';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -1603,7 +1644,10 @@ export class CyberBoss extends Boss {
             ctx.lineTo(currentRadius + 8, 3);
             ctx.stroke();
         } else if (this.health === 2) {
+            drawSpikesOnArc(3.0, 4.5, 4);
+            
             drawArmorArc(3.0, 4.5);
+            
             ctx.strokeStyle = '#ef4444';
             ctx.lineWidth = 2;
             ctx.beginPath();
