@@ -3394,7 +3394,7 @@ export class Level {
                     const spawnCount = Math.random() < 0.7 ? 2 : 1;
                     for (let i = 0; i < spawnCount; i++) {
                         const speed = 2.4 + Math.random() * 2.0;
-                        const angleSpread = (Math.random() - 0.5) * 0.22; // Koni yayılımı
+                        const angleSpread = (Math.random() - 0.5) * 0.42; // Koni yayılımını artırdık (üçgen şeklinde dağılım için)
                         
                         let vx = 0;
                         let vy = 0;
@@ -3442,8 +3442,8 @@ export class Level {
                 if (p.type === 'fire') {
                     const ratio = 1 - (p.life / p.maxLife); // ömür oranı
                     
-                    // Zamanla alev genişler
-                    p.size = p.startSize + ratio * 8.5;
+                    // Zamanla alev üçgen şeklinde belirgin şekilde genişler (8.5'ten 15.0'a çıkarıldı)
+                    p.size = p.startSize + ratio * 15.0;
                     
                     // Yellow -> Orange -> Red -> Grey/Fading smoke
                     if (ratio < 0.22) {
@@ -3456,9 +3456,9 @@ export class Level {
                         p.color = `rgba(100, 116, 139, ${0.22 * (1 - ratio)})`; // duman
                     }
                     
-                    // Termal sıcaklıkla hafif yukarı yükselme ve rüzgar dalgalanması
-                    p.vy -= 0.035; 
-                    p.vx += (Math.random() - 0.5) * 0.15;
+                    // Hafif dikey yükselme ve rüzgar dalgalanması (yükselme azaltıldı ki düzgün üçgen kalsın)
+                    p.vy -= 0.015; 
+                    p.vx += (Math.random() - 0.5) * 0.12;
                 }
             });
         }
@@ -4181,8 +4181,8 @@ export class Level {
                     else if (f.dir === 'down') dirY = 1;
                     else if (f.dir === 'up') dirY = -1;
 
-                    // Katman katman, büyüyen ve dalgalanan ateş pufları çiz
-                    const stepSize = 8;
+                    // Katman katman, büyüyen ve dalgalanan ateş pufları çiz (üçgen koni şeklinde)
+                    const stepSize = 6;
                     const maxPuffs = Math.ceil(f.currentLength / stepSize);
 
                     for (let i = 0; i <= maxPuffs; i++) {
@@ -4190,44 +4190,55 @@ export class Level {
                         if (dist > f.currentLength) break;
 
                         const ratio = dist / (f.range || 200);
-                        const wobbleSpeed = 16;
-                        // Dalgalanma dalgası (wobble)
-                        const wobble = Math.sin(this.time * wobbleSpeed - dist * 0.07) * (2.0 + ratio * 9.0);
+                        const wobbleSpeed = 20;
+                        const wobble = Math.sin(this.time * wobbleSpeed - dist * 0.05) * (1.5 + ratio * 3.5);
 
-                        let px = rayStartX + dirX * dist;
-                        let py = rayStartY + dirY * dist;
+                        // Koni yarı genişliği (uzaklaştıkça artar, üçgen yayılımı sağlar)
+                        const halfConeWidth = ratio * 26.0;
 
-                        if (dirX !== 0) {
-                            py += wobble;
-                        } else {
-                            px += wobble;
-                        }
+                        // Üçgen formunu doldurmak için 3 adet paralel akış (sol, orta, sağ) çiziyoruz
+                        const offsets = [-0.6, 0, 0.6];
+                        offsets.forEach(offsetRatio => {
+                            let px = rayStartX + dirX * dist;
+                            let py = rayStartY + dirY * dist;
 
-                        // Ateş pufunun çapı kaynaktan uzaklaştıkça genişlesin
-                        const puffRadius = 6.0 + ratio * 14.0;
+                            // Perpendicular (dik) sapma
+                            const perpOffset = wobble + offsetRatio * halfConeWidth;
 
-                        // Uzaklığa göre renk geçişi (Sarı -> Turuncu -> Kırmızı -> Saydam Kırmızı)
-                        let puffColor = 'rgba(254, 240, 138, 0.85)'; // En sıcak (sarı)
-                        if (ratio > 0.15) {
-                            puffColor = 'rgba(249, 115, 22, 0.75)'; // Orta sıcak (turuncu)
-                        }
-                        if (ratio > 0.45) {
-                            puffColor = 'rgba(239, 68, 68, 0.55)'; // Soğuyan (kırmızı)
-                        }
-                        if (ratio > 0.8) {
-                            puffColor = 'rgba(239, 68, 68, 0.15)'; // Dağılan alev ucu
-                        }
+                            if (dirX !== 0) {
+                                py += perpOffset;
+                            } else {
+                                px += perpOffset;
+                            }
 
-                        ctx.save();
-                        ctx.fillStyle = puffColor;
-                        if (i % 3 === 0) {
-                            ctx.shadowColor = ratio > 0.4 ? '#ef4444' : '#f97316';
-                            ctx.shadowBlur = 6 + Math.random() * 6;
-                        }
-                        ctx.beginPath();
-                        ctx.arc(px, py, puffRadius, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.restore();
+                            // Puf yarıçapı da uçlara doğru büyür
+                            const puffRadius = 5.0 + ratio * 16.0;
+
+                            // Renk geçişi
+                            let puffColor = 'rgba(254, 240, 138, 0.85)'; // Sarı (kaynakta en sıcak)
+                            if (ratio > 0.12) {
+                                puffColor = 'rgba(249, 115, 22, 0.70)'; // Turuncu
+                            }
+                            if (ratio > 0.45) {
+                                puffColor = 'rgba(239, 68, 68, 0.48)'; // Kırmızı
+                            }
+                            if (ratio > 0.82) {
+                                puffColor = 'rgba(239, 68, 68, 0.12)'; // Alev ucu sönme
+                            }
+
+                            ctx.save();
+                            ctx.fillStyle = puffColor;
+                            
+                            // Performans ve görsel için bazı puflara shadow ekle
+                            if (i % 4 === 0) {
+                                ctx.shadowColor = ratio > 0.4 ? '#ef4444' : '#f97316';
+                                ctx.shadowBlur = 6 + Math.random() * 4;
+                            }
+                            ctx.beginPath();
+                            ctx.arc(px, py, puffRadius, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.restore();
+                        });
                     }
                     
                     ctx.restore();
