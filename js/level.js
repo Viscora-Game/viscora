@@ -3291,9 +3291,9 @@ export class Level {
         // --- ALEV SİLAHLARI (THERMAL FLAMETHROWERS) KONTROLÜ ---
         if (this.flamethrowers) {
             this.flamethrowers.forEach(f => {
-                // 1. Hareket Güncelleme
+                // 1. Hareket Güncelleme (Yavaş ve akıcı devriye için 0.015'ten 0.005'e düşürüldü)
                 if (f.moving) {
-                    f.progress = (f.progress || 0) + (f.moveSpeed || 1.5) * (f.moveDir || 1) * 0.015;
+                    f.progress = (f.progress || 0) + (f.moveSpeed || 1.5) * (f.moveDir || 1) * 0.005;
                     if (f.progress >= 1) {
                         f.progress = 1;
                         f.moveDir = -1;
@@ -3381,17 +3381,84 @@ export class Level {
                     }
                 }
 
-                // 4. Parçacık Emisyonu
-                if (f.active && Math.random() < 0.35 && player.game && f.currentLength > 5) {
-                    const t = Math.random() * f.currentLength;
-                    let px = rayStartX;
-                    let py = rayStartY;
-                    if (f.dir === 'right') px += t;
-                    else if (f.dir === 'left') px -= t;
-                    else if (f.dir === 'down') py += t;
-                    else if (f.dir === 'up') py -= t;
+                // 4. Parçacık Emisyonu (Yavaş yavaş partikül fırlatarak alev yayma)
+                if (f.active && player.game && player.game.particles && f.currentLength > 5) {
+                    let dirX = 0;
+                    let dirY = 0;
+                    if (f.dir === 'right') dirX = 1;
+                    else if (f.dir === 'left') dirX = -1;
+                    else if (f.dir === 'down') dirY = 1;
+                    else if (f.dir === 'up') dirY = -1;
 
-                    player.game.emitParticles(px, py + (Math.random() - 0.5) * 8, 'trail', 'rgba(249, 115, 22, 0.45)', 1);
+                    // Her karede yoğunluk için 1-2 alev puf partikülü üret
+                    const spawnCount = Math.random() < 0.7 ? 2 : 1;
+                    for (let i = 0; i < spawnCount; i++) {
+                        const speed = 2.4 + Math.random() * 2.0;
+                        const angleSpread = (Math.random() - 0.5) * 0.22; // Koni yayılımı
+                        
+                        let vx = 0;
+                        let vy = 0;
+                        if (f.dir === 'right') {
+                            vx = speed;
+                            vy = angleSpread * speed;
+                        } else if (f.dir === 'left') {
+                            vx = -speed;
+                            vy = angleSpread * speed;
+                        } else if (f.dir === 'down') {
+                            vy = speed;
+                            vx = angleSpread * speed;
+                        } else if (f.dir === 'up') {
+                            vy = -speed;
+                            vx = angleSpread * speed;
+                        }
+
+                        const offsetNoiseX = (Math.random() - 0.5) * 5;
+                        const offsetNoiseY = (Math.random() - 0.5) * 5;
+
+                        // Alev engele değdiğinde partikül sönmeli (dinamik yaşam süresi)
+                        const life = Math.max(10, Math.ceil(f.currentLength / speed));
+
+                        player.game.particles.push({
+                            x: rayStartX + offsetNoiseX,
+                            y: rayStartY + offsetNoiseY,
+                            vx: vx,
+                            vy: vy,
+                            startSize: 3.5 + Math.random() * 3,
+                            size: 3.5,
+                            color: 'rgba(254, 240, 138, 0.9)',
+                            alpha: 0.9,
+                            life: life,
+                            maxLife: life,
+                            type: 'fire'
+                        });
+                    }
+                }
+            });
+        }
+
+        // --- AKTİF ALEV PARTİKÜLLERİNİN HAREKET VE RENK GEÇİŞLERİ ---
+        if (player.game && player.game.particles) {
+            player.game.particles.forEach(p => {
+                if (p.type === 'fire') {
+                    const ratio = 1 - (p.life / p.maxLife); // ömür oranı
+                    
+                    // Zamanla alev genişler
+                    p.size = p.startSize + ratio * 8.5;
+                    
+                    // Yellow -> Orange -> Red -> Grey/Fading smoke
+                    if (ratio < 0.22) {
+                        p.color = `rgba(254, 240, 138, ${0.9 * (1 - ratio)})`;
+                    } else if (ratio < 0.55) {
+                        p.color = `rgba(249, 115, 22, ${0.75 * (1 - ratio)})`;
+                    } else if (ratio < 0.82) {
+                        p.color = `rgba(239, 68, 68, ${0.55 * (1 - ratio)})`;
+                    } else {
+                        p.color = `rgba(100, 116, 139, ${0.22 * (1 - ratio)})`; // duman
+                    }
+                    
+                    // Termal sıcaklıkla hafif yukarı yükselme ve rüzgar dalgalanması
+                    p.vy -= 0.035; 
+                    p.vx += (Math.random() - 0.5) * 0.15;
                 }
             });
         }
@@ -4107,38 +4174,62 @@ export class Level {
                     else if (f.dir === 'down') rayStartY = f.y + f.h;
                     else if (f.dir === 'up') rayStartY = f.y;
 
-                    ctx.shadowColor = '#f97316';
-                    ctx.shadowBlur = 12 + Math.random() * 8;
+                    let dirX = 0;
+                    let dirY = 0;
+                    if (f.dir === 'right') dirX = 1;
+                    else if (f.dir === 'left') dirX = -1;
+                    else if (f.dir === 'down') dirY = 1;
+                    else if (f.dir === 'up') dirY = -1;
+
+                    // Katman katman, büyüyen ve dalgalanan ateş pufları çiz
+                    const stepSize = 8;
+                    const maxPuffs = Math.ceil(f.currentLength / stepSize);
+
+                    for (let i = 0; i <= maxPuffs; i++) {
+                        const dist = i * stepSize;
+                        if (dist > f.currentLength) break;
+
+                        const ratio = dist / (f.range || 200);
+                        const wobbleSpeed = 16;
+                        // Dalgalanma dalgası (wobble)
+                        const wobble = Math.sin(this.time * wobbleSpeed - dist * 0.07) * (2.0 + ratio * 9.0);
+
+                        let px = rayStartX + dirX * dist;
+                        let py = rayStartY + dirY * dist;
+
+                        if (dirX !== 0) {
+                            py += wobble;
+                        } else {
+                            px += wobble;
+                        }
+
+                        // Ateş pufunun çapı kaynaktan uzaklaştıkça genişlesin
+                        const puffRadius = 6.0 + ratio * 14.0;
+
+                        // Uzaklığa göre renk geçişi (Sarı -> Turuncu -> Kırmızı -> Saydam Kırmızı)
+                        let puffColor = 'rgba(254, 240, 138, 0.85)'; // En sıcak (sarı)
+                        if (ratio > 0.15) {
+                            puffColor = 'rgba(249, 115, 22, 0.75)'; // Orta sıcak (turuncu)
+                        }
+                        if (ratio > 0.45) {
+                            puffColor = 'rgba(239, 68, 68, 0.55)'; // Soğuyan (kırmızı)
+                        }
+                        if (ratio > 0.8) {
+                            puffColor = 'rgba(239, 68, 68, 0.15)'; // Dağılan alev ucu
+                        }
+
+                        ctx.save();
+                        ctx.fillStyle = puffColor;
+                        if (i % 3 === 0) {
+                            ctx.shadowColor = ratio > 0.4 ? '#ef4444' : '#f97316';
+                            ctx.shadowBlur = 6 + Math.random() * 6;
+                        }
+                        ctx.beginPath();
+                        ctx.arc(px, py, puffRadius, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    }
                     
-                    let endX = rayStartX;
-                    let endY = rayStartY;
-                    if (f.dir === 'right') endX += f.currentLength;
-                    else if (f.dir === 'left') endX -= f.currentLength;
-                    else if (f.dir === 'down') endY += f.currentLength;
-                    else if (f.dir === 'up') endY -= f.currentLength;
-
-                    const grad = ctx.createLinearGradient(rayStartX, rayStartY, endX, endY);
-                    grad.addColorStop(0, 'rgba(239, 68, 68, 0.85)');
-                    grad.addColorStop(0.3, 'rgba(249, 115, 22, 0.7)');
-                    grad.addColorStop(0.7, 'rgba(234, 179, 8, 0.45)');
-                    grad.addColorStop(1, 'rgba(234, 179, 8, 0.05)');
-
-                    ctx.lineWidth = 14 + Math.sin(this.time * 25) * 4;
-                    ctx.strokeStyle = grad;
-                    ctx.lineCap = 'round';
-                    ctx.beginPath();
-                    ctx.moveTo(rayStartX, rayStartY);
-                    ctx.lineTo(endX, endY);
-                    ctx.stroke();
-
-                    ctx.shadowBlur = 0;
-                    ctx.lineWidth = 6 + Math.sin(this.time * 30) * 1.5;
-                    ctx.strokeStyle = '#fef08a';
-                    ctx.beginPath();
-                    ctx.moveTo(rayStartX, rayStartY);
-                    ctx.lineTo(endX, endY);
-                    ctx.stroke();
-
                     ctx.restore();
                 }
 
