@@ -1341,7 +1341,7 @@ export class CyberBoss extends Boss {
             const dist = Math.sqrt(dx * dx + dy * dy);
             if (dist < player.radius + p.radius - 2) {
                 if (!player.isDead) {
-                    player.takeDamage(1);
+                    player.takeDamage(2);
                 }
                 this.projectiles.splice(i, 1);
                 continue;

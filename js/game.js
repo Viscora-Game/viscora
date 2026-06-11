@@ -92,7 +92,6 @@ export class GameManager {
         this.gameTime = 0; // Toplam saniye
         this.timeString = "00:00";
         this.bossRespawnsUsed = 0;
-        this.nextBossHealth = null;
 
         // Arka Plan ve Ön Plan Paralaks Süslemeleri
         this.bgCells = [];
@@ -447,18 +446,11 @@ export class GameManager {
         this.initEnemies(this.currentLevel);
         if (this.currentLevel === 10) {
             this.boss = new Boss(1200, 300); // Boss spawn at x: 1200, y: 300
-            if (this.nextBossHealth === 1) {
-                this.boss.health = 1;
-            }
         } else if (this.currentLevel === 20) {
             this.boss = new CyberBoss(1200, 300); // CyberBoss spawn at x: 1200, y: 300
-            if (this.nextBossHealth === 1) {
-                this.boss.health = 1;
-            }
         } else {
             this.boss = null;
         }
-        this.nextBossHealth = null;
         let maxH = 3;
         if (this.difficulty === 'easy') maxH = 3;
         else if (this.difficulty === 'normal') maxH = 3;
@@ -521,16 +513,9 @@ export class GameManager {
             this.bossRespawnsUsed = 0;
             if (this.currentLevel === 10) {
                 this.boss = new Boss(1200, 300);
-                if (this.nextBossHealth === 1) {
-                    this.boss.health = 1;
-                }
             } else if (this.currentLevel === 20) {
                 this.boss = new CyberBoss(1200, 300);
-                if (this.nextBossHealth === 1) {
-                    this.boss.health = 1;
-                }
             }
-            this.nextBossHealth = null;
             let maxH = 3;
             this.player.maxHealth = maxH;
             this.player.health = 1;
@@ -1099,11 +1084,6 @@ export class GameManager {
                 }
 
                 if (!usedRespawn) {
-                    if (isBossFight && this.boss && this.boss.health === 1) {
-                        this.nextBossHealth = 1;
-                    } else {
-                        this.nextBossHealth = null;
-                    }
                     this.state = 'GAMEOVER';
                     this.ui.showScreen('gameover');
                     this.ui.resetKeys();
