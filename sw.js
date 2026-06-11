@@ -1,4 +1,4 @@
-const CACHE_NAME = 'viscora-cache-v17';
+const CACHE_NAME = 'viscora-cache-v22';
 const ASSETS = [
   './',
   './index.html',
