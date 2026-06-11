@@ -336,26 +336,32 @@ export class Level {
                 }
 
                 if (Array.isArray(data.flamethrowers)) {
-                    this.flamethrowers = data.flamethrowers.map(f => ({
-                        id: f.id !== undefined ? f.id : Math.random(),
-                        startX: f.startX !== undefined ? f.startX : f.x,
-                        startY: f.startY !== undefined ? f.startY : f.y,
-                        x: f.x,
-                        y: f.y,
-                        w: f.w || 40,
-                        h: f.h || 40,
-                        dir: f.dir || 'right',
-                        range: f.range || 200,
-                        moving: !!f.moving,
-                        moveRange: f.moveRange || 100,
-                        moveSpeed: f.moveSpeed || 1.5,
-                        moveAxis: f.moveAxis || 'y',
-                        moveDir: f.moveDir || 1,
-                        progress: f.progress || 0,
-                        disabled: !!f.disabled,
-                        active: f.active !== undefined ? f.active : true,
-                        currentLength: f.currentLength || 0
-                    }));
+                    this.flamethrowers = data.flamethrowers.map(f => {
+                        const dir = f.dir || 'right';
+                        const isVert = dir === 'right' || dir === 'left';
+                        const targetW = isVert ? 32 : 58;
+                        const targetH = isVert ? 58 : 32;
+                        return {
+                            id: f.id !== undefined ? f.id : Math.random(),
+                            startX: f.startX !== undefined ? f.startX : f.x,
+                            startY: f.startY !== undefined ? f.startY : f.y,
+                            x: f.x,
+                            y: f.y,
+                            w: targetW,
+                            h: targetH,
+                            dir: dir,
+                            range: f.range || 200,
+                            moving: !!f.moving,
+                            moveRange: f.moveRange || 100,
+                            moveSpeed: f.moveSpeed || 1.5,
+                            moveAxis: f.moveAxis || 'y',
+                            moveDir: f.moveDir || 1,
+                            progress: f.progress || 0,
+                            disabled: !!f.disabled,
+                            active: f.active !== undefined ? f.active : true,
+                            currentLength: f.currentLength || 0
+                        };
+                    });
                 }
 
                 if (Array.isArray(data.levers)) {
@@ -2081,8 +2087,8 @@ export class Level {
                 { x: 1084, y: 368, w: 32, h: 32, activated: false, linkedGateId: 9002, timer: 0 }
             ];
             this.flamethrowers = [
-                { id: 9001, startX: 440, startY: 160, x: 440, y: 160, w: 40, h: 40, dir: 'right', range: 160, moving: true, moveRange: 160, moveSpeed: 1.2, moveAxis: 'y', moveDir: 1, progress: 0, disabled: false, active: true, currentLength: 0 },
-                { id: 9002, startX: 1340, startY: 100, x: 1340, y: 100, w: 40, h: 40, dir: 'down', range: 240, moving: false, disabled: false, active: true, currentLength: 0 }
+                { id: 9001, startX: 440, startY: 160, x: 440, y: 160, w: 32, h: 58, dir: 'right', range: 160, moving: true, moveRange: 160, moveSpeed: 1.2, moveAxis: 'y', moveDir: 1, progress: 0, disabled: false, active: true, currentLength: 0 },
+                { id: 9002, startX: 1340, startY: 100, x: 1340, y: 100, w: 58, h: 32, dir: 'down', range: 240, moving: false, disabled: false, active: true, currentLength: 0 }
             ];
             this.fallingPlatforms = [];
             this.fallingBlockTraps = [
@@ -3299,6 +3305,8 @@ export class Level {
         if (this.flamethrowers) {
             this.flamethrowers.forEach(f => {
                 // 1. Hareket Güncelleme (Yavaş ve akıcı devriye için 0.015'ten 0.005'e düşürüldü)
+                f.prevX = f.x;
+                f.prevY = f.y;
                 if (f.moving) {
                     f.progress = (f.progress || 0) + (f.moveSpeed || 1.5) * (f.moveDir || 1) * 0.005;
                     if (f.progress >= 1) {

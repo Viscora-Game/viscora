@@ -883,7 +883,7 @@ export class Player {
                         if (this.vy >= 0) {
                             this.vy = 0;
                             this.onGround = true;
-                            if (plat.targetX !== undefined) {
+                            if (plat.targetX !== undefined || (plat.type === 'flamethrower' && plat.moving)) {
                                 this.ridingPlatform = plat;
                             }
                             if (plat.slippery) {
