@@ -33,6 +33,7 @@ export class Level {
         this.fallingBlockTraps = [];
         this.vantuzPoints = [];
         this.decorations = [];
+        this.flamethrowers = [];
 
         let data = null;
         if (typeof levelNumber === 'object' && levelNumber !== null) {
@@ -325,6 +326,29 @@ export class Level {
                         activated: b.activated || false,
                         linkedGateId: b.linkedGateId,
                         timer: b.timer || 0
+                    }));
+                }
+
+                if (Array.isArray(data.flamethrowers)) {
+                    this.flamethrowers = data.flamethrowers.map(f => ({
+                        id: f.id !== undefined ? f.id : Math.random(),
+                        startX: f.startX !== undefined ? f.startX : f.x,
+                        startY: f.startY !== undefined ? f.startY : f.y,
+                        x: f.x,
+                        y: f.y,
+                        w: f.w || 40,
+                        h: f.h || 40,
+                        dir: f.dir || 'right',
+                        range: f.range || 200,
+                        moving: !!f.moving,
+                        moveRange: f.moveRange || 100,
+                        moveSpeed: f.moveSpeed || 1.5,
+                        moveAxis: f.moveAxis || 'y',
+                        moveDir: f.moveDir || 1,
+                        progress: f.progress || 0,
+                        disabled: !!f.disabled,
+                        active: f.active !== undefined ? f.active : true,
+                        currentLength: f.currentLength || 0
                     }));
                 }
 
@@ -2047,7 +2071,13 @@ export class Level {
                 { x: 2280, y: 500, w: 32, h: 32, linkedGateId: 101, cooldown: 0 },
                 { x: 2640, y: 500, w: 32, h: 32, linkedGateId: 69, cooldown: 0 }
             ];
-            this.buttons = [];
+            this.buttons = [
+                { x: 1084, y: 368, w: 32, h: 32, activated: false, linkedGateId: 9002, timer: 0 }
+            ];
+            this.flamethrowers = [
+                { id: 9001, startX: 440, startY: 160, x: 440, y: 160, w: 40, h: 40, dir: 'right', range: 160, moving: true, moveRange: 160, moveSpeed: 1.2, moveAxis: 'y', moveDir: 1, progress: 0, disabled: false, active: true, currentLength: 0 },
+                { id: 9002, startX: 1340, startY: 100, x: 1340, y: 100, w: 40, h: 40, dir: 'down', range: 240, moving: false, disabled: false, active: true, currentLength: 0 }
+            ];
             this.fallingPlatforms = [];
             this.fallingBlockTraps = [
                 { startX: 1700, startY: -220, x: 1700, y: -220, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
@@ -2796,6 +2826,12 @@ export class Level {
                         linkedGate.disabled = plate.activated;
                     }
                 }
+                if (plate.linkedGateId !== undefined && this.flamethrowers) {
+                    const linkedF = this.flamethrowers.find(f => f.id === plate.linkedGateId);
+                    if (linkedF) {
+                        linkedF.disabled = plate.activated;
+                    }
+                }
                 
                 if (plate.activated && !wasActivated) {
                     audio.playPlateActivate();
@@ -3086,6 +3122,12 @@ export class Level {
                         linkedGate.disabled = button.activated;
                     }
                 }
+                if (button.linkedGateId !== undefined && this.flamethrowers) {
+                    const linkedF = this.flamethrowers.find(f => f.id === button.linkedGateId);
+                    if (linkedF) {
+                        linkedF.disabled = button.activated;
+                    }
+                }
             });
         }
 
@@ -3113,6 +3155,12 @@ export class Level {
                     const linkedGate = this.gates.find(g => g.id === lever.linkedGateId);
                     if (linkedGate) {
                         linkedGate.disabled = lever.activated;
+                    }
+                }
+                if (lever.linkedGateId !== undefined && this.flamethrowers) {
+                    const linkedF = this.flamethrowers.find(f => f.id === lever.linkedGateId);
+                    if (linkedF) {
+                        linkedF.disabled = lever.activated;
                     }
                 }
             });
@@ -3236,6 +3284,114 @@ export class Level {
                     if (Math.random() < 0.08 && player.game) {
                         player.game.emitParticles(d.x + d.w / 2, d.y + d.h - 5, 'trail', 'rgba(148, 163, 184, 0.2)', 1);
                     }
+                }
+            });
+        }
+
+        // --- ALEV SİLAHLARI (THERMAL FLAMETHROWERS) KONTROLÜ ---
+        if (this.flamethrowers) {
+            this.flamethrowers.forEach(f => {
+                // 1. Hareket Güncelleme
+                if (f.moving) {
+                    f.progress = (f.progress || 0) + (f.moveSpeed || 1.5) * (f.moveDir || 1) * 0.015;
+                    if (f.progress >= 1) {
+                        f.progress = 1;
+                        f.moveDir = -1;
+                    } else if (f.progress <= 0) {
+                        f.progress = 0;
+                        f.moveDir = 1;
+                    }
+                    if (f.moveAxis === 'x') {
+                        f.x = f.startX + f.moveRange * f.progress;
+                    } else {
+                        f.y = f.startY + f.moveRange * f.progress;
+                    }
+                }
+
+                if (f.disabled) {
+                    f.currentLength = 0;
+                    return;
+                }
+
+                // 2. Alevin Boyunu Raycast ile Hesapla (Blok ve Platform Engellemesi)
+                let rayStartX = f.x + f.w / 2;
+                let rayStartY = f.y + f.h / 2;
+                if (f.dir === 'right') rayStartX = f.x + f.w;
+                else if (f.dir === 'left') rayStartX = f.x;
+                else if (f.dir === 'down') rayStartY = f.y + f.h;
+                else if (f.dir === 'up') rayStartY = f.y;
+
+                let minDistance = f.range || 200;
+
+                const activeBreakable = this.breakablePlatforms ? this.breakablePlatforms.filter(p => !p.broken) : [];
+                const activeFalling = this.fallingPlatforms ? this.fallingPlatforms.filter(p => !p.fallen) : [];
+                const checkObjects = [
+                    ...this.platforms,
+                    ...(this.movingPlatforms || []),
+                    ...activeBreakable,
+                    ...activeFalling,
+                    ...(this.pushBlocks ? this.pushBlocks.filter(pb => !pb.broken) : [])
+                ];
+
+                checkObjects.forEach(obj => {
+                    if (f.dir === 'right') {
+                        if (obj.x >= rayStartX && obj.x < rayStartX + minDistance &&
+                            rayStartY >= obj.y && rayStartY <= obj.y + obj.h) {
+                            minDistance = obj.x - rayStartX;
+                        }
+                    } else if (f.dir === 'left') {
+                        if (obj.x + obj.w <= rayStartX && obj.x + obj.w > rayStartX - minDistance &&
+                            rayStartY >= obj.y && rayStartY <= obj.y + obj.h) {
+                            minDistance = rayStartX - (obj.x + obj.w);
+                        }
+                    } else if (f.dir === 'down') {
+                        if (obj.y >= rayStartY && obj.y < rayStartY + minDistance &&
+                            rayStartX >= obj.x && rayStartX <= obj.x + obj.w) {
+                            minDistance = obj.y - rayStartY;
+                        }
+                    } else if (f.dir === 'up') {
+                        if (obj.y + obj.h <= rayStartY && obj.y + obj.h > rayStartY - minDistance &&
+                            rayStartX >= obj.x && rayStartX <= obj.x + obj.w) {
+                            minDistance = rayStartY - (obj.y + obj.h);
+                        }
+                    }
+                });
+
+                f.currentLength = minDistance;
+
+                // 3. Oyuncu ile Çarpışma (Hasar) Kontrolü
+                if (f.active) {
+                    let flameArea = { x: 0, y: 0, w: 0, h: 0 };
+                    const thickness = 22; // Alevin çarpışma genişliği
+
+                    if (f.dir === 'right') {
+                        flameArea = { x: rayStartX, y: rayStartY - thickness/2, w: f.currentLength, h: thickness };
+                    } else if (f.dir === 'left') {
+                        flameArea = { x: rayStartX - f.currentLength, y: rayStartY - thickness/2, w: f.currentLength, h: thickness };
+                    } else if (f.dir === 'down') {
+                        flameArea = { x: rayStartX - thickness/2, y: rayStartY, w: thickness, h: f.currentLength };
+                    } else if (f.dir === 'up') {
+                        flameArea = { x: rayStartX - thickness/2, y: rayStartY - f.currentLength, w: thickness, h: f.currentLength };
+                    }
+
+                    const buffer = 4;
+                    if (player.x + player.radius - buffer > flameArea.x && player.x - player.radius + buffer < flameArea.x + flameArea.w &&
+                        player.y + player.radius - buffer > flameArea.y && player.y - player.radius + buffer < flameArea.y + flameArea.h) {
+                        player.takeDamage(1);
+                    }
+                }
+
+                // 4. Parçacık Emisyonu
+                if (f.active && Math.random() < 0.35 && player.game && f.currentLength > 5) {
+                    const t = Math.random() * f.currentLength;
+                    let px = rayStartX;
+                    let py = rayStartY;
+                    if (f.dir === 'right') px += t;
+                    else if (f.dir === 'left') px -= t;
+                    else if (f.dir === 'down') py += t;
+                    else if (f.dir === 'up') py -= t;
+
+                    player.game.emitParticles(px, py + (Math.random() - 0.5) * 8, 'trail', 'rgba(249, 115, 22, 0.45)', 1);
                 }
             });
         }
@@ -3931,6 +4087,116 @@ export class Level {
                     ctx.restore();
                 }
                 
+                ctx.restore();
+            });
+        }
+
+        // --- ALEV SİLAHLARINI (FLAMETHROWERS) ÇİZ ---
+        if (this.flamethrowers) {
+            this.flamethrowers.forEach(f => {
+                ctx.save();
+
+                // 1. Alev efektini çiz (aktif ve devredışı değilse)
+                if (f.active && !f.disabled && f.currentLength > 0) {
+                    ctx.save();
+                    
+                    let rayStartX = f.x + f.w / 2;
+                    let rayStartY = f.y + f.h / 2;
+                    if (f.dir === 'right') rayStartX = f.x + f.w;
+                    else if (f.dir === 'left') rayStartX = f.x;
+                    else if (f.dir === 'down') rayStartY = f.y + f.h;
+                    else if (f.dir === 'up') rayStartY = f.y;
+
+                    ctx.shadowColor = '#f97316';
+                    ctx.shadowBlur = 12 + Math.random() * 8;
+                    
+                    let endX = rayStartX;
+                    let endY = rayStartY;
+                    if (f.dir === 'right') endX += f.currentLength;
+                    else if (f.dir === 'left') endX -= f.currentLength;
+                    else if (f.dir === 'down') endY += f.currentLength;
+                    else if (f.dir === 'up') endY -= f.currentLength;
+
+                    const grad = ctx.createLinearGradient(rayStartX, rayStartY, endX, endY);
+                    grad.addColorStop(0, 'rgba(239, 68, 68, 0.85)');
+                    grad.addColorStop(0.3, 'rgba(249, 115, 22, 0.7)');
+                    grad.addColorStop(0.7, 'rgba(234, 179, 8, 0.45)');
+                    grad.addColorStop(1, 'rgba(234, 179, 8, 0.05)');
+
+                    ctx.lineWidth = 14 + Math.sin(this.time * 25) * 4;
+                    ctx.strokeStyle = grad;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(rayStartX, rayStartY);
+                    ctx.lineTo(endX, endY);
+                    ctx.stroke();
+
+                    ctx.shadowBlur = 0;
+                    ctx.lineWidth = 6 + Math.sin(this.time * 30) * 1.5;
+                    ctx.strokeStyle = '#fef08a';
+                    ctx.beginPath();
+                    ctx.moveTo(rayStartX, rayStartY);
+                    ctx.lineTo(endX, endY);
+                    ctx.stroke();
+
+                    ctx.restore();
+                }
+
+                // 2. Taban Metal Kutuyu Çiz (Launcher Body)
+                ctx.fillStyle = '#1e293b';
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 2.5;
+                ctx.fillRect(f.x, f.y, f.w, f.h);
+                ctx.strokeRect(f.x, f.y, f.w, f.h);
+
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(f.x + 6, f.y + 6, f.w - 12, f.h - 12);
+                ctx.strokeRect(f.x + 6, f.y + 6, f.w - 12, f.h - 12);
+
+                // 3. Üfleç Borusunu Çiz (Nozzle)
+                ctx.fillStyle = '#475569';
+                ctx.strokeStyle = '#334155';
+                ctx.lineWidth = 2;
+                
+                let nozzleX = f.x + f.w / 2 - 8;
+                let nozzleY = f.y + f.h / 2 - 8;
+                let nozzleW = 16;
+                let nozzleH = 16;
+
+                if (f.dir === 'right') {
+                    nozzleX = f.x + f.w;
+                    nozzleY = f.y + f.h / 2 - 6;
+                    nozzleW = 8;
+                    nozzleH = 12;
+                } else if (f.dir === 'left') {
+                    nozzleX = f.x - 8;
+                    nozzleY = f.y + f.h / 2 - 6;
+                    nozzleW = 8;
+                    nozzleH = 12;
+                } else if (f.dir === 'down') {
+                    nozzleX = f.x + f.w / 2 - 6;
+                    nozzleY = f.y + f.h;
+                    nozzleW = 12;
+                    nozzleH = 8;
+                } else if (f.dir === 'up') {
+                    nozzleX = f.x + f.w / 2 - 6;
+                    nozzleY = f.y - 8;
+                    nozzleW = 12;
+                    nozzleH = 8;
+                }
+                ctx.fillRect(nozzleX, nozzleY, nozzleW, nozzleH);
+                ctx.strokeRect(nozzleX, nozzleY, nozzleW, nozzleH);
+
+                // 4. Durum Işığı Çiz (LED Indicator)
+                let ledColor = '#ef4444';
+                if (f.active && !f.disabled) {
+                    ledColor = (this.time * 5) % 2 > 1 ? '#eab308' : '#f97316';
+                }
+                ctx.fillStyle = ledColor;
+                ctx.beginPath();
+                ctx.arc(f.x + f.w / 2, f.y + f.h / 2, 4, 0, Math.PI * 2);
+                ctx.fill();
+
                 ctx.restore();
             });
         }
@@ -5277,6 +5543,18 @@ export class Level {
         if (this.gates) {
             this.gates.forEach(gate => {
                 gate.disabled = false;
+            });
+        }
+
+        if (this.flamethrowers) {
+            this.flamethrowers.forEach(f => {
+                f.x = f.startX !== undefined ? f.startX : f.x;
+                f.y = f.startY !== undefined ? f.startY : f.y;
+                f.progress = 0;
+                f.moveDir = 1;
+                f.disabled = false;
+                f.active = true;
+                f.currentLength = 0;
             });
         }
 

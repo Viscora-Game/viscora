@@ -537,6 +537,7 @@ export class LevelEditor {
                         <button class="editor-btn" data-tool="create_teleport" style="grid-column: span 2;">🌌 Işınlanma Portalı (Pair)</button>
                         <button class="editor-btn" data-tool="create_button">🔘 Buton (Bas/Çek)</button>
                         <button class="editor-btn" data-tool="create_lever">🕹️ Kol (Şalter)</button>
+                        <button class="editor-btn" data-tool="create_flamethrower">🔥 Alev Silahı (Flamethrower)</button>
                         <button class="editor-btn" data-tool="create_vantuz" style="grid-column: span 2;">🧲 Vantuz Noktası (Pembe)</button>
                     </div>
                 </details>
@@ -791,6 +792,7 @@ export class LevelEditor {
         lvl.bouncePads = [];
         lvl.buttons = [];
         lvl.levers = [];
+        lvl.flamethrowers = [];
         lvl.fallingPlatforms = [];
         lvl.breakablePlatforms = [];
         lvl.hiddenPassages = [];
@@ -926,6 +928,24 @@ export class LevelEditor {
             linkedGateId: l.linkedGateId
         }));
 
+        const flamethrowers = (lvl.flamethrowers || []).map(f => ({
+            id: f.id !== undefined ? f.id : Math.random(),
+            startX: Math.round(f.startX !== undefined ? f.startX : f.x),
+            startY: Math.round(f.startY !== undefined ? f.startY : f.y),
+            x: Math.round(f.x),
+            y: Math.round(f.y),
+            w: Math.round(f.w),
+            h: Math.round(f.h),
+            dir: f.dir || 'right',
+            range: Math.round(f.range || 200),
+            moving: !!f.moving,
+            moveRange: Math.round(f.moveRange || 100),
+            moveSpeed: f.moveSpeed || 1.5,
+            moveAxis: f.moveAxis || 'y',
+            disabled: !!f.disabled,
+            active: f.active !== undefined ? f.active : true
+        }));
+
         const fallingPlatforms = (lvl.fallingPlatforms || []).map(p => ({
             startX: Math.round(p.startX !== undefined ? p.startX : p.x),
             startY: Math.round(p.startY !== undefined ? p.startY : p.y),
@@ -1012,6 +1032,7 @@ export class LevelEditor {
             bouncePads,
             buttons,
             levers,
+            flamethrowers,
             fallingPlatforms,
             breakablePlatforms,
             hiddenPassages,
@@ -1231,6 +1252,53 @@ export class LevelEditor {
                     * Bu tetikleyici aktif olduğunda yukarıdaki ID'ye sahip olan kapı devre dışı bırakılır (açılır).
                 </div>
             `;
+        } else if (type === 'flamethrower') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Alev Yönü</label>
+                    <select id="inspect-flame-dir">
+                        <option value="right" ${obj.dir === 'right' ? 'selected' : ''}>Sağa</option>
+                        <option value="left" ${obj.dir === 'left' ? 'selected' : ''}>Sola</option>
+                        <option value="up" ${obj.dir === 'up' ? 'selected' : ''}>Yukarı</option>
+                        <option value="down" ${obj.dir === 'down' ? 'selected' : ''}>Aşağı</option>
+                    </select>
+                </div>
+                <div class="editor-input-group">
+                    <label>Alev Menzili</label>
+                    <input type="number" id="inspect-flame-range" value="${obj.range || 200}">
+                </div>
+                <div class="editor-input-group">
+                    <label>Bağlantı ID (Tetikleme için)</label>
+                    <input type="number" id="inspect-flame-id" value="${obj.id || 9001}">
+                </div>
+                <div class="editor-checkbox-group">
+                    <input type="checkbox" id="inspect-flame-active" ${obj.active !== false ? 'checked' : ''}>
+                    <label for="inspect-flame-active">Varsayılan Aktif (Alev Açık)</label>
+                </div>
+                <div class="editor-checkbox-group">
+                    <input type="checkbox" id="inspect-flame-moving" ${obj.moving ? 'checked' : ''}>
+                    <label for="inspect-flame-moving">Hareketli Cihaz</label>
+                </div>
+            `;
+            if (obj.moving) {
+                html += `
+                    <div class="editor-input-group">
+                        <label>Hareket Ekseni</label>
+                        <select id="inspect-flame-move-axis">
+                            <option value="y" ${obj.moveAxis === 'y' || !obj.moveAxis ? 'selected' : ''}>Dikey (Y)</option>
+                            <option value="x" ${obj.moveAxis === 'x' ? 'selected' : ''}>Yatay (X)</option>
+                        </select>
+                    </div>
+                    <div class="editor-input-group">
+                        <label>Hareket Menzili</label>
+                        <input type="number" id="inspect-flame-move-range" value="${obj.moveRange || 100}">
+                    </div>
+                    <div class="editor-input-group">
+                        <label>Hareket Hızı</label>
+                        <input type="number" step="0.1" id="inspect-flame-move-speed" value="${obj.moveSpeed || 1.5}">
+                    </div>
+                `;
+            }
         } else if (type === 'hazard' && obj.type === 'spike') {
             html += `
                 <div class="editor-input-group">
@@ -1446,6 +1514,38 @@ export class LevelEditor {
         addUpdateEvent('inspect-bounce-force', (val) => { obj.force = parseFloat(val) || 12.0; });
         addUpdateEvent('inspect-teleport-color', (val) => { obj.color = val; });
         addUpdateEvent('inspect-trigger-gate', (val) => { obj.linkedGateId = parseInt(val) || 101; });
+
+        addUpdateEvent('inspect-flame-dir', (val) => { obj.dir = val; });
+        addUpdateEvent('inspect-flame-range', (val) => { obj.range = parseInt(val) || 200; });
+        addUpdateEvent('inspect-flame-id', (val) => { obj.id = parseInt(val) || 9001; });
+        
+        const flameActive = document.getElementById('inspect-flame-active');
+        if (flameActive) {
+            flameActive.addEventListener('change', () => {
+                obj.active = flameActive.checked;
+                this.saveToLocalStorage();
+            });
+        }
+
+        const flameMoving = document.getElementById('inspect-flame-moving');
+        if (flameMoving) {
+            flameMoving.addEventListener('change', () => {
+                obj.moving = flameMoving.checked;
+                if (obj.moving) {
+                    obj.moveRange = obj.moveRange || 100;
+                    obj.moveSpeed = obj.moveSpeed || 1.5;
+                    obj.moveAxis = obj.moveAxis || 'y';
+                    obj.startX = obj.startX !== undefined ? obj.startX : obj.x;
+                    obj.startY = obj.startY !== undefined ? obj.startY : obj.y;
+                }
+                this.updateInspector();
+                this.saveToLocalStorage();
+            });
+        }
+
+        addUpdateEvent('inspect-flame-move-axis', (val) => { obj.moveAxis = val; });
+        addUpdateEvent('inspect-flame-move-range', (val) => { obj.moveRange = parseInt(val) || 100; });
+        addUpdateEvent('inspect-flame-move-speed', (val) => { obj.moveSpeed = parseFloat(val) || 1.5; });
     }
 
     /**
@@ -1482,6 +1582,8 @@ export class LevelEditor {
             lvl.buttons = lvl.buttons.filter(b => b !== obj);
         } else if (this.selectedObjectType === 'lever') {
             lvl.levers = lvl.levers.filter(l => l !== obj);
+        } else if (this.selectedObjectType === 'flamethrower') {
+            lvl.flamethrowers = (lvl.flamethrowers || []).filter(f => f !== obj);
         } else if (this.selectedObjectType === 'fallingPlatform') {
             lvl.fallingPlatforms = lvl.fallingPlatforms.filter(fp => fp !== obj);
         } else if (this.selectedObjectType === 'breakablePlatform') {
@@ -1697,6 +1799,24 @@ export class LevelEditor {
             linkedGateId: l.linkedGateId
         }));
 
+        const flamethrowers = (lvl.flamethrowers || []).map(f => ({
+            id: f.id !== undefined ? f.id : Math.random(),
+            startX: Math.round(f.startX !== undefined ? f.startX : f.x),
+            startY: Math.round(f.startY !== undefined ? f.startY : f.y),
+            x: Math.round(f.x),
+            y: Math.round(f.y),
+            w: Math.round(f.w),
+            h: Math.round(f.h),
+            dir: f.dir || 'right',
+            range: Math.round(f.range || 200),
+            moving: !!f.moving,
+            moveRange: Math.round(f.moveRange || 100),
+            moveSpeed: f.moveSpeed || 1.5,
+            moveAxis: f.moveAxis || 'y',
+            disabled: !!f.disabled,
+            active: f.active !== undefined ? f.active : true
+        }));
+
         const fallingPlatforms = (lvl.fallingPlatforms || []).map(p => ({
             startX: Math.round(p.startX !== undefined ? p.startX : p.x),
             startY: Math.round(p.startY !== undefined ? p.startY : p.y),
@@ -1777,6 +1897,7 @@ export class LevelEditor {
             bouncePads,
             buttons,
             levers,
+            flamethrowers,
             fallingPlatforms,
             breakablePlatforms,
             hiddenPassages,
@@ -1926,6 +2047,7 @@ export class LevelEditor {
                 lvl.bouncePads = [];
                 lvl.buttons = [];
                 lvl.levers = [];
+                lvl.flamethrowers = [];
                 lvl.fallingPlatforms = [];
                 lvl.breakablePlatforms = [];
                 lvl.hiddenPassages = [];
@@ -2334,6 +2456,27 @@ export class LevelEditor {
                     }));
                 } else {
                     lvl.checkpoints = [];
+                }
+
+                // Parse flamethrowers
+                if (Array.isArray(data.flamethrowers)) {
+                    lvl.flamethrowers = data.flamethrowers.map(f => ({
+                        id: f.id !== undefined ? f.id : Math.random(),
+                        startX: f.startX !== undefined ? f.startX : f.x,
+                        startY: f.startY !== undefined ? f.startY : f.y,
+                        x: f.x,
+                        y: f.y,
+                        w: f.w || 32,
+                        h: f.h || 32,
+                        dir: f.dir || 'right',
+                        range: f.range || 200,
+                        moving: !!f.moving,
+                        moveRange: f.moveRange || 100,
+                        moveSpeed: f.moveSpeed || 1.5,
+                        moveAxis: f.moveAxis || 'y',
+                        disabled: !!f.disabled,
+                        active: f.active !== undefined ? f.active : true
+                    }));
                 }
 
                 document.getElementById('editor-level-width').value = lvl.width;
@@ -2802,6 +2945,25 @@ export class LevelEditor {
                     r: 15,
                     activated: false
                 });
+            } else if (this.activeTool === 'create_flamethrower') {
+                if (!lvl.flamethrowers) lvl.flamethrowers = [];
+                lvl.flamethrowers.push({
+                    id: 9000 + Math.floor(Math.random() * 1000),
+                    startX: snapX,
+                    startY: snapY,
+                    x: snapX,
+                    y: snapY,
+                    w: 32,
+                    h: 32,
+                    dir: 'right',
+                    range: 200,
+                    moving: false,
+                    moveRange: 100,
+                    moveSpeed: 1.5,
+                    moveAxis: 'y',
+                    disabled: false,
+                    active: true
+                });
             }
 
             this.saveToLocalStorage(); // Auto-save after creation
@@ -3002,6 +3164,14 @@ export class LevelEditor {
             for (const d of lvl.decorations) {
                 if (mx > d.x && mx < d.x + d.w && my > d.y && my < d.y + d.h) {
                     return { type: 'decoration', obj: d };
+                }
+            }
+        }
+
+        if (lvl.flamethrowers) {
+            for (const f of lvl.flamethrowers) {
+                if (mx > f.x && mx < f.x + f.w && my > f.y && my < f.y + f.h) {
+                    return { type: 'flamethrower', obj: f };
                 }
             }
         }
