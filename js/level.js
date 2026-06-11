@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v18';
-import { THEMES } from './generator.js?v=v18';
+import { audio } from './audio.js?v=v19';
+import { THEMES } from './generator.js?v=v19';
 
 /**
  * Viscora Level Design & Manager
@@ -8,6 +8,12 @@ import { THEMES } from './generator.js?v=v18';
 export class Level {
     constructor() {
         this.currentLevel = 1;
+        this.dragonHeadImage = new Image();
+        this.dragonHeadImage.src = 'assets/dragon_head.png';
+        this.dragonHeadLoaded = false;
+        this.dragonHeadImage.onload = () => {
+            this.dragonHeadLoaded = true;
+        };
         this.loadLevel(1);
     }
 
@@ -4244,60 +4250,92 @@ export class Level {
                     ctx.restore();
                 }
 
-                // 2. Taban Metal Kutuyu Çiz (Launcher Body)
-                ctx.fillStyle = '#1e293b';
-                ctx.strokeStyle = '#475569';
-                ctx.lineWidth = 2.5;
-                ctx.fillRect(f.x, f.y, f.w, f.h);
-                ctx.strokeRect(f.x, f.y, f.w, f.h);
+                // 2. Taban Metal Kutuyu Çiz veya Ejderha Kafası Assetini Çiz
+                if (this.dragonHeadLoaded) {
+                    ctx.save();
+                    const cx = f.x + f.w / 2;
+                    const cy = f.y + f.h / 2;
+                    ctx.translate(cx, cy);
+                    
+                    if (f.dir === 'left') {
+                        ctx.scale(-1, 1);
+                    } else if (f.dir === 'down') {
+                        ctx.rotate(Math.PI / 2);
+                    } else if (f.dir === 'up') {
+                        ctx.rotate(-Math.PI / 2);
+                    }
+                    
+                    // Draw dragon head centered (width 32, height 58 based on ratio 1.82)
+                    ctx.drawImage(this.dragonHeadImage, -16, -29, 32, 58);
+                    
+                    // 3. Glowing Eye Effect (active state)
+                    if (f.active && !f.disabled) {
+                        const pulse = Math.sin(this.time * 15) * 1.5;
+                        ctx.fillStyle = '#ffb700';
+                        ctx.shadowColor = '#ff5100';
+                        ctx.shadowBlur = 8 + pulse;
+                        ctx.beginPath();
+                        ctx.arc(6.5, 0, 2.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    
+                    ctx.restore();
+                } else {
+                    // Fallback: Taban Metal Kutuyu Çiz (Launcher Body)
+                    ctx.fillStyle = '#1e293b';
+                    ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 2.5;
+                    ctx.fillRect(f.x, f.y, f.w, f.h);
+                    ctx.strokeRect(f.x, f.y, f.w, f.h);
 
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(f.x + 6, f.y + 6, f.w - 12, f.h - 12);
-                ctx.strokeRect(f.x + 6, f.y + 6, f.w - 12, f.h - 12);
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillRect(f.x + 6, f.y + 6, f.w - 12, f.h - 12);
+                    ctx.strokeRect(f.x + 6, f.y + 6, f.w - 12, f.h - 12);
 
-                // 3. Üfleç Borusunu Çiz (Nozzle)
-                ctx.fillStyle = '#475569';
-                ctx.strokeStyle = '#334155';
-                ctx.lineWidth = 2;
-                
-                let nozzleX = f.x + f.w / 2 - 8;
-                let nozzleY = f.y + f.h / 2 - 8;
-                let nozzleW = 16;
-                let nozzleH = 16;
+                    // Üfleç Borusunu Çiz (Nozzle)
+                    ctx.fillStyle = '#475569';
+                    ctx.strokeStyle = '#334155';
+                    ctx.lineWidth = 2;
+                    
+                    let nozzleX = f.x + f.w / 2 - 8;
+                    let nozzleY = f.y + f.h / 2 - 8;
+                    let nozzleW = 16;
+                    let nozzleH = 16;
 
-                if (f.dir === 'right') {
-                    nozzleX = f.x + f.w;
-                    nozzleY = f.y + f.h / 2 - 6;
-                    nozzleW = 8;
-                    nozzleH = 12;
-                } else if (f.dir === 'left') {
-                    nozzleX = f.x - 8;
-                    nozzleY = f.y + f.h / 2 - 6;
-                    nozzleW = 8;
-                    nozzleH = 12;
-                } else if (f.dir === 'down') {
-                    nozzleX = f.x + f.w / 2 - 6;
-                    nozzleY = f.y + f.h;
-                    nozzleW = 12;
-                    nozzleH = 8;
-                } else if (f.dir === 'up') {
-                    nozzleX = f.x + f.w / 2 - 6;
-                    nozzleY = f.y - 8;
-                    nozzleW = 12;
-                    nozzleH = 8;
+                    if (f.dir === 'right') {
+                        nozzleX = f.x + f.w;
+                        nozzleY = f.y + f.h / 2 - 6;
+                        nozzleW = 8;
+                        nozzleH = 12;
+                    } else if (f.dir === 'left') {
+                        nozzleX = f.x - 8;
+                        nozzleY = f.y + f.h / 2 - 6;
+                        nozzleW = 8;
+                        nozzleH = 12;
+                    } else if (f.dir === 'down') {
+                        nozzleX = f.x + f.w / 2 - 6;
+                        nozzleY = f.y + f.h;
+                        nozzleW = 12;
+                        nozzleH = 8;
+                    } else if (f.dir === 'up') {
+                        nozzleX = f.x + f.w / 2 - 6;
+                        nozzleY = f.y - 8;
+                        nozzleW = 12;
+                        nozzleH = 8;
+                    }
+                    ctx.fillRect(nozzleX, nozzleY, nozzleW, nozzleH);
+                    ctx.strokeRect(nozzleX, nozzleY, nozzleW, nozzleH);
+
+                    // Durum Işığı Çiz (LED Indicator)
+                    let ledColor = '#ef4444';
+                    if (f.active && !f.disabled) {
+                        ledColor = (this.time * 5) % 2 > 1 ? '#eab308' : '#f97316';
+                    }
+                    ctx.fillStyle = ledColor;
+                    ctx.beginPath();
+                    ctx.arc(f.x + f.w / 2, f.y + f.h / 2, 4, 0, Math.PI * 2);
+                    ctx.fill();
                 }
-                ctx.fillRect(nozzleX, nozzleY, nozzleW, nozzleH);
-                ctx.strokeRect(nozzleX, nozzleY, nozzleW, nozzleH);
-
-                // 4. Durum Işığı Çiz (LED Indicator)
-                let ledColor = '#ef4444';
-                if (f.active && !f.disabled) {
-                    ledColor = (this.time * 5) % 2 > 1 ? '#eab308' : '#f97316';
-                }
-                ctx.fillStyle = ledColor;
-                ctx.beginPath();
-                ctx.arc(f.x + f.w / 2, f.y + f.h / 2, 4, 0, Math.PI * 2);
-                ctx.fill();
 
                 ctx.restore();
             });
