@@ -121,7 +121,7 @@ export class Boss {
         if (!level || !level.platforms) return false;
 
         const allPlats = [
-            ...(level.platforms || []),
+            ...(level.platforms ? level.platforms.filter(p => !p.passage) : []),
             ...(level.movingPlatforms || []),
             ...(level.fallingPlatforms ? level.fallingPlatforms.filter(p => !p.fallen) : []),
             ...(level.breakablePlatforms ? level.breakablePlatforms.filter(p => !p.broken) : [])
@@ -568,7 +568,7 @@ export class Boss {
         const activeFalling = level.fallingPlatforms ? level.fallingPlatforms.filter(p => !p.fallen) : [];
         const activeBreakable = level.breakablePlatforms ? level.breakablePlatforms.filter(p => !p.broken) : [];
         const allPlats = [
-            ...(level.platforms || []),
+            ...(level.platforms ? level.platforms.filter(p => !p.passage) : []),
             ...(level.movingPlatforms || []),
             ...activeFalling,
             ...activeBreakable

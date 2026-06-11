@@ -92,7 +92,8 @@ export class Level {
                         h: p.h || 40,
                         type: p.type || 'normal',
                         sticky: p.type === 'sticky',
-                        slippery: p.type === 'slippery'
+                        slippery: p.type === 'slippery',
+                        passage: p.type === 'passage' || !!p.passage
                     }));
                 } else {
                     this.platforms = [];
@@ -2607,6 +2608,7 @@ export class Level {
         ];
         
         for (const plat of allPlats) {
+            if (plat.passage) continue;
             if (nextX + block.w > plat.x && nextX < plat.x + plat.w &&
                 block.y + block.h > plat.y && block.y < plat.y + plat.h) {
                 return false; // Blocked by static platform
@@ -2897,6 +2899,7 @@ export class Level {
                     ...(this.flamethrowers || [])
                 ];
                 for (const plat of allPlats) {
+                    if (plat.passage) continue;
                     if (block.x + block.w > plat.x && block.x < plat.x + plat.w &&
                         block.y + block.h > plat.y && block.y < plat.y + plat.h) {
                         if (block.vy > 0) {

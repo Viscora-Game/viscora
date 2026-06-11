@@ -58,6 +58,7 @@ export class Enemy {
 
             // Platform duvar çarpışma tespiti (Dikey sekme)
             for (const plat of level.platforms) {
+                if (plat.passage) continue;
                 if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2, plat)) {
                     if (this.vy > 0) {
                         this.y = plat.y - this.radius;
@@ -83,6 +84,7 @@ export class Enemy {
 
             // Platform duvar çarpışma tespiti (Yatay sekme)
             for (const plat of level.platforms) {
+                if (plat.passage) continue;
                 if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2, plat)) {
                     if (this.vx > 0) {
                         this.x = plat.x - this.radius;

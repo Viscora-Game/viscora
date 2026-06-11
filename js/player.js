@@ -317,7 +317,10 @@ export class Player {
         const colliders = [];
         if (level.platforms) {
             for (let i = 0; i < level.platforms.length; i++) {
-                colliders.push(level.platforms[i]);
+                const plat = level.platforms[i];
+                if (!plat.passage) {
+                    colliders.push(plat);
+                }
             }
         }
         if (level.movingPlatforms) {
