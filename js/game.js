@@ -948,8 +948,8 @@ export class GameManager {
         const dy = this.player.y - (p.y + p.h / 2);
         const dist = Math.sqrt(dx * dx + dy * dy);
         
-        // 10. ve 20. bölümler için boss'un ölmüş olması gerekir
-        const isBossDefeated = (this.currentLevel !== 10 && this.currentLevel !== 20) || (this.boss && this.boss.isDead);
+        // 10, 20, 30, 40 vb. tüm boss bölümleri için boss'un ölmüş olması gerekir
+        const isBossDefeated = (this.currentLevel <= 0 || this.currentLevel % 10 !== 0 || this.currentLevel === 999) || (this.boss && this.boss.isDead);
         
         if (dist < this.player.radius + p.w / 2 - 10 && isBossDefeated) {
             this.state = 'WIN';
@@ -1037,7 +1037,7 @@ export class GameManager {
                     this.player.deathSplashDone = true;
                 }
                 
-                const isBossFight = (this.currentLevel === 10 || this.currentLevel === 20);
+                const isBossFight = (this.currentLevel > 0 && this.currentLevel % 10 === 0 && this.currentLevel !== 999);
                 const isHardcore = (this.difficulty === 'hardcore');
                 let usedRespawn = false;
 
