@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v21';
-import { THEMES } from './generator.js?v=v21';
+import { audio } from './audio.js?v=v22';
+import { THEMES } from './generator.js?v=v22';
 
 /**
  * Viscora Level Design & Manager
@@ -205,7 +205,15 @@ export class Level {
                                   l.type === 'blue' ? 'laser' :
                                   (l.type || 'laser'),
                             id: l.id !== undefined ? l.id : (100 + Math.floor(Math.random() * 900)),
-                            disabled: false
+                            disabled: false,
+                            moving: l.moving || false,
+                            startX: l.startX !== undefined ? l.startX : l.x,
+                            startY: l.startY !== undefined ? l.startY : l.y,
+                            targetX: l.targetX !== undefined ? l.targetX : l.x,
+                            targetY: l.targetY !== undefined ? l.targetY : l.y,
+                            speed: l.speed || 0.015,
+                            dir: l.dir || 1,
+                            progress: l.progress || 0
                         });
                     });
                 }
@@ -219,7 +227,15 @@ export class Level {
                             h: n.h !== undefined ? n.h : 220,
                             type: 'net',
                             id: n.id !== undefined ? n.id : (100 + Math.floor(Math.random() * 900)),
-                            disabled: false
+                            disabled: false,
+                            moving: n.moving || false,
+                            startX: n.startX !== undefined ? n.startX : n.x,
+                            startY: n.startY !== undefined ? n.startY : n.y,
+                            targetX: n.targetX !== undefined ? n.targetX : n.x,
+                            targetY: n.targetY !== undefined ? n.targetY : n.y,
+                            speed: n.speed || 0.015,
+                            dir: n.dir || 1,
+                            progress: n.progress || 0
                         });
                     });
                 }
@@ -234,7 +250,15 @@ export class Level {
                                 h: g.h || 220,
                                 type: g.type || 'laser',
                                 id: g.id || (100 + Math.floor(Math.random() * 900)),
-                                disabled: g.disabled || false
+                                disabled: g.disabled || false,
+                                moving: g.moving || false,
+                                startX: g.startX !== undefined ? g.startX : g.x,
+                                startY: g.startY !== undefined ? g.startY : g.y,
+                                targetX: g.targetX !== undefined ? g.targetX : g.x,
+                                targetY: g.targetY !== undefined ? g.targetY : g.y,
+                                speed: g.speed || 0.015,
+                                dir: g.dir || 1,
+                                progress: g.progress || 0
                             });
                         }
                     });
@@ -2828,6 +2852,39 @@ export class Level {
 
                 plat.x = plat.startX + (plat.targetX - plat.startX) * ease;
                 plat.y = plat.startY + (plat.targetY - plat.startY) * ease;
+            });
+        }
+
+        // Hareketli lazer ve ağ kapılarının (gates) konumlarını güncelle
+        if (this.gates) {
+            this.gates.forEach(gate => {
+                if (gate.moving) {
+                    if (gate.startX === undefined) gate.startX = gate.x;
+                    if (gate.startY === undefined) gate.startY = gate.y;
+                    if (gate.targetX === undefined) gate.targetX = gate.x;
+                    if (gate.targetY === undefined) gate.targetY = gate.y;
+                    if (gate.speed === undefined) gate.speed = 0.015;
+                    if (gate.dir === undefined) gate.dir = 1;
+                    if (gate.progress === undefined) gate.progress = 0;
+
+                    gate.prevX = gate.x;
+                    gate.prevY = gate.y;
+
+                    gate.progress += gate.speed * gate.dir;
+                    if (gate.progress >= 1) {
+                        gate.progress = 1;
+                        gate.dir = -1;
+                    } else if (gate.progress <= 0) {
+                        gate.progress = 0;
+                        gate.dir = 1;
+                    }
+
+                    const t = gate.progress;
+                    const ease = t * t * (3 - 2 * t); // Smoothstep
+
+                    gate.x = gate.startX + (gate.targetX - gate.startX) * ease;
+                    gate.y = gate.startY + (gate.targetY - gate.startY) * ease;
+                }
             });
         }
 

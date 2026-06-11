@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v21';
-import { audio } from './audio.js?v=v21';
+import { ViscosityStates } from './viscosity.js?v=v22';
+import { audio } from './audio.js?v=v22';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -973,7 +973,12 @@ export class Player {
                             this.vx = 0;
                         } else {
                             this.vy = 0;
-                            if (ny < 0) this.onGround = true;
+                            if (ny < 0) {
+                                this.onGround = true;
+                                if (gate.moving) {
+                                    this.ridingPlatform = gate;
+                                }
+                            }
                         }
                     }
                 }
