@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v42';
-import { Level } from './level.js?v=v42';
-import { Enemy, GelChaser } from './enemies.js?v=v42';
-import { UIManager } from './ui.js?v=v42';
-import { audio } from './audio.js?v=v42';
-import { LevelEditor } from './editor.js?v=v42';
-import { Boss, CyberBoss } from './boss.js?v=v42';
+import { Player } from './player.js?v=v43';
+import { Level } from './level.js?v=v43';
+import { Enemy, GelChaser } from './enemies.js?v=v43';
+import { UIManager } from './ui.js?v=v43';
+import { audio } from './audio.js?v=v43';
+import { LevelEditor } from './editor.js?v=v43';
+import { Boss, CyberBoss } from './boss.js?v=v43';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1155,6 +1155,10 @@ export class GameManager {
      * Ekran Çizimleri
      */
     draw() {
+        // Reset transform to base DPR scale to prevent any accumulated camera/zoom transformations from previous frames
+        const dpr = this._dpr || 1;
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
         // Ekranı temizle
         this.ctx.clearRect(0, 0, this.cssWidth, this.cssHeight);
 
