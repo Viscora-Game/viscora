@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'viscora-cache-v24';
+const CACHE_NAME = 'viscora-cache-v24';
 const ASSETS = [
   './',
   './index.html',
@@ -41,7 +41,7 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // API isteklerini veya GET dÄ±ÅŸÄ±ndaki istekleri Ã¶nbelleÄŸe alma
+  // API isteklerini veya GET dışındaki istekleri önbelleğe alma
   if (e.request.method !== 'GET' || e.request.url.includes('/api/')) {
     return;
   }
@@ -49,7 +49,7 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Arka planda gÃ¼ncel sÃ¼rÃ¼mÃ¼ sorgula ve Ã¶nbelleÄŸi gÃ¼ncelle (Stale-While-Revalidate)
+        // Arka planda güncel sürümü sorgula ve önbelleği güncelle (Stale-While-Revalidate)
         fetch(e.request).then((networkResponse) => {
           if (networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => cache.put(e.request, networkResponse));
@@ -61,4 +61,3 @@ self.addEventListener('fetch', (e) => {
     })
   );
 });
-

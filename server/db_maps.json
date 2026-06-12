@@ -1,0 +1,89 @@
+[
+  {
+    "id": "map_1780772773638_348",
+    "name": "Test Lab",
+    "author": "Sudenaz Test",
+    "data": {
+      "width": 1200,
+      "height": 600,
+      "spawn": {
+        "x": 100,
+        "y": 300
+      },
+      "portal": {
+        "x": 900,
+        "y": 300,
+        "w": 60,
+        "h": 80,
+        "angle": 0
+      },
+      "platforms": [
+        {
+          "x": 100,
+          "y": 350,
+          "w": 200,
+          "h": 40,
+          "type": "normal"
+        },
+        {
+          "x": 400,
+          "y": 300,
+          "w": 200,
+          "h": 40,
+          "type": "sticky"
+        }
+      ]
+    },
+    "likes": 0,
+    "createdAt": "2026-06-06T22:06:13.638706"
+  },
+  {
+    "id": "map_1780772843226_854",
+    "name": "Test Lab",
+    "author": "Sudenaz Test",
+    "data": {
+      "width": 1200,
+      "height": 600,
+      "spawn": {
+        "x": 100,
+        "y": 300
+      },
+      "portal": {
+        "x": 900,
+        "y": 300,
+        "w": 60,
+        "h": 80,
+        "angle": 0
+      },
+      "platforms": [
+        {
+          "x": 100,
+          "y": 350,
+          "w": 200,
+          "h": 40,
+          "type": "normal"
+        },
+        {
+          "x": 400,
+          "y": 300,
+          "w": 200,
+          "h": 40,
+          "type": "sticky"
+        }
+      ]
+    },
+    "likes": 1,
+    "createdAt": "2026-06-06T22:07:23.226576"
+  },
+  {
+    "id": "map_1780772849394_243",
+    "name": "Second Lab",
+    "author": "Sudenaz Test 2",
+    "data": {
+      "width": 800,
+      "height": 600
+    },
+    "likes": 0,
+    "createdAt": "2026-06-06T22:07:29.394846"
+  }
+]

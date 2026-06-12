@@ -1,0 +1,89 @@
+        } else if (levelNumber === 3) {
+            // ═══════════════════════════════════════════════
+            // BÖLÜM 3: NEON GEÇİTLER II — Platform Zincirleri
+            // ═══════════════════════════════════════════════
+            this.width = 2850;
+            this.height = 600;
+            this.spawnX = 80;
+            this.spawnY = 400;
+
+            this.platforms = [
+                { x: 0, y: 480, w: 1140, h: 40, type: 'normal' },
+                { x: 0, y: 120, w: 2580, h: 40, type: 'normal' },
+                { x: 40, y: 480, w: 1060, h: 40, type: 'slippery', slippery: true },
+                { x: 1100, y: 480, w: 500, h: 40, type: 'normal' },
+                { x: 1140, y: 480, w: 1450, h: 40, type: 'normal' }
+            ];
+
+            this.hazards = [
+                { x: 280, y: 160, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 400, y: 160, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 540, y: 160, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 660, y: 160, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 780, y: 160, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 900, y: 160, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 1020, y: 160, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 1420, y: 460, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1800, y: 460, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1240, y: 460, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1600, y: 460, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1980, y: 460, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 2160, y: 460, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 2400, y: 460, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 2400, y: 160, w: 60, h: 20, type: 'spike', direction: 'down' }
+            ];
+
+            this.movingPlatforms = [];
+            this.bouncePads = [];
+            this.pressurePlates = [];
+            this.pushBlocks = [];
+            this.conveyors = [
+                { x: 40, y: 460, w: 1060, h: 20, direction: 1, speed: 1.5 }
+            ];
+            this.teleportPairs = [];
+
+            this.gates = [
+                { x: 360, y: 240, w: 20, h: 220, type: 'laser', id: 866, disabled: false },
+                { x: 600, y: 240, w: 20, h: 220, type: 'laser', id: 299, disabled: false },
+                { x: 820, y: 240, w: 20, h: 220, type: 'laser', id: 575, disabled: false },
+                { x: 2420, y: 180, w: 20, h: 280, type: 'net', id: 911, disabled: false }
+            ];
+
+            this.collectibles = [];
+
+            this.enemies = [
+                { x: 1360, y: 360, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 1720, y: 360, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 2100, y: 340, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
+                { x: 1920, y: 380, rangeX: 120, speed: 1.5, isVertical: true, color: '#d946ef' },
+                { x: 2340, y: 440, rangeX: 120, speed: 1.2, isVertical: false, color: '#f43f5e' }
+            ];
+
+            this.fallingBlockTraps = [
+                { startX: 240, startY: 260, x: 240, y: 260, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
+                { startX: 460, startY: 260, x: 460, y: 260, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
+                { startX: 700, startY: 260, x: 700, y: 260, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
+                { startX: 900, startY: 260, x: 900, y: 260, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 }
+            ];
+
+            this.portal = {
+                x: 2540,
+                y: 320,
+                w: 60,
+                h: 80,
+                angle: 0
+            };
+
+            this.decorations = [
+                { x: 40, y: 200, w: 1060, h: 20, type: 'pipe', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 260, y: 180, w: 32, h: 32, type: 'warning_light', rotation: 0, startRotation: 0, state: 4.416814692820392, text: '', color: '' },
+                { x: 480, y: 180, w: 32, h: 32, type: 'warning_light', rotation: 0, startRotation: 0, state: 4.416814692820392, text: '', color: '' },
+                { x: 720, y: 180, w: 32, h: 32, type: 'warning_light', rotation: 0, startRotation: 0, state: 4.416814692820392, text: '', color: '' },
+                { x: 920, y: 180, w: 32, h: 32, type: 'warning_light', rotation: 0, startRotation: 0, state: 4.416814692820392, text: '', color: '' },
+                { x: 0, y: 480, w: 2580, h: 40, type: 'pano', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 1100, y: 160, w: 40, h: 320, type: 'box', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 0, y: 120, w: 2570, h: 40, type: 'pano', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 0, y: 160, w: 40, h: 320, type: 'box', rotation: 0, startRotation: 0, state: 0, text: '', color: '' },
+                { x: 60, y: 240, w: 160, h: 80, type: 'textbox', rotation: 0, startRotation: 0, state: 0, text: '                                                               KOŞ KOŞ KOŞ ! ! !', color: '#d946ef' },
+                { x: 2480, y: 200, w: 200, h: 80, type: 'textbox', rotation: 0, startRotation: 0, state: 0, text: 'Ağ Kapısından sadece doğru renk ile geçebilirsin !', color: '#06b6d4' }
+            ];
