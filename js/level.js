@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v32';
-import { THEMES } from './generator.js?v=v32';
+import { audio } from './audio.js?v=v33';
+import { THEMES } from './generator.js?v=v33';
 
 /**
  * Viscora Level Design & Manager
@@ -3287,6 +3287,30 @@ export class Level {
                 
                 player.takeDamage(1);
             }
+
+            // Düşmanların tehlikeye düşme kontrolü (Baiting)
+            if (player.game && player.game.enemies) {
+                player.game.enemies.forEach(enemy => {
+                    if (enemy.isDead) return;
+                    // Düşmanlar için toleransı daha dar tutup tam içine girdiklerinde tetiklenmesini sağlıyoruz
+                    const eBufferX = 4;
+                    const eBufferY = 4;
+                    if (enemy.x + enemy.radius - eBufferX > hazard.x && 
+                        enemy.x - enemy.radius + eBufferX < hazard.x + hazard.w &&
+                        enemy.y + enemy.radius - eBufferY > hazard.y &&
+                        enemy.y - enemy.radius + eBufferY < hazard.y + hazard.h) {
+                        
+                        if (enemy.type === 'chaser' && enemy.explode) {
+                            enemy.explode(player, player.game.emitParticles.bind(player.game));
+                        } else {
+                            enemy.isDead = true;
+                            if (player.game.emitParticles) {
+                                player.game.emitParticles(enemy.x, enemy.y, 'enemy_pop', enemy.color, 15);
+                            }
+                        }
+                    }
+                });
+            }
         });
 
         // --- BUTON KONTROLLERİ ---
@@ -3589,6 +3613,30 @@ export class Level {
 
                     if (!arrow.alive) return;
 
+                    // Düşman çarpışma kontrolü (Baiting)
+                    if (player.game && player.game.enemies) {
+                        for (const enemy of player.game.enemies) {
+                            if (enemy.isDead) continue;
+                            const edx = arrow.x - enemy.x;
+                            const edy = arrow.y - enemy.y;
+                            const dist = Math.sqrt(edx * edx + edy * edy);
+                            if (dist < enemy.radius + 6) {
+                                arrow.alive = false;
+                                if (enemy.type === 'chaser' && enemy.explode) {
+                                    enemy.explode(player, player.game.emitParticles.bind(player.game));
+                                } else {
+                                    enemy.isDead = true;
+                                    if (player.game.emitParticles) {
+                                        player.game.emitParticles(enemy.x, enemy.y, 'enemy_pop', enemy.color, 15);
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!arrow.alive) return;
+
                     // Oyuncu çarpışma kontrolü
                     const adx = arrow.x - player.x;
                     const ady = arrow.y - player.y;
@@ -3692,6 +3740,25 @@ export class Level {
                     if (player.x + player.radius - buffer > flameArea.x && player.x - player.radius + buffer < flameArea.x + flameArea.w &&
                         player.y + player.radius - buffer > flameArea.y && player.y - player.radius + buffer < flameArea.y + flameArea.h) {
                         player.takeDamage(1);
+                    }
+
+                    // Düşman alev temas kontrolü (Baiting)
+                    if (player.game && player.game.enemies) {
+                        player.game.enemies.forEach(enemy => {
+                            if (enemy.isDead) return;
+                            const eBuffer = 4;
+                            if (enemy.x + enemy.radius - eBuffer > flameArea.x && enemy.x - enemy.radius + eBuffer < flameArea.x + flameArea.w &&
+                                enemy.y + enemy.radius - eBuffer > flameArea.y && enemy.y - enemy.radius + eBuffer < flameArea.y + flameArea.h) {
+                                if (enemy.type === 'chaser' && enemy.explode) {
+                                    enemy.explode(player, player.game.emitParticles.bind(player.game));
+                                } else {
+                                    enemy.isDead = true;
+                                    if (player.game.emitParticles) {
+                                        player.game.emitParticles(enemy.x, enemy.y, 'enemy_pop', enemy.color, 15);
+                                    }
+                                }
+                            }
+                        });
                     }
                 }
 

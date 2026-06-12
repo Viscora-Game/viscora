@@ -469,15 +469,44 @@ export class GelChaser extends Enemy {
 
         // Daire çember çarpışması
         if (dist < player.radius + this.radius - 4) {
+            const stompVy = player.vy > 0 ? player.vy : (player.prevVy > 0 ? player.prevVy : 0);
+            const isSteppingOn = stompVy > 0 && player.y + player.radius - stompVy <= this.y - this.radius + 10;
+
             if (this.state === 'chase') {
-                // Kovalarken temas edilirse chaser anında patlar!
-                this.explode(player, emitParticles);
-                if (onStomp) onStomp(); // Ekran sarsıntısı ve donma etkisi
+                // Kovalama modunda patlama zamanlayıcısı kontrolü
+                if (this.chaseTimer < 1.0) {
+                    // Son 1 saniyede (aşırı kararsız flaş modu) her türlü temas anında patlatır!
+                    this.explode(player, emitParticles);
+                    if (onStomp) onStomp();
+                } else {
+                    // İlk 1.5 saniyede (şişme aşaması) tam üstüne basarak chaser'ı güvenle defuse edebiliriz!
+                    if (isSteppingOn) {
+                        this.isDead = true;
+                        
+                        let bounceForce = 7.5;
+                        if (player.viscosity.id === 'LOW') bounceForce = 8.2;
+                        if (player.viscosity.id === 'HIGH') bounceForce = 5.0;
+                        
+                        player.vy = -bounceForce;
+                        player.onGround = false;
+                        player.applySquish(-0.4, 0.45);
+                        
+                        // Defuse edilince güvenli yeşil parçacıklar yayarız
+                        if (emitParticles) {
+                            emitParticles(this.x, this.y, 'enemy_pop', '#10b981', 22);
+                        }
+                        
+                        if (onStomp) {
+                            onStomp();
+                        }
+                    } else {
+                        // Yanına çarparsa patlar
+                        this.explode(player, emitParticles);
+                        if (onStomp) onStomp();
+                    }
+                }
             } else {
-                // Diğer durumlarda standart ezme/ezilme davranışları
-                const stompVy = player.vy > 0 ? player.vy : (player.prevVy > 0 ? player.prevVy : 0);
-                const isSteppingOn = stompVy > 0 && player.y + player.radius - stompVy <= this.y - this.radius + 10;
-                
+                // Diğer durumlarda (devriye, algılama, uyarı) standart ezme/ezilme davranışları
                 if (isSteppingOn) {
                     this.isDead = true;
                     
