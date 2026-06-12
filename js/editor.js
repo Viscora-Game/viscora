@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v40';
-import { audio } from './audio.js?v=v40';
-import { LevelGenerator } from './generator.js?v=v40';
+import { Enemy, GelChaser } from './enemies.js?v=v41';
+import { audio } from './audio.js?v=v41';
+import { LevelGenerator } from './generator.js?v=v41';
 
 export class LevelEditor {
     constructor(game) {
@@ -2701,6 +2701,48 @@ export class LevelEditor {
                     }));
                 } else {
                     lvl.arrowShooters = [];
+                }
+
+                // Parse laserEmitters
+                if (Array.isArray(data.laserEmitters)) {
+                    lvl.laserEmitters = data.laserEmitters.map(e => ({
+                        x: e.x,
+                        y: e.y,
+                        w: e.w || 30,
+                        h: e.h || 30,
+                        direction: e.direction !== undefined ? e.direction : 0,
+                        color: e.color || 'blue',
+                        path: []
+                    }));
+                } else {
+                    lvl.laserEmitters = [];
+                }
+
+                // Parse laserReceivers
+                if (Array.isArray(data.laserReceivers)) {
+                    lvl.laserReceivers = data.laserReceivers.map(r => ({
+                        x: r.x,
+                        y: r.y,
+                        w: r.w || 30,
+                        h: r.h || 30,
+                        linkedGateId: r.linkedGateId || 101,
+                        activated: false
+                    }));
+                } else {
+                    lvl.laserReceivers = [];
+                }
+
+                // Parse staticMirrors
+                if (Array.isArray(data.staticMirrors)) {
+                    lvl.staticMirrors = data.staticMirrors.map(m => ({
+                        x: m.x,
+                        y: m.y,
+                        w: m.w || 40,
+                        h: m.h || 40,
+                        mirrorType: m.mirrorType || 'top-left'
+                    }));
+                } else {
+                    lvl.staticMirrors = [];
                 }
 
                 document.getElementById('editor-level-width').value = lvl.width;

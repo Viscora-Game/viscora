@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v40';
-import { THEMES } from './generator.js?v=v40';
+import { audio } from './audio.js?v=v41';
+import { THEMES } from './generator.js?v=v41';
 
 /**
  * Viscora Level Design & Manager
@@ -3980,6 +3980,40 @@ export class Level {
                         if (dist >= 0 && dist < closestDist) {
                             closestDist = dist;
                             closestCollider = { type: 'platform', obj: plat };
+                        }
+                    });
+                }
+
+                // A3. Hareketli platformlar ile çarpışma (Lazer geçmesin)
+                if (this.movingPlatforms) {
+                    this.movingPlatforms.forEach(plat => {
+                        const dist = rayIntersectsAABB(currX, currY, dx, dy, plat);
+                        if (dist >= 0 && dist < closestDist) {
+                            closestDist = dist;
+                            closestCollider = { type: 'platform', obj: plat };
+                        }
+                    });
+                }
+
+                // A4. Kapılar / Lazer bariyerleri ile çarpışma (Aktif olanlar lazeri engeller)
+                if (this.gates) {
+                    this.gates.forEach(gate => {
+                        if (gate.disabled) return;
+                        const dist = rayIntersectsAABB(currX, currY, dx, dy, gate);
+                        if (dist >= 0 && dist < closestDist) {
+                            closestDist = dist;
+                            closestCollider = { type: 'platform', obj: gate };
+                        }
+                    });
+                }
+
+                // A5. Düşen blok tuzakları ile çarpışma (Lazer geçmesin)
+                if (this.fallingBlockTraps) {
+                    this.fallingBlockTraps.forEach(trap => {
+                        const dist = rayIntersectsAABB(currX, currY, dx, dy, trap);
+                        if (dist >= 0 && dist < closestDist) {
+                            closestDist = dist;
+                            closestCollider = { type: 'platform', obj: trap };
                         }
                     });
                 }
