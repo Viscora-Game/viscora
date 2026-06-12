@@ -240,6 +240,11 @@ export class Player {
             this.glowBoost = 15;
             audio.playJump();
             
+            // Emit landing-like dust particles under the player when jumping!
+            if (this.game) {
+                this.game.emitParticles(this.x, this.y + this.radius, 'land', this.viscosity.particleColor, 10);
+            }
+            
             // Anticipation: Önce yatay genişleme/basılma, yay tepkisiyle dikey uzama
             this.applySquish(0.3, -0.35);
             
@@ -278,6 +283,11 @@ export class Player {
                 this.applySquish(0.4, -0.4);
                 this.slingshotCharge = 0;
                 this.clingCooldown = 18; // Cooldown ~0.3s
+                
+                // Emit wall-jump dust particles from the contact point
+                if (this.game) {
+                    this.game.emitParticles(this.x + activeWall * this.radius, this.y, 'land', this.viscosity.particleColor, 10);
+                }
                 
                 if (this.onEvent) this.onEvent('jump');
             }

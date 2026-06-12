@@ -1238,6 +1238,52 @@ export class GameManager {
         this.ctx.fillStyle = bgGrad;
         this.ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
 
+        // 1. Far Parallax Cyber-Grid (Scrolling at 0.025)
+        this.ctx.save();
+        const themeCellColor = (this.level.theme && this.level.theme.cellColor) ? this.level.theme.cellColor : 'rgba(6, 182, 212, 0.8)';
+        this.ctx.strokeStyle = themeCellColor;
+        this.ctx.globalAlpha = 0.035;
+        this.ctx.lineWidth = 1.0;
+        const gridX = - (this.camera.x * 0.025) % 100;
+        const gridY = - (this.camera.y * 0.025) % 100;
+        
+        // Dikey grid çizgileri
+        for (let x = gridX; x < this.cssWidth; x += 100) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, 0);
+            this.ctx.lineTo(x, this.cssHeight);
+            this.ctx.stroke();
+        }
+        // Yatay grid çizgileri
+        for (let y = gridY; y < this.cssHeight; y += 100) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, y);
+            this.ctx.lineTo(this.cssWidth, y);
+            this.ctx.stroke();
+        }
+        this.ctx.restore();
+
+        // 2. Distant Neon Mountains/Pipes (Scrolling at 0.06)
+        this.ctx.save();
+        this.ctx.fillStyle = bgGrad;
+        this.ctx.strokeStyle = themeCellColor;
+        this.ctx.globalAlpha = 0.06;
+        this.ctx.lineWidth = 2.0;
+        this.ctx.beginPath();
+        const baseHeight = this.cssHeight * 0.65;
+        this.ctx.moveTo(0, this.cssHeight);
+        
+        for (let x = 0; x <= this.cssWidth; x += 30) {
+            const worldX = x + this.camera.x * 0.06;
+            const y = baseHeight + Math.sin(worldX * 0.003) * 45 + Math.cos(worldX * 0.007) * 20;
+            this.ctx.lineTo(x, y);
+        }
+        this.ctx.lineTo(this.cssWidth, this.cssHeight);
+        this.ctx.closePath();
+        this.ctx.stroke();
+        this.ctx.fill();
+        this.ctx.restore();
+
         // Paraks Derinlik Hücrelerini Çiz
         this.bgCells.forEach(cell => {
             cell.angle += cell.pulseSpeed;

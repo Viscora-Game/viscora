@@ -1,6 +1,4 @@
-/**
- * Viscora Enemy System
- */
+import { audio } from './audio.js?v=v37';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -42,6 +40,60 @@ export class Enemy {
      */
     update(level) {
         if (this.isDead) return;
+
+        // İtilebilir Blok Çarpışması (Push Block Collision)
+        if (level.pushBlocks) {
+            for (const block of level.pushBlocks) {
+                if (block.broken) continue;
+                
+                let closestX = Math.max(block.x, Math.min(this.x, block.x + block.w));
+                let closestY = Math.max(block.y, Math.min(this.y, block.y + block.h));
+                let dx = this.x - closestX;
+                let dy = this.y - closestY;
+                let distanceSq = dx * dx + dy * dy;
+                const distance = Math.sqrt(distanceSq) || 0.0001;
+                
+                if (distance < this.radius) {
+                    // Blok ezme kontrolü (yukarıdan düşen blok)
+                    const isFallenOn = block.vy > 1.0 && block.y + block.h - block.vy <= this.y - this.radius + 12;
+                    if (isFallenOn) {
+                        this.isDead = true;
+                        try { audio.playDamage(); } catch(e){}
+                        if (window.gameInstance && window.gameInstance.emitParticles) {
+                            window.gameInstance.emitParticles(this.x, this.y, 'enemy_pop', this.color, 22);
+                        }
+                        return;
+                    }
+
+                    // AABB Çember Çarpışma Çözümü (İtme)
+                    const overlap = this.radius - distance;
+                    let nx = dx / distance;
+                    let ny = dy / distance;
+                    
+                    this.x += nx * overlap;
+                    this.y += ny * overlap;
+                    
+                    // Eğer yatayda itildiyse ve dikey devriye değilse yön değiştir
+                    if (Math.abs(nx) > Math.abs(ny)) {
+                        if (!this.isVertical) {
+                            this.vx = -this.vx;
+                        }
+                    } else {
+                        if (ny < 0) { // Üstüne bastı
+                            if (this.isVertical) {
+                                this.vy = -this.vy;
+                            } else {
+                                this.vy = 0;
+                            }
+                        } else if (ny > 0) { // Kafasına çarptı
+                            if (this.isVertical) {
+                                this.vy = -this.vy;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         if (this.isVertical) {
             // Y ekseninde hareket
@@ -294,6 +346,57 @@ export class GelChaser extends Enemy {
      */
     update(level, player, emitParticles) {
         if (this.isDead) return;
+
+        // İtilebilir Blok Çarpışması (Push Block Collision)
+        if (level.pushBlocks) {
+            for (const block of level.pushBlocks) {
+                if (block.broken) continue;
+                
+                let closestX = Math.max(block.x, Math.min(this.x, block.x + block.w));
+                let closestY = Math.max(block.y, Math.min(this.y, block.y + block.h));
+                let dx = this.x - closestX;
+                let dy = this.y - closestY;
+                let distanceSq = dx * dx + dy * dy;
+                const distance = Math.sqrt(distanceSq) || 0.0001;
+                
+                if (distance < this.radius) {
+                    // Blok ezme kontrolü (yukarıdan düşen blok)
+                    const isFallenOn = block.vy > 1.0 && block.y + block.h - block.vy <= this.y - this.radius + 12;
+                    if (isFallenOn) {
+                        this.isDead = true;
+                        try { audio.playDamage(); } catch(e){}
+                        if (emitParticles) {
+                            emitParticles(this.x, this.y, 'enemy_pop', this.color, 22);
+                        } else if (window.gameInstance && window.gameInstance.emitParticles) {
+                            window.gameInstance.emitParticles(this.x, this.y, 'enemy_pop', this.color, 22);
+                        }
+                        return;
+                    }
+
+                    // AABB Çember Çarpışma Çözümü (İtme)
+                    const overlap = this.radius - distance;
+                    let nx = dx / distance;
+                    let ny = dy / distance;
+                    
+                    this.x += nx * overlap;
+                    this.y += ny * overlap;
+                    
+                    // Eğer yatayda itildiyse ve devriye durumundaysa yön değiştir
+                    if (Math.abs(nx) > Math.abs(ny)) {
+                        if (this.state === 'patrol') {
+                            this.vx = -this.vx;
+                        }
+                    } else {
+                        if (ny < 0) { // Üstüne bastı
+                            this.vy = 0;
+                            this.onGround = true;
+                        } else if (ny > 0) { // Kafasına çarptı
+                            this.vy = 0;
+                        }
+                    }
+                }
+            }
+        }
 
         // --- PLATFORM YERÇEKİMİ & DİKEY FİZİK ---
         this.vy += 0.28; // Yerçekimi ivmesi

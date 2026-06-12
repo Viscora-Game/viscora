@@ -539,6 +539,44 @@ class AudioManager {
             noiseSource.start(now);
             noiseSource.stop(now + noiseLength);
 
+            // 3. Extra organic textures depending on form
+            if (stateId === 'HIGH') {
+                // Deep sticky sub bass thud for heavy gel form
+                const subOsc = this.ctx.createOscillator();
+                const subGain = this.ctx.createGain();
+                subOsc.type = 'sine';
+                subOsc.frequency.setValueAtTime(90, now);
+                subOsc.frequency.exponentialRampToValueAtTime(30, now + 0.3);
+                
+                subGain.gain.setValueAtTime(0.5, now);
+                subGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                
+                subOsc.connect(subGain);
+                subGain.connect(this.sfxVolume);
+                subOsc.start(now);
+                subOsc.stop(now + 0.3);
+            } else if (stateId === 'LOW') {
+                // 3 quick bubbly splash plops for liquid form
+                for (let b = 0; b < 3; b++) {
+                    const popTime = now + b * 0.05;
+                    const popOsc = this.ctx.createOscillator();
+                    const popGain = this.ctx.createGain();
+                    
+                    popOsc.type = 'sine';
+                    popOsc.frequency.setValueAtTime(800 + b * 300 + Math.random() * 200, popTime);
+                    popOsc.frequency.exponentialRampToValueAtTime(2000, popTime + 0.04);
+                    
+                    popGain.gain.setValueAtTime(0.08, popTime);
+                    popGain.gain.exponentialRampToValueAtTime(0.001, popTime + 0.04);
+                    
+                    popOsc.connect(popGain);
+                    popGain.connect(this.sfxVolume);
+                    
+                    popOsc.start(popTime);
+                    popOsc.stop(popTime + 0.04);
+                }
+            }
+
         } catch (e) {
             console.error("Error playing shift SFX:", e);
         }
