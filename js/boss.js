@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v34';
+import { audio } from './audio.js?v=v35';
 
 export class Boss {
     constructor(x, y) {
@@ -550,6 +550,7 @@ export class Boss {
         this.isDead = true;
         this.vx = 0;
         this.vy = 0;
+        this.shockwaves = [];
         audio.playWin();
 
         if (player && player.game) {
@@ -956,9 +957,16 @@ export class CyberBoss extends Boss {
         this.invulnFrames = 0;
     }
 
+    die(player) {
+        super.die(player);
+        this.projectiles = [];
+        this.laserCharged = false;
+    }
+
     update(level, player) {
         if (this.isDead) {
-            this.updateProjectiles(level, player);
+            this.projectiles = []; // Safeguard
+            this.laserCharged = false;
             this.resolveCollisions(level);
             return;
         }
