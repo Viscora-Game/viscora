@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v39';
-import { audio } from './audio.js?v=v39';
-import { LevelGenerator } from './generator.js?v=v39';
+import { Enemy, GelChaser } from './enemies.js?v=v40';
+import { audio } from './audio.js?v=v40';
+import { LevelGenerator } from './generator.js?v=v40';
 
 export class LevelEditor {
     constructor(game) {
@@ -544,6 +544,8 @@ export class LevelEditor {
                         <button class="editor-btn" data-tool="create_vantuz" style="grid-column: span 2;">🧲 Vantuz Noktası (Pembe)</button>
                         <button class="editor-btn" data-tool="create_mirror_slash">🪞 Ayna (/)</button>
                         <button class="editor-btn" data-tool="create_mirror_backslash">🪞 Ayna (\)</button>
+                        <button class="editor-btn" data-tool="create_static_mirror_slash">📐 Köşe Ayna (/)</button>
+                        <button class="editor-btn" data-tool="create_static_mirror_backslash">📐 Köşe Ayna (\)</button>
                         <button class="editor-btn" data-tool="create_laser_emitter">📡 Lazer Verici</button>
                         <button class="editor-btn" data-tool="create_laser_receiver">🎯 Lazer Alıcı</button>
                     </div>
@@ -1461,6 +1463,18 @@ export class LevelEditor {
                     <input type="number" id="inspect-laser-receiver-gate" value="${obj.linkedGateId || 101}">
                 </div>
             `;
+        } else if (type === 'staticMirror') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Köşe Konumu</label>
+                    <select id="inspect-static-mirror-type">
+                        <option value="top-left" ${obj.mirrorType === 'top-left' || obj.mirrorType === 'slash' ? 'selected' : ''}>Sol-Üst (/) (Top-Left)</option>
+                        <option value="top-right" ${obj.mirrorType === 'top-right' || obj.mirrorType === 'backslash' ? 'selected' : ''}>Sağ-Üst (\\) (Top-Right)</option>
+                        <option value="bottom-left" ${obj.mirrorType === 'bottom-left' ? 'selected' : ''}>Sol-Alt (\\) (Bottom-Left)</option>
+                        <option value="bottom-right" ${obj.mirrorType === 'bottom-right' ? 'selected' : ''}>Sağ-Alt (/) (Bottom-Right)</option>
+                    </select>
+                </div>
+            `;
         } else if (type === 'pushBlock') {
             html += `
                 <div class="editor-checkbox-group">
@@ -1692,6 +1706,7 @@ export class LevelEditor {
             });
         }
         addUpdateEvent('inspect-block-mirror-type', (val) => { obj.mirrorType = val; });
+        addUpdateEvent('inspect-static-mirror-type', (val) => { obj.mirrorType = val; });
     }
 
     /**
@@ -1746,6 +1761,8 @@ export class LevelEditor {
             lvl.laserEmitters = (lvl.laserEmitters || []).filter(e => e !== obj);
         } else if (this.selectedObjectType === 'laserReceiver') {
             lvl.laserReceivers = (lvl.laserReceivers || []).filter(r => r !== obj);
+        } else if (this.selectedObjectType === 'staticMirror') {
+            lvl.staticMirrors = (lvl.staticMirrors || []).filter(m => m !== obj);
         } else if (this.selectedObjectType === 'decoration') {
             lvl.decorations = lvl.decorations.filter(d => d !== obj);
         } else if (this.selectedObjectType === 'checkpoint') {
@@ -2053,6 +2070,14 @@ export class LevelEditor {
             linkedGateId: r.linkedGateId
         }));
 
+        const staticMirrors = (lvl.staticMirrors || []).map(m => ({
+            x: Math.round(m.x),
+            y: Math.round(m.y),
+            w: Math.round(m.w),
+            h: Math.round(m.h),
+            mirrorType: m.mirrorType
+        }));
+
         return {
             levelWidth: lvl.width,
             levelHeight: lvl.height,
@@ -2081,7 +2106,8 @@ export class LevelEditor {
             vantuzPoints,
             decorations,
             laserEmitters,
-            laserReceivers
+            laserReceivers,
+            staticMirrors
         };
     }
 
@@ -3066,6 +3092,24 @@ export class LevelEditor {
                     isMirror: true,
                     mirrorType: 'backslash'
                 });
+            } else if (this.activeTool === 'create_static_mirror_slash') {
+                if (!lvl.staticMirrors) lvl.staticMirrors = [];
+                lvl.staticMirrors.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 40,
+                    h: 40,
+                    mirrorType: 'top-left'
+                });
+            } else if (this.activeTool === 'create_static_mirror_backslash') {
+                if (!lvl.staticMirrors) lvl.staticMirrors = [];
+                lvl.staticMirrors.push({
+                    x: snapX,
+                    y: snapY,
+                    w: 40,
+                    h: 40,
+                    mirrorType: 'top-right'
+                });
             } else if (this.activeTool === 'create_laser_emitter') {
                 if (!lvl.laserEmitters) lvl.laserEmitters = [];
                 lvl.laserEmitters.push({
@@ -3341,6 +3385,14 @@ export class LevelEditor {
             for (const r of lvl.laserReceivers) {
                 if (mx > r.x && mx < r.x + r.w && my > r.y && my < r.y + r.h) {
                     return { type: 'laserReceiver', obj: r };
+                }
+            }
+        }
+
+        if (lvl.staticMirrors) {
+            for (const m of lvl.staticMirrors) {
+                if (mx > m.x && mx < m.x + m.w && my > m.y && my < m.y + m.h) {
+                    return { type: 'staticMirror', obj: m };
                 }
             }
         }

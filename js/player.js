@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v39';
-import { audio } from './audio.js?v=v39';
+import { ViscosityStates } from './viscosity.js?v=v40';
+import { audio } from './audio.js?v=v40';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -358,6 +358,11 @@ export class Player {
         if (level.flamethrowers) {
             for (let i = 0; i < level.flamethrowers.length; i++) {
                 colliders.push(level.flamethrowers[i]);
+            }
+        }
+        if (level.staticMirrors) {
+            for (let i = 0; i < level.staticMirrors.length; i++) {
+                colliders.push(level.staticMirrors[i]);
             }
         }
         this.activeColliders = colliders;

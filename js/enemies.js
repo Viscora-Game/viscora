@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v39';
+import { audio } from './audio.js?v=v40';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -40,6 +40,11 @@ export class Enemy {
      */
     update(level) {
         if (this.isDead) return;
+
+        const allPlats = [
+            ...level.platforms,
+            ...(level.staticMirrors || [])
+        ];
 
         // İtilebilir Blok Çarpışması (Push Block Collision)
         if (level.pushBlocks) {
@@ -109,7 +114,7 @@ export class Enemy {
             }
 
             // Platform duvar çarpışma tespiti (Dikey sekme)
-            for (const plat of level.platforms) {
+            for (const plat of allPlats) {
                 if (plat.passage) continue;
                 if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2, plat)) {
                     if (this.vy > 0) {
@@ -135,7 +140,7 @@ export class Enemy {
             }
 
             // Platform duvar çarpışma tespiti (Yatay sekme)
-            for (const plat of level.platforms) {
+            for (const plat of allPlats) {
                 if (plat.passage) continue;
                 if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2, plat)) {
                     if (this.vx > 0) {
@@ -304,6 +309,11 @@ export class GelChaser extends Enemy {
     hasLineOfSight(level, player) {
         if (!player) return false;
         
+        const allPlats = [
+            ...level.platforms,
+            ...(level.staticMirrors || [])
+        ];
+        
         const x1 = this.x;
         const y1 = this.y;
         const x2 = player.x;
@@ -319,7 +329,7 @@ export class GelChaser extends Enemy {
         };
 
         // Görüş çizgisinin herhangi bir katı (solid) platform kenarı tarafından kesilip kesilmediğine bakarız
-        for (const plat of level.platforms) {
+        for (const plat of allPlats) {
             // Tek yönlü platformlar (geçitler) veya saydam engeller görüşü engellemez
             if (plat.passage) continue;
             
@@ -346,6 +356,11 @@ export class GelChaser extends Enemy {
      */
     update(level, player, emitParticles) {
         if (this.isDead) return;
+
+        const allPlats = [
+            ...level.platforms,
+            ...(level.staticMirrors || [])
+        ];
 
         // İtilebilir Blok Çarpışması (Push Block Collision)
         if (level.pushBlocks) {
@@ -429,7 +444,7 @@ export class GelChaser extends Enemy {
 
         // Yatay çarpışma çözümü (Platform duvarları)
         let hitWall = false;
-        for (const plat of level.platforms) {
+        for (const plat of allPlats) {
             if (plat.passage) continue;
             // Yatay kontrolü yaparken dikeyde 4px daraltılmış kutu kullanıyoruz ki üzerinde durduğu zemini duvar sanmasın
             if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius + 4, this.radius * 2, this.radius * 2 - 8, plat)) {
@@ -450,7 +465,7 @@ export class GelChaser extends Enemy {
         this.onGround = false;
 
         // Dikey çarpışma çözümü (Zemin & Tavan)
-        for (const plat of level.platforms) {
+        for (const plat of allPlats) {
             if (plat.passage) {
                 // Tek yönlü platformlar (aşağı düşerken basılabilir)
                 if (this.vy > 0 && this.y + this.radius - this.vy <= plat.y + 4 &&

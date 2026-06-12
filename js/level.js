@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v39';
-import { THEMES } from './generator.js?v=v39';
+import { audio } from './audio.js?v=v40';
+import { THEMES } from './generator.js?v=v40';
 
 /**
  * Viscora Level Design & Manager
@@ -16,6 +16,7 @@ export class Level {
         };
         this.laserEmitters = [];
         this.laserReceivers = [];
+        this.staticMirrors = [];
         this.loadLevel(1);
     }
 
@@ -45,6 +46,7 @@ export class Level {
         this.arrowShooters = [];
         this.laserEmitters = [];
         this.laserReceivers = [];
+        this.staticMirrors = [];
 
         let data = null;
         if (typeof levelNumber === 'object' && levelNumber !== null) {
@@ -543,6 +545,18 @@ export class Level {
                     }));
                 } else {
                     this.laserReceivers = [];
+                }
+
+                if (Array.isArray(data.staticMirrors)) {
+                    this.staticMirrors = data.staticMirrors.map(m => ({
+                        x: m.x,
+                        y: m.y,
+                        w: m.w || 40,
+                        h: m.h || 40,
+                        mirrorType: m.mirrorType || 'slash'
+                    }));
+                } else {
+                    this.staticMirrors = [];
                 }
 
                 this.resetLevelRuntimeState();
@@ -3928,6 +3942,7 @@ export class Level {
             let reflections = 0;
             const maxReflections = 12;
             let rayActive = true;
+            let lastHitCollider = null;
 
             while (rayActive && reflections < maxReflections) {
                 let closestDist = Infinity;
@@ -3945,14 +3960,51 @@ export class Level {
                     }
                 });
 
+                // A1. Kırılabilir platformlar ile çarpışma (Lazer geçmesin)
+                if (this.breakablePlatforms) {
+                    this.breakablePlatforms.forEach(plat => {
+                        if (plat.broken) return;
+                        const dist = rayIntersectsAABB(currX, currY, dx, dy, plat);
+                        if (dist >= 0 && dist < closestDist) {
+                            closestDist = dist;
+                            closestCollider = { type: 'platform', obj: plat };
+                        }
+                    });
+                }
+
+                // A2. Düşen platformlar ile çarpışma (Lazer geçmesin)
+                if (this.fallingPlatforms) {
+                    this.fallingPlatforms.forEach(plat => {
+                        if (plat.fallen) return;
+                        const dist = rayIntersectsAABB(currX, currY, dx, dy, plat);
+                        if (dist >= 0 && dist < closestDist) {
+                            closestDist = dist;
+                            closestCollider = { type: 'platform', obj: plat };
+                        }
+                    });
+                }
+
                 // B. İtilebilir bloklar (Aynalı veya normal) ile çarpışma
                 if (this.pushBlocks) {
                     this.pushBlocks.forEach(block => {
                         if (block.broken) return;
+                        if (lastHitCollider && lastHitCollider.type === 'block' && lastHitCollider.obj === block) return;
                         const dist = rayIntersectsAABB(currX, currY, dx, dy, block);
-                        if (dist > 1.0 && dist < closestDist) {
+                        if (dist >= 0 && dist < closestDist) {
                             closestDist = dist;
                             closestCollider = { type: 'block', obj: block };
+                        }
+                    });
+                }
+
+                // B2. Statik Köşe Aynaları ile çarpışma
+                if (this.staticMirrors) {
+                    this.staticMirrors.forEach(mirror => {
+                        if (lastHitCollider && lastHitCollider.type === 'staticMirror' && lastHitCollider.obj === mirror) return;
+                        const dist = rayIntersectsAABB(currX, currY, dx, dy, mirror);
+                        if (dist >= 0 && dist < closestDist) {
+                            closestDist = dist;
+                            closestCollider = { type: 'staticMirror', obj: mirror };
                         }
                     });
                 }
@@ -4000,13 +4052,16 @@ export class Level {
 
                 // Çarpışan objenin türüne göre davranış belirle
                 if (closestCollider) {
-                    if (closestCollider.type === 'block' && closestCollider.obj.isMirror) {
+                    if (closestCollider.type === 'staticMirror' || (closestCollider.type === 'block' && closestCollider.obj.isMirror)) {
                         // Yansıma açısı hesabı
-                        const block = closestCollider.obj;
+                        const mirror = closestCollider.obj;
                         let nextDx = dx;
                         let nextDy = dy;
 
-                        if (block.mirrorType === 'slash') { // /
+                        const mType = mirror.mirrorType;
+                        const isSlash = (mType === 'slash' || mType === 'top-left' || mType === 'bottom-right');
+
+                        if (isSlash) { // /
                             if (dx === 1) { nextDx = 0; nextDy = -1; }
                             else if (dx === -1) { nextDx = 0; nextDy = 1; }
                             else if (dy === 1) { nextDx = -1; nextDy = 0; }
@@ -4023,6 +4078,7 @@ export class Level {
                         dx = nextDx;
                         dy = nextDy;
                         reflections++;
+                        lastHitCollider = closestCollider; // Son çarptığımız objeyi yoksayacağız
                     } else {
                         rayActive = false;
                         if (closestCollider.type === 'player') {
@@ -5361,6 +5417,67 @@ export class Level {
                 ctx.beginPath();
                 ctx.arc(receiver.x + receiver.w / 2, receiver.y + receiver.h / 2, 4, 0, Math.PI * 2);
                 ctx.fill();
+
+            });
+        }
+
+        // D. Statik Köşe Aynalarını Çiz
+        if (this.staticMirrors) {
+            this.staticMirrors.forEach(mirror => {
+                ctx.save();
+                
+                // Koyu metalik gövde
+                ctx.fillStyle = '#1e293b';
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 2.0;
+                
+                ctx.beginPath();
+                const mType = mirror.mirrorType;
+                if (mType === 'slash' || mType === 'top-left') {
+                    // Sol-Üst Köşe (/) - Sol-Alt, Sol-Üst, Sağ-Üst
+                    ctx.moveTo(mirror.x, mirror.y + mirror.h);
+                    ctx.lineTo(mirror.x, mirror.y);
+                    ctx.lineTo(mirror.x + mirror.w, mirror.y);
+                } else if (mType === 'backslash' || mType === 'top-right') {
+                    // Sağ-Üst Köşe (\) - Sol-Üst, Sağ-Üst, Sağ-Alt
+                    ctx.moveTo(mirror.x, mirror.y);
+                    ctx.lineTo(mirror.x + mirror.w, mirror.y);
+                    ctx.lineTo(mirror.x + mirror.w, mirror.y + mirror.h);
+                } else if (mType === 'bottom-left') {
+                    // Sol-Alt Köşe (\) - Sol-Üst, Sol-Alt, Sağ-Alt
+                    ctx.moveTo(mirror.x, mirror.y);
+                    ctx.lineTo(mirror.x, mirror.y + mirror.h);
+                    ctx.lineTo(mirror.x + mirror.w, mirror.y + mirror.h);
+                } else if (mType === 'bottom-right') {
+                    // Sağ-Alt Köşe (/) - Sol-Alt, Sağ-Alt, Sağ-Üst
+                    ctx.moveTo(mirror.x, mirror.y + mirror.h);
+                    ctx.lineTo(mirror.x + mirror.w, mirror.y + mirror.h);
+                    ctx.lineTo(mirror.x + mirror.w, mirror.y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Parlayan ayna yüzeyi (Neon diagonal şerit)
+                ctx.shadowColor = '#00f0ff';
+                ctx.shadowBlur = 8;
+                ctx.strokeStyle = '#00f0ff';
+                ctx.lineWidth = 4;
+                
+                ctx.beginPath();
+                if (mType === 'slash' || mType === 'top-left' || mType === 'bottom-right') {
+                    ctx.moveTo(mirror.x, mirror.y + mirror.h);
+                    ctx.lineTo(mirror.x + mirror.w, mirror.y);
+                } else {
+                    ctx.moveTo(mirror.x, mirror.y);
+                    ctx.lineTo(mirror.x + mirror.w, mirror.y + mirror.h);
+                }
+                ctx.stroke();
+
+                // Beyaz parlama hattı
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
 
                 ctx.restore();
             });
