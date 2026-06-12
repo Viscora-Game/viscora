@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v38';
-import { audio } from './audio.js?v=v38';
-import { LevelGenerator } from './generator.js?v=v38';
+import { Enemy, GelChaser } from './enemies.js?v=v39';
+import { audio } from './audio.js?v=v39';
+import { LevelGenerator } from './generator.js?v=v39';
 
 export class LevelEditor {
     constructor(game) {
@@ -542,6 +542,10 @@ export class LevelEditor {
                         <button class="editor-btn" data-tool="create_button">🔘 Buton (Bas/Çek)</button>
                         <button class="editor-btn" data-tool="create_lever">🕹️ Kol (Şalter)</button>
                         <button class="editor-btn" data-tool="create_vantuz" style="grid-column: span 2;">🧲 Vantuz Noktası (Pembe)</button>
+                        <button class="editor-btn" data-tool="create_mirror_slash">🪞 Ayna (/)</button>
+                        <button class="editor-btn" data-tool="create_mirror_backslash">🪞 Ayna (\)</button>
+                        <button class="editor-btn" data-tool="create_laser_emitter">📡 Lazer Verici</button>
+                        <button class="editor-btn" data-tool="create_laser_receiver">🎯 Lazer Alıcı</button>
                     </div>
                 </details>
 
@@ -1085,7 +1089,7 @@ export class LevelEditor {
         let html = `<div style="font-size:13px; font-weight:bold; margin-bottom:10px; color:#10b981;">TÜR: ${type.toUpperCase()}</div>`;
         
         // Temel Boyutlar
-        if (type !== 'spawn' && type !== 'portal' && type !== 'collectible' && type !== 'teleportPair' && type !== 'vantuzPoint' && type !== 'checkpoint') {
+        if (type !== 'spawn' && type !== 'portal' && type !== 'collectible' && type !== 'teleportPair' && type !== 'vantuzPoint' && type !== 'checkpoint' && type !== 'laserEmitter' && type !== 'laserReceiver') {
             html += `
                 <div class="editor-input-group">
                     <label>X Konum</label>
@@ -1123,7 +1127,7 @@ export class LevelEditor {
                     <input type="number" id="inspect-y2" value="${Math.round(obj.y2)}">
                 </div>
             `;
-        } else if (type === 'portal' || type === 'collectible' || type === 'vantuzPoint' || type === 'checkpoint') {
+        } else if (type === 'portal' || type === 'collectible' || type === 'vantuzPoint' || type === 'checkpoint' || type === 'laserEmitter' || type === 'laserReceiver') {
             html += `
                 <div class="editor-input-group">
                     <label>X Konum</label>
@@ -1429,6 +1433,49 @@ export class LevelEditor {
                     </div>
                 </div>
             `;
+        } else if (type === 'laserEmitter') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Lazer Yönü</label>
+                    <select id="inspect-laser-emitter-dir">
+                        <option value="0" ${obj.direction === 0 ? 'selected' : ''}>Sağa (Right)</option>
+                        <option value="1" ${obj.direction === 1 ? 'selected' : ''}>Aşağı (Down)</option>
+                        <option value="2" ${obj.direction === 2 ? 'selected' : ''}>Sola (Left)</option>
+                        <option value="3" ${obj.direction === 3 ? 'selected' : ''}>Yukarı (Up)</option>
+                    </select>
+                </div>
+                <div class="editor-input-group">
+                    <label>Lazer Rengi</label>
+                    <select id="inspect-laser-emitter-color">
+                        <option value="blue" ${obj.color === 'blue' ? 'selected' : ''}>Mavi (Sıvı Geçer)</option>
+                        <option value="pink" ${obj.color === 'pink' ? 'selected' : ''}>Pembe (Jel Geçer)</option>
+                        <option value="green" ${obj.color === 'green' ? 'selected' : ''}>Yeşil (Normal Geçer)</option>
+                        <option value="yellow" ${obj.color === 'yellow' ? 'selected' : ''}>Sarı (Ölümcül)</option>
+                    </select>
+                </div>
+            `;
+        } else if (type === 'laserReceiver') {
+            html += `
+                <div class="editor-input-group">
+                    <label>Bağlı Kapı ID</label>
+                    <input type="number" id="inspect-laser-receiver-gate" value="${obj.linkedGateId || 101}">
+                </div>
+            `;
+        } else if (type === 'pushBlock') {
+            html += `
+                <div class="editor-checkbox-group">
+                    <input type="checkbox" id="inspect-block-mirror" ${obj.isMirror ? 'checked' : ''}>
+                    <label for="inspect-block-mirror">Yansıtıcı Ayna (Mirror)</label>
+                </div>
+                <div class="editor-input-group" id="inspect-block-mirror-type-container" style="display: ${obj.isMirror ? 'block' : 'none'};">
+                    <label>Ayna Yönü</label>
+                    <select id="inspect-block-mirror-type">
+                        <option value="slash" ${obj.mirrorType === 'slash' ? 'selected' : ''}>Slash (/) (Sağ-Yukarı / Sol-Aşağı)</option>
+                        <option value="backslash" ${obj.mirrorType === 'backslash' ? 'selected' : ''}>Backslash (\\) (Sağ-Aşağı / Sol-Yukarı)</option>
+                    </select>
+                </div>
+            `;
+        }
         }
 
         html += `<button class="editor-btn danger" id="inspect-delete-btn" style="width:100%; margin-top:12px;">🔴 OBJEYİ SİL (DEL)</button>`;
@@ -1629,6 +1676,23 @@ export class LevelEditor {
         addUpdateEvent('inspect-arrow-interval', (val) => { obj.fireInterval = parseFloat(val) || 2.5; });
         addUpdateEvent('inspect-arrow-speed', (val) => { obj.arrowSpeed = parseFloat(val) || 4.5; });
         addUpdateEvent('inspect-arrow-range', (val) => { obj.arrowRange = parseInt(val) || 400; });
+
+        addUpdateEvent('inspect-laser-emitter-dir', (val) => { obj.direction = parseInt(val) || 0; });
+        addUpdateEvent('inspect-laser-emitter-color', (val) => { obj.color = val; });
+        addUpdateEvent('inspect-laser-receiver-gate', (val) => { obj.linkedGateId = parseInt(val) || 101; });
+
+        const blockMirror = document.getElementById('inspect-block-mirror');
+        if (blockMirror) {
+            blockMirror.addEventListener('change', () => {
+                obj.isMirror = blockMirror.checked;
+                const container = document.getElementById('inspect-block-mirror-type-container');
+                if (container) {
+                    container.style.display = blockMirror.checked ? 'block' : 'none';
+                }
+                this.saveToLocalStorage();
+            });
+        }
+        addUpdateEvent('inspect-block-mirror-type', (val) => { obj.mirrorType = val; });
     }
 
     /**
@@ -1679,6 +1743,10 @@ export class LevelEditor {
             lvl.fallingBlockTraps = lvl.fallingBlockTraps.filter(fbt => fbt !== obj);
         } else if (this.selectedObjectType === 'vantuzPoint') {
             lvl.vantuzPoints = lvl.vantuzPoints.filter(vp => vp !== obj);
+        } else if (this.selectedObjectType === 'laserEmitter') {
+            lvl.laserEmitters = (lvl.laserEmitters || []).filter(e => e !== obj);
+        } else if (this.selectedObjectType === 'laserReceiver') {
+            lvl.laserReceivers = (lvl.laserReceivers || []).filter(r => r !== obj);
         } else if (this.selectedObjectType === 'decoration') {
             lvl.decorations = lvl.decorations.filter(d => d !== obj);
         } else if (this.selectedObjectType === 'checkpoint') {
@@ -1845,7 +1913,9 @@ export class LevelEditor {
             w: Math.round(pb.w),
             h: Math.round(pb.h),
             startX: Math.round(pb.startX !== undefined ? pb.startX : pb.x),
-            startY: Math.round(pb.startY !== undefined ? pb.startY : pb.y)
+            startY: Math.round(pb.startY !== undefined ? pb.startY : pb.y),
+            isMirror: pb.isMirror || false,
+            mirrorType: pb.mirrorType || 'slash'
         }));
 
         const conveyors = (lvl.conveyors || []).map(c => ({
@@ -1967,6 +2037,23 @@ export class LevelEditor {
             color: d.color || ''
         }));
 
+        const laserEmitters = (lvl.laserEmitters || []).map(e => ({
+            x: Math.round(e.x),
+            y: Math.round(e.y),
+            w: Math.round(e.w),
+            h: Math.round(e.h),
+            direction: e.direction !== undefined ? e.direction : 0,
+            color: e.color || 'blue'
+        }));
+
+        const laserReceivers = (lvl.laserReceivers || []).map(r => ({
+            x: Math.round(r.x),
+            y: Math.round(r.y),
+            w: Math.round(r.w),
+            h: Math.round(r.h),
+            linkedGateId: r.linkedGateId
+        }));
+
         return {
             levelWidth: lvl.width,
             levelHeight: lvl.height,
@@ -1993,7 +2080,9 @@ export class LevelEditor {
             hiddenPassages,
             fallingBlockTraps,
             vantuzPoints,
-            decorations
+            decorations,
+            laserEmitters,
+            laserReceivers
         };
     }
 
@@ -2946,7 +3035,58 @@ export class LevelEditor {
                     w: 50,
                     h: 50,
                     vx: 0,
-                    vy: 0
+                    vy: 0,
+                    isMirror: false,
+                    mirrorType: 'slash'
+                });
+            } else if (this.activeTool === 'create_mirror_slash') {
+                if (!lvl.pushBlocks) lvl.pushBlocks = [];
+                lvl.pushBlocks.push({
+                    startX: snapX,
+                    startY: snapY,
+                    x: snapX,
+                    y: snapY,
+                    w: 50,
+                    h: 50,
+                    vx: 0,
+                    vy: 0,
+                    isMirror: true,
+                    mirrorType: 'slash'
+                });
+            } else if (this.activeTool === 'create_mirror_backslash') {
+                if (!lvl.pushBlocks) lvl.pushBlocks = [];
+                lvl.pushBlocks.push({
+                    startX: snapX,
+                    startY: snapY,
+                    x: snapX,
+                    y: snapY,
+                    w: 50,
+                    h: 50,
+                    vx: 0,
+                    vy: 0,
+                    isMirror: true,
+                    mirrorType: 'backslash'
+                });
+            } else if (this.activeTool === 'create_laser_emitter') {
+                if (!lvl.laserEmitters) lvl.laserEmitters = [];
+                lvl.laserEmitters.push({
+                    id: 1000 + Math.floor(Math.random() * 9000),
+                    x: snapX,
+                    y: snapY,
+                    w: 32,
+                    h: 32,
+                    direction: 0,
+                    color: 'blue'
+                });
+            } else if (this.activeTool === 'create_laser_receiver') {
+                if (!lvl.laserReceivers) lvl.laserReceivers = [];
+                lvl.laserReceivers.push({
+                    id: 1000 + Math.floor(Math.random() * 9000),
+                    x: snapX,
+                    y: snapY,
+                    w: 32,
+                    h: 32,
+                    linkedGateId: 101
                 });
             } else if (this.activeTool === 'create_conveyor') {
                 if (!lvl.conveyors) lvl.conveyors = [];
@@ -3187,6 +3327,22 @@ export class LevelEditor {
         for (const h of lvl.hazards) {
             if (mx > h.x && mx < h.x + h.w && my > h.y && my < h.y + h.h) {
                 return { type: 'hazard', obj: h };
+            }
+        }
+
+        if (lvl.laserEmitters) {
+            for (const e of lvl.laserEmitters) {
+                if (mx > e.x && mx < e.x + e.w && my > e.y && my < e.y + e.h) {
+                    return { type: 'laserEmitter', obj: e };
+                }
+            }
+        }
+
+        if (lvl.laserReceivers) {
+            for (const r of lvl.laserReceivers) {
+                if (mx > r.x && mx < r.x + r.w && my > r.y && my < r.y + r.h) {
+                    return { type: 'laserReceiver', obj: r };
+                }
             }
         }
 

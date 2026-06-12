@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v38';
-import { THEMES } from './generator.js?v=v38';
+import { audio } from './audio.js?v=v39';
+import { THEMES } from './generator.js?v=v39';
 
 /**
  * Viscora Level Design & Manager
@@ -14,6 +14,8 @@ export class Level {
         this.dragonHeadImage.onload = () => {
             this.dragonHeadLoaded = true;
         };
+        this.laserEmitters = [];
+        this.laserReceivers = [];
         this.loadLevel(1);
     }
 
@@ -41,6 +43,8 @@ export class Level {
         this.decorations = [];
         this.flamethrowers = [];
         this.arrowShooters = [];
+        this.laserEmitters = [];
+        this.laserReceivers = [];
 
         let data = null;
         if (typeof levelNumber === 'object' && levelNumber !== null) {
@@ -312,7 +316,9 @@ export class Level {
                         w: pb.w || 50,
                         h: pb.h || 50,
                         vx: pb.vx || 0,
-                        vy: pb.vy || 0
+                        vy: pb.vy || 0,
+                        isMirror: pb.isMirror || false,
+                        mirrorType: pb.mirrorType || 'slash'
                     }));
                 }
 
@@ -510,6 +516,33 @@ export class Level {
                     }));
                 } else {
                     this.arrowShooters = [];
+                }
+
+                if (Array.isArray(data.laserEmitters)) {
+                    this.laserEmitters = data.laserEmitters.map(e => ({
+                        x: e.x,
+                        y: e.y,
+                        w: e.w || 32,
+                        h: e.h || 32,
+                        direction: e.direction !== undefined ? e.direction : 0,
+                        color: e.color || 'blue',
+                        path: []
+                    }));
+                } else {
+                    this.laserEmitters = [];
+                }
+
+                if (Array.isArray(data.laserReceivers)) {
+                    this.laserReceivers = data.laserReceivers.map(r => ({
+                        x: r.x,
+                        y: r.y,
+                        w: r.w || 32,
+                        h: r.h || 32,
+                        linkedGateId: r.linkedGateId,
+                        activated: false
+                    }));
+                } else {
+                    this.laserReceivers = [];
                 }
 
                 this.resetLevelRuntimeState();
@@ -3828,6 +3861,238 @@ export class Level {
                 }
             });
         }
+        this.updateLaserRouting(player);
+    }
+
+    /**
+     * Lazer yönlendirme ve yansıma fiziğini günceller
+     */
+    updateLaserRouting(player) {
+        if (!this.laserEmitters) this.laserEmitters = [];
+        if (!this.laserReceivers) this.laserReceivers = [];
+
+        // 1. Alıcıları sıfırla
+        this.laserReceivers.forEach(r => r.activated = false);
+
+        // Yardımcı AABB kesişim fonksiyonu
+        const rayIntersectsAABB = (rx, ry, dx, dy, box) => {
+            const minX = box.x;
+            const maxX = box.x + box.w;
+            const minY = box.y;
+            const maxY = box.y + box.h;
+
+            if (dx === 1) { // Right
+                if (ry >= minY && ry <= maxY && rx <= minX) return minX - rx;
+            } else if (dx === -1) { // Left
+                if (ry >= minY && ry <= maxY && rx >= maxX) return rx - maxX;
+            } else if (dy === 1) { // Down
+                if (rx >= minX && rx <= maxX && ry <= minY) return minY - ry;
+            } else if (dy === -1) { // Up
+                if (rx >= minX && rx <= maxX && ry >= maxY) return ry - maxY;
+            }
+            return -1;
+        };
+
+        // 2. Her bir lazer vericisi için ışın yayılımını hesapla
+        this.laserEmitters.forEach(emitter => {
+            let currX = emitter.x + emitter.w / 2;
+            let currY = emitter.y + emitter.h / 2;
+            let dir = emitter.direction; // 0: Right, 1: Down, 2: Left, 3: Up
+            let dx = 0, dy = 0;
+            if (dir === 0) dx = 1;
+            else if (dir === 1) dy = 1;
+            else if (dir === 2) dx = -1;
+            else if (dir === 3) dy = -1;
+
+            emitter.path = [{ x: currX, y: currY }];
+
+            let reflections = 0;
+            const maxReflections = 12;
+            let rayActive = true;
+
+            while (rayActive && reflections < maxReflections) {
+                let closestDist = Infinity;
+                let closestCollider = null;
+                let hitX = currX;
+                let hitY = currY;
+
+                // A. Zeminler ve duvarlar ile çarpışma
+                this.platforms.forEach(plat => {
+                    if (plat.passage) return; // Gizli geçitleri atla
+                    const dist = rayIntersectsAABB(currX, currY, dx, dy, plat);
+                    if (dist >= 0 && dist < closestDist) {
+                        closestDist = dist;
+                        closestCollider = { type: 'platform', obj: plat };
+                    }
+                });
+
+                // B. İtilebilir bloklar (Aynalı veya normal) ile çarpışma
+                if (this.pushBlocks) {
+                    this.pushBlocks.forEach(block => {
+                        if (block.broken) return;
+                        const dist = rayIntersectsAABB(currX, currY, dx, dy, block);
+                        if (dist > 1.0 && dist < closestDist) {
+                            closestDist = dist;
+                            closestCollider = { type: 'block', obj: block };
+                        }
+                    });
+                }
+
+                // C. Oyuncu ile çarpışma (Eşleşmeyen form ise lazeri bloke eder ve oyuncuya hasar verir)
+                let playerMatchesColor = false;
+                if (emitter.color === 'blue' && player.viscosity.id === 'LOW') playerMatchesColor = true;
+                else if (emitter.color === 'pink' && player.viscosity.id === 'HIGH') playerMatchesColor = true;
+                else if (emitter.color === 'green' && player.viscosity.id === 'NORMAL') playerMatchesColor = true;
+
+                if (!playerMatchesColor) {
+                    const pBox = {
+                        x: player.x - player.radius,
+                        y: player.y - player.radius,
+                        w: player.radius * 2,
+                        h: player.radius * 2
+                    };
+                    const dist = rayIntersectsAABB(currX, currY, dx, dy, pBox);
+                    if (dist > 0 && dist < closestDist) {
+                        closestDist = dist;
+                        closestCollider = { type: 'player', obj: player };
+                    }
+                }
+
+                // Kesişim noktasını ve bir sonraki adımı belirle
+                if (closestDist < Infinity) {
+                    hitX = currX + dx * closestDist;
+                    hitY = currY + dy * closestDist;
+                } else {
+                    // Ekran / Seviye sınırı
+                    let distToBorder = Infinity;
+                    if (dx === 1) distToBorder = this.width - currX;
+                    else if (dx === -1) distToBorder = currX;
+                    else if (dy === 1) distToBorder = this.height - currY;
+                    else if (dy === -1) distToBorder = currY;
+
+                    closestDist = distToBorder;
+                    hitX = currX + dx * closestDist;
+                    hitY = currY + dy * closestDist;
+                    rayActive = false;
+                }
+
+                // Noktayı kaydet
+                emitter.path.push({ x: hitX, y: hitY });
+
+                // Çarpışan objenin türüne göre davranış belirle
+                if (closestCollider) {
+                    if (closestCollider.type === 'block' && closestCollider.obj.isMirror) {
+                        // Yansıma açısı hesabı
+                        const block = closestCollider.obj;
+                        let nextDx = dx;
+                        let nextDy = dy;
+
+                        if (block.mirrorType === 'slash') { // /
+                            if (dx === 1) { nextDx = 0; nextDy = -1; }
+                            else if (dx === -1) { nextDx = 0; nextDy = 1; }
+                            else if (dy === 1) { nextDx = -1; nextDy = 0; }
+                            else if (dy === -1) { nextDx = 1; nextDy = 0; }
+                        } else { // \
+                            if (dx === 1) { nextDx = 0; nextDy = 1; }
+                            else if (dx === -1) { nextDx = 0; nextDy = -1; }
+                            else if (dy === 1) { nextDx = 1; nextDy = 0; }
+                            else if (dy === -1) { nextDx = -1; nextDy = 0; }
+                        }
+
+                        currX = hitX;
+                        currY = hitY;
+                        dx = nextDx;
+                        dy = nextDy;
+                        reflections++;
+                    } else {
+                        rayActive = false;
+                        if (closestCollider.type === 'player') {
+                            if (emitter.color === 'yellow') {
+                                player.takeDamage(3, 'melt');
+                            } else {
+                                player.takeDamage(1);
+                            }
+                        }
+                    }
+                } else {
+                    rayActive = false;
+                }
+            }
+
+            // 3. Işın yollarını kontrol edip sensörleri aktif et
+            if (this.laserReceivers && emitter.path.length > 1) {
+                this.laserReceivers.forEach(receiver => {
+                    for (let i = 0; i < emitter.path.length - 1; i++) {
+                        const p1 = emitter.path[i];
+                        const p2 = emitter.path[i+1];
+
+                        let intersects = false;
+                        if (p1.y === p2.y) { // Yatay segment
+                            if (receiver.y <= p1.y && receiver.y + receiver.h >= p1.y) {
+                                const minX = Math.min(p1.x, p2.x);
+                                const maxX = Math.max(p1.x, p2.x);
+                                if (minX <= receiver.x + receiver.w && maxX >= receiver.x) {
+                                    intersects = true;
+                                }
+                            }
+                        } else { // Dikey segment
+                            if (receiver.x <= p1.x && receiver.x + receiver.w >= p1.x) {
+                                const minY = Math.min(p1.y, p2.y);
+                                const maxY = Math.max(p1.y, p2.y);
+                                if (minY <= receiver.y + receiver.h && maxY >= receiver.y) {
+                                    intersects = true;
+                                }
+                            }
+                        }
+
+                        if (intersects) {
+                            receiver.activated = true;
+                            break;
+                        }
+                    }
+                });
+            }
+        });
+
+        // 4. Bağlı kapıları/flamethrower'ları güncelle
+        if (this.laserReceivers) {
+            this.laserReceivers.forEach(receiver => {
+                if (receiver.linkedGateId !== undefined) {
+                    if (this.gates) {
+                        const linkedGates = this.gates.filter(g => g.id === receiver.linkedGateId);
+                        linkedGates.forEach(g => {
+                            if (receiver.activated) {
+                                g.disabled = true;
+                            } else {
+                                const otherActive = (this.pressurePlates || []).some(pp => pp.linkedGateId === receiver.linkedGateId && pp.activated) ||
+                                                    (this.buttons || []).some(b => b.linkedGateId === receiver.linkedGateId && b.activated) ||
+                                                    (this.levers || []).some(l => l.linkedGateId === receiver.linkedGateId && l.activated) ||
+                                                    (this.laserReceivers || []).some(r => r !== receiver && r.linkedGateId === receiver.linkedGateId && r.activated);
+                                if (!otherActive) {
+                                    g.disabled = false;
+                                }
+                            }
+                        });
+                    }
+                    if (this.flamethrowers) {
+                        const linkedFs = this.flamethrowers.filter(f => f.id === receiver.linkedGateId);
+                        linkedFs.forEach(f => {
+                            if (receiver.activated) {
+                                f.disabled = true;
+                            } else {
+                                const otherActive = (this.pressurePlates || []).some(pp => pp.linkedGateId === receiver.linkedGateId && pp.activated) ||
+                                                    (this.buttons || []).some(b => b.linkedGateId === receiver.linkedGateId && b.activated) ||
+                                                    (this.levers || []).some(l => l.linkedGateId === receiver.linkedGateId && l.activated) ||
+                                                    (this.laserReceivers || []).some(r => r !== receiver && r.linkedGateId === receiver.linkedGateId && r.activated);
+                                if (!otherActive) {
+                                    f.disabled = false;
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -4756,23 +5021,54 @@ export class Level {
                 ctx.moveTo(block.x + block.w - 12, block.y + block.h - 4); ctx.lineTo(block.x + block.w - 4, block.y + block.h - 12);
                 ctx.stroke();
                 
-                // Glowing Neon Core (energy battery center)
-                ctx.save();
-                ctx.shadowColor = themeColor;
-                ctx.shadowBlur = 8;
-                ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-                ctx.strokeStyle = themeColor;
-                ctx.lineWidth = 2;
-                ctx.fillRect(block.x + block.w/2 - 12, block.y + block.h/2 - 12, 24, 24);
-                ctx.strokeRect(block.x + block.w/2 - 12, block.y + block.h/2 - 12, 24, 24);
-                
-                // Center white core pulse
-                ctx.fillStyle = '#ffffff';
-                ctx.shadowBlur = 4;
-                ctx.beginPath();
-                ctx.arc(block.x + block.w/2, block.y + block.h/2, 4 + Math.sin(this.time * 2) * 1.5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+                // Glowing Neon Core or Mirror reflection pane
+                if (block.isMirror) {
+                    ctx.save();
+                    ctx.shadowColor = '#00f0ff';
+                    ctx.shadowBlur = 10;
+                    ctx.strokeStyle = '#00f0ff';
+                    ctx.lineWidth = 5;
+                    ctx.beginPath();
+                    if (block.mirrorType === 'slash') {
+                        ctx.moveTo(block.x + 10, block.y + block.h - 10);
+                        ctx.lineTo(block.x + block.w - 10, block.y + 10);
+                    } else {
+                        ctx.moveTo(block.x + 10, block.y + 10);
+                        ctx.lineTo(block.x + block.w - 10, block.y + block.h - 10);
+                    }
+                    ctx.stroke();
+
+                    // White center highlight
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                    ctx.restore();
+
+                    // Mini label "M" for visual clarity
+                    ctx.save();
+                    ctx.fillStyle = '#00f0ff';
+                    ctx.font = '800 9px Outfit';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('M', block.x + block.w / 2, block.y + block.h / 2 + 3);
+                    ctx.restore();
+                } else {
+                    ctx.save();
+                    ctx.shadowColor = themeColor;
+                    ctx.shadowBlur = 8;
+                    ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+                    ctx.strokeStyle = themeColor;
+                    ctx.lineWidth = 2;
+                    ctx.fillRect(block.x + block.w/2 - 12, block.y + block.h/2 - 12, 24, 24);
+                    ctx.strokeRect(block.x + block.w/2 - 12, block.y + block.h/2 - 12, 24, 24);
+                    
+                    // Center white core pulse
+                    ctx.fillStyle = '#ffffff';
+                    ctx.shadowBlur = 4;
+                    ctx.beginPath();
+                    ctx.arc(block.x + block.w/2, block.y + block.h/2, 4 + Math.sin(this.time * 2) * 1.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
                 
                 // Corner bolts/rivets
                 ctx.fillStyle = '#64748b';
@@ -4933,6 +5229,120 @@ export class Level {
                 ctx.arc(endX, endY, 4, 0, Math.PI * 2);
                 ctx.fill();
                 
+                ctx.restore();
+            });
+        }
+
+        // --- LAZER BULMACA ELEMANLARINI ÇİZ (EMITTERS, RECEIVERS, BEAMS) ---
+        // A. Lazer Işın Yollarını Çiz
+        if (this.laserEmitters) {
+            this.laserEmitters.forEach(emitter => {
+                if (emitter.path && emitter.path.length > 1) {
+                    ctx.save();
+                    
+                    let laserColor = '#00f0ff'; // Varsayılan mavi/turkuaz
+                    if (emitter.color === 'pink') laserColor = '#d946ef';
+                    else if (emitter.color === 'green') laserColor = '#10b981';
+                    else if (emitter.color === 'yellow') laserColor = '#eab308';
+
+                    ctx.shadowColor = laserColor;
+                    ctx.shadowBlur = 10 + Math.random() * 8;
+                    ctx.strokeStyle = laserColor;
+                    ctx.lineWidth = 3 + Math.sin(this.time * 10) * 1.0;
+                    ctx.beginPath();
+                    ctx.moveTo(emitter.path[0].x, emitter.path[0].y);
+                    for (let i = 1; i < emitter.path.length; i++) {
+                        ctx.lineTo(emitter.path[i].x, emitter.path[i].y);
+                    }
+                    ctx.stroke();
+
+                    // Parlak beyaz merkez hattı
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.2;
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            });
+        }
+
+        // B. Lazer Vericilerini (Emitters) Çiz
+        if (this.laserEmitters) {
+            this.laserEmitters.forEach(emitter => {
+                ctx.save();
+                
+                // Gövde (Metalik koyu kutu)
+                ctx.fillStyle = '#1e293b';
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 2.5;
+                ctx.fillRect(emitter.x, emitter.y, emitter.w, emitter.h);
+                ctx.strokeRect(emitter.x, emitter.y, emitter.w, emitter.h);
+
+                // Renkli ışın üreteç çekirdeği
+                let coreColor = '#00f0ff';
+                if (emitter.color === 'pink') coreColor = '#d946ef';
+                else if (emitter.color === 'green') coreColor = '#10b981';
+                else if (emitter.color === 'yellow') coreColor = '#eab308';
+
+                ctx.fillStyle = coreColor;
+                ctx.beginPath();
+                ctx.arc(emitter.x + emitter.w / 2, emitter.y + emitter.h / 2, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Çıkış namlusu/nozulu
+                ctx.fillStyle = '#334155';
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                
+                const cx = emitter.x + emitter.w / 2;
+                const cy = emitter.y + emitter.h / 2;
+                const dir = emitter.direction;
+                
+                if (dir === 0) { // Sağ (Right)
+                    ctx.rect(emitter.x + emitter.w - 4, cy - 4, 8, 8);
+                } else if (dir === 1) { // Aşağı (Down)
+                    ctx.rect(cx - 4, emitter.y + emitter.h - 4, 8, 8);
+                } else if (dir === 2) { // Sol (Left)
+                    ctx.rect(emitter.x - 4, cy - 4, 8, 8);
+                } else if (dir === 3) { // Yukarı (Up)
+                    ctx.rect(cx - 4, emitter.y - 4, 8, 8);
+                }
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.restore();
+            });
+        }
+
+        // C. Lazer Alıcılarını (Receivers) Çiz
+        if (this.laserReceivers) {
+            this.laserReceivers.forEach(receiver => {
+                ctx.save();
+
+                // Panel gövdesi
+                ctx.fillStyle = '#0f172a';
+                ctx.strokeStyle = '#334155';
+                ctx.lineWidth = 2.5;
+                ctx.fillRect(receiver.x, receiver.y, receiver.w, receiver.h);
+                ctx.strokeRect(receiver.x, receiver.y, receiver.w, receiver.h);
+
+                // Sensör hedef halkası
+                const activeColor = receiver.activated ? '#10b981' : '#ef4444';
+                ctx.shadowColor = activeColor;
+                ctx.shadowBlur = receiver.activated ? 12 : 0;
+                ctx.strokeStyle = activeColor;
+                ctx.lineWidth = 2;
+                
+                ctx.beginPath();
+                ctx.arc(receiver.x + receiver.w / 2, receiver.y + receiver.h / 2, 10, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Merkez ışık noktası
+                ctx.fillStyle = activeColor;
+                ctx.beginPath();
+                ctx.arc(receiver.x + receiver.w / 2, receiver.y + receiver.h / 2, 4, 0, Math.PI * 2);
+                ctx.fill();
+
                 ctx.restore();
             });
         }
