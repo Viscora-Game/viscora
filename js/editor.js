@@ -1476,7 +1476,6 @@ export class LevelEditor {
                 </div>
             `;
         }
-        }
 
         html += `<button class="editor-btn danger" id="inspect-delete-btn" style="width:100%; margin-top:12px;">🔴 OBJEYİ SİL (DEL)</button>`;
 
