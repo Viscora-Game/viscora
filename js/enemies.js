@@ -247,6 +247,49 @@ export class GelChaser extends Enemy {
     }
 
     /**
+     * Platformların görüş çizgisini engelleyip engellemediğini kontrol eder (Raycast LOS)
+     */
+    hasLineOfSight(level, player) {
+        if (!player) return false;
+        
+        const x1 = this.x;
+        const y1 = this.y;
+        const x2 = player.x;
+        const y2 = player.y;
+
+        // İki çizgi parçasının (segment) kesişim testi (Standart 2D kesişim algoritması)
+        const lineIntersects = (ax, ay, bx, by, cx, cy, dx, dy) => {
+            const d = (bx - ax) * (dy - cy) - (by - ay) * (dx - cx);
+            if (d === 0) return false;
+            const u = ((cx - ax) * (dy - cy) - (cy - ay) * (dx - cx)) / d;
+            const v = ((cx - ax) * (by - ay) - (cy - ay) * (bx - ax)) / d;
+            return (u >= 0 && u <= 1) && (v >= 0 && v <= 1);
+        };
+
+        // Görüş çizgisinin herhangi bir katı (solid) platform kenarı tarafından kesilip kesilmediğine bakarız
+        for (const plat of level.platforms) {
+            // Tek yönlü platformlar (geçitler) veya saydam engeller görüşü engellemez
+            if (plat.passage) continue;
+            
+            const px1 = plat.x;
+            const py1 = plat.y;
+            const px2 = plat.x + plat.w;
+            const py2 = plat.y + plat.h;
+
+            // Platformun 4 kenarı
+            if (
+                lineIntersects(x1, y1, x2, y2, px1, py1, px1, py2) || // Sol kenar
+                lineIntersects(x1, y1, x2, y2, px2, py1, px2, py2) || // Sağ kenar
+                lineIntersects(x1, y1, x2, y2, px1, py1, px2, py1) || // Üst kenar
+                lineIntersects(x1, y1, x2, y2, px1, py2, px2, py2)    // Alt kenar
+            ) {
+                return false; // Görüş engellendi!
+            }
+        }
+        return true; // Engel yok, görüş açık!
+    }
+
+    /**
      * Düşman yapay zekası, platform fizik hareketi ve durum geçişleri
      */
     update(level, player, emitParticles) {
@@ -335,7 +378,7 @@ export class GelChaser extends Enemy {
             const dx = player.x - this.x;
             const dy = player.y - this.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist <= this.detectionRadius) {
+            if (dist <= this.detectionRadius && this.hasLineOfSight(level, player)) {
                 this.state = 'alert';
                 this.alertTimer = 24; // 0.4 sn (60fps varsayımı ile)
                 this.vx = 0;
