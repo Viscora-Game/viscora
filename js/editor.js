@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v37';
-import { audio } from './audio.js?v=v37';
-import { LevelGenerator } from './generator.js?v=v37';
+import { Enemy, GelChaser } from './enemies.js?v=v38';
+import { audio } from './audio.js?v=v38';
+import { LevelGenerator } from './generator.js?v=v38';
 
 export class LevelEditor {
     constructor(game) {
@@ -541,36 +541,36 @@ export class LevelEditor {
                         <button class="editor-btn" data-tool="create_teleport" style="grid-column: span 2;">🌌 Işınlanma Portalı (Pair)</button>
                         <button class="editor-btn" data-tool="create_button">🔘 Buton (Bas/Çek)</button>
                         <button class="editor-btn" data-tool="create_lever">🕹️ Kol (Şalter)</button>
-                        <button class="editor-btn" data-tool="create_flamethrower">🔥 Alev Silahı (Flamethrower)</button>
                         <button class="editor-btn" data-tool="create_vantuz" style="grid-column: span 2;">🧲 Vantuz Noktası (Pembe)</button>
                     </div>
                 </details>
 
                 <details class="editor-sub-section">
-                    <summary>🚧 Engeller & Kapılar</summary>
+                    <summary>⚡ Engeller, Tuzaklar & Silahlar</summary>
                     <div class="tools-grid">
                         <button class="editor-btn" data-tool="create_gate_blue">🔵 Mavi Lazer</button>
                         <button class="editor-btn" data-tool="create_gate_pink">💗 Pembe Lazer</button>
                         <button class="editor-btn" data-tool="create_gate_green">💚 Yeşil Lazer</button>
                         <button class="editor-btn" data-tool="create_gate_yellow">💛 Sarı Lazer</button>
                         <button class="editor-btn" data-tool="create_gate_net" style="grid-column: span 2;">🟣 Mor Ağ Kapısı</button>
-                    </div>
-                </details>
-
-                <details class="editor-sub-section">
-                    <summary>👾 Düşmanlar & Tehlikeler</summary>
-                    <div class="tools-grid">
-                        <button class="editor-btn" data-tool="create_enemy">🔴 Yatay Diken</button>
-                        <button class="editor-btn" data-tool="create_enemy_vertical">🔵 Dikey Diken</button>
-                        <button class="editor-btn" data-tool="create_enemy_jumping">🟣 Zıplayan Diken</button>
-                        <button class="editor-btn" data-tool="create_enemy_flying">🟡 Uçan Diken</button>
+                        <button class="editor-btn" data-tool="create_flamethrower" style="grid-column: span 2;">🔥 Alev Silahı (Flamethrower)</button>
+                        <button class="editor-btn" data-tool="create_arrow_shooter" style="grid-column: span 2; background: rgba(6, 182, 212, 0.12); color: #67e8f9; border-color: rgba(6, 182, 212, 0.35);">🏹 Ok Fırlatıcı (Arrow Shooter)</button>
+                        <button class="editor-btn" data-tool="create_trap_falling_block" style="grid-column: span 2;">🗿 Düşen Blok Tuzağı</button>
                         <button class="editor-btn" data-tool="create_hazard_acid" style="grid-column: span 2;">🧪 Asit Havuzu</button>
                         <button class="editor-btn" data-tool="create_hazard_spike">🔺 Yer Dikeni</button>
                         <button class="editor-btn" data-tool="create_hazard_spike_down">🔻 Tavan Dikeni</button>
                         <button class="editor-btn" data-tool="create_hazard_spike_left">◀️ Duvar Dikeni (S)</button>
                         <button class="editor-btn" data-tool="create_hazard_spike_right">▶️ Duvar Dikeni (D)</button>
-                        <button class="editor-btn" data-tool="create_trap_falling_block" style="grid-column: span 2;">🗿 Düşen Blok Tuzağı</button>
-                        <button class="editor-btn" data-tool="create_arrow_shooter" style="grid-column: span 2; background: rgba(6, 182, 212, 0.12); color: #67e8f9; border-color: rgba(6, 182, 212, 0.35);">🏹 Ok Fırlatıcı (Arrow Shooter)</button>
+                    </div>
+                </details>
+
+                <details class="editor-sub-section">
+                    <summary>👾 Düşmanlar & Canavarlar</summary>
+                    <div class="tools-grid">
+                        <button class="editor-btn" data-tool="create_enemy">🔴 Yatay Diken</button>
+                        <button class="editor-btn" data-tool="create_enemy_vertical">🔵 Dikey Diken</button>
+                        <button class="editor-btn" data-tool="create_enemy_jumping">🟣 Zıplayan Diken</button>
+                        <button class="editor-btn" data-tool="create_enemy_flying">🟡 Uçan Diken</button>
                         <button class="editor-btn" data-tool="create_enemy_chaser" style="grid-column: span 2; background: rgba(16, 185, 129, 0.12); color: #34d399; border-color: rgba(16, 185, 129, 0.35);">🧬 Jel Takipçi (Gel Chaser)</button>
                     </div>
                 </details>

@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v37">
+    <link rel="stylesheet" href="index.css?v=v38">
     <link rel="manifest" href="manifest.json">
     <script>
         // Service Worker Kaydı (PWA & Offline Desteği)
@@ -398,42 +398,56 @@
                             <div class="codex-icon">⚙️</div>
                             <div class="codex-info">
                                 <h3>Şalter & Düğme</h3>
-                                <p>Haritadaki lazer kapılarını açıp kapatır. Şalterler kalıcı, düğmeler ise süre kısıtlamalıdır.</p>
+                                <p>Haritadaki lazer veya ağ kapılarını açıp kapatmak için kullanılır. Şalterler (Kollar) etkileşime geçildiğinde kalıcı açık/kapalı konuma geçerken, butonlar (düğmeler) basıldıktan sonra 3 saniye süreyle bağlı kapıyı açık tutar.</p>
                             </div>
                         </div>
                         <div class="codex-row">
-                            <div class="codex-icon">🟡</div>
+                            <div class="codex-icon">🟨</div>
                             <div class="codex-info">
                                 <h3>Basınç Plakası</h3>
-                                <p>Üzerine oyuncu veya itilebilir kutu geldiğinde aktif olur. Kapıları açmak için kullanılır.</p>
+                                <p>Üzerine oyuncu veya itilebilir blok/kutu geldiğinde aktif olan zemin tetikleyicisi. Bağlı kapıları veya bariyerleri açık tutmak için kullanılır.</p>
                             </div>
                         </div>
                         <div class="codex-row">
                             <div class="codex-icon">📦</div>
                             <div class="codex-info">
-                                <h3>İtilebilir Enerji Kutusu (Kutu)</h3>
-                                <p>Sadece oyuncu tarafından itilebilir. Basınç plakalarını basılı tutmak için idealdir. Boss uyanıkken kafasına düşürülürse boss'a 1 hasar verir.</p>
+                                <h3>İtilebilir Blok / Enerji Kutusu</h3>
+                                <p>Karakteriniz tarafından itilebilen ağır fiziksel nesneler. Basınç plakalarını sürekli basılı tutmak, yüksek yerlere tırmanmak, devriye gezen düşmanların yolunu kesmek veya üzerlerine düşürerek onları ezmek için kullanılabilir.</p>
                             </div>
                         </div>
                         <div class="codex-row">
-                            <div class="codex-icon">⚡</div>
+                            <div class="codex-icon">🌌</div>
                             <div class="codex-info">
-                                <h3>Işınlanma Portalları</h3>
-                                <p>Karakteri ve kutuları anında birbirine bağlı olan diğer portal çıkışına ışınlar.</p>
+                                <h3>Işınlanma Portalı (Pair)</h3>
+                                <p>Birbirine bağlı çift portallar. Karakterinizi ve itilebilir blokları anında diğer portal konumuna ışınlar.</p>
                             </div>
                         </div>
                         <div class="codex-row">
-                            <div class="codex-icon">🔼</div>
+                            <div class="codex-icon">🌀</div>
                             <div class="codex-info">
-                                <h3>Zıplatma Pedi</h3>
+                                <h3>Bitiş Portalı</h3>
+                                <p>Seviyeyi tamamlayan ana geçiş portalı. Kristallerin tümünü topladığınızda aktif olur ve sizi bir sonraki bölüme taşır.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">🦘</div>
+                            <div class="codex-info">
+                                <h3>Zıplatma Pedi (Bounce Pad)</h3>
                                 <p>Üzerine gelen karakteri yüksek dikey hıza ulaştırarak havaya fırlatır.</p>
                             </div>
                         </div>
                         <div class="codex-row">
-                            <div class="codex-icon">⏩</div>
+                            <div class="codex-icon">🧡</div>
                             <div class="codex-info">
                                 <h3>Konveyör Bant</h3>
-                                <p>Üzerindeki oyuncuyu ve kutuları ok yönünde sabit bir hızla sürükler.</p>
+                                <p>Üzerindeki oyuncuyu ve itilebilir blokları ok yönünde sabit bir hızla sürükleyen hareketli bantlar.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">🧲</div>
+                            <div class="codex-info">
+                                <h3>Vantuz Noktası</h3>
+                                <p>Karakteriniz Jel (Pembe) formundayken zıplayarak yapışabileceği özel tutunma noktaları. Bu noktalarda asılı kalabilir ve kendinizi yukarı çekmek için tırmanma gücü kazanabilirsiniz.</p>
                             </div>
                         </div>
                     </div>
@@ -443,36 +457,71 @@
                         <div class="codex-row">
                             <div class="codex-icon">🚨</div>
                             <div class="codex-info">
-                                <h3>Lazer Kapıları</h3>
-                                <p>Mavi lazerlerden Sıvı (Mavi) form, Pembe lazerlerden Jel (Pembe) form, Yeşil lazerlerden ise Normal (Yeşil) form hasar almadan geçebilir. <strong>Sarı lazerler ise temas anında karakteri eritecek şekilde anında öldürür!</strong></p>
+                                <h3>Lazer Kapıları & Ağ Kapısı</h3>
+                                <p>Lazer kapılarının renklerine uygun viskozite formları hasar almadan geçebilir (Mavi lazerden Mavi form, Pembe lazerden Pembe form, Yeşil lazerden Yeşil form). <strong>Sarı lazerler ise temas anında karakteri anında eritir!</strong> Mor Ağ Kapısı'ndan ise sadece Jel (Pembe) form yavaşça sızarak geçebilir.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">🔥</div>
+                            <div class="codex-info">
+                                <h3>Alev Silahı (Flamethrower)</h3>
+                                <p>Sürekli veya belirli aralıklarla alev püskürten silah tuzağı. Alevler oyuncuya yüksek hasar verir. Jel Takipçileri bu alevlere çekerek onları yok edebilirsiniz.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">🏹</div>
+                            <div class="codex-info">
+                                <h3>Ok Fırlatıcı (Arrow Shooter)</h3>
+                                <p>Düzenli aralıklarla hızlı ok fırlatan savunma sistemi. Oklar oyuncuya hasar verir, ancak aynı zamanda Jel Takipçileri vurmak veya onları tetiklemek için de kullanılabilir.</p>
                             </div>
                         </div>
                         <div class="codex-row">
                             <div class="codex-icon">⚠️</div>
                             <div class="codex-info">
                                 <h3>Düşen ve Kırılan Platformlar</h3>
-                                <p>Düşen zeminler üzerine basıldıktan sonra düşer. Kırılan zeminler ise çatlayarak yok olur ve geçit verir.</p>
+                                <p>Düşen zeminler üzerine basıldıktan sonra yerçekimine kapılarak düşer. Kırılan zeminler ise çatlayarak yok olur ve geçit verir.</p>
                             </div>
                         </div>
                         <div class="codex-row">
                             <div class="codex-icon">🪨</div>
                             <div class="codex-info">
-                                <h3>Düşen Blok Tuzağı</h3>
-                                <p>Altından geçmeye çalıştığınızda tetiklenir ve hızla aşağı düşerek sizi ezmeye çalışır.</p>
+                                <h3>Düşen Blok Tuzağı & Asit Havuzu</h3>
+                                <p>Altından geçildiğinde hızla düşen ağır blok tuzakları ve temas anında doğrudan hasar verip eriten yeşil asit havuzları.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">🔺</div>
+                            <div class="codex-info">
+                                <h3>Sabit Dikenler (Yer, Tavan, Duvar)</h3>
+                                <p>Temas edildiğinde doğrudan hasar veren ve karakterinizi geriye fırlatan sabit tehlikeler.</p>
                             </div>
                         </div>
                         <div class="codex-row">
                             <div class="codex-icon">👾</div>
                             <div class="codex-info">
-                                <h3>Devriye Robotlar ve Örümcekler</h3>
-                                <p>Yollarda devriye gezen veya sizi gördüğünde takip eden düşmanlar. Üstlerine zıplayarak yok edilebilirler.</p>
+                                <h3>Devriye Dikenleri (Robotlar ve Örümcekler)</h3>
+                                <p>Yatay, dikey, zıplayan veya uçan devriye desenlerine sahip dikenli düşmanlar. Üzerlerine zıplayarak yok edilebilirler. Çevresel tuzaklardan (alevler, oklar vb.) hasar almazlar.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">🧬</div>
+                            <div class="codex-info">
+                                <h3>Jel Takipçi (Gel Chaser)</h3>
+                                <p>Sizi fark ettiğinde hızla üzerinize koşan agresif takipçi düşman. Üzerine zıplanarak öldürülemez! Onu yenmek için alev silahlarının menziline çekmeli, asit/lav havuzlarına düşmeli veya üzerlerine ağır itilebilir bloklar düşürerek ezmelisiniz.</p>
                             </div>
                         </div>
                         <div class="codex-row">
                             <div class="codex-icon">👹</div>
                             <div class="codex-info">
                                 <h3>Viscoruptor (BÖLÜM 10 BOSS'U)</h3>
-                                <p>Yere basarak geniş fuchsia şok dalgaları yayar, yapıştığınız duvarlardan sizi düşürür. Kafasına kutu düşürerek hasar verilebilir.</p>
+                                <p>Yere basarak geniş fuchsia şok dalgaları yayan ve yapıştığınız duvarlardan sizi düşüren ilk büyük boss. Kafasına itilebilir enerji kutuları düşürerek hasar verebilirsiniz.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row">
+                            <div class="codex-icon">🤖</div>
+                            <div class="codex-info">
+                                <h3>CyberBoss (BÖLÜM 20 BOSS'U)</h3>
+                                <p>20. Bölümün sonundaki devasa sibernetik boss. Farklı fazlarda ölümcül lazerler ateşler, zemin sarsan vuruşlar yapar ve oyuncuyu ezmeye çalışır. Öldürüldüğünde açılan portal ile kaçışı sağlar.</p>
                             </div>
                         </div>
                     </div>
@@ -531,7 +580,7 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v37"></script>
-    <script type="module" src="js/main.js?v=v37"></script>
+    <script src="js/controls_customizer.js?v=v38"></script>
+    <script type="module" src="js/main.js?v=v38"></script>
 </body>
 </html>
