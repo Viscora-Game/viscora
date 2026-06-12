@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v24';
-import { THEMES } from './generator.js?v=v24';
+import { audio } from './audio.js?v=v25';
+import { THEMES } from './generator.js?v=v25';
 
 /**
  * Viscora Level Design & Manager
@@ -2433,7 +2433,7 @@ export class Level {
             // BÖLÜM 14: TOKSİK LABİRİNT / ENGEL PARKURU
             // ═══════════════════════════════════════════════
             this.width = 3000;
-            this.height = 3000;
+            this.height = 600;
             this.spawnX = 80;
             this.spawnY = 380;
 
@@ -4036,58 +4036,8 @@ export class Level {
             });
         });
 
-        // --- EN ALTTAKİ LAV NEHRİ (LAVA RIVER AT THE BOTTOM) ---
-        {
-            ctx.save();
-            ctx.globalAlpha = 0.15; // Semi-transparent for glassmorphism
-            
-            const viewH = (game && game.cssHeight) ? game.cssHeight : (ctx.canvas.height || 600);
-            const lavaY = 570;
-            const lavaHeight = Math.max(30, (camera.y + viewH / zoom) - lavaY + 100);
-            
-            const lavaGrad = ctx.createLinearGradient(0, 575, 0, 575 + lavaHeight);
-            let shadowColor = '#f97316';
-            if (this.theme && this.theme.bottomRiverColors) {
-                lavaGrad.addColorStop(0, this.theme.bottomRiverColors[0]);
-                lavaGrad.addColorStop(0.4, this.theme.bottomRiverColors[1]);
-                lavaGrad.addColorStop(1, this.theme.bottomRiverColors[2]);
-                shadowColor = this.theme.bottomRiverShadow || '#f97316';
-            } else {
-                // Asit havuzu varsa lav nehrini yeşil asit yap (Uyumlu görünüm)
-                const hasAcidPools = this.hazards && this.hazards.some(h => h.type === 'acid');
-                if (hasAcidPools) {
-                    lavaGrad.addColorStop(0, '#10b981'); // Neon Zümrüt Yeşil
-                    lavaGrad.addColorStop(0.4, '#059669'); // Orta Yeşil
-                    lavaGrad.addColorStop(1, '#064e3b'); // Koyu Yeşil
-                    shadowColor = '#10b981';
-                } else {
-                    lavaGrad.addColorStop(0, '#f97316'); // Neon Turuncu
-                    lavaGrad.addColorStop(0.4, '#ea580c'); // Koyu Turuncu
-                    lavaGrad.addColorStop(1, '#7c2d12'); // Koyu Kırmızı
-                    shadowColor = '#f97316';
-                }
-            }
-            
-            ctx.fillStyle = lavaGrad;
-            ctx.shadowColor = shadowColor;
-            ctx.shadowBlur = 12;
-            
-            ctx.beginPath();
-            ctx.moveTo(0, lavaY + lavaHeight);
-            ctx.lineTo(0, 575);
-            
-            const lavaWaveCount = 24;
-            const lavaStep = this.width / lavaWaveCount;
-            for (let i = 0; i <= lavaWaveCount; i++) {
-                const lx = i * lavaStep;
-                const ly = 578 + Math.sin(this.time * 1.2 + (i * 0.8)) * 3;
-                ctx.lineTo(lx, ly);
-            }
-            ctx.lineTo(this.width, lavaY + lavaHeight);
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
-        }
+        // --- EN ALTTAKİ LAV NEHRİ (Minimized — sadece ince bir çizgi) ---
+        // Arka plan lav dolgusu kaldırıldı, bölüm engelleri ön planda kalsın
 
         // --- PLATFORMLARI ÇİZ ---
         this.platforms.forEach(plat => {
@@ -4927,83 +4877,53 @@ export class Level {
             });
         }
 
-        // --- EN ALTTAKİ LAVA/SIVI TABAKASI ---
+        // --- EN ALTTAKİ LAVA/SIVI TABAKASI (İnce tek çizgi — bölüm ağırlıklı) ---
         {
             ctx.save();
-            const lavaY = 570;
+            const lavaY = 580;
             
             // Dinamik renk belirleme (Tema bazlı)
-            let baseColor = '#2d0a0a';
             let surfaceColor = '#f97316';
-            let strokeColor = '#ef4444';
             let glowColor = '#f97316';
             
             const themeId = (this.theme && this.theme.id) ? this.theme.id : null;
             if (themeId) {
                 if (themeId === 'neon_sewer') {
-                    baseColor = '#022c22';
                     surfaceColor = '#10b981';
-                    strokeColor = '#10b981';
                     glowColor = '#10b981';
                 } else if (themeId === 'toxic_lab') {
-                    baseColor = '#3c3505';
                     surfaceColor = '#eab308';
-                    strokeColor = '#eab308';
                     glowColor = '#eab308';
                 } else if (themeId === 'gravity_chasm') {
-                    baseColor = '#2e083a';
                     surfaceColor = '#d946ef';
-                    strokeColor = '#f472b6';
                     glowColor = '#d946ef';
                 }
             } else {
-                // Temasız ama asit olan özel haritalar
                 const hasAcidPools = this.hazards && this.hazards.some(h => h.type === 'acid');
                 if (hasAcidPools) {
-                    baseColor = '#022c22';
                     surfaceColor = '#10b981';
-                    strokeColor = '#10b981';
                     glowColor = '#10b981';
                 }
             }
-            
-            const lavaHeight = Math.max(30, (camera.y + viewH / zoom) - lavaY + 100);
 
-            // Koyu tabanı yarı saydam çiz (Cam/sıvı efekti)
-            ctx.save();
-            ctx.globalAlpha = 0.15; // Reduced from 0.40 to 0.15 for transparency
-            ctx.fillStyle = baseColor;
-            ctx.fillRect(0, lavaY, this.width, lavaHeight);
-            ctx.restore();
-
-            // Dalgalı parıldayan lav yüzeyi
-            ctx.fillStyle = surfaceColor;
-            ctx.strokeStyle = strokeColor;
-            ctx.lineWidth = 3;
+            // Sadece ince neon dalgalı çizgi — dolgu yok
+            ctx.strokeStyle = surfaceColor;
+            ctx.lineWidth = 2;
             ctx.shadowColor = glowColor;
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 8;
+            ctx.globalAlpha = 0.6;
 
             ctx.beginPath();
-            ctx.moveTo(0, lavaY + lavaHeight);
-            ctx.lineTo(0, lavaY);
-
             const lavaSegmentW = 30;
             const lavaSegments = Math.ceil(this.width / lavaSegmentW);
             for (let i = 0; i <= lavaSegments; i++) {
                 const lx = i * lavaSegmentW;
-                const ly = lavaY + Math.sin(this.time * 1.5 + (i * 0.7)) * 4;
-                ctx.lineTo(lx, ly);
+                const ly = lavaY + Math.sin(this.time * 1.5 + (i * 0.7)) * 3;
+                if (i === 0) ctx.moveTo(lx, ly);
+                else ctx.lineTo(lx, ly);
             }
-            ctx.lineTo(this.width, lavaY + lavaHeight);
-            ctx.closePath();
-
-            // Gövdeyi yarı saydam doldur, neon kırmızı üst çizgiyi tam opak çiz
-            ctx.save();
-            ctx.globalAlpha = 0.15; // Reduced from 0.40 to 0.15 for transparency
-            ctx.fill();
-            ctx.restore();
-            
             ctx.stroke();
+
             ctx.restore();
         }
 

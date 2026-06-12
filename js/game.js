@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v24';
-import { Level } from './level.js?v=v24';
-import { Enemy } from './enemies.js?v=v24';
-import { UIManager } from './ui.js?v=v24';
-import { audio } from './audio.js?v=v24';
-import { LevelEditor } from './editor.js?v=v24';
-import { Boss, CyberBoss } from './boss.js?v=v24';
+import { Player } from './player.js?v=v25';
+import { Level } from './level.js?v=v25';
+import { Enemy } from './enemies.js?v=v25';
+import { UIManager } from './ui.js?v=v25';
+import { audio } from './audio.js?v=v25';
+import { LevelEditor } from './editor.js?v=v25';
+import { Boss, CyberBoss } from './boss.js?v=v25';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1630,20 +1630,51 @@ export class GameManager {
             this.ctx.stroke();
             
             // Coordinate ratios
+            // Calculate active height of the level to prevent squishing when level height is arbitrarily large (like Level 14 typo or custom levels)
+            let activeHeight = 600;
+            let maxY = 600;
+            if (this.level.platforms && this.level.platforms.length > 0) {
+                const maxPlatY = Math.max(...this.level.platforms.map(p => p.y + p.h));
+                if (maxPlatY > maxY) maxY = maxPlatY;
+            }
+            if (this.level.portal) {
+                const portalBottom = this.level.portal.y + this.level.portal.h;
+                if (portalBottom > maxY) maxY = portalBottom;
+            }
+            activeHeight = Math.min(this.level.height, Math.max(600, maxY + 50));
+
             const scaleX = mapW / this.level.width;
-            const scaleY = mapH / this.level.height;
+            const scaleY = mapH / activeHeight;
             
-            // Draw bottom lava layer
+            // Set clip path to keep all map contents strictly inside the glassmorphic backing panel
+            this.ctx.clip();
+
+            // Draw bottom lava layer (thin line + soft glow gradient to keep it level-focused rather than dominating)
             const lavaYVal = 570;
             if (this.level.height > lavaYVal) {
                 const lavaY = lavaYVal * scaleY;
-                const lavaH = (this.level.height - lavaYVal) * scaleY;
-                const lavaGrad = this.ctx.createLinearGradient(mapX, mapY + lavaY, mapX, mapY + lavaY + lavaH);
-                lavaGrad.addColorStop(0, '#f97316'); // Orange top
-                lavaGrad.addColorStop(1, '#7c2d12'); // Dark red bottom
+                
+                // Determine color based on theme
+                let lavaColor = '#f97316';
+                if (this.level.theme && this.level.theme.id) {
+                    const themeId = this.level.theme.id;
+                    if (themeId === 'neon_sewer') lavaColor = '#10b981';
+                    else if (themeId === 'toxic_lab') lavaColor = '#eab308';
+                    else if (themeId === 'gravity_chasm') lavaColor = '#d946ef';
+                }
+                
+                // Soft gradient below the surface line
+                const lavaGrad = this.ctx.createLinearGradient(mapX, mapY + lavaY, mapX, mapY + mapH);
+                lavaGrad.addColorStop(0, lavaColor + '66'); // 40% opacity neon at the surface
+                lavaGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
                 this.ctx.fillStyle = lavaGrad;
-                this.ctx.fillRect(mapX, mapY + lavaY, mapW, lavaH);
+                this.ctx.fillRect(mapX, mapY + lavaY, mapW, mapH - lavaY);
+
+                // Thin neon surface line
+                this.ctx.fillStyle = lavaColor;
+                this.ctx.fillRect(mapX, mapY + lavaY, mapW, 2);
             }
+
 
             // Draw hazards (spikes, acid pools)
             if (this.level.hazards) {
