@@ -13,15 +13,35 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v44">
+    <link rel="stylesheet" href="index.css?v=v45">
     <link rel="manifest" href="manifest.json">
     <script>
-        // Service Worker Kaydı (PWA & Offline Desteği)
+        // Service Worker Kaydı (PWA & Offline Desteği + Otomatik Güncelleme)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker başarıyla kaydedildi:', reg.scope))
+                    .then(reg => {
+                        console.log('Service Worker başarıyla kaydedildi:', reg.scope);
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            if (newWorker) {
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'activated') {
+                                        window.location.reload();
+                                    }
+                                });
+                            }
+                        });
+                    })
                     .catch(err => console.error('Service Worker kayıt hatası:', err));
+            });
+
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
             });
         }
 
@@ -580,7 +600,7 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v44"></script>
-    <script type="module" src="js/main.js?v=v44"></script>
+    <script src="js/controls_customizer.js?v=v45"></script>
+    <script type="module" src="js/main.js?v=v45"></script>
 </body>
 </html>
