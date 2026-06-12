@@ -93,6 +93,30 @@ class AudioManager {
                 document.addEventListener('click', unlock);
             }
 
+            // Auto-suspend/resume AudioContext on visibility change to stop background audio
+            if (!this._visibilityHandlerAdded) {
+                this._visibilityHandlerAdded = true;
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        if (this.ctx && this.ctx.state === 'running') {
+                            this.ctx.suspend();
+                        }
+                    } else {
+                        if (this.ctx && this.ctx.state === 'suspended') {
+                            this.ctx.resume().then(() => {
+                                if (this.musicPlaying && this.playChordRef) {
+                                    if (this.musicIntervalId) {
+                                        clearInterval(this.musicIntervalId);
+                                    }
+                                    this.playChordRef();
+                                    this.musicIntervalId = setInterval(this.playChordRef, 5000);
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+
             console.log("Viscora Audio Engine Initialized successfully.");
         } catch (e) {
             console.error("Web Audio API not supported on this browser:", e);
@@ -735,22 +759,7 @@ class AudioManager {
                 this.musicIntervalId = setInterval(playChord, 5000);
             });
 
-            // Uygulama arka plandan geri gelince müziği yeniden başlat (Android)
-            if (!this._visibilityHandlerAdded) {
-                this._visibilityHandlerAdded = true;
-                document.addEventListener('visibilitychange', () => {
-                    if (!document.hidden && this.musicPlaying) {
-                        this.resume().then(() => {
-                            // Interval durmuş olabilir, yeniden başlat
-                            if (this.musicIntervalId) {
-                                clearInterval(this.musicIntervalId);
-                            }
-                            playChord();
-                            this.musicIntervalId = setInterval(playChord, 5000);
-                        });
-                    }
-                });
-            }
+
         } catch (e) {
             console.error("Error starting music:", e);
         }

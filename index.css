@@ -490,11 +490,11 @@ h2 {
 /* Buton Tasarımları */
 .menu-btn {
     font-family: var(--font-game);
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     font-weight: 600;
     letter-spacing: 0.1rem;
-    padding: 0.9rem 2.5rem;
-    border-radius: 12px;
+    padding: 1.15rem 2.8rem;
+    border-radius: 14px;
     cursor: pointer;
     border: none;
     transition: all 0.2s ease;
