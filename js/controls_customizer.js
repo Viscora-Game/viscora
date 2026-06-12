@@ -11,7 +11,7 @@ class ControlsCustomizer {
         this.draggingBtn = null;
         this.dragOffsetX = 0;
         this.dragOffsetY = 0;
-        this.currentSize = 90;
+        this.currentSize = 96;
 
         // Arrow function bound methods for event removal
         this._onTouchStart = this._onTouchStart.bind(this);
@@ -74,7 +74,7 @@ class ControlsCustomizer {
 
     _applyLayout(layout) {
         if (!layout || !layout.positions) return;
-        this.currentSize = layout.size || 90;
+        this.currentSize = layout.size || 96;
 
         // Butonları doğrudan layer'ın içine taşı
         this.buttonIds.forEach(id => {

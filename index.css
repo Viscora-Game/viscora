@@ -790,8 +790,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 /* HUD Butonu (Pause vb.) */
 .hud-btn {
     pointer-events: auto;
-    width: 44px;
-    height: 44px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     background: rgba(15, 15, 25, 0.6);
     border: 1px solid var(--border-glow);
@@ -806,8 +806,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 }
 
 .hud-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
 }
 
 .hud-btn:active {
@@ -826,11 +826,11 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     border: 1.5px solid var(--color-normal);
     box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
     border-radius: 30px;
-    padding: 6px 16px;
+    padding: 8px 20px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.75rem;
+    gap: 10px;
+    font-size: 0.85rem;
     font-weight: 800;
     letter-spacing: 0.15rem;
     backdrop-filter: blur(10px);
@@ -839,8 +839,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 }
 
 .viscosity-badge .badge-dot {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background-color: var(--color-normal);
     box-shadow: 0 0 8px var(--color-normal);
@@ -908,8 +908,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 }
 
 .control-btn {
-    width: 90px;
-    height: 90px;
+    width: 96px;
+    height: 96px;
     border-radius: 50%;
     background: rgba(20, 20, 32, 0.55);
     border: 1.5px solid rgba(255, 255, 255, 0.18);
@@ -947,8 +947,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     background: rgba(16, 185, 129, 0.12);
     border-color: rgba(16, 185, 129, 0.25);
     color: rgba(16, 185, 129, 0.55);
-    width: 74px;
-    height: 74px;
+    width: 80px;
+    height: 80px;
 }
 .down-btn:active, .down-btn.active {
     background: rgba(16, 185, 129, 0.25);
@@ -959,8 +959,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 
 /* Özel Aksiyon Tuşları */
 .shift-btn {
-    width: 108px;
-    border-radius: 45px;
+    width: 114px;
+    border-radius: 48px;
     background: rgba(15, 15, 25, 0.55);
     border: 1.5px solid rgba(255, 255, 255, 0.18);
     position: relative;
@@ -1626,28 +1626,28 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     }
 
     .control-btn {
-        width: 50px;
-        height: 50px;
+        width: 76px;
+        height: 76px;
     }
 
     .control-btn svg {
-        width: 20px;
-        height: 20px;
+        width: 32px;
+        height: 32px;
     }
 
     .down-btn {
-        width: 42px;
-        height: 42px;
+        width: 64px;
+        height: 64px;
     }
 
     .shift-btn {
-        width: 66px;
-        height: 50px;
-        border-radius: 25px;
+        width: 96px;
+        height: 76px;
+        border-radius: 38px;
     }
 
     .shift-inner {
-        font-size: 0.7rem;
+        font-size: 0.8rem;
     }
 
     .dpad-left {
