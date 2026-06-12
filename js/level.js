@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v25';
-import { THEMES } from './generator.js?v=v25';
+import { audio } from './audio.js?v=v26';
+import { THEMES } from './generator.js?v=v26';
 
 /**
  * Viscora Level Design & Manager
@@ -4092,9 +4092,8 @@ export class Level {
             const cornerRadius = Math.min(6, plat.w / 2, plat.h / 2);
             this.drawRoundedRect(ctx, plat.x, plat.y, plat.w, plat.h, cornerRadius);
             
-            // Cam efekti (Glassmorphism): Gövdeyi yarı saydam doldur, neon kenarlığı tam opak çiz
+            // Katı Dolgu: Gövdeyi tamamen opak doldur, neon kenarlığı tam opak çiz
             ctx.save();
-            ctx.globalAlpha = 0.25;
             ctx.fill();
             ctx.restore();
             
@@ -4906,22 +4905,46 @@ export class Level {
                 }
             }
 
-            // Sadece ince neon dalgalı çizgi — dolgu yok
-            ctx.strokeStyle = surfaceColor;
-            ctx.lineWidth = 2;
-            ctx.shadowColor = glowColor;
-            ctx.shadowBlur = 8;
-            ctx.globalAlpha = 0.6;
-
+            // Dalgalı lav/sıvı dolgusu (globalAlpha = 0.85 ile içi dolgun ve opak)
             ctx.beginPath();
             const lavaSegmentW = 30;
             const lavaSegments = Math.ceil(this.width / lavaSegmentW);
+            
+            // Sağ alt köşeden başla
+            ctx.moveTo(this.width, this.height);
+            // Sol alt köşeye git
+            ctx.lineTo(0, this.height);
+            
+            // Dalga çizgisini takip et
+            for (let i = 0; i <= lavaSegments; i++) {
+                const lx = i * lavaSegmentW;
+                const ly = lavaY + Math.sin(this.time * 1.5 + (i * 0.7)) * 3;
+                if (i === 0) ctx.lineTo(lx, ly);
+                else ctx.lineTo(lx, ly);
+            }
+            ctx.closePath();
+            
+            const fillGrad = ctx.createLinearGradient(0, lavaY, 0, this.height);
+            fillGrad.addColorStop(0, surfaceColor);
+            fillGrad.addColorStop(1, '#000000'); // Derine indikçe siyaha doğru söner
+            
+            ctx.fillStyle = fillGrad;
+            ctx.globalAlpha = 0.85; // Arkadaki öğeleri kapatacak şekilde yüksek opaklık
+            ctx.fill();
+
+            // Üst kısımdaki parlak neon yüzey çizgisi
+            ctx.beginPath();
             for (let i = 0; i <= lavaSegments; i++) {
                 const lx = i * lavaSegmentW;
                 const ly = lavaY + Math.sin(this.time * 1.5 + (i * 0.7)) * 3;
                 if (i === 0) ctx.moveTo(lx, ly);
                 else ctx.lineTo(lx, ly);
             }
+            ctx.strokeStyle = surfaceColor;
+            ctx.lineWidth = 3;
+            ctx.shadowColor = glowColor;
+            ctx.shadowBlur = 10;
+            ctx.globalAlpha = 1.0;
             ctx.stroke();
 
             ctx.restore();
