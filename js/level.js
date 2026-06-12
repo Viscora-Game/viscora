@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v29';
-import { THEMES } from './generator.js?v=v29';
+import { audio } from './audio.js?v=v30';
+import { THEMES } from './generator.js?v=v30';
 
 /**
  * Viscora Level Design & Manager
@@ -287,7 +287,8 @@ export class Level {
                         rangeX: e.rangeX !== undefined ? e.rangeX : 120,
                         speed: e.speed !== undefined ? e.speed : 1.2,
                         isVertical: !!e.isVertical,
-                        color: e.color || '#f43f5e'
+                        color: e.color || '#f43f5e',
+                        type: e.type || 'patrol'
                     }));
                 }
 

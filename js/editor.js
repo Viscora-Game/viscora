@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy } from './enemies.js?v=v29';
-import { audio } from './audio.js?v=v29';
-import { LevelGenerator } from './generator.js?v=v29';
+import { Enemy, GelChaser } from './enemies.js?v=v30';
+import { audio } from './audio.js?v=v30';
+import { LevelGenerator } from './generator.js?v=v30';
 
 export class LevelEditor {
     constructor(game) {
@@ -400,9 +400,13 @@ export class LevelEditor {
         // Initialize enemies from edited state
         this.game.enemies = [];
         if (this.game.level.enemies) {
-            this.game.enemies = this.game.level.enemies.map(e => 
-                new Enemy(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, !!e.isVertical, e.color || '#f43f5e')
-            );
+            this.game.enemies = this.game.level.enemies.map(e => {
+                if (e.type === 'chaser') {
+                    return new GelChaser(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.0, e.color || '#10b981');
+                } else {
+                    return new Enemy(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, !!e.isVertical, e.color || '#f43f5e');
+                }
+            });
         }
 
         // Respawn player
@@ -567,6 +571,7 @@ export class LevelEditor {
                         <button class="editor-btn" data-tool="create_hazard_spike_right">▶️ Duvar Dikeni (D)</button>
                         <button class="editor-btn" data-tool="create_trap_falling_block" style="grid-column: span 2;">🗿 Düşen Blok Tuzağı</button>
                         <button class="editor-btn" data-tool="create_arrow_shooter" style="grid-column: span 2; background: rgba(6, 182, 212, 0.12); color: #67e8f9; border-color: rgba(6, 182, 212, 0.35);">🏹 Ok Fırlatıcı (Arrow Shooter)</button>
+                        <button class="editor-btn" data-tool="create_enemy_chaser" style="grid-column: span 2; background: rgba(16, 185, 129, 0.12); color: #34d399; border-color: rgba(16, 185, 129, 0.35);">🧬 Jel Takipçi (Gel Chaser)</button>
                     </div>
                 </details>
 
@@ -869,7 +874,8 @@ export class LevelEditor {
             rangeX: Math.round(e.rangeX || 120),
             speed: e.speed || 1.2,
             isVertical: !!e.isVertical,
-            color: e.color || '#f43f5e'
+            color: e.color || '#f43f5e',
+            type: e.type || 'patrol'
         }));
 
         const pressurePlates = (lvl.pressurePlates || []).map(pp => ({
@@ -1193,29 +1199,47 @@ export class LevelEditor {
                 </div>
             `;
         } else if (type === 'enemy') {
+            const isChaser = obj.type === 'chaser';
             html += `
+                <div class="editor-input-group">
+                    <label>Düşman Sınıfı</label>
+                    <select id="inspect-enemy-type">
+                        <option value="patrol" ${!isChaser ? 'selected' : ''}>Devriye (Normal)</option>
+                        <option value="chaser" ${isChaser ? 'selected' : ''}>Jel Takipçi (🧬)</option>
+                    </select>
+                </div>
                 <div class="editor-input-group">
                     <label>Patrol Menzil</label>
                     <input type="number" id="inspect-enemy-range" value="${obj.rangeX || 150}">
                 </div>
                 <div class="editor-input-group">
                     <label>Devriye Hızı</label>
-                    <input type="number" step="0.1" id="inspect-enemy-speed" value="${obj.speed || 1.2}">
-                </div>
-                <div class="editor-checkbox-group">
-                    <input type="checkbox" id="inspect-enemy-vertical" ${obj.isVertical ? 'checked' : ''}>
-                    <label for="inspect-enemy-vertical">Dikey Devriye</label>
-                </div>
-                <div class="editor-input-group">
-                    <label>Renk</label>
-                    <select id="inspect-enemy-color">
-                        <option value="#f43f5e" ${obj.color === '#f43f5e' || !obj.color ? 'selected' : ''}>Kırmızı</option>
-                        <option value="#06b6d4" ${obj.color === '#06b6d4' ? 'selected' : ''}>Mavi</option>
-                        <option value="#d946ef" ${obj.color === '#d946ef' ? 'selected' : ''}>Mor/Pembe</option>
-                        <option value="#eab308" ${obj.color === '#eab308' ? 'selected' : ''}>Sarı</option>
-                    </select>
+                    <input type="number" step="0.1" id="inspect-enemy-speed" value="${obj.speed !== undefined ? obj.speed : (isChaser ? 1.0 : 1.2)}">
                 </div>
             `;
+            if (!isChaser) {
+                html += `
+                    <div class="editor-checkbox-group">
+                        <input type="checkbox" id="inspect-enemy-vertical" ${obj.isVertical ? 'checked' : ''}>
+                        <label for="inspect-enemy-vertical">Dikey Devriye</label>
+                    </div>
+                    <div class="editor-input-group">
+                        <label>Renk</label>
+                        <select id="inspect-enemy-color">
+                            <option value="#f43f5e" ${obj.color === '#f43f5e' || !obj.color ? 'selected' : ''}>Kırmızı</option>
+                            <option value="#06b6d4" ${obj.color === '#06b6d4' ? 'selected' : ''}>Mavi</option>
+                            <option value="#d946ef" ${obj.color === '#d946ef' ? 'selected' : ''}>Mor/Pembe</option>
+                            <option value="#eab308" ${obj.color === '#eab308' ? 'selected' : ''}>Sarı</option>
+                        </select>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div style="font-size: 11px; color: #34d399; margin-top: 5px; line-height: 1.3; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 5px;">
+                        ℹ️ Jel Takipçi yeşil renkte devriye gezer, oyuncuyu 240px yakınına girdiğinde algılar ve 2.5 saniye şişip kovalayarak patlar!
+                    </div>
+                `;
+            }
         } else if (type === 'collectible') {
             html += `
                 <div class="editor-input-group">
@@ -1541,6 +1565,15 @@ export class LevelEditor {
         addUpdateEvent('inspect-gate-type', (val) => { obj.type = val; });
         addUpdateEvent('inspect-gate-id', (val) => { obj.id = parseInt(val) || 101; });
 
+        addUpdateEvent('inspect-enemy-type', (val) => {
+            obj.type = val;
+            if (val === 'chaser') {
+                obj.color = '#10b981';
+                obj.isVertical = false;
+            }
+            this.updateInspector();
+        });
+
         addUpdateEvent('inspect-enemy-range', (val) => { obj.rangeX = parseInt(val) || 150; });
         addUpdateEvent('inspect-enemy-speed', (val) => { obj.speed = parseFloat(val) || 1.2; });
         
@@ -1701,9 +1734,13 @@ export class LevelEditor {
         // Düşmanları başlat
         this.game.enemies = [];
         if (this.game.level.enemies) {
-            this.game.enemies = this.game.level.enemies.map(e => 
-                new Enemy(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, !!e.isVertical, e.color || '#f43f5e')
-            );
+            this.game.enemies = this.game.level.enemies.map(e => {
+                if (e.type === 'chaser') {
+                    return new GelChaser(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.0, e.color || '#10b981');
+                } else {
+                    return new Enemy(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, !!e.isVertical, e.color || '#f43f5e');
+                }
+            });
         }
 
         // Oyuncuyu canlandır
@@ -1790,7 +1827,8 @@ export class LevelEditor {
             rangeX: Math.round(e.rangeX || 120),
             speed: e.speed || 1.2,
             isVertical: !!e.isVertical,
-            color: e.color || '#f43f5e'
+            color: e.color || '#f43f5e',
+            type: e.type || 'patrol'
         }));
 
         const pressurePlates = (lvl.pressurePlates || []).map(pp => ({
@@ -2321,7 +2359,8 @@ export class LevelEditor {
                         rangeX: e.rangeX !== undefined ? e.rangeX : 120,
                         speed: e.speed !== undefined ? e.speed : 1.2,
                         isVertical: !!e.isVertical,
-                        color: e.color || '#f43f5e'
+                        color: e.color || '#f43f5e',
+                        type: e.type || 'patrol'
                     }));
                 }
 
@@ -2876,6 +2915,16 @@ export class LevelEditor {
                     speed: 2.0,
                     isVertical: false,
                     color: '#eab308'
+                });
+            } else if (this.activeTool === 'create_enemy_chaser') {
+                lvl.enemies.push({
+                    x: snapX,
+                    y: snapY,
+                    rangeX: 150,
+                    speed: 1.0,
+                    isVertical: false,
+                    color: '#10b981',
+                    type: 'chaser'
                 });
             } else if (this.activeTool === 'create_plate') {
                 if (!lvl.pressurePlates) lvl.pressurePlates = [];
@@ -3821,21 +3870,36 @@ export class LevelEditor {
         if (lvl.enemies) {
             lvl.enemies.forEach(e => {
                 ctx.save();
-                ctx.fillStyle = '#f43f5e';
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.arc(e.x, e.y, 16, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-                
-                // Diken topu olduğunu belirtmek için ufak bir artı işareti çiz
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(e.x - 8, e.y); ctx.lineTo(e.x + 8, e.y);
-                ctx.moveTo(e.x, e.y - 8); ctx.lineTo(e.x, e.y + 8);
-                ctx.stroke();
+                if (e.type === 'chaser') {
+                    ctx.fillStyle = '#10b981'; // Green gel color
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, 16, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '11px Outfit';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('🧬', e.x, e.y);
+                } else {
+                    ctx.fillStyle = e.color || '#f43f5e';
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, 16, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(e.x - 8, e.y); ctx.lineTo(e.x + 8, e.y);
+                    ctx.moveTo(e.x, e.y - 8); ctx.lineTo(e.x, e.y + 8);
+                    ctx.stroke();
+                }
                 ctx.restore();
             });
         }

@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v29';
-import { Level } from './level.js?v=v29';
-import { Enemy } from './enemies.js?v=v29';
-import { UIManager } from './ui.js?v=v29';
-import { audio } from './audio.js?v=v29';
-import { LevelEditor } from './editor.js?v=v29';
-import { Boss, CyberBoss } from './boss.js?v=v29';
+import { Player } from './player.js?v=v30';
+import { Level } from './level.js?v=v30';
+import { Enemy, GelChaser } from './enemies.js?v=v30';
+import { UIManager } from './ui.js?v=v30';
+import { audio } from './audio.js?v=v30';
+import { LevelEditor } from './editor.js?v=v30';
+import { Boss, CyberBoss } from './boss.js?v=v30';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -292,9 +292,13 @@ export class GameManager {
      */
     initEnemies(levelNumber) {
         if (this.level.enemies) {
-            this.enemies = this.level.enemies.map(e => 
-                new Enemy(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, !!e.isVertical, e.color || '#f43f5e')
-            );
+            this.enemies = this.level.enemies.map(e => {
+                if (e.type === 'chaser') {
+                    return new GelChaser(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.0, e.color || '#10b981');
+                } else {
+                    return new Enemy(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, !!e.isVertical, e.color || '#f43f5e');
+                }
+            });
             return;
         }
 
@@ -847,7 +851,7 @@ export class GameManager {
 
         // Düşmanları Güncelle & Çarpışma Kontrolü
         this.enemies.forEach(enemy => {
-            enemy.update(this.level);
+            enemy.update(this.level, this.player, this.emitParticles.bind(this));
             enemy.checkCollision(this.player, this.emitParticles.bind(this), () => {
                 // Cilalama: Düşmana basınca kamera sallanır, oyun kısa süreli donar ve stomping sesi tetiklenir
                 this.shakeCamera(7, 10);

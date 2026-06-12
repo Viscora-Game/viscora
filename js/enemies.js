@@ -225,4 +225,326 @@ export class Enemy {
     }
 }
 
+export class GelChaser extends Enemy {
+    constructor(x, y, rangeX = 150, speed = 1.0, color = '#10b981', type = 'chaser') {
+        super(x, y, rangeX, speed, false, color);
+        this.type = type;
+        
+        // Jel Takipçi Özel Durumları: 'patrol' (normal), 'alert' (algılama), 'warning' (uyarı), 'chase' (takip), 'exploded' (patladı)
+        this.state = 'patrol';
+        this.alertTimer = 0;
+        this.chaseTimer = 0;
+        this.chaseSpeed = 3.2; // Tasarımda önerilen takip hızı (2.5 - 4.0)
+        this.detectionRadius = 240; // Tasarımda önerilen algılama mesafesi (6 - 8 birim: 240px)
+        this.explosionRadius = 100; // Tasarımda önerilen patlama yarıçapı (2 - 3 birim: 100px)
+        this.isExploded = false;
+        
+        this.baseRadius = 16;
+        this.radius = 16;
+        this.vy = 0;
+        this.onGround = false;
+        this.facingDir = 1;
+    }
+
+    /**
+     * Düşman yapay zekası, platform fizik hareketi ve durum geçişleri
+     */
+    update(level, player, emitParticles) {
+        if (this.isDead) return;
+
+        // --- PLATFORM YERÇEKİMİ & DİKEY FİZİK ---
+        this.vy += 0.28; // Yerçekimi ivmesi
+        if (this.vy > 10) this.vy = 10; // Terminal hız limiti
+
+        // Yatay hareket girdisini belirle
+        if (this.state === 'patrol') {
+            // Normal devriye hareketi
+            this.x += this.vx;
+            
+            // Devriye sınır kontrolü
+            if (this.x < this.minX) {
+                this.x = this.minX;
+                this.vx = -this.vx;
+            } else if (this.x > this.maxX) {
+                this.x = this.maxX;
+                this.vx = -this.vx;
+            }
+            this.facingDir = Math.sign(this.vx) || 1;
+        } else if (this.state === 'chase') {
+            // Oyuncuya doğru koş
+            const chaseDir = player ? Math.sign(player.x - this.x) : 1;
+            this.vx = (chaseDir || 1) * this.chaseSpeed;
+            this.x += this.vx;
+            this.facingDir = chaseDir || 1;
+        } else {
+            // Alert/Warning durumlarında duraklar
+            this.vx = 0;
+        }
+
+        // Yatay çarpışma çözümü (Platform duvarları)
+        let hitWall = false;
+        for (const plat of level.platforms) {
+            if (plat.passage) continue;
+            if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2, plat)) {
+                hitWall = true;
+                if (this.vx > 0) {
+                    this.x = plat.x - this.radius;
+                } else if (this.vx < 0) {
+                    this.x = plat.x + plat.w + this.radius;
+                }
+            }
+        }
+
+        // Dikey hareket uygula
+        this.y += this.vy;
+        this.onGround = false;
+
+        // Dikey çarpışma çözümü (Zemin & Tavan)
+        for (const plat of level.platforms) {
+            if (plat.passage) {
+                // Tek yönlü platformlar (aşağı düşerken basılabilir)
+                if (this.vy > 0 && this.y + this.radius - this.vy <= plat.y + 4 &&
+                    this.x + this.radius > plat.x && this.x - this.radius < plat.x + plat.w) {
+                    this.y = plat.y - this.radius;
+                    this.vy = 0;
+                    this.onGround = true;
+                }
+                continue;
+            }
+            if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2, plat)) {
+                if (this.vy > 0) {
+                    this.y = plat.y - this.radius;
+                    this.vy = 0;
+                    this.onGround = true;
+                } else if (this.vy < 0) {
+                    this.y = plat.y + plat.h + this.radius;
+                    this.vy = 0;
+                }
+            }
+        }
+
+        // Akıllı Zıplama Yapay Zekası: Kovalama modundayken duvara çarparsa ve yerdeyse üzerinden atlar
+        if (this.state === 'chase' && hitWall && this.onGround) {
+            this.vy = -6.5;
+            this.onGround = false;
+        }
+
+        // --- DURUM GEÇİŞLERİ VE ZAMANLAYICILAR ---
+        if (this.state === 'patrol' && player && !player.isDead) {
+            const dx = player.x - this.x;
+            const dy = player.y - this.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist <= this.detectionRadius) {
+                this.state = 'alert';
+                this.alertTimer = 24; // 0.4 sn (60fps varsayımı ile)
+                this.vx = 0;
+            }
+        }
+
+        if (this.state === 'alert') {
+            this.alertTimer--;
+            if (this.alertTimer <= 0) {
+                this.state = 'warning';
+                this.alertTimer = 24; // 0.4 sn
+            }
+        } else if (this.state === 'warning') {
+            this.alertTimer--;
+            if (this.alertTimer <= 0) {
+                this.state = 'chase';
+                this.chaseTimer = 2.5; // Tasarımda önerilen 2.5 sn patlama süresi
+            }
+        } else if (this.state === 'chase') {
+            this.chaseTimer -= (1 / 60);
+
+            // Kovalarken arkasında koşma izi partikülleri yay
+            if (Math.random() < 0.3 && emitParticles) {
+                emitParticles(
+                    this.x + (Math.random() - 0.5) * this.radius,
+                    this.y + (Math.random() - 0.5) * this.radius,
+                    'trail',
+                    '#ef4444',
+                    1
+                );
+            }
+
+            // Şişme efekti (radius dinamik büyümesi)
+            this.radius = this.baseRadius + (1 - this.chaseTimer / 2.5) * 14; // Yarıçapı 16px'ten 30px'e şişer
+
+            if (this.chaseTimer <= 0) {
+                this.explode(player, emitParticles);
+            }
+        }
+
+        this.pulseTime += (this.state === 'chase' ? 0.22 : 0.08);
+    }
+
+    /**
+     * Düşmanın alan hasarlı patlaması
+     */
+    explode(player, emitParticles) {
+        this.isDead = true;
+        this.isExploded = true;
+
+        // Patlama ses efekti tetikleme denemesi
+        if (player && player.game && player.game.audio) {
+            try { player.game.audio.playExplode && player.game.audio.playExplode(); } catch(e){}
+        }
+
+        // Oyuncu patlama alanındaysa hasar ver ve fırlat
+        if (player && !player.isDead) {
+            const dx = player.x - this.x;
+            const dy = player.y - this.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist <= this.explosionRadius) {
+                player.takeDamage(2); // Tasarımdaki Orta-Yüksek patlama hasarı (2 can gider)
+                
+                // Oyuncuyu geriye ve havaya doğru fırlatma (Blast Force)
+                const pushForce = 6;
+                player.vx += (dx / (dist || 1)) * pushForce;
+                player.vy = -5.5;
+                player.applySquish(-0.5, 0.6);
+            }
+        }
+
+        // Tasarımdaki sıvı patlama efekti (Etrafa saçılan 35 adet kırmızı jöle parçacığı)
+        if (emitParticles) {
+            emitParticles(this.x, this.y, 'enemy_pop', '#ef4444', 35);
+        }
+    }
+
+    /**
+     * Jel Takipçiyi şablona sadık kalarak çizer
+     */
+    draw(ctx, camera) {
+        if (this.isDead) return;
+
+        ctx.save();
+        ctx.translate(-camera.x, -camera.y);
+
+        // Durum renkleri belirleme
+        let bodyColor = '#10b981'; // Normal: Yeşil
+        let secondaryColor = '#047857';
+        let glowColor = '#10b981';
+        let shakeX = 0, shakeY = 0;
+
+        if (this.state === 'alert') {
+            bodyColor = '#eab308'; // Algılama: Sarı
+            secondaryColor = '#a16207';
+            glowColor = '#eab308';
+        } else if (this.state === 'warning') {
+            bodyColor = '#f97316'; // Uyarı: Turuncu
+            secondaryColor = '#c2410c';
+            glowColor = '#f97316';
+            // Uyarı titremesi
+            shakeX = (Math.random() - 0.5) * 3;
+            shakeY = (Math.random() - 0.5) * 3;
+        } else if (this.state === 'chase') {
+            bodyColor = '#ef4444'; // Takip/Patlama: Kırmızı
+            secondaryColor = '#991b1b';
+            glowColor = '#ef4444';
+
+            // Son 1 saniyede patlama flaş efekti (kırmızı/beyaz hızlı yanıp sönme)
+            if (this.chaseTimer < 1.0 && Math.floor(this.chaseTimer * 10) % 2 === 0) {
+                bodyColor = '#ffffff';
+                secondaryColor = '#ef4444';
+                glowColor = '#ffffff';
+            }
+        }
+
+        ctx.translate(shakeX, shakeY);
+
+        const pulse = Math.sin(this.pulseTime) * 1.2;
+        const currentRadius = this.radius + pulse;
+
+        // Dış neon glow efekti
+        ctx.shadowColor = glowColor;
+        ctx.shadowBlur = this.state === 'chase' ? (16 + pulse * 4) : (10 + Math.abs(pulse) * 2);
+
+        // 3D Kubbe gradyanı
+        const grad = ctx.createRadialGradient(
+            this.x - currentRadius * 0.2, 
+            this.y - currentRadius * 0.2, 
+            2, 
+            this.x, 
+            this.y, 
+            currentRadius
+        );
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.35, bodyColor);
+        grad.addColorStop(1, secondaryColor);
+        ctx.fillStyle = grad;
+
+        // --- JEL KUBBE GÖVDESİ ---
+        ctx.beginPath();
+        // Üst yarım kubbe
+        ctx.arc(this.x, this.y - currentRadius * 0.08, currentRadius, Math.PI, 0, false);
+        // Alt kısmı kapat
+        ctx.lineTo(this.x + currentRadius, this.y + currentRadius * 0.5);
+        ctx.lineTo(this.x - currentRadius, this.y + currentRadius * 0.5);
+        ctx.closePath();
+        ctx.fill();
+
+        // --- HAREKETLİ JEL AYAKLAR ---
+        ctx.fillStyle = secondaryColor;
+        ctx.beginPath();
+        ctx.arc(this.x - currentRadius * 0.6, this.y + currentRadius * 0.45, currentRadius * 0.24, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y + currentRadius * 0.52, currentRadius * 0.26, 0, Math.PI * 2);
+        ctx.arc(this.x + currentRadius * 0.6, this.y + currentRadius * 0.45, currentRadius * 0.24, 0, Math.PI * 2);
+        ctx.fill();
+
+        // --- KIZGIN GÖZLER & EYEBROWS ---
+        ctx.shadowBlur = 0; // Detay çizimlerinde gölgeyi kapat
+        const eyeRadius = currentRadius * 0.22;
+        const eyeSpacing = currentRadius * 0.32;
+        const lookDir = this.facingDir;
+
+        // Siyah göz yuvaları
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(this.x - eyeSpacing, this.y - currentRadius * 0.08, eyeRadius, 0, Math.PI * 2);
+        ctx.arc(this.x + eyeSpacing, this.y - currentRadius * 0.08, eyeRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Kızgın kaşlar (Eğik siyah çizgiler)
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = currentRadius * 0.15;
+        ctx.lineCap = 'round';
+        
+        // Sol kaş
+        ctx.beginPath();
+        ctx.moveTo(this.x - eyeSpacing - eyeRadius * 1.2, this.y - currentRadius * 0.23);
+        ctx.lineTo(this.x - eyeSpacing + eyeRadius * 1.2, this.y - currentRadius * 0.02);
+        ctx.stroke();
+
+        // Sağ kaş
+        ctx.beginPath();
+        ctx.moveTo(this.x + eyeSpacing + eyeRadius * 1.2, this.y - currentRadius * 0.23);
+        ctx.lineTo(this.x + eyeSpacing - eyeRadius * 1.2, this.y - currentRadius * 0.02);
+        ctx.stroke();
+
+        // Göz bebekleri (Normalde beyaz, uyarılınca/kovalarken kırmızı parlar)
+        ctx.fillStyle = (this.state === 'patrol') ? '#ffffff' : '#f43f5e';
+        ctx.beginPath();
+        ctx.arc(this.x - eyeSpacing + lookDir * 1.2, this.y - currentRadius * 0.06, 2.2, 0, Math.PI * 2);
+        ctx.arc(this.x + eyeSpacing + lookDir * 1.2, this.y - currentRadius * 0.06, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // --- TEPEDEKİ UYARI İKONLARI ---
+        if (this.state === 'alert') {
+            ctx.fillStyle = '#eab308';
+            ctx.font = '800 16px Outfit';
+            ctx.textAlign = 'center';
+            ctx.fillText('!', this.x, this.y - currentRadius - 8);
+        } else if (this.state === 'warning') {
+            ctx.fillStyle = '#f97316';
+            ctx.font = '800 18px Outfit';
+            ctx.textAlign = 'center';
+            ctx.fillText('💢', this.x, this.y - currentRadius - 10);
+        }
+
+        ctx.restore();
+    }
+}
+
 export default Enemy;

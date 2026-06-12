@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v29';
-import { audio } from './audio.js?v=v29';
+import { ViscosityStates } from './viscosity.js?v=v30';
+import { audio } from './audio.js?v=v30';
 
 export class Player {
     constructor(x, y, game = null) {
