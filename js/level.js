@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v27';
-import { THEMES } from './generator.js?v=v27';
+import { audio } from './audio.js?v=v28';
+import { THEMES } from './generator.js?v=v28';
 
 /**
  * Viscora Level Design & Manager
@@ -6046,15 +6046,18 @@ export class Level {
             });
         }
 
-        // En yüksek platformu bul ve tavan sınırını onun biraz yukarısına sabitle (en azından -80 toleransı ile)
+        // En yüksek platformu veya interaktif objeyi (itilebilir bloklar, düşen tuzaklar, lazer kapılar vb.) bul ve tavan sınırını onun yukarısına sabitle
         let minY = this.height || 600;
-        const allPlats = [
+        const allInteractiveObjects = [
             ...(this.platforms || []),
             ...(this.movingPlatforms || []),
             ...(this.breakablePlatforms || []),
-            ...(this.fallingPlatforms || [])
+            ...(this.fallingPlatforms || []),
+            ...(this.pushBlocks || []),
+            ...(this.fallingBlockTraps || []),
+            ...(this.gates || [])
         ];
-        allPlats.forEach(p => {
+        allInteractiveObjects.forEach(p => {
             let py = p.y !== undefined ? p.y : (p.startY !== undefined ? p.startY : p.y);
             if (py !== undefined && py < minY) {
                 minY = py;
