@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v26';
-import { THEMES } from './generator.js?v=v26';
+import { audio } from './audio.js?v=v27';
+import { THEMES } from './generator.js?v=v27';
 
 /**
  * Viscora Level Design & Manager
@@ -6060,7 +6060,7 @@ export class Level {
                 minY = py;
             }
         });
-        this.ceilingY = Math.min(-80, minY - 100);
+        this.ceilingY = Math.min(-95, minY - 115);
     }
 
     /**

@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v26';
-import { audio } from './audio.js?v=v26';
+import { ViscosityStates } from './viscosity.js?v=v27';
+import { audio } from './audio.js?v=v27';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -700,7 +700,7 @@ export class Player {
             this.resolveCollisions(level, false);
 
             // Tavanda ekran dışına (harita limitine) çıkmasını engelle
-            const ceilingLimit = (level.ceilingY !== undefined ? level.ceilingY : -120) + this.radius;
+            const ceilingLimit = (level.ceilingY !== undefined ? level.ceilingY : -135) + this.radius;
             if (this.y < ceilingLimit) {
                 this.y = ceilingLimit;
                 this.vy = 0;
