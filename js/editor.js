@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy } from './enemies.js?v=v28';
-import { audio } from './audio.js?v=v28';
-import { LevelGenerator } from './generator.js?v=v28';
+import { Enemy } from './enemies.js?v=v29';
+import { audio } from './audio.js?v=v29';
+import { LevelGenerator } from './generator.js?v=v29';
 
 export class LevelEditor {
     constructor(game) {
@@ -1276,6 +1276,7 @@ export class LevelEditor {
                         <option value="left" ${obj.dir === 'left' ? 'selected' : ''}>Sola ⬅️</option>
                         <option value="up" ${obj.dir === 'up' ? 'selected' : ''}>Yukarı ⬆️</option>
                         <option value="down" ${obj.dir === 'down' ? 'selected' : ''}>Aşağı ⬇️</option>
+                        <option value="target" ${obj.dir === 'target' ? 'selected' : ''}>🎯 Hedef Takip (360°)</option>
                     </select>
                 </div>
                 <div class="editor-input-group">
@@ -3802,7 +3803,7 @@ export class LevelEditor {
                 ctx.font = '14px Outfit';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                const dirEmoji = a.dir === 'right' ? '➡' : a.dir === 'left' ? '⬅' : a.dir === 'up' ? '⬆' : '⬇';
+                const dirEmoji = a.dir === 'right' ? '➡' : a.dir === 'left' ? '⬅' : a.dir === 'up' ? '⬆' : a.dir === 'down' ? '⬇' : '🎯';
                 ctx.fillText(dirEmoji, cx, cy + a.h * 0.55);
                 ctx.restore();
 

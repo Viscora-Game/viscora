@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v28';
-import { THEMES } from './generator.js?v=v28';
+import { audio } from './audio.js?v=v29';
+import { THEMES } from './generator.js?v=v29';
 
 /**
  * Viscora Level Design & Manager
@@ -3525,6 +3525,14 @@ export class Level {
                         else if (shooter.dir === 'left')   { ox = shooter.x;            vx = -spd; }
                         else if (shooter.dir === 'up')     { oy = shooter.y;            vy = -spd; }
                         else if (shooter.dir === 'down')   { oy = shooter.y + shooter.h; vy =  spd; }
+                        else if (shooter.dir === 'target') {
+                            const angle = Math.atan2(player.y - cy, player.x - cx);
+                            const r = shooter.w / 2 + 8; // Namlu ucundan fırlatılması için
+                            ox = cx + Math.cos(angle) * r;
+                            oy = cy + Math.sin(angle) * r;
+                            vx = Math.cos(angle) * spd;
+                            vy = Math.sin(angle) * spd;
+                        }
 
                         shooter.arrows.push({ x: ox, y: oy, vx, vy, life: shooter.arrowRange, alive: true });
 
@@ -4590,7 +4598,7 @@ export class Level {
         }
 
         // --- OK FIRLATICIlarI ÇİZ ---
-        this.drawArrowShooters(ctx, this.time);
+        this.drawArrowShooters(ctx, this.time, game ? game.player : null);
 
         // --- TOPLANABİLİR HÜCRE ÇEKİRDEKLERİNİ ÇİZ ---
         if (this.collectibles) {
@@ -6072,7 +6080,7 @@ export class Level {
     /**
      * Ok Fırlatıcıları Çizer (level.js draw loop'undan çağrılır)
      */
-    drawArrowShooters(ctx, time) {
+    drawArrowShooters(ctx, time, player = null) {
         if (!this.arrowShooters || this.arrowShooters.length === 0) return;
 
         this.arrowShooters.forEach(shooter => {
@@ -6087,6 +6095,21 @@ export class Level {
             if (shooter.dir === 'left')  ctx.rotate(Math.PI);
             else if (shooter.dir === 'up')    ctx.rotate(-Math.PI / 2);
             else if (shooter.dir === 'down')  ctx.rotate(Math.PI / 2);
+            else if (shooter.dir === 'target') {
+                let angle = 0;
+                if (player) {
+                    const dx = player.x - cx;
+                    const dy = player.y - cy;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist <= shooter.detectionRadius) {
+                        angle = Math.atan2(dy, dx);
+                        shooter.lastTargetAngle = angle;
+                    } else if (shooter.lastTargetAngle !== undefined) {
+                        angle = shooter.lastTargetAngle;
+                    }
+                }
+                ctx.rotate(angle);
+            }
 
             const r = shooter.w / 2;
 
