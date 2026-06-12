@@ -285,7 +285,8 @@ export class GelChaser extends Enemy {
         let hitWall = false;
         for (const plat of level.platforms) {
             if (plat.passage) continue;
-            if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2, plat)) {
+            // Yatay kontrolü yaparken dikeyde 4px daraltılmış kutu kullanıyoruz ki üzerinde durduğu zemini duvar sanmasın
+            if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius + 4, this.radius * 2, this.radius * 2 - 8, plat)) {
                 hitWall = true;
                 if (this.vx > 0) {
                     this.x = plat.x - this.radius;
@@ -410,6 +411,52 @@ export class GelChaser extends Enemy {
         // Tasarımdaki sıvı patlama efekti (Etrafa saçılan 35 adet kırmızı jöle parçacığı)
         if (emitParticles) {
             emitParticles(this.x, this.y, 'enemy_pop', '#ef4444', 35);
+        }
+    }
+
+    /**
+     * Oyuncu ile temas/çarpışma kontrolleri (Kovalarken anında patlar)
+     */
+    checkCollision(player, emitParticles, onStomp) {
+        if (this.isDead || player.isDead) return;
+
+        const dx = player.x - this.x;
+        const dy = player.y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Daire çember çarpışması
+        if (dist < player.radius + this.radius - 4) {
+            if (this.state === 'chase') {
+                // Kovalarken temas edilirse chaser anında patlar!
+                this.explode(player, emitParticles);
+                if (onStomp) onStomp(); // Ekran sarsıntısı ve donma etkisi
+            } else {
+                // Diğer durumlarda standart ezme/ezilme davranışları
+                const stompVy = player.vy > 0 ? player.vy : (player.prevVy > 0 ? player.prevVy : 0);
+                const isSteppingOn = stompVy > 0 && player.y + player.radius - stompVy <= this.y - this.radius + 10;
+                
+                if (isSteppingOn) {
+                    this.isDead = true;
+                    
+                    let bounceForce = 7.5;
+                    if (player.viscosity.id === 'LOW') bounceForce = 8.2;
+                    if (player.viscosity.id === 'HIGH') bounceForce = 5.0;
+                    
+                    player.vy = -bounceForce;
+                    player.onGround = false;
+                    player.applySquish(-0.4, 0.45);
+                    
+                    if (emitParticles) {
+                        emitParticles(this.x, this.y, 'enemy_pop', this.color, 22);
+                    }
+                    
+                    if (onStomp) {
+                        onStomp();
+                    }
+                } else {
+                    player.takeDamage(1);
+                }
+            }
         }
     }
 
