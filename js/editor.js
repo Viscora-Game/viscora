@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v43';
-import { audio } from './audio.js?v=v43';
-import { LevelGenerator } from './generator.js?v=v43';
+import { Enemy, GelChaser } from './enemies.js?v=v44';
+import { audio } from './audio.js?v=v44';
+import { LevelGenerator } from './generator.js?v=v44';
 
 export class LevelEditor {
     constructor(game) {
@@ -2476,8 +2476,8 @@ export class LevelEditor {
                     lvl.laserEmitters = data.laserEmitters.map(e => ({
                         x: e.x,
                         y: e.y,
-                        w: e.w || 30,
-                        h: e.h || 30,
+                        w: 40,
+                        h: 40,
                         direction: e.direction !== undefined ? e.direction : 0,
                         color: e.color || 'blue',
                         path: []
@@ -2491,8 +2491,8 @@ export class LevelEditor {
                     lvl.laserReceivers = data.laserReceivers.map(r => ({
                         x: r.x,
                         y: r.y,
-                        w: r.w || 30,
-                        h: r.h || 30,
+                        w: 40,
+                        h: 40,
                         linkedGateId: r.linkedGateId || 101,
                         activated: false
                     }));
@@ -2926,8 +2926,8 @@ export class LevelEditor {
                     id: 1000 + Math.floor(Math.random() * 9000),
                     x: snapX,
                     y: snapY,
-                    w: 32,
-                    h: 32,
+                    w: 40,
+                    h: 40,
                     direction: 0,
                     color: 'blue'
                 });
@@ -2937,8 +2937,8 @@ export class LevelEditor {
                     id: 1000 + Math.floor(Math.random() * 9000),
                     x: snapX,
                     y: snapY,
-                    w: 32,
-                    h: 32,
+                    w: 40,
+                    h: 40,
                     linkedGateId: 101
                 });
             } else if (this.activeTool === 'create_conveyor') {

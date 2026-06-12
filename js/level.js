@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v43';
-import { THEMES } from './generator.js?v=v43';
+import { audio } from './audio.js?v=v44';
+import { THEMES } from './generator.js?v=v44';
 
 /**
  * Viscora Level Design & Manager
@@ -524,8 +524,8 @@ export class Level {
                     this.laserEmitters = data.laserEmitters.map(e => ({
                         x: e.x,
                         y: e.y,
-                        w: e.w || 32,
-                        h: e.h || 32,
+                        w: 40,
+                        h: 40,
                         direction: e.direction !== undefined ? e.direction : 0,
                         color: e.color || 'blue',
                         path: []
@@ -538,8 +538,8 @@ export class Level {
                     this.laserReceivers = data.laserReceivers.map(r => ({
                         x: r.x,
                         y: r.y,
-                        w: r.w || 32,
-                        h: r.h || 32,
+                        w: 40,
+                        h: 40,
                         linkedGateId: r.linkedGateId,
                         activated: false
                     }));
