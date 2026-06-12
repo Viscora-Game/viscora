@@ -439,6 +439,9 @@ export class GelChaser extends Enemy {
                 } else if (this.vx < 0) {
                     this.x = plat.x + plat.w + this.radius;
                 }
+                if (this.state === 'patrol') {
+                    this.vx = -this.vx;
+                }
             }
         }
 
