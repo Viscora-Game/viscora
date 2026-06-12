@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v41';
-import { audio } from './audio.js?v=v41';
-import { LevelGenerator } from './generator.js?v=v41';
+import { Enemy, GelChaser } from './enemies.js?v=v42';
+import { audio } from './audio.js?v=v42';
+import { LevelGenerator } from './generator.js?v=v42';
 
 export class LevelEditor {
     constructor(game) {
@@ -829,246 +829,7 @@ export class LevelEditor {
      * Mevcut seviye verilerini tarayıcı hafızasına (localStorage) otomatik kaydeder.
      */
     saveToLocalStorage() {
-        const lvl = this.game.level;
-        
-        const platforms = lvl.platforms.map(p => ({
-            x: Math.round(p.x),
-            y: Math.round(p.y),
-            w: Math.round(p.w),
-            h: Math.round(p.h),
-            type: p.type || 'normal'
-        }));
-
-        const spikes = lvl.hazards
-            .filter(h => h.type === 'spike')
-            .map(h => ({ x: Math.round(h.x), y: Math.round(h.y), w: Math.round(h.w), h: Math.round(h.h), direction: h.direction || 'up' }));
-
-        const acidPools = lvl.hazards
-            .filter(h => h.type === 'acid')
-            .map(h => ({ x: Math.round(h.x), y: Math.round(h.y), w: Math.round(h.w), h: Math.round(h.h) }));
-
-        const lasers = lvl.gates
-            .filter(g => g.type === 'laser' || g.type === 'pinkLaser' || g.type === 'greenLaser' || g.type === 'yellowLaser')
-            .map(g => ({
-                x: Math.round(g.x),
-                y: Math.round(g.y),
-                w: Math.round(g.w),
-                h: Math.round(g.h),
-                type: g.type,
-                id: g.id
-            }));
-
-        const netGates = lvl.gates
-            .filter(g => g.type === 'net')
-            .map(g => ({ x: Math.round(g.x), y: Math.round(g.y), w: Math.round(g.w), h: Math.round(g.h), id: g.id }));
-
-        const movingPlatforms = lvl.movingPlatforms.map(p => ({
-            startX: Math.round(p.startX),
-            startY: Math.round(p.startY),
-            targetX: Math.round(p.targetX),
-            targetY: Math.round(p.targetY),
-            w: Math.round(p.w),
-            h: Math.round(p.h),
-            speed: p.speed || 0.015
-        }));
-
-        const crystals = lvl.collectibles.map(c => ({ x: Math.round(c.x), y: Math.round(c.y), color: c.color || '#eab308' }));
-
-        const enemies = lvl.enemies.map(e => ({
-            x: Math.round(e.x),
-            y: Math.round(e.y),
-            rangeX: Math.round(e.rangeX || 120),
-            speed: e.speed || 1.2,
-            isVertical: !!e.isVertical,
-            color: e.color || '#f43f5e',
-            type: e.type || 'patrol'
-        }));
-
-        const pressurePlates = (lvl.pressurePlates || []).map(pp => ({
-            x: Math.round(pp.x),
-            y: Math.round(pp.y),
-            w: Math.round(pp.w),
-            h: Math.round(pp.h),
-            linkedGateId: pp.linkedGateId
-        }));
-
-        const pushBlocks = (lvl.pushBlocks || []).map(pb => ({
-            x: Math.round(pb.startX !== undefined ? pb.startX : pb.x),
-            y: Math.round(pb.startY !== undefined ? pb.startY : pb.y),
-            w: Math.round(pb.w),
-            h: Math.round(pb.h),
-            startX: Math.round(pb.startX !== undefined ? pb.startX : pb.x),
-            startY: Math.round(pb.startY !== undefined ? pb.startY : pb.y)
-        }));
-
-        const conveyors = (lvl.conveyors || []).map(c => ({
-            x: Math.round(c.x),
-            y: Math.round(c.y),
-            w: Math.round(c.w),
-            h: Math.round(c.h),
-            direction: c.direction,
-            speed: c.speed
-        }));
-
-        const teleportPairs = (lvl.teleportPairs || []).map(tp => ({
-            x1: Math.round(tp.x1),
-            y1: Math.round(tp.y1),
-            x2: Math.round(tp.x2),
-            y2: Math.round(tp.y2),
-            color: tp.color || '#a855f7'
-        }));
-
-        const bouncePads = (lvl.bouncePads || []).map(bp => ({
-            x: Math.round(bp.x),
-            y: Math.round(bp.y),
-            w: Math.round(bp.w),
-            h: Math.round(bp.h),
-            force: bp.force
-        }));
-
-        const buttons = (lvl.buttons || []).map(b => ({
-            x: Math.round(b.x),
-            y: Math.round(b.y),
-            w: Math.round(b.w),
-            h: Math.round(b.h),
-            linkedGateId: b.linkedGateId
-        }));
-
-        const levers = (lvl.levers || []).map(l => ({
-            x: Math.round(l.x),
-            y: Math.round(l.y),
-            w: Math.round(l.w),
-            h: Math.round(l.h),
-            linkedGateId: l.linkedGateId
-        }));
-
-        const flamethrowers = (lvl.flamethrowers || []).map(f => ({
-            id: f.id !== undefined ? f.id : Math.random(),
-            startX: Math.round(f.startX !== undefined ? f.startX : f.x),
-            startY: Math.round(f.startY !== undefined ? f.startY : f.y),
-            x: Math.round(f.x),
-            y: Math.round(f.y),
-            w: Math.round(f.w),
-            h: Math.round(f.h),
-            dir: f.dir || 'right',
-            range: Math.round(f.range || 200),
-            moving: !!f.moving,
-            moveRange: Math.round(f.moveRange || 100),
-            moveSpeed: f.moveSpeed || 1.5,
-            moveAxis: f.moveAxis || 'y',
-            disabled: !!f.disabled,
-            active: f.active !== undefined ? f.active : true
-        }));
-
-        const arrowShooters = (lvl.arrowShooters || []).map(a => ({
-            x: Math.round(a.x),
-            y: Math.round(a.y),
-            w: Math.round(a.w || 48),
-            h: Math.round(a.h || 48),
-            dir: a.dir || 'right',
-            detectionRadius: Math.round(a.detectionRadius !== undefined ? a.detectionRadius : 200),
-            fireInterval: a.fireInterval !== undefined ? a.fireInterval : 2.5,
-            arrowSpeed: a.arrowSpeed !== undefined ? a.arrowSpeed : 4.5,
-            arrowRange: Math.round(a.arrowRange !== undefined ? a.arrowRange : 400)
-        }));
-
-        const fallingPlatforms = (lvl.fallingPlatforms || []).map(p => ({
-            startX: Math.round(p.startX !== undefined ? p.startX : p.x),
-            startY: Math.round(p.startY !== undefined ? p.startY : p.y),
-            x: Math.round(p.startX !== undefined ? p.startX : p.x),
-            y: Math.round(p.startY !== undefined ? p.startY : p.y),
-            w: Math.round(p.w),
-            h: Math.round(p.h),
-            timer: 0,
-            triggered: false,
-            vy: 0,
-            fallen: false
-        }));
-
-        const breakablePlatforms = (lvl.breakablePlatforms || []).map(p => ({
-            x: Math.round(p.x),
-            y: Math.round(p.y),
-            w: Math.round(p.w),
-            h: Math.round(p.h),
-            type: p.type || 'platform',
-            broken: false,
-            timer: 0,
-            triggered: false
-        }));
-
-        const hiddenPassages = (lvl.hiddenPassages || []).map(p => ({
-            x: Math.round(p.x),
-            y: Math.round(p.y),
-            w: Math.round(p.w),
-            h: Math.round(p.h)
-        }));
-
-        const fallingBlockTraps = (lvl.fallingBlockTraps || []).map(t => ({
-            startX: Math.round(t.startX !== undefined ? t.startX : t.x),
-            startY: Math.round(t.startY !== undefined ? t.startY : t.y),
-            x: Math.round(t.startX !== undefined ? t.startX : t.x),
-            y: Math.round(t.startY !== undefined ? t.startY : t.y),
-            w: Math.round(t.w),
-            h: Math.round(t.h),
-            state: 'idle',
-            vy: 0,
-            timer: 0
-        }));
-
-        const vantuzPoints = (lvl.vantuzPoints || []).map(v => ({
-            x: Math.round(v.x),
-            y: Math.round(v.y)
-        }));
-
-        const decorations = (lvl.decorations || []).map(d => ({
-            x: Math.round(d.x),
-            y: Math.round(d.y),
-            w: Math.round(d.w),
-            h: Math.round(d.h),
-            type: d.type || 'neon_light',
-            rotation: d.rotation || 0,
-            state: d.state || 0,
-            text: d.text || '',
-            color: d.color || ''
-        }));
-
-        const checkpoints = (lvl.checkpoints || []).map(cp => ({
-            x: Math.round(cp.x),
-            y: Math.round(cp.y),
-            r: Math.round(cp.r || 15)
-        }));
-
-        const exportObj = {
-            levelWidth: lvl.width,
-            levelHeight: lvl.height,
-            spawn: { x: Math.round(lvl.spawnX), y: Math.round(lvl.spawnY) },
-            portal: { x: Math.round(lvl.portal.x), y: Math.round(lvl.portal.y) },
-            platforms,
-            spikes,
-            acidPools,
-            lasers,
-            netGates,
-            movingPlatforms,
-            crystals,
-            enemies,
-            pressurePlates,
-            pushBlocks,
-            conveyors,
-            teleportPairs,
-            bouncePads,
-            buttons,
-            levers,
-            flamethrowers,
-            fallingPlatforms,
-            breakablePlatforms,
-            hiddenPassages,
-            fallingBlockTraps,
-            vantuzPoints,
-            checkpoints,
-            decorations,
-            arrowShooters
-        };
-
+        const exportObj = this.getLevelDataObj();
         const jsonStr = JSON.stringify(exportObj, null, 4);
         localStorage.setItem('viscora_custom_level_' + this.game.currentLevel, jsonStr);
     }
@@ -2258,6 +2019,11 @@ export class LevelEditor {
                 lvl.fallingBlockTraps = [];
                 lvl.vantuzPoints = [];
                 lvl.decorations = [];
+                lvl.checkpoints = [];
+                lvl.arrowShooters = [];
+                lvl.laserEmitters = [];
+                lvl.laserReceivers = [];
+                lvl.staticMirrors = [];
 
                 // Parse dimensions
                 lvl.width = Math.max(800, data.levelWidth || data.width || 2000);
@@ -2500,7 +2266,9 @@ export class LevelEditor {
                         w: pb.w || 50,
                         h: pb.h || 50,
                         vx: pb.vx || 0,
-                        vy: pb.vy || 0
+                        vy: pb.vy || 0,
+                        isMirror: pb.isMirror || false,
+                        mirrorType: pb.mirrorType || 'slash'
                     }));
                 }
 
