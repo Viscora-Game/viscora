@@ -712,7 +712,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     flex-direction: column;
     justify-content: space-between;
     box-sizing: border-box;
-    z-index: 10;
+    z-index: 30;
 }
 
 .hud-layer.hidden {

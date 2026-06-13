@@ -40,7 +40,7 @@ class AudioManager {
      * Initialize AudioContext upon user interaction
      */
     init() {
-        if (this.ctx) return;
+        if (this.ctx && this.ctx.state !== 'closed') return;
 
         try {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -153,12 +153,11 @@ class AudioManager {
         }
     }
 
-    /**
-     * Ensure the AudioContext is running
-     * Returns a Promise that resolves when context is running
-     */
     resume() {
         try {
+            if (!this.ctx || this.ctx.state === 'closed') {
+                this.init();
+            }
             if (this.ctx && this.ctx.state === 'suspended') {
                 return this.ctx.resume();
             }
@@ -749,9 +748,9 @@ class AudioManager {
                 try {
                     if (typeof document !== 'undefined' && document.hidden) return;
                     if (!this.musicPlaying || this.isMuted || this.isMusicMuted || this.musicVolumeLevel === 0 || !this.ctx) return;
-                    // Eğer context suspend'deyse, resume et ve bekle
+                    // Eğer context suspend'deyse, resume etmeyi dene ve bu adımı atla (bir sonraki döngüde çalacaktır)
                     if (this.ctx.state === 'suspended') {
-                        this.ctx.resume().then(() => playChord());
+                        this.resume();
                         return;
                     }
                     const now = this.ctx.currentTime;
