@@ -124,25 +124,20 @@ html, body {
     pointer-events: none;
 }
 
-/* Yönlendirme Uyarısı (Sürekli Gizli) */
+/* Yönlendirme Uyarısı */
 #orientation-warning {
-    display: none !important;
+    display: none;
 }
 
-/* Dikey ekranlarda tüm ekranı (menüler dahil) otomatik döndür */
+/* Dikey (portrait) modda yönlendirme kuralları */
 @media (orientation: portrait) {
-    #orientation-warning {
-        display: none !important;
+    /* Oyunda veya editörde iken dikey tutulursa yönlendirme uyarısı göster ve oyunu gizle */
+    body.game-active #orientation-warning {
+        display: flex !important;
+        z-index: 99999 !important;
     }
-    #game-container {
-        position: fixed !important;
-        top: 50% !important;
-        left: 50% !important;
-        width: 100vh !important;
-        height: 100vw !important;
-        transform: translate(-50%, -50%) rotate(90deg) !important;
-        transform-origin: center center !important;
-        overflow: hidden !important;
+    body.game-active #game-container {
+        display: none !important;
     }
 }
 
