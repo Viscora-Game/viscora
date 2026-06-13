@@ -49,7 +49,17 @@ class AudioManager {
             // Setup master nodes
             this.masterVolume = this.ctx.createGain();
             this.masterVolume.gain.setValueAtTime(1.0, this.ctx.currentTime);
-            this.masterVolume.connect(this.ctx.destination);
+            
+            // DynamicsCompressorNode to prevent clipping/crackling
+            this.compressor = this.ctx.createDynamicsCompressor();
+            this.compressor.threshold.setValueAtTime(-20, this.ctx.currentTime); // start compressing at -20dB
+            this.compressor.knee.setValueAtTime(25, this.ctx.currentTime);       // soft knee
+            this.compressor.ratio.setValueAtTime(10, this.ctx.currentTime);      // ratio 10:1
+            this.compressor.attack.setValueAtTime(0.003, this.ctx.currentTime);   // fast attack (3ms)
+            this.compressor.release.setValueAtTime(0.20, this.ctx.currentTime);   // release 200ms
+            
+            this.masterVolume.connect(this.compressor);
+            this.compressor.connect(this.ctx.destination);
             
             // Web Audio Filter for dynamic state music transitions
             this.viscosityFilter = this.ctx.createBiquadFilter();
