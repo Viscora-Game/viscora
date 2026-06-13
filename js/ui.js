@@ -821,9 +821,6 @@ export class UIManager {
             if (stars < 24) return false; // Lock boss if less than 24 stars in chapter
         }
 
-        // normal levels in chapter 1 (1-9) always unlocked or progressive
-        if (lvlNum <= 9) return true;
-
         return this.game.unlockedLevel >= lvlNum;
     }
 

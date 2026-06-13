@@ -737,6 +737,7 @@ class AudioManager {
 
             const playChord = () => {
                 try {
+                    if (typeof document !== 'undefined' && document.hidden) return;
                     if (!this.musicPlaying || this.isMuted || this.isMusicMuted || this.musicVolumeLevel === 0 || !this.ctx) return;
                     // Eğer context suspend'deyse, resume et ve bekle
                     if (this.ctx.state === 'suspended') {
