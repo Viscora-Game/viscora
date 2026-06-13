@@ -1,5 +1,5 @@
-import { GameManager } from './game.js?v=v50';
-import { audio } from './audio.js?v=v50';
+import { GameManager } from './game.js?v=v51';
+import { audio } from './audio.js?v=v51';
 
 // Oyun Başlatma Girişi
 window.addEventListener('DOMContentLoaded', () => {
@@ -13,12 +13,12 @@ window.addEventListener('DOMContentLoaded', () => {
         
         // Dinleyicileri temizle
         window.removeEventListener('click', unlockAudio);
-        window.removeEventListener('touchstart', unlockAudio);
+        window.removeEventListener('touchend', unlockAudio);
         window.removeEventListener('keydown', unlockAudio);
     };
 
     window.addEventListener('click', unlockAudio);
-    window.addEventListener('touchstart', unlockAudio);
+    window.addEventListener('touchend', unlockAudio);
     window.addEventListener('keydown', unlockAudio);
 
     // Mobil tam ekran desteği tetikleyicisi (Opsiyonel estetik iyileştirme)

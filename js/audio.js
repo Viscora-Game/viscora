@@ -84,11 +84,9 @@ class AudioManager {
                             }
                         });
                     }
-                    document.removeEventListener('touchstart', unlock);
                     document.removeEventListener('touchend', unlock);
                     document.removeEventListener('click', unlock);
                 };
-                document.addEventListener('touchstart', unlock, { passive: true });
                 document.addEventListener('touchend', unlock, { passive: true });
                 document.addEventListener('click', unlock);
             }
@@ -767,8 +765,8 @@ class AudioManager {
 
                         // Setup slow volume envelope
                         gainNode.gain.setValueAtTime(0, now);
-                        gainNode.gain.linearRampToValueAtTime(0.08, now + 2.0); // Slow attack
-                        gainNode.gain.setValueAtTime(0.08, now + duration - 2.0);
+                        gainNode.gain.linearRampToValueAtTime(0.22, now + 2.0); // Slow attack
+                        gainNode.gain.setValueAtTime(0.22, now + duration - 2.0);
                         gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration); // Slow decay
 
                         // Resonance filter sweeping slowly
@@ -1054,11 +1052,9 @@ if (typeof window !== 'undefined') {
             audio.unlock();
         }
         // Remove listeners
-        window.removeEventListener('touchstart', globalUnlock, { capture: true });
         window.removeEventListener('touchend', globalUnlock, { capture: true });
         window.removeEventListener('click', globalUnlock, { capture: true });
     };
-    window.addEventListener('touchstart', globalUnlock, { capture: true, passive: true });
     window.addEventListener('touchend', globalUnlock, { capture: true, passive: true });
     window.addEventListener('click', globalUnlock, { capture: true });
 }
