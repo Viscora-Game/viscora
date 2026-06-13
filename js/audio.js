@@ -12,8 +12,8 @@ class AudioManager {
         const savedMusicMuted = localStorage.getItem('viscora_music_muted');
         const savedSfxMuted = localStorage.getItem('viscora_sfx_muted');
 
-        this.musicVolumeLevel = savedMusicVol !== null ? parseFloat(savedMusicVol) : 0.5;
-        this.sfxVolumeLevel = savedSfxVol !== null ? parseFloat(savedSfxVol) : 0.8;
+        this.musicVolumeLevel = savedMusicVol !== null ? parseFloat(savedMusicVol) : 0.8;
+        this.sfxVolumeLevel = savedSfxVol !== null ? parseFloat(savedSfxVol) : 1.0;
         this.isMusicMuted = savedMusicMuted !== null ? savedMusicMuted === 'true' : false;
         this.isSfxMuted = savedSfxMuted !== null ? savedSfxMuted === 'true' : false;
 
@@ -58,12 +58,12 @@ class AudioManager {
             this.viscosityFilter.connect(this.masterVolume);
 
             this.musicVolume = this.ctx.createGain();
-            const initialMusicGain = this.isMusicMuted ? 0 : (this.musicVolumeLevel * 0.35);
+            const initialMusicGain = this.isMusicMuted ? 0 : (this.musicVolumeLevel * 0.55);
             this.musicVolume.gain.setValueAtTime(initialMusicGain, this.ctx.currentTime);
             this.musicVolume.connect(this.viscosityFilter);
             
             this.sfxVolume = this.ctx.createGain();
-            const initialSfxGain = this.isSfxMuted ? 0 : (this.sfxVolumeLevel * 0.75);
+            const initialSfxGain = this.isSfxMuted ? 0 : (this.sfxVolumeLevel * 1.0);
             this.sfxVolume.gain.setValueAtTime(initialSfxGain, this.ctx.currentTime);
             this.sfxVolume.connect(this.masterVolume);
 
@@ -207,7 +207,7 @@ class AudioManager {
         
         try {
             if (this.musicVolume && this.ctx) {
-                const targetGain = this.isMusicMuted ? 0 : (this.musicVolumeLevel * 0.35);
+                const targetGain = this.isMusicMuted ? 0 : (this.musicVolumeLevel * 0.55);
                 this.musicVolume.gain.setValueAtTime(targetGain, this.ctx.currentTime);
                 this.musicVolume.gain.value = targetGain;
             }
@@ -231,7 +231,7 @@ class AudioManager {
         
         try {
             if (this.sfxVolume && this.ctx) {
-                const targetGain = this.isSfxMuted ? 0 : (this.sfxVolumeLevel * 0.75);
+                const targetGain = this.isSfxMuted ? 0 : (this.sfxVolumeLevel * 1.0);
                 this.sfxVolume.gain.setValueAtTime(targetGain, this.ctx.currentTime);
                 this.sfxVolume.gain.value = targetGain;
             }
@@ -249,7 +249,7 @@ class AudioManager {
         localStorage.setItem('viscora_music_muted', this.isMusicMuted.toString());
         try {
             if (this.musicVolume && this.ctx) {
-                const targetGain = this.isMusicMuted ? 0 : (this.musicVolumeLevel * 0.35);
+                const targetGain = this.isMusicMuted ? 0 : (this.musicVolumeLevel * 0.55);
                 this.musicVolume.gain.setValueAtTime(targetGain, this.ctx.currentTime);
                 this.musicVolume.gain.value = targetGain;
             }
@@ -270,7 +270,7 @@ class AudioManager {
         localStorage.setItem('viscora_sfx_muted', this.isSfxMuted.toString());
         try {
             if (this.sfxVolume && this.ctx) {
-                const targetGain = this.isSfxMuted ? 0 : (this.sfxVolumeLevel * 0.75);
+                const targetGain = this.isSfxMuted ? 0 : (this.sfxVolumeLevel * 1.0);
                 this.sfxVolume.gain.setValueAtTime(targetGain, this.ctx.currentTime);
                 this.sfxVolume.gain.value = targetGain;
             }
@@ -301,7 +301,7 @@ class AudioManager {
             osc.detune.setValueAtTime(randDetune, now);
             osc.frequency.exponentialRampToValueAtTime(360, now + 0.12);
             
-            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.setValueAtTime(0.6, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
             
             osc.connect(gain);
@@ -318,7 +318,7 @@ class AudioManager {
             clickOsc.frequency.setValueAtTime(450, now);
             clickOsc.frequency.exponentialRampToValueAtTime(150, now + 0.04);
             
-            clickGain.gain.setValueAtTime(0.3, now);
+            clickGain.gain.setValueAtTime(0.5, now);
             clickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
             
             clickOsc.connect(clickGain);
@@ -353,7 +353,7 @@ class AudioManager {
             filter.frequency.setValueAtTime(300, now);
             filter.frequency.exponentialRampToValueAtTime(80, now + 0.18);
 
-            gain.gain.setValueAtTime(0.5, now);
+            gain.gain.setValueAtTime(0.75, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
 
             osc.connect(filter);
@@ -406,7 +406,7 @@ class AudioManager {
             osc.frequency.setValueAtTime(320, now);
             osc.frequency.exponentialRampToValueAtTime(75, now + 0.16);
             
-            gain.gain.setValueAtTime(0.7, now);
+            gain.gain.setValueAtTime(0.95, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
             
             osc.connect(gain);
@@ -421,7 +421,7 @@ class AudioManager {
             clickOsc.frequency.setValueAtTime(620, now);
             clickOsc.frequency.exponentialRampToValueAtTime(140, now + 0.07);
             
-            clickGain.gain.setValueAtTime(0.45, now);
+            clickGain.gain.setValueAtTime(0.65, now);
             clickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.07);
             
             clickOsc.connect(clickGain);
@@ -859,7 +859,7 @@ class AudioManager {
             osc.frequency.setValueAtTime(320, now);
             osc.frequency.exponentialRampToValueAtTime(880, now + 0.16);
 
-            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.setValueAtTime(0.5, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
 
             osc.connect(gain);
@@ -886,7 +886,7 @@ class AudioManager {
             osc.frequency.setValueAtTime(329.63, now + 0.05); // E4
             osc.frequency.setValueAtTime(523.25, now + 0.1); // C5
 
-            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.setValueAtTime(0.45, now);
             gain.gain.exponentialRampToValueAtTime(0.005, now + 0.25);
 
             osc.connect(gain);
@@ -913,7 +913,7 @@ class AudioManager {
             osc.frequency.setValueAtTime(261.63, now + 0.05); // C4
             osc.frequency.setValueAtTime(196.00, now + 0.1); // G3
 
-            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.setValueAtTime(0.35, now);
             gain.gain.exponentialRampToValueAtTime(0.005, now + 0.25);
 
             osc.connect(gain);
@@ -947,7 +947,7 @@ class AudioManager {
             filter.type = 'lowpass';
             filter.frequency.setValueAtTime(150, now);
 
-            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.setValueAtTime(0.55, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
 
             osc.connect(filter);
@@ -973,7 +973,7 @@ class AudioManager {
             noiseFilter.Q.setValueAtTime(3.0, now);
 
             const noiseGain = this.ctx.createGain();
-            noiseGain.gain.setValueAtTime(0.06, now);
+            noiseGain.gain.setValueAtTime(0.15, now);
             noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
 
             noise.connect(noiseFilter);
@@ -1008,7 +1008,7 @@ class AudioManager {
             filter.frequency.setValueAtTime(150, now);
             filter.frequency.exponentialRampToValueAtTime(1200, now + 0.35);
 
-            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.setValueAtTime(0.65, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
 
             osc.connect(filter);
@@ -1026,7 +1026,7 @@ class AudioManager {
             chimeOsc.frequency.setValueAtTime(1200, now + 0.1);
             chimeOsc.frequency.exponentialRampToValueAtTime(2400, now + 0.25);
 
-            chimeGain.gain.setValueAtTime(0.2, now + 0.1);
+            chimeGain.gain.setValueAtTime(0.45, now + 0.1);
             chimeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
 
             chimeOsc.connect(chimeGain);
