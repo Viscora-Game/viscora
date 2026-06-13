@@ -1849,7 +1849,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 /* Yatay Modda Başlangıç Ekranı İki Sütunlu Kompakt Yerleşim Optimizasyonu */
 @media (orientation: landscape) and (max-height: 640px) {
     #start-screen {
-        padding-top: 72px !important; /* Top space reserved for future ad banner */
+        padding-top: 48px !important; /* Top space reserved for future ad banner */
         padding-bottom: 0.8rem !important;
         align-items: flex-end !important; /* Push menu card to the bottom */
         justify-content: center !important;
@@ -2047,7 +2047,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 /* Çok küçük ekranlar için yatay mod (420px veya daha az yükseklik) */
 @media (orientation: landscape) and (max-height: 420px) {
     #start-screen {
-        padding-top: 45px !important; /* Compact top space for ads on tiny devices */
+        padding-top: 36px !important; /* Compact top space for ads on tiny devices */
         padding-bottom: 0.4rem !important;
     }
 
