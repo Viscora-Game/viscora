@@ -1849,21 +1849,24 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 /* Yatay Modda Başlangıç Ekranı İki Sütunlu Kompakt Yerleşim Optimizasyonu */
 @media (orientation: landscape) and (max-height: 640px) {
     #start-screen {
-        padding: 0.4rem 0 !important;
-        align-items: center !important;
+        padding-top: 72px !important; /* Top space reserved for future ad banner */
+        padding-bottom: 0.8rem !important;
+        align-items: flex-end !important; /* Push menu card to the bottom */
+        justify-content: center !important;
         overflow-y: auto !important;
+        box-sizing: border-box !important;
     }
     
     #start-screen .menu-card {
-        width: 96% !important;
-        max-width: 840px !important;
-        padding: 0.8rem 1.4rem !important;
-        border-radius: 16px !important;
+        width: 98% !important;
+        max-width: 900px !important; /* Enlarged from 840px */
+        padding: 1.2rem 1.8rem !important; /* Enlarged from 0.8rem 1.4rem */
+        border-radius: 20px !important; /* Slightly rounder, more premium */
         display: grid !important;
         grid-template-columns: 1.15fr 1.25fr !important;
         grid-template-rows: auto auto auto auto !important;
-        column-gap: 1.8rem !important;
-        row-gap: 0.4rem !important;
+        column-gap: 2rem !important; /* Enlarged from 1.8rem */
+        row-gap: 0.6rem !important; /* Enlarged from 0.4rem */
         align-items: center !important;
         box-sizing: border-box !important;
     }
@@ -1878,14 +1881,14 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     }
     
     #start-screen .brand .game-title {
-        font-size: 1.8rem !important;
-        letter-spacing: 0.15rem !important;
+        font-size: 2.2rem !important; /* Enlarged from 1.8rem */
+        letter-spacing: 0.18rem !important;
         margin-bottom: 0 !important;
     }
     
     #start-screen .brand .game-subtitle {
-        font-size: 0.55rem !important;
-        letter-spacing: 0.2rem !important;
+        font-size: 0.65rem !important; /* Enlarged from 0.55rem */
+        letter-spacing: 0.22rem !important;
         margin-bottom: 0 !important;
     }
     
@@ -1895,8 +1898,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         grid-row: 2 !important;
         justify-self: start !important;
         margin: 0 !important;
-        padding: 0.3rem 0.8rem !important;
-        font-size: 0.8rem !important;
+        padding: 0.4rem 1rem !important; /* Enlarged from 0.3rem 0.8rem */
+        font-size: 0.88rem !important; /* Enlarged from 0.8rem */
     }
     
     /* Sol Sütun: Klavye ipuçlarını gizle */
@@ -1910,7 +1913,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         grid-row: 3 !important;
         display: flex !important;
         flex-direction: row !important;
-        gap: 1rem !important;
+        gap: 1.2rem !important; /* Enlarged from 1rem */
         width: 100% !important;
         max-width: none !important;
         margin: 0 !important;
@@ -1927,30 +1930,30 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     
     #start-screen .settings-control > span {
         width: auto !important;
-        font-size: 0.72rem !important;
+        font-size: 0.8rem !important; /* Enlarged from 0.72rem */
         white-space: nowrap !important;
-        margin-right: 4px !important;
+        margin-right: 6px !important;
     }
     
     #start-screen .settings-control .slider-wrapper {
         flex: 1 !important;
-        max-width: 90px !important;
-        gap: 4px !important;
+        max-width: 110px !important; /* Enlarged from 90px */
+        gap: 6px !important;
     }
     
     #start-screen .volume-slider {
-        height: 4px !important;
+        height: 6px !important; /* Thicker track for easier touch control */
     }
     
     #start-screen .volume-val-text {
-        font-size: 0.65rem !important;
-        min-width: 24px !important;
+        font-size: 0.72rem !important; /* Enlarged from 0.65rem */
+        min-width: 28px !important;
     }
 
     #start-screen .sound-toggle-mini-btn {
-        width: 22px !important;
-        height: 22px !important;
-        font-size: 0.75rem !important;
+        width: 26px !important; /* Enlarged from 22px */
+        height: 26px !important; /* Enlarged from 22px */
+        font-size: 0.85rem !important; /* Enlarged from 0.75rem */
         padding: 0 !important;
     }
     
@@ -1964,19 +1967,19 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     }
     
     #start-screen .difficulty-title {
-        font-size: 0.65rem !important;
-        margin-bottom: 2px !important;
+        font-size: 0.72rem !important; /* Enlarged from 0.65rem */
+        margin-bottom: 4px !important;
         display: block !important;
     }
     
     #start-screen .difficulty-buttons {
-        gap: 4px !important;
+        gap: 6px !important; /* Enlarged from 4px */
     }
     
     #start-screen .diff-btn {
-        padding: 0.3rem 0.5rem !important;
-        font-size: 0.7rem !important;
-        border-radius: 8px !important;
+        padding: 0.45rem 0.7rem !important; /* Enlarged from 0.3rem 0.5rem */
+        font-size: 0.78rem !important; /* Enlarged from 0.7rem */
+        border-radius: 9px !important;
     }
     
     #start-screen .diff-btn .diff-sub {
@@ -1987,11 +1990,29 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     #start-screen #level-selector-wrapper {
         grid-column: 2 !important;
         grid-row: 1 / span 3 !important;
-        max-height: 180px !important; /* Yüksekliği arttırdık */
-        min-height: 120px !important;
+        max-height: 220px !important; /* Enlarged from 180px */
+        min-height: 140px !important; /* Enlarged from 120px */
         margin-bottom: 0 !important;
         overflow-y: auto !important;
         align-self: stretch !important;
+    }
+
+    /* Sağ Sütun: Bölüm Butonları Süslemeleri */
+    #start-screen .level-btn {
+        width: 44px !important; /* Wider buttons */
+        min-height: 52px !important;
+        height: auto !important;
+        font-size: 0.85rem !important;
+        border-radius: 8px !important;
+        padding: 4px 2px !important;
+    }
+
+    #start-screen .btn-star {
+        font-size: 0.5rem !important;
+    }
+
+    #start-screen .btn-num {
+        font-size: 0.85rem !important;
     }
     
     /* Sağ Sütun: Aksiyon Butonları Kapsayıcısı (Yan Yana) - Row 4 */
@@ -2025,6 +2046,11 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 
 /* Çok küçük ekranlar için yatay mod (420px veya daha az yükseklik) */
 @media (orientation: landscape) and (max-height: 420px) {
+    #start-screen {
+        padding-top: 45px !important; /* Compact top space for ads on tiny devices */
+        padding-bottom: 0.4rem !important;
+    }
+
     #start-screen .menu-card {
         padding: 0.5rem 1.2rem !important;
         row-gap: 0.25rem !important;
@@ -2058,9 +2084,19 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         padding: 0.4rem !important;
     }
     
-    .level-btn {
+    #start-screen .level-btn {
         width: 28px !important;
         height: 28px !important;
+        min-height: unset !important;
+        font-size: 0.7rem !important;
+        padding: 2px !important;
+    }
+
+    #start-screen .btn-star {
+        font-size: 0.4rem !important;
+    }
+
+    #start-screen .btn-num {
         font-size: 0.7rem !important;
     }
 }
