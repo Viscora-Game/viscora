@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v45';
-import { audio } from './audio.js?v=v45';
-import { LevelGenerator } from './generator.js?v=v45';
+import { Enemy, GelChaser } from './enemies.js?v=v49';
+import { audio } from './audio.js?v=v49';
+import { LevelGenerator } from './generator.js?v=v49';
 
 export class LevelEditor {
     constructor(game) {
@@ -63,6 +63,9 @@ export class LevelEditor {
         this.active = true;
         this.game.state = 'EDITOR';
         this.game.ui.resetKeys();
+        
+        // Load custom level from localStorage if it exists (otherwise loads campaign default)
+        this.game.level.loadLevel(this.game.currentLevel, true);
         
         // Change cursor to crosshair for editor mode
         this.game.canvas.style.cursor = 'crosshair';
@@ -3665,15 +3668,6 @@ export class LevelEditor {
      */
     draw(ctx) {
         if (!this.active || this.game.state !== 'EDITOR') return;
-
-        // Visual Watermark Feedback (displays EDITOR MODE on screen)
-        ctx.save();
-        ctx.fillStyle = 'rgba(217, 70, 239, 0.8)'; // Bright Fuchsia
-        ctx.shadowColor = '#d946ef';
-        ctx.shadowBlur = 8;
-        ctx.font = '800 13px Outfit';
-        ctx.fillText('🛠️ EDITOR MODE (F1 to Exit)', 20, 30);
-        ctx.restore();
 
         ctx.save();
         ctx.translate(-this.game.camera.x, -this.game.camera.y);

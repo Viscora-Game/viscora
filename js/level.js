@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v45';
-import { THEMES } from './generator.js?v=v45';
+import { audio } from './audio.js?v=v49';
+import { THEMES } from './generator.js?v=v49';
 
 /**
  * Viscora Level Design & Manager
@@ -23,9 +23,12 @@ export class Level {
     /**
      * Belirtilen bölümün platform, tehlike ve zıplatma pedi koordinatlarını yükler.
      */
-    loadLevel(levelNumber) {
+    loadLevel(levelNumber, isEditorOrPlaytest = false) {
         this.currentLevel = levelNumber;
         this.time = 0;
+        this.platforms = [];
+        this.hazards = [];
+        this.enemies = [];
         this.movingPlatforms = [];
         this.gates = [];
         this.collectibles = [];
@@ -51,7 +54,7 @@ export class Level {
         let data = null;
         if (typeof levelNumber === 'object' && levelNumber !== null) {
             data = levelNumber;
-        } else {
+        } else if (isEditorOrPlaytest) {
             // Boss bölümleri (10 ve 20) için lokal kayıtlı özel haritaları yükleme, orijinal boss dövüşünü yükle
             const isBossLvl = (levelNumber === 10 || levelNumber === 20);
             if (!isBossLvl) {
@@ -568,13 +571,13 @@ export class Level {
 
         // Assign Visual Theme based on Campaign Level Number
         let campaignThemeId = null;
-        if (levelNumber === 0 || levelNumber === 1 || levelNumber === 6 || levelNumber === 12) {
+        if (levelNumber === 0 || levelNumber === 1 || levelNumber === 6 || levelNumber === 12 || levelNumber === 19) {
             campaignThemeId = 'neon_sewer';
-        } else if (levelNumber === 2 || levelNumber === 4 || levelNumber === 8 || levelNumber === 9 || levelNumber === 11 || levelNumber === 13) {
+        } else if (levelNumber === 2 || levelNumber === 4 || levelNumber === 8 || levelNumber === 9 || levelNumber === 11 || levelNumber === 13 || levelNumber === 17 || levelNumber === 18) {
             campaignThemeId = 'toxic_lab';
-        } else if (levelNumber === 3 || levelNumber === 7) {
+        } else if (levelNumber === 3 || levelNumber === 7 || levelNumber === 14 || levelNumber === 15) {
             campaignThemeId = 'magma_core';
-        } else if (levelNumber === 5 || levelNumber === 10) {
+        } else if (levelNumber === 5 || levelNumber === 10 || levelNumber === 16 || levelNumber === 20) {
             campaignThemeId = 'gravity_chasm';
         }
 
@@ -2636,17 +2639,63 @@ export class Level {
                 { startX: 600, startY: -120, x: 600, y: -120, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 }
             ];
         } else if (levelNumber === 16) {
+            // ═══════════════════════════════════════════════
+            // BÖLÜM 16: MEKANİK KORİDORLAR
+            // ═══════════════════════════════════════════════
             this.width = 1600;
             this.height = 600;
-            this.spawnX = 100;
-            this.spawnY = 380;
+            this.spawnX = 40;
+            this.spawnY = 180;
+            this.portal = { x: 1530, y: 240, w: 60, h: 80, angle: 0 };
+
             this.platforms = [
-                { x: 0, y: 460, w: 1600, h: 140, type: 'normal' }
+                { x: 0, y: 440, w: 1600, h: 140, type: 'normal' },
+                { x: 0, y: 260, w: 240, h: 40, type: 'normal' },
+                { x: 400, y: 260, w: 240, h: 40, type: 'normal' },
+                { x: 820, y: 260, w: 240, h: 40, type: 'normal' },
+                { x: 1200, y: 260, w: 240, h: 40, type: 'normal' },
+                { x: 350, y: 50, w: 290, h: 40, type: 'normal' },
+                { x: 750, y: 50, w: 370, h: 40, type: 'normal' },
+                { x: 0, y: 50, w: 320, h: 40, type: 'normal' },
+                { x: 1160, y: 50, w: 435, h: 40, type: 'normal' }
             ];
-            this.hazards = [];
-            this.collectibles = [];
-            this.enemies = [];
-            this.portal = { x: 1400, y: 380, w: 60, h: 80, angle: 0 };
+
+            this.gates = [
+                { x: 1500, y: 110, w: 20, h: 330, type: 'yellowLaser', id: 1, disabled: false },
+                { x: 1460, y: 110, w: 20, h: 330, type: 'yellowLaser', id: 101, disabled: false }
+            ];
+
+            this.pushBlocks = [
+                { startX: 80, startY: 210, x: 80, y: 210, w: 50, h: 50, vx: 0, vy: 0, isMirror: true, mirrorType: 'slash' },
+                { startX: 500, startY: 210, x: 500, y: 210, w: 50, h: 50, vx: 0, vy: 0, isMirror: true, mirrorType: 'slash' },
+                { startX: 910, startY: 210, x: 910, y: 210, w: 50, h: 50, vx: 0, vy: 0, isMirror: true, mirrorType: 'slash' }
+            ];
+
+            this.breakablePlatforms = [
+                { x: 300, y: 320, w: 40, h: 120, type: 'wall', broken: false, timer: 0, triggered: false },
+                { x: 710, y: 320, w: 40, h: 120, type: 'wall', broken: false, timer: 0, triggered: false },
+                { x: 1110, y: 320, w: 40, h: 120, type: 'wall', broken: false, timer: 0, triggered: false }
+            ];
+
+            this.laserEmitters = [
+                { x: 0, y: 390, w: 40, h: 40, direction: 0, color: 'blue', path: [] }
+            ];
+
+            this.laserReceivers = [
+                { x: 320, y: 90, w: 40, h: 40, linkedGateId: 101, activated: false },
+                { x: 710, y: 90, w: 40, h: 40, linkedGateId: 1, activated: false },
+                { x: 1120, y: 90, w: 40, h: 40, linkedGateId: 101, activated: false }
+            ];
+
+            this.staticMirrors = [
+                { x: 780, y: 260, w: 40, h: 40, mirrorType: 'top-right' },
+                { x: 640, y: 260, w: 40, h: 40, mirrorType: 'bottom-left' },
+                { x: 640, y: 80, w: 40, h: 40, mirrorType: 'top-left' },
+                { x: 360, y: 260, w: 40, h: 40, mirrorType: 'top-right' },
+                { x: 240, y: 260, w: 40, h: 40, mirrorType: 'top-left' },
+                { x: 1060, y: 260, w: 40, h: 40, mirrorType: 'bottom-left' },
+                { x: 1160, y: 260, w: 40, h: 40, mirrorType: 'top-right' }
+            ];
         } else if (levelNumber === 17) {
             this.width = 1600;
             this.height = 600;
@@ -5452,6 +5501,7 @@ export class Level {
                 ctx.arc(receiver.x + receiver.w / 2, receiver.y + receiver.h / 2, 4, 0, Math.PI * 2);
                 ctx.fill();
 
+                ctx.restore();
             });
         }
 
