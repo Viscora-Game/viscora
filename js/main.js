@@ -1,5 +1,5 @@
-import { GameManager } from './game.js?v=v54';
-import { audio } from './audio.js?v=v54';
+import { GameManager } from './game.js?v=v55';
+import { audio } from './audio.js?v=v55';
 
 // Oyun Başlatma Girişi
 window.addEventListener('DOMContentLoaded', () => {
@@ -10,6 +10,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const unlockAudio = () => {
         audio.init();
         audio.unlock();
+        requestFullScreen();
         
         // Dinleyicileri temizle
         window.removeEventListener('click', unlockAudio);
@@ -38,11 +39,11 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // OYNA butonuna basıldığında ses aktifleştirilir (tam ekranı devre dışı bıraktık test amaçlı)
+    // OYNA butonuna basıldığında ses aktifleştirilir
     const playBtn = document.getElementById('btn-play');
     if (playBtn) {
         playBtn.addEventListener('click', () => {
-            // requestFullScreen(); // Geliştirici incelemeleri için otomatik tam ekranı devre dışı bıraktık
+            requestFullScreen();
         });
     }
 });
