@@ -1148,65 +1148,77 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 
 .level-btn {
     font-family: var(--font-game);
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    padding: 0.4rem 0.2rem 0.3rem;
-    border-radius: 10px;
+    padding: 0.5rem 0.2rem 0.4rem;
+    border-radius: 12px;
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-secondary);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: all 0.2s ease;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    color: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    gap: 2px;
-    min-height: 48px;
+    gap: 4px;
+    min-height: 52px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+}
+
+.level-btn:not(.locked) {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, rgba(217, 70, 239, 0.03) 100%);
+    border-color: rgba(6, 182, 212, 0.25);
 }
 
 .btn-num {
     line-height: 1;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 700;
 }
 
 .btn-stars-row {
     display: flex;
-    gap: 1px;
+    gap: 2px;
     line-height: 1;
+    justify-content: center;
 }
 
 .btn-star {
-    font-size: 0.55rem;
+    font-size: 0.6rem;
     color: #eab308;
-    text-shadow: 0 0 4px rgba(234,179,8,0.6);
+    text-shadow: 0 0 5px rgba(234,179,8,0.8);
     transition: opacity 0.2s;
 }
 
 .btn-star.empty {
-    color: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.15);
     text-shadow: none;
 }
 
 .level-btn:hover:not(.locked) {
-    background: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(217, 70, 239, 0.1) 100%);
+    border-color: rgba(6, 182, 212, 0.5);
     color: #fff;
-    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(6, 182, 212, 0.25);
 }
 
 .level-btn.active {
-    background: rgba(6, 182, 212, 0.15);
-    color: var(--color-low);
-    border-color: var(--color-low);
-    box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, rgba(217, 70, 239, 0.15) 100%) !important;
+    color: #06b6d4 !important;
+    border-color: #06b6d4 !important;
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.45) !important;
+    transform: scale(1.05);
 }
 
 .level-btn.locked {
-    opacity: 0.45;
+    opacity: 0.4;
     cursor: not-allowed;
-    background: rgba(0, 0, 0, 0.25);
-    border-color: rgba(255, 255, 255, 0.02);
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.03) !important;
+    box-shadow: none !important;
 }
 
 /* --------------------------------------------------
@@ -1859,7 +1871,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         border-radius: 20px !important; /* Slightly rounder, more premium */
         display: grid !important;
         grid-template-columns: 1.15fr 1.25fr !important;
-        grid-template-rows: auto auto auto auto !important;
+        grid-template-rows: auto auto auto !important;
         column-gap: 2rem !important; /* Enlarged from 1.8rem */
         row-gap: 0.6rem !important; /* Enlarged from 0.4rem */
         align-items: center !important;
@@ -1887,14 +1899,24 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         margin-bottom: 0 !important;
     }
     
-    /* Sol Sütun: Codex butonu - Row 2 */
-    #start-screen .codex-btn {
+    /* Sol Sütun: Rehber ve Ses Butonları - Row 2 */
+    #start-screen .start-top-buttons {
         grid-column: 1 !important;
         grid-row: 2 !important;
-        justify-self: start !important;
+        display: flex !important;
+        gap: 0.8rem !important;
+        justify-content: flex-start !important;
+        width: 100% !important;
+        max-width: none !important;
         margin: 0 !important;
-        padding: 0.4rem 1rem !important; /* Enlarged from 0.3rem 0.8rem */
+    }
+    
+    #start-screen .start-top-buttons .codex-btn {
+        flex: 1 !important;
+        margin: 0 !important;
+        padding: 0.45rem 1rem !important; /* Enlarged from 0.3rem 0.8rem */
         font-size: 0.88rem !important; /* Enlarged from 0.8rem */
+        text-align: center !important;
     }
     
     /* Sol Sütun: Klavye ipuçlarını gizle */
@@ -1902,60 +1924,10 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         display: none !important;
     }
     
-    /* Sol Sütun: Ses Ayarları (Yan Yana) - Row 3 */
-    #start-screen .menu-settings {
-        grid-column: 1 !important;
-        grid-row: 3 !important;
-        display: flex !important;
-        flex-direction: row !important;
-        gap: 1.2rem !important; /* Enlarged from 1rem */
-        width: 100% !important;
-        max-width: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    
-    #start-screen .settings-control {
-        flex: 1 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        margin: 0 !important;
-    }
-    
-    #start-screen .settings-control > span {
-        width: auto !important;
-        font-size: 0.8rem !important; /* Enlarged from 0.72rem */
-        white-space: nowrap !important;
-        margin-right: 6px !important;
-    }
-    
-    #start-screen .settings-control .slider-wrapper {
-        flex: 1 !important;
-        max-width: 110px !important; /* Enlarged from 90px */
-        gap: 6px !important;
-    }
-    
-    #start-screen .volume-slider {
-        height: 6px !important; /* Thicker track for easier touch control */
-    }
-    
-    #start-screen .volume-val-text {
-        font-size: 0.72rem !important; /* Enlarged from 0.65rem */
-        min-width: 28px !important;
-    }
-
-    #start-screen .sound-toggle-mini-btn {
-        width: 26px !important; /* Enlarged from 22px */
-        height: 26px !important; /* Enlarged from 22px */
-        font-size: 0.85rem !important; /* Enlarged from 0.75rem */
-        padding: 0 !important;
-    }
-    
-    /* Sol Sütun: Zorluk Ayarı - Row 4 */
+    /* Sol Sütun: Zorluk Ayarı - Row 3 */
     #start-screen .difficulty-container {
         grid-column: 1 !important;
-        grid-row: 4 !important;
+        grid-row: 3 !important;
         margin: 0 !important;
         text-align: left !important;
         width: 100% !important;
@@ -1981,10 +1953,10 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         display: none !important; /* Can/checkpoint açıklamalarını yatayda gizle */
     }
     
-    /* Sağ Sütun: Bölüm Seçici - Row 1-3 span (Genişletilmiş Yükseklik) */
+    /* Sağ Sütun: Bölüm Seçici - Row 1-2 span (Genişletilmiş Yükseklik) */
     #start-screen #level-selector-wrapper {
         grid-column: 2 !important;
-        grid-row: 1 / span 3 !important;
+        grid-row: 1 / span 2 !important;
         max-height: 220px !important; /* Enlarged from 180px */
         min-height: 140px !important; /* Enlarged from 120px */
         margin-bottom: 0 !important;
@@ -2010,10 +1982,10 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         font-size: 0.85rem !important;
     }
     
-    /* Sağ Sütun: Aksiyon Butonları Kapsayıcısı (Yan Yana) - Row 4 */
+    /* Sağ Sütun: Aksiyon Butonları Kapsayıcısı (Yan Yana) - Row 3 */
     #start-screen .menu-actions-wrapper {
         grid-column: 2 !important;
-        grid-row: 4 !important;
+        grid-row: 3 !important;
         display: flex !important;
         flex-direction: row !important;
         gap: 0.6rem !important;
@@ -2071,20 +2043,17 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         margin-top: 0.15rem !important;
     }
     
-    .settings-control {
-        padding: 5px 10px !important;
-    }
-    
     .level-group-card {
         padding: 0.4rem !important;
     }
     
     #start-screen .level-btn {
-        width: 28px !important;
-        height: 28px !important;
+        width: 32px !important;
+        height: 32px !important;
         min-height: unset !important;
-        font-size: 0.7rem !important;
+        font-size: 0.75rem !important;
         padding: 2px !important;
+        border-radius: 6px !important;
     }
 
     #start-screen .btn-star {
@@ -2092,7 +2061,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     }
 
     #start-screen .btn-num {
-        font-size: 0.7rem !important;
+        font-size: 0.75rem !important;
     }
 }
 
@@ -2307,6 +2276,14 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     text-align: center;
     box-shadow: 0 8px 40px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.04) inset;
     animation: slide-up 0.3s cubic-bezier(.18,.89,.32,1.28);
+}
+
+.sound-settings-card {
+    border: 1px solid rgba(6, 182, 212, 0.4) !important;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7), 
+                0 0 30px rgba(255, 255, 255, 0.02) inset,
+                -6px -6px 20px rgba(6, 182, 212, 0.15),
+                6px 6px 20px rgba(217, 70, 239, 0.15) !important;
 }
 
 @keyframes slide-up {

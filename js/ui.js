@@ -542,6 +542,23 @@ export class UIManager {
             });
         }
 
+        // Ses Ayarları Modalı Aç/Kapat
+        const btnOpenSettings = document.getElementById('btn-open-settings');
+        const btnCloseSettings = document.getElementById('btn-close-settings');
+        const settingsModal = document.getElementById('settings-modal');
+
+        if (btnOpenSettings && settingsModal) {
+            this.bindTouchClick(btnOpenSettings, () => {
+                settingsModal.classList.remove('hidden');
+            });
+        }
+
+        if (btnCloseSettings && settingsModal) {
+            this.bindTouchClick(btnCloseSettings, () => {
+                settingsModal.classList.add('hidden');
+            });
+        }
+
         if (btnCodexPause) {
             this.bindTouchClick(btnCodexPause, () => {
                 this.codexReferrer = 'pause';
@@ -856,7 +873,7 @@ export class UIManager {
                 const starRow = [1,2,3].map(i =>
                     `<span class="btn-star${stars >= i ? '' : ' empty'}">★</span>`
                 ).join('');
-                btn.innerHTML = `<span class="btn-stars-row">${starRow}</span><span class="btn-num">${lvlNum}</span>`;
+                btn.innerHTML = `<span class="btn-num">${lvlNum}</span><span class="btn-stars-row">${starRow}</span>`;
             } else {
                 btn.classList.add('locked');
                 btn.innerHTML = `<span class="btn-num">${lvlNum}</span><span style="font-size: 0.6rem; margin-top: 1px;">🔒</span>`;
