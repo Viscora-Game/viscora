@@ -5,9 +5,7 @@
       "namespace": "android_app",
       "package_name": "com.viscoragame.app",
       "sha256_cert_fingerprints": [
-        "42:FB:3F:9F:7D:62:4D:76:5B:75:7A:96:C9:AA:83:39:A8:4C:82:19:2A:4F:03:44:A3:1F:30:39:98:9A:71:40",
-        "33:14:7E:BD:BF:8E:68:4E:10:22:DB:B4:0C:95:D6:59:C2:0C:13:97:5A:1D:18:2E:7E:5C:A3:9C:82:0B:0E:22",
-        "8E:2C:8F:2F:CE:E0:5C:58:17:DF:3E:9A:07:3A:8C:97:A1:23:F5:DC:72:C3:28:E2:A8:F6:AE:F2:AA:C6:FC:AD"
+        "42:FB:3F:9F:7D:62:4D:76:5B:75:7A:96:C9:AA:83:39:A8:4C:82:19:2A:4F:03:44:A3:1F:30:39:98:9A:71:40"
       ]
     }
   }
