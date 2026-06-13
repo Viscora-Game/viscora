@@ -129,12 +129,12 @@ html, body {
     display: none !important;
 }
 
-/* Oyun veya Editör aktifken, dikey ekranlarda ekranı otomatik döndür */
+/* Dikey ekranlarda tüm ekranı (menüler dahil) otomatik döndür */
 @media (orientation: portrait) {
-    body.game-active #orientation-warning {
+    #orientation-warning {
         display: none !important;
     }
-    body.game-active #game-container {
+    #game-container {
         position: fixed !important;
         top: 50% !important;
         left: 50% !important;
