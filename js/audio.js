@@ -744,7 +744,9 @@ class AudioManager {
     }
 
     /**
-     * Start procedural ambient b    startMusic() {
+     * Start procedural ambient background music
+     */
+    startMusic() {
         try {
             if (this.musicPlaying && this.musicIntervalId) return;
             this.init(); // Auto init if not done
