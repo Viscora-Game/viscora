@@ -112,13 +112,13 @@ class AudioManager {
                     } else {
                         if (this.ctx && this.ctx.state === 'suspended') {
                             this.ctx.resume().then(() => {
-                                if (this.musicPlaying && this.playChordRef) {
-                                    if (this.musicIntervalId) {
-                                        clearInterval(this.musicIntervalId);
-                                    }
-                                    this.playChordRef();
-                                    this.musicIntervalId = setInterval(this.playChordRef, 5000);
-                                }
+                                 if (this.musicPlaying && this.playChordRef) {
+                                     if (this.musicIntervalId) {
+                                         clearInterval(this.musicIntervalId);
+                                     }
+                                     this.playChordRef();
+                                     this.musicIntervalId = setInterval(this.playChordRef, 6000);
+                                 }
                             });
                         }
                     }
@@ -740,8 +740,14 @@ class AudioManager {
      */
     startMusic() {
         try {
-            if (this.musicPlaying) return;
+            if (this.musicPlaying && this.musicIntervalId) return;
             this.init(); // Auto init if not done
+            
+            if (this.musicIntervalId) {
+                clearInterval(this.musicIntervalId);
+                this.musicIntervalId = null;
+            }
+            
             this.musicPlaying = true;
 
             const playChord = () => {
