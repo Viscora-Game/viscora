@@ -77,6 +77,14 @@ class AudioManager {
             this.sfxVolume.gain.setValueAtTime(initialSfxGain, this.ctx.currentTime);
             this.sfxVolume.connect(this.masterVolume);
 
+            // Create a shared white noise buffer for hi-hats
+            const bufferSize = this.ctx.sampleRate * 0.15; // 150ms of noise
+            this.noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+            const data = this.noiseBuffer.getChannelData(0);
+            for (let j = 0; j < bufferSize; j++) {
+                data[j] = Math.random() * 2 - 1;
+            }
+
             // Resume context if suspended (common on Chrome/mobile)
             if (this.ctx.state === 'suspended') {
                 this.ctx.resume();
@@ -117,7 +125,7 @@ class AudioManager {
                                          clearInterval(this.musicIntervalId);
                                      }
                                      this.playChordRef();
-                                     this.musicIntervalId = setInterval(this.playChordRef, 6000);
+                                     this.musicIntervalId = setInterval(this.playChordRef, 3750);
                                  }
                             });
                         }
@@ -765,87 +773,221 @@ class AudioManager {
                     const currentChord = this.chords[this.currentChordIndex];
                     this.currentChordIndex = (this.currentChordIndex + 1) % this.chords.length;
 
-                    const duration = 6.0; // 6 seconds per chord
+                    const bpm = 128;
+                    const beatDur = 60 / bpm; // 0.46875
+                    const sixteenthDur = beatDur / 4; // 0.1171875
+                    const duration = beatDur * 8; // 3.75 seconds per chord cycle
 
-                    // Create oscillators for each note in chord
+                    // 1. Pumping Side-chained Pad Chords
+                    const padGain = this.ctx.createGain();
+                    padGain.gain.setValueAtTime(0, now);
+                    padGain.connect(this.musicVolume);
+
+                    // Fade in the pad slightly at the beginning of the bar
+                    padGain.gain.linearRampToValueAtTime(0.07, now + 0.2);
+
+                    // Schedule side-chain volume pumping on every beat
+                    for (let beat = 0; beat < 8; beat++) {
+                        const beatTime = now + beat * beatDur;
+                        // Duck at the kick hit
+                        padGain.gain.setValueAtTime(0.07, beatTime);
+                        padGain.gain.exponentialRampToValueAtTime(0.015, beatTime + 0.06);
+                        // Recover after the kick
+                        padGain.gain.linearRampToValueAtTime(0.07, beatTime + beatDur - 0.06);
+                    }
+                    // Fade out at the end of the bar
+                    padGain.gain.setValueAtTime(0.07, now + duration - 0.2);
+                    padGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
                     currentChord.forEach((freq, i) => {
+                        const osc = this.ctx.createOscillator();
+                        const filter = this.ctx.createBiquadFilter();
+
+                        osc.type = (i % 2 === 0) ? 'sawtooth' : 'triangle';
+                        osc.frequency.setValueAtTime(freq, now);
+                        osc.detune.setValueAtTime(i * 6 - 9 + (Math.random() - 0.5) * 8, now);
+
+                        filter.type = 'lowpass';
+                        filter.frequency.setValueAtTime(350 + i * 50, now);
+                        filter.frequency.exponentialRampToValueAtTime(700 + i * 100, now + 1.8);
+                        filter.frequency.exponentialRampToValueAtTime(350, now + duration);
+
+                        osc.connect(filter);
+                        filter.connect(padGain);
+                        osc.start(now);
+                        osc.stop(now + duration);
+                    });
+
+                    // 2. Techno 4/4 Kick Drum Synthesizer
+                    const playKick = (time) => {
+                        const osc = this.ctx.createOscillator();
+                        const gainNode = this.ctx.createGain();
+                        osc.connect(gainNode);
+                        gainNode.connect(this.musicVolume);
+
+                        osc.frequency.setValueAtTime(160, time);
+                        osc.frequency.exponentialRampToValueAtTime(45, time + 0.10);
+
+                        gainNode.gain.setValueAtTime(0, time);
+                        gainNode.gain.linearRampToValueAtTime(0.35, time + 0.003);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.20);
+
+                        osc.start(time);
+                        osc.stop(time + 0.25);
+                    };
+
+                    // 3. Off-beat White Noise Hi-Hat Synthesizer
+                    const playHihat = (time) => {
+                        if (!this.noiseBuffer && this.ctx) {
+                            const bufferSize = this.ctx.sampleRate * 0.15;
+                            this.noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                            const data = this.noiseBuffer.getChannelData(0);
+                            for (let j = 0; j < bufferSize; j++) {
+                                data[j] = Math.random() * 2 - 1;
+                            }
+                        }
+                        if (!this.noiseBuffer) return;
+                        const source = this.ctx.createBufferSource();
+                        source.buffer = this.noiseBuffer;
+
+                        const filter = this.ctx.createBiquadFilter();
+                        filter.type = 'highpass';
+                        filter.frequency.setValueAtTime(7500, time);
+
+                        const gainNode = this.ctx.createGain();
+                        gainNode.gain.setValueAtTime(0, time);
+                        gainNode.gain.linearRampToValueAtTime(0.045, time + 0.003);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+
+                        source.connect(filter);
+                        filter.connect(gainNode);
+                        gainNode.connect(this.musicVolume);
+
+                        source.start(time);
+                        source.stop(time + 0.08);
+                    };
+
+                    // 4. Driving Groovy Acid-Bassline Synthesizer (16th notes sequencer)
+                    const playBass = (freq, time, dur, velocity = 0.07) => {
                         const osc = this.ctx.createOscillator();
                         const filter = this.ctx.createBiquadFilter();
                         const gainNode = this.ctx.createGain();
 
-                        // Mix oscillator types for nice rich ambient pad
-                        osc.type = (i % 2 === 0) ? 'sine' : 'triangle';
-                        osc.frequency.setValueAtTime(freq, now);
-                        // Increased pitch detune for rich retro-synth/neon chorusing effect
-                        osc.detune.setValueAtTime(i * 4 - 8 + (Math.random() - 0.5) * 6, now);
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(freq, time);
 
-                        // Setup slow volume envelope
-                        gainNode.gain.setValueAtTime(0, now);
-                        gainNode.gain.linearRampToValueAtTime(0.12, now + 2.0); // Slow attack
-                        gainNode.gain.setValueAtTime(0.12, now + duration - 2.0);
-                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration); // Slow decay
-
-                        // Resonance filter sweeping slowly
                         filter.type = 'lowpass';
-                        filter.frequency.setValueAtTime(400, now);
-                        filter.frequency.exponentialRampToValueAtTime(800 + i * 100, now + 2.5);
-                        filter.frequency.exponentialRampToValueAtTime(300, now + duration);
+                        filter.frequency.setValueAtTime(550, time);
+                        filter.frequency.exponentialRampToValueAtTime(120, time + dur * 0.85);
+
+                        gainNode.gain.setValueAtTime(0, time);
+                        gainNode.gain.linearRampToValueAtTime(velocity, time + 0.004);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, time + dur);
 
                         osc.connect(filter);
                         filter.connect(gainNode);
                         gainNode.connect(this.musicVolume);
 
-                        osc.start(now);
-                        osc.stop(now + duration);
-                    });
+                        osc.start(time);
+                        osc.stop(time + dur + 0.02);
+                    };
 
-                    // Deep sub-bass root drone (warm viscosity vibe)
-                    const rootFreq = currentChord[0] / 2;
-                    const subOsc = this.ctx.createOscillator();
-                    const subGain = this.ctx.createGain();
-                    subOsc.type = 'sine';
-                    subOsc.frequency.setValueAtTime(rootFreq, now);
-                    
-                    subGain.gain.setValueAtTime(0, now);
-                    subGain.gain.linearRampToValueAtTime(0.07, now + 2.0);
-                    subGain.gain.setValueAtTime(0.07, now + duration - 2.0);
-                    subGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-                    
-                    subOsc.connect(subGain);
-                    subGain.connect(this.musicVolume);
-                    subOsc.start(now);
-                    subOsc.stop(now + duration);
+                    // 5. Arpeggiated Neon Lead Synthesizer
+                    const playLead = (freq, time, dur) => {
+                        const osc = this.ctx.createOscillator();
+                        const gainNode = this.ctx.createGain();
+                        const filter = this.ctx.createBiquadFilter();
 
-                    // Bubbly / neon liquid pluck scheduler (Viscosity theme arpeggios)
-                    const numPlucks = 6 + Math.floor(Math.random() * 6);
-                    for (let pIdx = 0; pIdx < numPlucks; pIdx++) {
-                        const timeOffset = Math.random() * (duration - 1.0);
-                        const noteFreq = currentChord[Math.floor(Math.random() * currentChord.length)] * (Math.random() < 0.5 ? 2 : 4);
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, time);
+
+                        filter.type = 'lowpass';
+                        filter.frequency.setValueAtTime(1500, time);
+                        filter.frequency.exponentialRampToValueAtTime(400, time + dur * 0.7);
+
+                        gainNode.gain.setValueAtTime(0, time);
+                        gainNode.gain.linearRampToValueAtTime(0.025, time + 0.002);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, time + dur);
+
+                        osc.connect(filter);
+                        filter.connect(gainNode);
+                        gainNode.connect(this.musicVolume);
+
+                        osc.start(time);
+                        osc.stop(time + dur + 0.02);
+                    };
+
+                    // Schedule the rhythms
+                    const rootFreq = currentChord[0] / 2; // Sub-bass root
+
+                    // Bassline pattern (16 steps repeated twice = 32 steps)
+                    const bassPattern = [
+                        1, 1, 2, 0,  1, 1, 2, 1.5,
+                        1, 1, 2, 0,  1, 2, 1.5, 2
+                    ];
+
+                    for (let step = 0; step < 32; step++) {
+                        const stepTime = now + step * sixteenthDur;
+                        const beatIndex = Math.floor(step / 4);
+                        const isOffBeat = (step % 4 === 2); // Steps 2, 6, 10, 14...
+
+                        // Schedule 4/4 Kick on quarter beats
+                        if (step % 4 === 0) {
+                            playKick(stepTime);
+                        }
+
+                        // Schedule Off-beat Hi-Hat
+                        if (isOffBeat) {
+                            playHihat(stepTime);
+                        }
+
+                        // Schedule Bassline note
+                        const patternVal = bassPattern[step % 16];
+                        if (patternVal > 0) {
+                            const noteFreq = rootFreq * patternVal;
+                            // Accent first step of beat
+                            const velocity = (step % 4 === 0) ? 0.09 : 0.06;
+                            playBass(noteFreq, stepTime, sixteenthDur * 0.9, velocity);
+                        }
+
+                        // Schedule Neon Lead Pluck (Syncopated)
+                        // Play plucks on steps: 0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30
+                        if (step % 3 === 0 && step % 4 !== 0) {
+                            const chordNote = currentChord[step % currentChord.length];
+                            // Lead plays 2 octaves up
+                            const leadFreq = chordNote * 4;
+                            playLead(leadFreq, stepTime, sixteenthDur * 1.2);
+                        }
+                    }
+
+                    // Liquid Bubble Plops on top (low probability for organic texture)
+                    const numPlops = 2 + Math.floor(Math.random() * 3);
+                    for (let pIdx = 0; pIdx < numPlops; pIdx++) {
+                        const timeOffset = Math.random() * (duration - 0.5);
+                        const noteFreq = currentChord[Math.floor(Math.random() * currentChord.length)] * 4;
                         
                         const pOsc = this.ctx.createOscillator();
                         const pFilter = this.ctx.createBiquadFilter();
                         const pGain = this.ctx.createGain();
 
-                        pOsc.type = Math.random() < 0.4 ? 'sine' : 'triangle';
+                        pOsc.type = 'sine';
                         pOsc.frequency.setValueAtTime(noteFreq, now + timeOffset);
                         
-                        // Sweeping peaking resonance filter for squelchy/wet bubble "plop" or neon beep
                         pFilter.type = 'peaking';
-                        pFilter.Q.setValueAtTime(8, now + timeOffset);
-                        pFilter.frequency.setValueAtTime(1500, now + timeOffset);
-                        pFilter.frequency.exponentialRampToValueAtTime(150, now + timeOffset + 0.15);
+                        pFilter.Q.setValueAtTime(12, now + timeOffset);
+                        pFilter.frequency.setValueAtTime(2200, now + timeOffset);
+                        pFilter.frequency.exponentialRampToValueAtTime(180, now + timeOffset + 0.12);
 
-                        // Pluck volume envelope
                         pGain.gain.setValueAtTime(0, now + timeOffset);
-                        pGain.gain.linearRampToValueAtTime(0.04, now + timeOffset + 0.01);
-                        pGain.gain.exponentialRampToValueAtTime(0.001, now + timeOffset + 0.25);
+                        pGain.gain.linearRampToValueAtTime(0.015, now + timeOffset + 0.004);
+                        pGain.gain.exponentialRampToValueAtTime(0.001, now + timeOffset + 0.20);
 
                         pOsc.connect(pFilter);
                         pFilter.connect(pGain);
                         pGain.connect(this.musicVolume);
 
                         pOsc.start(now + timeOffset);
-                        pOsc.stop(now + timeOffset + 0.3);
+                        pOsc.stop(now + timeOffset + 0.25);
                     }
                 } catch (err) {
                     console.error("Error playing background music chord:", err);
@@ -857,7 +999,7 @@ class AudioManager {
             // Önce context'i resume et, sonra müziği başlat
             this.resume().then(() => {
                 playChord();
-                this.musicIntervalId = setInterval(playChord, 6000);
+                this.musicIntervalId = setInterval(playChord, 3750);
             });
 
 
