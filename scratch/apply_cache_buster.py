@@ -2,7 +2,7 @@ import os
 import re
 
 project_dir = 'c:/Users/Acer/OneDrive/Masaüstü/VISCORA/js'
-version = 'v6'
+version = 'v68'
 
 for file in os.listdir(project_dir):
     if file.endswith('.js'):

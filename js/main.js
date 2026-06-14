@@ -1,8 +1,19 @@
-import { GameManager } from './game.js?v=v55';
-import { audio } from './audio.js?v=v55';
+import { GameManager } from './game.js?v=v68';
+import { audio } from './audio.js?v=v68';
 
 // Oyun Başlatma Girişi
 window.addEventListener('DOMContentLoaded', () => {
+    // Giriş Animasyonu (Splash Screen) Kontrolü
+    const splash = document.getElementById('splash-screen');
+    if (splash) {
+        setTimeout(() => {
+            splash.classList.add('fade-out');
+            setTimeout(() => {
+                splash.remove();
+            }, 600);
+        }, 3500);
+    }
+
     // GameManager nesnesi oluşturulur (Canvas kimliğini veriyoruz)
     const game = new GameManager('game-canvas');
 

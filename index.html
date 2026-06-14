@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v67">
+    <link rel="stylesheet" href="index.css?v=v68">
     <link rel="manifest" href="manifest.json">
     <script>
         // Service Worker Kaydı (PWA & Offline Desteği + Otomatik Güncelleme)
@@ -130,6 +130,25 @@
     </script>
 </head>
 <body style="background-color: #0a0a0f; margin: 0; padding: 0;">
+    <!-- Gooey Gel Splash Screen (Giriş Animasyonu) -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-goo-container">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+        </div>
+        <h1 class="splash-logo">VISCORA</h1>
+    </div>
+
+    <!-- SVG Gooey Filter Definition -->
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display:none;">
+        <defs>
+            <filter id="goo">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+                <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+            </filter>
+        </defs>
+    </svg>
     <!-- Yönlendirme Uyarısı (Sadece Dikey Ekranlarda Görünür) -->
     <div id="orientation-warning" class="screen overlay-screen active">
         <div class="warning-card">
@@ -616,7 +635,7 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v67"></script>
-    <script type="module" src="js/main.js?v=v67"></script>
+    <script src="js/controls_customizer.js?v=v68"></script>
+    <script type="module" src="js/main.js?v=v68"></script>
 </body>
 </html>
