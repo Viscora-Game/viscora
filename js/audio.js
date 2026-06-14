@@ -759,7 +759,7 @@ class AudioManager {
                     const currentChord = this.chords[this.currentChordIndex];
                     this.currentChordIndex = (this.currentChordIndex + 1) % this.chords.length;
 
-                    const duration = 5.0; // 5 seconds per chord
+                    const duration = 6.0; // 6 seconds per chord
 
                     // Create oscillators for each note in chord
                     currentChord.forEach((freq, i) => {
@@ -775,8 +775,8 @@ class AudioManager {
 
                         // Setup slow volume envelope
                         gainNode.gain.setValueAtTime(0, now);
-                        gainNode.gain.linearRampToValueAtTime(0.22, now + 2.0); // Slow attack
-                        gainNode.gain.setValueAtTime(0.22, now + duration - 2.0);
+                        gainNode.gain.linearRampToValueAtTime(0.12, now + 2.0); // Slow attack
+                        gainNode.gain.setValueAtTime(0.12, now + duration - 2.0);
                         gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration); // Slow decay
 
                         // Resonance filter sweeping slowly
@@ -802,7 +802,7 @@ class AudioManager {
             // Önce context'i resume et, sonra müziği başlat
             this.resume().then(() => {
                 playChord();
-                this.musicIntervalId = setInterval(playChord, 5000);
+                this.musicIntervalId = setInterval(playChord, 6000);
             });
 
 
@@ -836,23 +836,23 @@ class AudioManager {
             
             if (themeId === 'toxic_lab') {
                 this.chords = [
-                    [82.41, 146.83, 164.81, 246.94], // Em7 (E2, D3, E3, B3)
-                    [130.81, 185.00, 196.00, 246.94], // Cmaj7#11 (C3, F#3, G3, B3)
-                    [146.83, 164.81, 220.00, 293.66], // Dadd9 (D3, E3, A3, D4)
-                    [123.47, 164.81, 220.00, 246.94]  // B7sus4 (B2, E3, A3, B3)
+                    [174.61, 220.00, 261.63, 329.63], // Fmaj7 (F3, A3, C4, E4)
+                    [196.00, 246.94, 293.66, 392.00], // G6 (G3, B3, D4, G4)
+                    [164.81, 246.94, 329.63, 392.00], // Em7 (E3, B3, E4, G4)
+                    [220.00, 261.63, 329.63, 440.00]  // Am7 (A3, C4, E4, A4)
                 ];
             } else if (themeId === 'magma_core') {
                 this.chords = [
-                    [73.42, 146.83, 174.61, 220.00],  // Dm (D2, D3, F3, A3)
-                    [116.54, 146.83, 174.61, 233.08], // Bbmaj7 (Bb2, D3, F3, Bb3)
-                    [98.00, 146.83, 164.81, 233.08],  // Gm6 (G2, D3, E3, Bb3)
-                    [110.00, 138.59, 196.00, 220.00]  // A7 (A2, C#3, G3, A3)
+                    [146.83, 174.61, 220.00, 293.66], // Dm9 (D3, F3, A3, D4)
+                    [146.83, 196.00, 246.94, 293.66], // G6/9 (D3, G3, B3, D4)
+                    [130.81, 164.81, 196.00, 246.94], // Cmaj7 (C3, E3, G3, B3)
+                    [130.81, 174.61, 220.00, 261.63]  // Fmaj7 (C3, F3, A3, C4)
                 ];
             } else if (themeId === 'gravity_chasm') {
                 this.chords = [
-                    [220.00, 293.66, 329.63, 440.00], // Asus2 (A3, D4, E4, A4)
-                    [174.61, 261.63, 349.23, 440.00], // Fmaj7 (F3, C4, F4, A4)
-                    [196.00, 293.66, 392.00, 440.00], // G6 (G3, D4, G4, A4)
+                    [261.63, 329.63, 392.00, 493.88], // Cmaj9 (C4, E4, G4, B4)
+                    [293.66, 369.99, 440.00, 587.33], // D6/9 (D4, F#4, A4, D5)
+                    [196.00, 293.66, 392.00, 440.00], // Gmaj7 (G3, D4, G4, A4)
                     [164.81, 293.66, 329.63, 493.88]  // Em9 (E3, D4, E4, B4)
                 ];
             } else {
