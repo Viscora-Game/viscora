@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v82';
+import { audio } from './audio.js?v=v83';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -153,13 +153,16 @@ export class Enemy {
             // Platform duvar çarpışma tespiti (Yatay sekme)
             for (const plat of allPlats) {
                 if (plat.passage) continue;
-                if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2, plat)) {
-                    if (this.vx > 0) {
-                        this.x = plat.x - this.radius;
-                        this.vx = -this.vx;
-                    } else if (this.vx < 0) {
-                        this.x = plat.x + plat.w + this.radius;
-                        this.vx = -this.vx;
+                // Sadece düşmanın dikey merkezi platformun gövdesi içindeyse duvar olarak kabul et
+                if (this.y > plat.y && this.y < plat.y + plat.h) {
+                    if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2, plat)) {
+                        if (this.vx > 0) {
+                            this.x = plat.x - this.radius;
+                            this.vx = -this.vx;
+                        } else if (this.vx < 0) {
+                            this.x = plat.x + plat.w + this.radius;
+                            this.vx = -this.vx;
+                        }
                     }
                 }
             }
@@ -472,16 +475,19 @@ export class GelChaser extends Enemy {
         let hitWall = false;
         for (const plat of allPlats) {
             if (plat.passage) continue;
-            // Yatay kontrolü yaparken dikeyde 4px daraltılmış kutu kullanıyoruz ki üzerinde durduğu zemini duvar sanmasın
-            if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius + 4, this.radius * 2, this.radius * 2 - 8, plat)) {
-                hitWall = true;
-                if (this.vx > 0) {
-                    this.x = plat.x - this.radius;
-                } else if (this.vx < 0) {
-                    this.x = plat.x + plat.w + this.radius;
-                }
-                if (this.state === 'patrol') {
-                    this.vx = -this.vx;
+            // Sadece düşmanın dikey merkezi platformun gövdesi içindeyse duvar olarak kabul et
+            if (this.y > plat.y && this.y < plat.y + plat.h) {
+                // Yatay kontrolü yaparken dikeyde 4px daraltılmış kutu kullanıyoruz ki üzerinde durduğu zemini duvar sanmasın
+                if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius + 4, this.radius * 2, this.radius * 2 - 8, plat)) {
+                    hitWall = true;
+                    if (this.vx > 0) {
+                        this.x = plat.x - this.radius;
+                    } else if (this.vx < 0) {
+                        this.x = plat.x + plat.w + this.radius;
+                    }
+                    if (this.state === 'patrol') {
+                        this.vx = -this.vx;
+                    }
                 }
             }
         }
