@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v71';
-import { Level } from './level.js?v=v71';
-import { Enemy, GelChaser } from './enemies.js?v=v71';
-import { UIManager } from './ui.js?v=v71';
-import { audio } from './audio.js?v=v71';
-import { LevelEditor } from './editor.js?v=v71';
-import { Boss, CyberBoss } from './boss.js?v=v71';
+import { Player } from './player.js?v=v74';
+import { Level } from './level.js?v=v74';
+import { Enemy, GelChaser } from './enemies.js?v=v74';
+import { UIManager } from './ui.js?v=v74';
+import { audio } from './audio.js?v=v74';
+import { LevelEditor } from './editor.js?v=v74';
+import { Boss, CyberBoss } from './boss.js?v=v74';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -595,33 +595,56 @@ export class GameManager {
             let speed = 0.5 + Math.random() * 3;
             let size = 2 + Math.random() * 5;
             let maxLife = 20 + Math.random() * 30;
+            
+            let vx = Math.cos(angle) * speed;
+            let vy = Math.sin(angle) * speed;
 
             if (type === 'land') {
                 // Yere basma halkası şeklinde yana fırlayan parçacıklar
                 speed = 1.0 + Math.random() * 4;
                 size = 3 + Math.random() * 4;
+                vx = Math.cos(angle) * speed;
+                vy = Math.sin(angle) * speed;
             } else if (type === 'shift') {
                 // Viskozite geçişi dairesel saçılımı
                 speed = 1.5 + Math.random() * 4.5;
                 size = 3.5 + Math.random() * 4;
                 maxLife = 20 + Math.random() * 15;
+                vx = Math.cos(angle) * speed;
+                vy = Math.sin(angle) * speed;
             } else if (type === 'enemy_pop') {
                 // Patlama dağılması
                 speed = 2.0 + Math.random() * 5;
                 size = 4 + Math.random() * 6;
                 maxLife = 35 + Math.random() * 20;
+                vx = Math.cos(angle) * speed;
+                vy = Math.sin(angle) * speed;
             } else if (type === 'trail') {
                 // Arkada kalan yavaş sönen damla
                 speed = 0.1 + Math.random() * 0.5;
                 size = 3 + Math.random() * 4;
                 maxLife = 15 + Math.random() * 15;
+                vx = Math.cos(angle) * speed;
+                vy = Math.sin(angle) * speed - 0.2;
+            } else if (type === 'smoke') {
+                // Gri duman bulutu, yukarı doğru süzülür ve genleşir
+                size = 6 + Math.random() * 8;
+                maxLife = 45 + Math.random() * 30;
+                vx = (Math.random() - 0.5) * 1.5;
+                vy = -1.2 - Math.random() * 1.8;
+            } else if (type === 'steam') {
+                // Hızlı yükselen renkli buhar
+                size = 3 + Math.random() * 4;
+                maxLife = 25 + Math.random() * 20;
+                vx = (Math.random() - 0.5) * 2.0;
+                vy = -2.2 - Math.random() * 2.8;
             }
 
             this.particles.push({
                 x: x,
                 y: y,
-                vx: Math.cos(angle) * speed + (type === 'trail' ? 0 : 0),
-                vy: Math.sin(angle) * speed + (type === 'trail' ? -0.2 : 0),
+                vx: vx,
+                vy: vy,
                 size: size,
                 color: color,
                 alpha: 1.0,
@@ -886,6 +909,14 @@ export class GameManager {
             // Sıvı parçacıkları yavaşça süzülür
             if (p.type === 'trail') {
                 p.vy += 0.01; // Hafif yerçekimi
+            } else if (p.type === 'smoke') {
+                p.size += 0.12; // Duman genişler
+                p.vx *= 0.95;   // Sürtünme
+                p.vy *= 0.96;
+            } else if (p.type === 'steam') {
+                p.size += 0.06; // Buhar hafifçe genişler
+                p.vx *= 0.94;
+                p.vy *= 0.94;
             }
         });
         
@@ -1032,7 +1063,8 @@ export class GameManager {
         if (this.player.isDead) {
             // Eğer erime animasyonu varsa, animasyon bitene kadar gameover ekranını beklet
             if (this.player.deathType === 'melt' && this.player.meltTimer > 0) {
-                this.player.update(null, this.level, null, null);
+                // Not: Oyuncu güncellenmesi döngünün yukarısında zaten yapıldığı için
+                // burada tekrar update çağrısı yapılmaz, böylece animasyon hızı normal kalır.
             } else {
                 // Tek seferlik ölüm patlaması (eğer önceden yapılmadıysa)
                 if (!this.player.deathSplashDone) {

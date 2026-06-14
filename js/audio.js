@@ -770,8 +770,8 @@ class AudioManager {
                         // Mix oscillator types for nice rich ambient pad
                         osc.type = (i % 2 === 0) ? 'sine' : 'triangle';
                         osc.frequency.setValueAtTime(freq, now);
-                        // Slight pitch detune for chorusing effect
-                        osc.detune.setValueAtTime(i * 1.5 - 3, now);
+                        // Increased pitch detune for rich retro-synth/neon chorusing effect
+                        osc.detune.setValueAtTime(i * 4 - 8 + (Math.random() - 0.5) * 6, now);
 
                         // Setup slow volume envelope
                         gainNode.gain.setValueAtTime(0, now);
@@ -792,6 +792,55 @@ class AudioManager {
                         osc.start(now);
                         osc.stop(now + duration);
                     });
+
+                    // Deep sub-bass root drone (warm viscosity vibe)
+                    const rootFreq = currentChord[0] / 2;
+                    const subOsc = this.ctx.createOscillator();
+                    const subGain = this.ctx.createGain();
+                    subOsc.type = 'sine';
+                    subOsc.frequency.setValueAtTime(rootFreq, now);
+                    
+                    subGain.gain.setValueAtTime(0, now);
+                    subGain.gain.linearRampToValueAtTime(0.07, now + 2.0);
+                    subGain.gain.setValueAtTime(0.07, now + duration - 2.0);
+                    subGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                    
+                    subOsc.connect(subGain);
+                    subGain.connect(this.musicVolume);
+                    subOsc.start(now);
+                    subOsc.stop(now + duration);
+
+                    // Bubbly / neon liquid pluck scheduler (Viscosity theme arpeggios)
+                    const numPlucks = 6 + Math.floor(Math.random() * 6);
+                    for (let pIdx = 0; pIdx < numPlucks; pIdx++) {
+                        const timeOffset = Math.random() * (duration - 1.0);
+                        const noteFreq = currentChord[Math.floor(Math.random() * currentChord.length)] * (Math.random() < 0.5 ? 2 : 4);
+                        
+                        const pOsc = this.ctx.createOscillator();
+                        const pFilter = this.ctx.createBiquadFilter();
+                        const pGain = this.ctx.createGain();
+
+                        pOsc.type = Math.random() < 0.4 ? 'sine' : 'triangle';
+                        pOsc.frequency.setValueAtTime(noteFreq, now + timeOffset);
+                        
+                        // Sweeping peaking resonance filter for squelchy/wet bubble "plop" or neon beep
+                        pFilter.type = 'peaking';
+                        pFilter.Q.setValueAtTime(8, now + timeOffset);
+                        pFilter.frequency.setValueAtTime(1500, now + timeOffset);
+                        pFilter.frequency.exponentialRampToValueAtTime(150, now + timeOffset + 0.15);
+
+                        // Pluck volume envelope
+                        pGain.gain.setValueAtTime(0, now + timeOffset);
+                        pGain.gain.linearRampToValueAtTime(0.04, now + timeOffset + 0.01);
+                        pGain.gain.exponentialRampToValueAtTime(0.001, now + timeOffset + 0.25);
+
+                        pOsc.connect(pFilter);
+                        pFilter.connect(pGain);
+                        pGain.connect(this.musicVolume);
+
+                        pOsc.start(now + timeOffset);
+                        pOsc.stop(now + timeOffset + 0.3);
+                    }
                 } catch (err) {
                     console.error("Error playing background music chord:", err);
                 }

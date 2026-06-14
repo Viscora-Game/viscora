@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v71';
-import { THEMES } from './generator.js?v=v71';
+import { audio } from './audio.js?v=v74';
+import { THEMES } from './generator.js?v=v74';
 
 /**
  * Viscora Level Design & Manager
@@ -6624,6 +6624,51 @@ export class Level {
                 
                 ctx.restore();
             });
+        }
+
+        // --- DRAW WAVY BOTTOM RIVER ---
+        if (this.theme && this.theme.bottomRiverColors) {
+            const riverColors = this.theme.bottomRiverColors;
+            const shadowColor = this.theme.bottomRiverShadow;
+            const startX = Math.max(0, camera.x - 50);
+            const endX = Math.min(this.width, camera.x + viewW + 50);
+            const numLayers = Math.min(3, riverColors.length);
+            const baseHeight = this.height - 25; // River surface baseline
+            
+            for (let layer = 0; layer < numLayers; layer++) {
+                ctx.save();
+                
+                // Color and glow settings
+                ctx.fillStyle = riverColors[layer];
+                if (layer === 0 && shadowColor) {
+                    ctx.shadowColor = shadowColor;
+                    ctx.shadowBlur = 15;
+                } else {
+                    ctx.shadowBlur = 0;
+                }
+                
+                // Wave parameters
+                const waveFreq = 0.015 - layer * 0.003;
+                const waveAmp = 6 + layer * 3;
+                const speed = 1.5 + layer * 0.8;
+                
+                ctx.beginPath();
+                // Start at bottom-left of viewport
+                ctx.moveTo(startX, this.height + 200);
+                
+                // Draw wavy top surface
+                for (let x = startX; x <= endX; x += 15) {
+                    const y = baseHeight + Math.sin(x * waveFreq + this.time * speed) * waveAmp;
+                    ctx.lineTo(x, y);
+                }
+                
+                // Close path at bottom-right of viewport
+                ctx.lineTo(endX, this.height + 200);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.restore();
+            }
         }
 
         ctx.restore();
