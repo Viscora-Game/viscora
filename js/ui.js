@@ -183,7 +183,7 @@ export class UIManager {
         html += `
         <div class="level-tutorial-section">
             <span class="level-section-title">🎓 EĞİTİM</span>
-            <button id="btn-level-0" class="level-btn active" style="width: 70px; height: 36px; padding: 0;">0</button>
+            <button id="btn-level-0" class="level-btn active" style="width: 52px; height: 28px; padding: 0; min-height: unset; font-size: 0.8rem;">0</button>
         </div>
         `;
 
