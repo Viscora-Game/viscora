@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v76';
+import { audio } from './audio.js?v=v77';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -38,8 +38,19 @@ export class Enemy {
     /**
      * Düşman hareket yapay zekası ve sınır kontrolleri
      */
-    update(level) {
+    update(level, player, emitParticles) {
         if (this.isDead) return;
+
+        // Ölüm çukuru tespiti (Lava/Asit nehrine temas)
+        if (this.y + this.radius >= level.height - 25) {
+            this.isDead = true;
+            if (emitParticles) {
+                emitParticles(this.x, this.y, 'enemy_pop', this.color, 15);
+            } else if (window.gameInstance && window.gameInstance.emitParticles) {
+                window.gameInstance.emitParticles(this.x, this.y, 'enemy_pop', this.color, 15);
+            }
+            return;
+        }
 
         const allPlats = [
             ...level.platforms,
@@ -152,6 +163,15 @@ export class Enemy {
                     }
                 }
             }
+        }
+
+        // Harita dışına çıkış engellemesi (Sınır koruma)
+        if (this.x < this.radius) {
+            this.x = this.radius;
+            if (!this.isVertical) this.vx = -this.vx;
+        } else if (this.x > level.width - this.radius) {
+            this.x = level.width - this.radius;
+            if (!this.isVertical) this.vx = -this.vx;
         }
 
         // Animasyon sayacı
@@ -357,6 +377,12 @@ export class GelChaser extends Enemy {
     update(level, player, emitParticles) {
         if (this.isDead) return;
 
+        // Ölüm çukuru tespiti (Lava/Asit nehrine temas)
+        if (this.y + this.radius >= level.height - 25) {
+            this.explode(player, emitParticles);
+            return;
+        }
+
         const allPlats = [
             ...level.platforms,
             ...(level.staticMirrors || [])
@@ -492,6 +518,15 @@ export class GelChaser extends Enemy {
         if (this.state === 'chase' && hitWall && this.onGround) {
             this.vy = -6.5;
             this.onGround = false;
+        }
+
+        // Harita dışına çıkış engellemesi (Sınır koruma)
+        if (this.x < this.radius) {
+            this.x = this.radius;
+            this.vx = 0;
+        } else if (this.x > level.width - this.radius) {
+            this.x = level.width - this.radius;
+            this.vx = 0;
         }
 
         // --- DURUM GEÇİŞLERİ VE ZAMANLAYICILAR ---
