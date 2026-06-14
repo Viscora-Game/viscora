@@ -614,10 +614,13 @@ h2 {
     align-items: center;
     flex: 1;
     gap: 10px;
+    min-width: 0;
 }
 
 .volume-slider {
     flex: 1;
+    width: 100%;
+    min-width: 0;
     -webkit-appearance: none;
     appearance: none;
     height: 6px;
@@ -1565,7 +1568,9 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     }
 
     .volume-slider {
-        width: 90px !important;
+        max-width: 90px !important;
+        width: 100% !important;
+        min-width: 0 !important;
     }
 }
 

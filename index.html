@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v70">
+    <link rel="stylesheet" href="index.css?v=v71">
     <link rel="manifest" href="manifest.json">
     <script>
         // Service Worker Kaydı (PWA & Offline Desteği + Otomatik Güncelleme)
@@ -301,8 +301,8 @@
                         <span style="font-size: 0.95rem; color: var(--text-secondary); width: 72px; text-align: left; font-weight: 600;">MÜZİK</span>
                         <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
                             <button id="btn-menu-music" class="sound-toggle-mini-btn" type="button" aria-label="Müziği Aç/Kapat" style="width: 32px; height: 32px; font-size: 1rem;">🎵</button>
-                            <div class="slider-wrapper" style="flex: 1; max-width: 125px; display: flex; align-items: center; gap: 8px;">
-                                <input type="range" id="slider-menu-music" class="volume-slider" min="0" max="100" value="50" style="height: 6px; flex: 1;">
+                            <div class="slider-wrapper" style="flex: 1; max-width: 125px; display: flex; align-items: center; gap: 8px; min-width: 0;">
+                                <input type="range" id="slider-menu-music" class="volume-slider" min="0" max="100" value="50" style="height: 6px; flex: 1; min-width: 0; width: 100%;">
                                 <span id="menu-music-text" class="volume-val-text" style="font-size: 0.85rem; min-width: 35px;">50%</span>
                             </div>
                         </div>
@@ -311,8 +311,8 @@
                         <span style="font-size: 0.95rem; color: var(--text-secondary); width: 72px; text-align: left; font-weight: 600;">EFEKTLER</span>
                         <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
                             <button id="btn-menu-sfx" class="sound-toggle-mini-btn" type="button" aria-label="Efektleri Aç/Kapat" style="width: 32px; height: 32px; font-size: 1rem;">🔊</button>
-                            <div class="slider-wrapper" style="flex: 1; max-width: 125px; display: flex; align-items: center; gap: 8px;">
-                                <input type="range" id="slider-menu-sfx" class="volume-slider" min="0" max="100" value="80" style="height: 6px; flex: 1;">
+                            <div class="slider-wrapper" style="flex: 1; max-width: 125px; display: flex; align-items: center; gap: 8px; min-width: 0;">
+                                <input type="range" id="slider-menu-sfx" class="volume-slider" min="0" max="100" value="80" style="height: 6px; flex: 1; min-width: 0; width: 100%;">
                                 <span id="menu-sfx-text" class="volume-val-text" style="font-size: 0.85rem; min-width: 35px;">80%</span>
                             </div>
                         </div>
@@ -351,8 +351,8 @@
                             <span style="font-size: 0.85rem; color: var(--text-secondary); width: 80px; text-align: left;">MÜZİK</span>
                             <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
                                 <button id="btn-pause-music" class="sound-toggle-mini-btn" type="button" aria-label="Müziği Aç/Kapat">🎵</button>
-                                <div class="slider-wrapper" style="flex: 1; max-width: 140px;">
-                                    <input type="range" id="slider-pause-music" class="volume-slider" min="0" max="100" value="50">
+                                <div class="slider-wrapper" style="flex: 1; max-width: 140px; min-width: 0;">
+                                    <input type="range" id="slider-pause-music" class="volume-slider" min="0" max="100" value="50" style="min-width: 0; width: 100%;">
                                     <span id="pause-music-text" class="volume-val-text">50%</span>
                                 </div>
                             </div>
@@ -361,8 +361,8 @@
                             <span style="font-size: 0.85rem; color: var(--text-secondary); width: 80px; text-align: left;">EFEKTLER</span>
                             <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
                                 <button id="btn-pause-sfx" class="sound-toggle-mini-btn" type="button" aria-label="Efektleri Aç/Kapat">🔊</button>
-                                <div class="slider-wrapper" style="flex: 1; max-width: 140px;">
-                                    <input type="range" id="slider-pause-sfx" class="volume-slider" min="0" max="100" value="80">
+                                <div class="slider-wrapper" style="flex: 1; max-width: 140px; min-width: 0;">
+                                    <input type="range" id="slider-pause-sfx" class="volume-slider" min="0" max="100" value="80" style="min-width: 0; width: 100%;">
                                     <span id="pause-sfx-text" class="volume-val-text">80%</span>
                                 </div>
                             </div>
@@ -635,7 +635,7 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v70"></script>
-    <script type="module" src="js/main.js?v=v70"></script>
+    <script src="js/controls_customizer.js?v=v71"></script>
+    <script type="module" src="js/main.js?v=v71"></script>
 </body>
 </html>
