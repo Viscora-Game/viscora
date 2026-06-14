@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v75';
-import { THEMES } from './generator.js?v=v75';
+import { audio } from './audio.js?v=v76';
+import { THEMES } from './generator.js?v=v76';
 
 /**
  * Viscora Level Design & Manager
@@ -3578,6 +3578,15 @@ export class Level {
         // --- DÜŞEN BLOK TUZAĞI (FALLING BLOCK TRAPS) ---
         if (this.fallingBlockTraps) {
             this.fallingBlockTraps.forEach(trap => {
+                // Alt kısımdaki dikenlerin her durumda (idle, falling, waiting, rising) hasar vermesi tespiti
+                const spikeBufferX = 2;
+                if (player.x + player.radius - spikeBufferX > trap.x && 
+                    player.x - player.radius + spikeBufferX < trap.x + trap.w &&
+                    player.y - player.radius < trap.y + trap.h + 10 && 
+                    player.y + player.radius > trap.y + trap.h) {
+                    player.takeDamage(1);
+                }
+
                 if (trap.state === 'idle') {
                     // Check if player is directly underneath the trap
                     const toleranceX = 40; // detection zone width around trap center
