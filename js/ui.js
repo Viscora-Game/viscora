@@ -179,13 +179,6 @@ export class UIManager {
 
         let html = '';
 
-        // 1. EĞİTİM SEVİYESİ (Bölüm 0)
-        html += `
-        <div class="level-tutorial-section">
-            <span class="level-section-title">🎓 EĞİTİM</span>
-            <button id="btn-level-0" class="level-btn active" style="width: 52px; height: 28px; padding: 0; min-height: unset; font-size: 0.8rem;">0</button>
-        </div>
-        `;
 
         // Group metadata
         const groups = [
@@ -234,6 +227,9 @@ export class UIManager {
                 <div class="level-group-grid">
             `;
 
+            if (g.id === 1) {
+                html += `<button id="btn-level-0" class="level-btn"></button>`;
+            }
             for (let i = g.start; i <= g.end; i++) {
                 html += `<button id="btn-level-${i}" class="level-btn locked" ${disabledAttr}><span class="btn-num">${i}</span><span style="font-size:0.6rem;">🔒</span></button>`;
             }
