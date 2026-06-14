@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v78';
-import { ViscosityList } from './viscosity.js?v=v78';
+import { audio } from './audio.js?v=v79';
+import { ViscosityList } from './viscosity.js?v=v79';
 
 export class UIManager {
     constructor(game) {
