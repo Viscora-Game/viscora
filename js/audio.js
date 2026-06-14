@@ -828,6 +828,52 @@ class AudioManager {
     }
 
     /**
+     * Set background music chords based on theme/zone
+     */
+    setTheme(themeId) {
+        try {
+            console.log("Audio Theme Switched to:", themeId);
+            
+            if (themeId === 'toxic_lab') {
+                this.chords = [
+                    [82.41, 146.83, 164.81, 246.94], // Em7 (E2, D3, E3, B3)
+                    [130.81, 185.00, 196.00, 246.94], // Cmaj7#11 (C3, F#3, G3, B3)
+                    [146.83, 164.81, 220.00, 293.66], // Dadd9 (D3, E3, A3, D4)
+                    [123.47, 164.81, 220.00, 246.94]  // B7sus4 (B2, E3, A3, B3)
+                ];
+            } else if (themeId === 'magma_core') {
+                this.chords = [
+                    [73.42, 146.83, 174.61, 220.00],  // Dm (D2, D3, F3, A3)
+                    [116.54, 146.83, 174.61, 233.08], // Bbmaj7 (Bb2, D3, F3, Bb3)
+                    [98.00, 146.83, 164.81, 233.08],  // Gm6 (G2, D3, E3, Bb3)
+                    [110.00, 138.59, 196.00, 220.00]  // A7 (A2, C#3, G3, A3)
+                ];
+            } else if (themeId === 'gravity_chasm') {
+                this.chords = [
+                    [220.00, 293.66, 329.63, 440.00], // Asus2 (A3, D4, E4, A4)
+                    [174.61, 261.63, 349.23, 440.00], // Fmaj7 (F3, C4, F4, A4)
+                    [196.00, 293.66, 392.00, 440.00], // G6 (G3, D4, G4, A4)
+                    [164.81, 293.66, 329.63, 493.88]  // Em9 (E3, D4, E4, B4)
+                ];
+            } else {
+                // Default: neon_sewer (Cmaj7 - Am9 - Fmaj7 - G6/9)
+                this.chords = [
+                    [130.81, 164.81, 196.00, 246.94], // C3, E3, G3, B3
+                    [110.00, 146.83, 164.81, 220.00], // A2, D3, E3, A3
+                    [87.31,  130.81, 174.61, 218.08], // F2, C3, F3, A3
+                    [98.00,  146.83, 196.00, 246.94]  // G2, D3, G3, B3
+                ];
+            }
+            
+            if (this.currentChordIndex >= this.chords.length) {
+                this.currentChordIndex = 0;
+            }
+        } catch (e) {
+            console.error("Error setting audio theme:", e);
+        }
+    }
+
+    /**
      * Update Web Audio filter depending on character state
      */
     updateViscosityFilter(stateId) {

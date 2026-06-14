@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v68';
-import { THEMES } from './generator.js?v=v68';
+import { audio } from './audio.js?v=v69';
+import { THEMES } from './generator.js?v=v69';
 
 /**
  * Viscora Level Design & Manager
@@ -562,7 +562,17 @@ export class Level {
                     this.staticMirrors = [];
                 }
 
+                // Resolve custom level theme
+                const customThemeId = data.themeId || data.theme || 'neon_sewer';
+                this.theme = THEMES.find(t => t.id === customThemeId) || THEMES[0];
+
                 this.resetLevelRuntimeState();
+                
+                // Notify audio engine of theme change
+                try {
+                    audio.setTheme(this.theme.id);
+                } catch(e) {}
+                
                 return; // Return early, custom level loaded!
             } catch (err) {
                 console.error("Error loading custom level from localStorage, falling back to campaign default:", err);
@@ -571,14 +581,28 @@ export class Level {
 
         // Assign Visual Theme based on Campaign Level Number
         let campaignThemeId = null;
-        if (levelNumber === 0 || levelNumber === 1 || levelNumber === 6 || levelNumber === 12 || levelNumber === 19) {
-            campaignThemeId = 'neon_sewer';
-        } else if (levelNumber === 2 || levelNumber === 4 || levelNumber === 8 || levelNumber === 9 || levelNumber === 11 || levelNumber === 13 || levelNumber === 17 || levelNumber === 18) {
-            campaignThemeId = 'toxic_lab';
-        } else if (levelNumber === 3 || levelNumber === 7 || levelNumber === 14 || levelNumber === 15) {
-            campaignThemeId = 'magma_core';
-        } else if (levelNumber === 5 || levelNumber === 10 || levelNumber === 16 || levelNumber === 20) {
-            campaignThemeId = 'gravity_chasm';
+        if (levelNumber <= 20) {
+            if (levelNumber === 0 || levelNumber === 1 || levelNumber === 6 || levelNumber === 12 || levelNumber === 19) {
+                campaignThemeId = 'neon_sewer';
+            } else if (levelNumber === 2 || levelNumber === 4 || levelNumber === 8 || levelNumber === 9 || levelNumber === 11 || levelNumber === 13 || levelNumber === 17 || levelNumber === 18) {
+                campaignThemeId = 'toxic_lab';
+            } else if (levelNumber === 3 || levelNumber === 7 || levelNumber === 14 || levelNumber === 15) {
+                campaignThemeId = 'magma_core';
+            } else if (levelNumber === 5 || levelNumber === 10 || levelNumber === 16 || levelNumber === 20) {
+                campaignThemeId = 'gravity_chasm';
+            }
+        } else {
+            // For levels > 20, map based on group
+            const groupIndex = Math.ceil(levelNumber / 10);
+            if (groupIndex === 3 || groupIndex === 7) {
+                campaignThemeId = 'magma_core';
+            } else if (groupIndex === 4 || groupIndex === 8) {
+                campaignThemeId = 'gravity_chasm';
+            } else if (groupIndex === 5 || groupIndex === 9) {
+                campaignThemeId = 'neon_sewer';
+            } else {
+                campaignThemeId = 'toxic_lab';
+            }
         }
 
         if (campaignThemeId) {
@@ -2774,6 +2798,12 @@ export class Level {
         }
         this.generateCheckpoints();
         this.resetLevelRuntimeState();
+        
+        // Notify audio engine of theme change
+        const themeId = (this.theme && this.theme.id) ? this.theme.id : 'neon_sewer';
+        try {
+            audio.setTheme(themeId);
+        } catch(e) {}
     }
 
     generateCheckpoints() {

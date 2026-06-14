@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v68';
-import { ViscosityList } from './viscosity.js?v=v68';
+import { audio } from './audio.js?v=v69';
+import { ViscosityList } from './viscosity.js?v=v69';
 
 export class UIManager {
     constructor(game) {
@@ -249,11 +249,21 @@ export class UIManager {
             if (header) {
                 this.bindTouchClick(header, (e) => {
                     e.stopPropagation();
+                    
+                    // Only allow toggling unlocked groups
+                    const isUnlocked = card.classList.contains('unlocked');
+                    if (!isUnlocked) return;
+                    
                     const isCollapsed = card.classList.contains('collapsed');
+                    
+                    // Collapse all cards first
+                    cards.forEach(c => {
+                        c.classList.add('collapsed');
+                    });
+                    
+                    // Toggle current card
                     if (isCollapsed) {
                         card.classList.remove('collapsed');
-                    } else {
-                        card.classList.add('collapsed');
                     }
                 });
             }
