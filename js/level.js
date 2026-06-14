@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v81';
-import { THEMES } from './generator.js?v=v81';
+import { audio } from './audio.js?v=v82';
+import { THEMES } from './generator.js?v=v82';
 
 /**
  * Viscora Level Design & Manager

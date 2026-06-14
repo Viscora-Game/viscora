@@ -958,6 +958,8 @@ class AudioManager {
 
             const scheduler = () => {
                 if (!this.musicPlaying || !this.ctx) return;
+                if (document.hidden) return; // Tab is in background, do not schedule or resume!
+                
                 // If context is suspended, resume it and wait
                 if (this.ctx.state === 'suspended') {
                     this.resume();

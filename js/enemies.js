@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v81';
+import { audio } from './audio.js?v=v82';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -568,7 +568,11 @@ export class GelChaser extends Enemy {
             }
 
             // Şişme efekti (radius dinamik büyümesi)
+            const oldRadius = this.radius;
             this.radius = this.baseRadius + (1 - this.chaseTimer / 2.5) * 14; // Yarıçapı 16px'ten 30px'e şişer
+            if (this.onGround) {
+                this.y -= (this.radius - oldRadius);
+            }
 
             if (this.chaseTimer <= 0) {
                 this.explode(player, emitParticles);
