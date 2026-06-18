@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v95">
+    <link rel="stylesheet" href="index.css?v=v96">
     <link rel="manifest" href="manifest.json">
     <script>
         // Service Worker Kaydı (PWA & Offline Desteği + Otomatik Güncelleme)
@@ -442,7 +442,7 @@
                             <div class="codex-icon pink-icon">🟣</div>
                             <div class="codex-info">
                                 <h3>Jel Form (Pembe - Yüksek Viskozite)</h3>
-                                <p>Çok yavaştır ancak <strong>yapışkan pembe duvarlara tutunabilir</strong> ve yukarı tırmanabilir. <strong>Ağ kapılarından (Net Gate)</strong> yavaşlayarak da olsa geçebilen tek formdur. Sadece <strong>Pembe lazer kapılarından</strong> hasar almadan geçebilir. Ayrıca <strong>alev makinelerinin ateşine karşı 2 saniye boyunca dayanabilir (kızararak hasarı geciktirir).</strong> Alev içindeyken form değiştirirse anında hasar alır.</p>
+                                <p>Çok yavaştır ancak <strong>yapışkan pembe duvarlara tutunabilir</strong> ve yukarı tırmanabilir. <strong>Ağ kapılarından (Net Gate)</strong> yavaşlayarak da olsa geçebilen tek formdur. Sadece <strong>Pembe lazer kapılarından</strong> hasar almadan geçebilir. Ayrıca <strong>alev makinelerinin ateşine karşı 2 saniye boyunca dayanabilir (kızararak hasarı geciktirir, bu esnada kaynama/cosss sesi çıkarır ve buhar yayar). Alevden çıktıktan sonra ise mavi/beyaz soğuma buharı saçarak ısıyı tahliye eder.</strong> Alev içindeyken form değiştirirse anında hasar alır.</p>
                             </div>
                         </div>
                     </div>
@@ -527,7 +527,7 @@
                             <div class="codex-icon">🔥</div>
                             <div class="codex-info">
                                 <h3>Alev Silahı (Flamethrower)</h3>
-                                <p>Sürekli veya belirli aralıklarla alev püskürten tehlikeli tuzak. Karakterinize yüksek hasar verir. <strong>Ancak Jel (Pembe) formundayken alevlerin içinde 2 saniye boyunca hasar almadan kalabilirsiniz (karakter yavaşça kızarır ve kaynama sesi çıkarır).</strong> Diğer formlar ise temas anında doğrudan hasar alır. Jel Takipçileri bu alevlere çekerek onları yok edebilirsiniz.</p>
+                                <p>Sürekli veya belirli aralıklarla alev püskürten tehlikeli tuzak. Karakterinize yüksek hasar verir. <strong>Ancak Jel (Pembe) formundayken alevlerin içinde 2 saniye boyunca hasar almadan kalabilirsiniz (karakter yavaşça kızararak kaynama/cosss sesi çıkarır ve dumanlar salar). Alevden çıktığında ise mavi/beyaz renkli soğuma buharı parçacıklarıyla ısıyı atar.</strong> Diğer formlar ise temas anında doğrudan hasar alır. Jel Takipçileri bu alevlere çekerek onları yok edebilirsiniz.</p>
                             </div>
                         </div>
                         <div class="codex-row">
@@ -605,6 +605,18 @@
                     <!-- 4. Sekme: Kontroller & Gamepad -->
                     <div id="tab-controls" class="codex-tab-content">
                         <div class="codex-row">
+                            <div class="codex-icon">⌨️</div>
+                            <div class="codex-info">
+                                <h3>Klavye Kontrolleri</h3>
+                                <p><strong>A / D veya Sol / Sağ Yön Tuşları:</strong> Karakteri sola ve sağa hareket ettirir.</p>
+                                <p><strong>W / Yukarı Yön Tuşu veya Space (Boşluk):</strong> Zıplamayı sağlar (Mavi formda çift zıplama yapılabilir).</p>
+                                <p><strong>S / Aşağı Yön Tuşu:</strong> Yeşil formda yuvarlanarak dar tünellerden/boşluklardan sızmanızı sağlar.</p>
+                                <p><strong>Shift veya E:</strong> Viskozite formları arasında döngüsel geçiş yapar (Yeşil -> Mavi -> Pembe -> Yeşil).</p>
+                                <p><strong>Escape veya P:</strong> Oyunu duraklatır.</p>
+                                <p><strong>F3:</strong> Koordinat ve lazer hata ayıklama (debug) panelini açar/kapatır.</p>
+                            </div>
+                        </div>
+                        <div class="codex-row" style="margin-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 15px;">
                             <div class="codex-icon">⚙️</div>
                             <div class="codex-info">
                                 <h3>Mobil Kontrol Özelleştirme</h3>
@@ -656,7 +668,7 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v95"></script>
-    <script type="module" src="js/main.js?v=v95"></script>
+    <script src="js/controls_customizer.js?v=v96"></script>
+    <script type="module" src="js/main.js?v=v96"></script>
 </body>
 </html>
