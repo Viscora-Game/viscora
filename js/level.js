@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v91';
-import { THEMES } from './generator.js?v=v91';
+import { audio } from './audio.js?v=v92';
+import { THEMES } from './generator.js?v=v92';
 
 /**
  * Viscora Level Design & Manager
@@ -2898,17 +2898,275 @@ export class Level {
             this.laserReceivers = [];
             this.staticMirrors = [];
         } else if (levelNumber === 19) {
-            this.width = 1600;
-            this.height = 600;
-            this.spawnX = 100;
-            this.spawnY = 380;
+            // ═══════════════════════════════════════════════
+            // BÖLÜM 19: NEON AYNALAR — Lazer Bulmacası
+            // ═══════════════════════════════════════════════
+            this.width = 3500;
+            this.height = 700;
+            this.spawnX = 80;
+            this.spawnY = 400;
+            this.portal = { x: 3340, y: 260, w: 60, h: 80, angle: 0 };
+
             this.platforms = [
-                { x: 0, y: 460, w: 1600, h: 140, type: 'normal' }
+                { x: 0, y: 460, w: 160, h: 140, type: 'normal' },
+                { x: 530, y: 460, w: 60, h: 20, type: 'normal' },
+                { x: 1090, y: 450, w: 60, h: 20, type: 'normal' },
+                { x: 1330, y: 220, w: 40, h: 120, type: 'sticky', sticky: true },
+                { x: 550, y: 100, w: 640, h: 40, type: 'normal' },
+                { x: 380, y: 0, w: 60, h: 20, type: 'normal' },
+                { x: 180, y: -90, w: 60, h: 20, type: 'normal' },
+                { x: -10, y: -230, w: 120, h: 40, type: 'normal' },
+                { x: 1520, y: 210, w: 440, h: 40, type: 'normal' },
+                { x: 2030, y: -90, w: 60, h: 20, type: 'normal' },
+                { x: 2190, y: -90, w: 120, h: 40, type: 'normal' },
+                { x: 2290, y: 200, w: 240, h: 40, type: 'normal' },
+                { x: 2130, y: -260, w: 240, h: 40, type: 'normal' },
+                { x: 2780, y: 380, w: 640, h: 40, type: 'normal' },
+                { x: 2440, y: -260, w: 120, h: 40, type: 'normal' },
+                { x: 2860, y: -260, w: 120, h: 40, type: 'normal' },
+                { x: 2600, y: -300, w: 220, h: 40, type: 'normal' },
+                { x: 2620, y: -80, w: 120, h: 40, type: 'normal' },
+                { x: 2760, y: 100, w: 120, h: 40, type: 'normal' }
             ];
-            this.hazards = [];
-            this.collectibles = [];
-            this.enemies = [];
-            this.portal = { x: 1400, y: 380, w: 60, h: 80, angle: 0 };
+
+            this.hazards = [
+                { x: 760, y: 80, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 940, y: 80, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 2160, y: -280, w: 60, h: 20, type: 'spike', direction: 'up' }
+            ];
+
+            this.gates = [
+                { x: 1530, y: -310, w: 20, h: 520, type: 'yellowLaser', id: 100, disabled: false },
+                { x: 3280, y: -60, w: 20, h: 440, type: 'yellowLaser', id: 101, disabled: false }
+            ];
+
+            this.levers = [
+                { x: 30, y: -260, w: 32, h: 32, linkedGateId: 100, activated: false }
+            ];
+
+            this.flamethrowers = [
+                {
+                    id: 9869,
+                    startX: 860,
+                    startY: -170,
+                    x: 860,
+                    y: -170,
+                    w: 58,
+                    h: 32,
+                    dir: 'down',
+                    range: 300,
+                    moving: false,
+                    moveRange: 100,
+                    moveSpeed: 1.5,
+                    moveAxis: 'y',
+                    disabled: false,
+                    active: true
+                },
+                {
+                    id: 9014,
+                    startX: 860,
+                    startY: -200,
+                    x: 860,
+                    y: -200,
+                    w: 58,
+                    h: 32,
+                    dir: 'up',
+                    range: 300,
+                    moving: false,
+                    moveRange: 100,
+                    moveSpeed: 1.5,
+                    moveAxis: 'y',
+                    disabled: false,
+                    active: true
+                }
+            ];
+
+            this.movingPlatforms = [
+                {
+                    startX: 230,
+                    startY: 420,
+                    targetX: 380,
+                    targetY: 420,
+                    w: 100,
+                    h: 20,
+                    speed: 0.015
+                },
+                {
+                    startX: 680,
+                    startY: 360,
+                    targetX: 830,
+                    targetY: 360,
+                    w: 100,
+                    h: 20,
+                    speed: 0.015
+                }
+            ];
+
+            this.collectibles = [
+                { x: 398, y: -76, color: '#eab308' },
+                { x: 768, y: -28, color: '#eab308' },
+                { x: 2123, y: 71, color: '#eab308' },
+                { x: 2826, y: 286, color: '#eab308' }
+            ];
+
+            this.enemies = [
+                { x: 2902, y: 356, rangeX: 120, speed: 1.2, isVertical: false, color: '#f43f5e', type: 'patrol' },
+                { x: 3141, y: 352, rangeX: 120, speed: 1.2, isVertical: false, color: '#f43f5e', type: 'patrol' },
+                { x: 3019, y: 250, rangeX: 180, speed: 2.0, isVertical: false, color: '#eab308', type: 'patrol' },
+                { x: 485, y: 324, rangeX: 180, speed: 2.0, isVertical: false, color: '#eab308', type: 'patrol' },
+                { x: 1089, y: 286, rangeX: 180, speed: 2.0, isVertical: false, color: '#eab308', type: 'patrol' },
+                { x: 314, y: -82, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4', type: 'patrol' },
+                { x: 150, y: -152, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4', type: 'patrol' }
+            ];
+
+            this.pushBlocks = [
+                {
+                    x: 2230,
+                    y: -140,
+                    w: 50,
+                    h: 50,
+                    startX: 2230,
+                    startY: -140,
+                    isMirror: true,
+                    mirrorType: "slash"
+                },
+                {
+                    x: 2250,
+                    y: -310,
+                    w: 50,
+                    h: 50,
+                    startX: 2250,
+                    startY: -310,
+                    isMirror: true,
+                    mirrorType: "slash"
+                }
+            ];
+
+            this.fallingBlockTraps = [
+                {
+                    startX: 1020,
+                    startY: -170,
+                    x: 1020,
+                    y: -170,
+                    w: 60,
+                    h: 60,
+                    state: "idle",
+                    vy: 0,
+                    timer: 0
+                },
+                {
+                    startX: 660,
+                    startY: -170,
+                    x: 660,
+                    y: -170,
+                    w: 60,
+                    h: 60,
+                    state: "idle",
+                    vy: 0,
+                    timer: 0
+                },
+                {
+                    startX: 1640,
+                    startY: -100,
+                    x: 1640,
+                    y: -100,
+                    w: 60,
+                    h: 60,
+                    state: "idle",
+                    vy: 0,
+                    timer: 0
+                },
+                {
+                    startX: 1760,
+                    startY: -100,
+                    x: 1760,
+                    y: -100,
+                    w: 60,
+                    h: 60,
+                    state: "idle",
+                    vy: 0,
+                    timer: 0
+                }
+            ];
+
+            this.laserEmitters = [
+                {
+                    x: 1890,
+                    y: 150,
+                    w: 40,
+                    h: 40,
+                    direction: 0,
+                    color: "blue",
+                    path: []
+                }
+            ];
+
+            this.laserReceivers = [
+                {
+                    x: 2800,
+                    y: 60,
+                    w: 40,
+                    h: 40,
+                    linkedGateId: 101,
+                    activated: false
+                }
+            ];
+
+            this.staticMirrors = [
+                {
+                    x: 2310,
+                    y: -90,
+                    w: 40,
+                    h: 40,
+                    mirrorType: "top-left"
+                },
+                {
+                    x: 2580,
+                    y: -80,
+                    w: 40,
+                    h: 40,
+                    mirrorType: "bottom-right"
+                },
+                {
+                    x: 2820,
+                    y: -260,
+                    w: 40,
+                    h: 40,
+                    mirrorType: "top-right"
+                },
+                {
+                    x: 2560,
+                    y: -260,
+                    w: 40,
+                    h: 40,
+                    mirrorType: "top-left"
+                },
+                {
+                    x: 2740,
+                    y: -80,
+                    w: 40,
+                    h: 40,
+                    mirrorType: "top-left"
+                },
+                {
+                    x: 2370,
+                    y: -260,
+                    w: 40,
+                    h: 40,
+                    mirrorType: "top-left"
+                }
+            ];
+
+            this.conveyors = [];
+            this.teleportPairs = [];
+            this.bouncePads = [];
+            this.buttons = [];
+            this.fallingPlatforms = [];
+            this.breakablePlatforms = [];
+            this.hiddenPassages = [];
+            this.vantuzPoints = [];
+            this.decorations = [];
+            this.arrowShooters = [];
         } else if (levelNumber === 20) {
             this.width = 2000;
             this.height = 600;
