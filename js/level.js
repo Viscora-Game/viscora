@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v90';
-import { THEMES } from './generator.js?v=v90';
+import { audio } from './audio.js?v=v91';
+import { THEMES } from './generator.js?v=v91';
 
 /**
  * Viscora Level Design & Manager
@@ -4353,14 +4353,14 @@ export class Level {
                     hitX = currX + dx * closestDist;
                     hitY = currY + dy * closestDist;
                 } else {
-                    // Ekran / Seviye sınırı
+                    // Ekran / Seviye sınırı (Negatif Y koordinatlarındaki aynalar için sınırlar genişletildi)
                     let distToBorder = Infinity;
                     if (dx === 1) distToBorder = this.width - currX;
                     else if (dx === -1) distToBorder = currX;
-                    else if (dy === 1) distToBorder = this.height - currY;
-                    else if (dy === -1) distToBorder = currY;
+                    else if (dy === 1) distToBorder = (this.height + 1000) - currY;
+                    else if (dy === -1) distToBorder = currY - (-1000); // y = -1000 sınırına olan mesafe
 
-                    closestDist = distToBorder;
+                    closestDist = Math.max(0, distToBorder);
                     hitX = currX + dx * closestDist;
                     hitY = currY + dy * closestDist;
                     rayActive = false;
