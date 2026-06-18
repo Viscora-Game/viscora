@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v87';
-import { THEMES } from './generator.js?v=v87';
+import { audio } from './audio.js?v=v88';
+import { THEMES } from './generator.js?v=v88';
 
 /**
  * Viscora Level Design & Manager
@@ -4167,6 +4167,39 @@ export class Level {
             return -1;
         };
 
+        // Yardımcı ayna diyagonal kesişim fonksiyonu (Lazeri tam köşegene hizalar)
+        const rayIntersectsMirror = (rx, ry, dx, dy, mirror) => {
+            const mType = mirror.mirrorType;
+            const isSlash = (mType === 'slash' || mType === 'top-left' || mType === 'bottom-right');
+            
+            if (dx === 1) { // Right
+                if (ry >= mirror.y && ry <= mirror.y + mirror.h) {
+                    const pct = (ry - mirror.y) / mirror.h;
+                    const ix = mirror.x + mirror.w * (isSlash ? (1 - pct) : pct);
+                    if (rx <= ix) return ix - rx;
+                }
+            } else if (dx === -1) { // Left
+                if (ry >= mirror.y && ry <= mirror.y + mirror.h) {
+                    const pct = (ry - mirror.y) / mirror.h;
+                    const ix = mirror.x + mirror.w * (isSlash ? (1 - pct) : pct);
+                    if (rx >= ix) return rx - ix;
+                }
+            } else if (dy === 1) { // Down
+                if (rx >= mirror.x && rx <= mirror.x + mirror.w) {
+                    const pct = (rx - mirror.x) / mirror.w;
+                    const iy = mirror.y + mirror.h * (isSlash ? (1 - pct) : pct);
+                    if (ry <= iy) return iy - ry;
+                }
+            } else if (dy === -1) { // Up
+                if (rx >= mirror.x && rx <= mirror.x + mirror.w) {
+                    const pct = (rx - mirror.x) / mirror.w;
+                    const iy = mirror.y + mirror.h * (isSlash ? (1 - pct) : pct);
+                    if (ry >= iy) return ry - iy;
+                }
+            }
+            return -1;
+        };
+
         // 2. Her bir lazer vericisi için ışın yayılımını hesapla
         this.laserEmitters.forEach(emitter => {
             let currX = emitter.x + emitter.w / 2;
@@ -4264,7 +4297,7 @@ export class Level {
                     this.pushBlocks.forEach(block => {
                         if (block.broken) return;
                         if (lastHitCollider && lastHitCollider.type === 'block' && lastHitCollider.obj === block) return;
-                        const dist = rayIntersectsAABB(currX, currY, dx, dy, block);
+                        const dist = block.isMirror ? rayIntersectsMirror(currX, currY, dx, dy, block) : rayIntersectsAABB(currX, currY, dx, dy, block);
                         if (dist >= 0 && dist < closestDist) {
                             closestDist = dist;
                             closestCollider = { type: 'block', obj: block };
@@ -4276,7 +4309,7 @@ export class Level {
                 if (this.staticMirrors) {
                     this.staticMirrors.forEach(mirror => {
                         if (lastHitCollider && lastHitCollider.type === 'staticMirror' && lastHitCollider.obj === mirror) return;
-                        const dist = rayIntersectsAABB(currX, currY, dx, dy, mirror);
+                        const dist = rayIntersectsMirror(currX, currY, dx, dy, mirror);
                         if (dist >= 0 && dist < closestDist) {
                             closestDist = dist;
                             closestCollider = { type: 'staticMirror', obj: mirror };
