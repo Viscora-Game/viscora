@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v99';
-import { Level } from './level.js?v=v99';
-import { Enemy, GelChaser } from './enemies.js?v=v99';
-import { UIManager } from './ui.js?v=v99';
-import { audio } from './audio.js?v=v99';
-import { LevelEditor } from './editor.js?v=v99';
-import { Boss, CyberBoss } from './boss.js?v=v99';
+import { Player } from './player.js?v=v100';
+import { Level } from './level.js?v=v100';
+import { Enemy, GelChaser } from './enemies.js?v=v100';
+import { UIManager } from './ui.js?v=v100';
+import { audio } from './audio.js?v=v100';
+import { LevelEditor } from './editor.js?v=v100';
+import { Boss, CyberBoss } from './boss.js?v=v100';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -579,7 +579,7 @@ export class GameManager {
             return;
         }
         const isDev = this.ui && this.ui.devMode;
-        const maxLvl = isDev ? 100 : 20;
+        const maxLvl = 30;
         if (this.currentLevel < maxLvl) {
             this.currentLevel++;
         } else {
@@ -1077,7 +1077,7 @@ export class GameManager {
 
             // Bölüm bazlı başlık ve buton yazısı güncellemesi
             const isDev = this.ui && this.ui.devMode;
-            const maxLvl = isDev ? 100 : 20;
+            const maxLvl = 30;
             if (this.currentLevel < maxLvl) {
                 const nextLvl = this.currentLevel + 1;
                 this.unlockedLevel = Math.max(this.unlockedLevel, nextLvl);
@@ -1741,7 +1741,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v99', this.cssWidth - 10, 10);
+        this.ctx.fillText('v100', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {

@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v99';
-import { THEMES } from './generator.js?v=v99';
+import { audio } from './audio.js?v=v100';
+import { THEMES } from './generator.js?v=v100';
 
 /**
  * Viscora Level Design & Manager
@@ -24,7 +24,11 @@ export class Level {
      * Belirtilen bölümün platform, tehlike ve zıplatma pedi koordinatlarını yükler.
      */
     loadLevel(levelNumber, isEditorOrPlaytest = false) {
-        this.currentLevel = levelNumber;
+        let originalLevelNumber = levelNumber;
+        if (typeof levelNumber === 'number' && levelNumber > 20) {
+            levelNumber = ((levelNumber - 1) % 20) + 1;
+        }
+        this.currentLevel = originalLevelNumber;
         this.time = 0;
         this.platforms = [];
         this.hazards = [];
@@ -581,7 +585,7 @@ export class Level {
 
         // Assign Visual Theme based on Campaign Level Number
         let campaignThemeId = null;
-        if (levelNumber <= 20) {
+        if (originalLevelNumber <= 20) {
             if (levelNumber === 0 || levelNumber === 1 || levelNumber === 6 || levelNumber === 12 || levelNumber === 19) {
                 campaignThemeId = 'neon_sewer';
             } else if (levelNumber === 2 || levelNumber === 4 || levelNumber === 8 || levelNumber === 9 || levelNumber === 11 || levelNumber === 13 || levelNumber === 17 || levelNumber === 18) {
@@ -593,7 +597,7 @@ export class Level {
             }
         } else {
             // For levels > 20, map based on group
-            const groupIndex = Math.ceil(levelNumber / 10);
+            const groupIndex = Math.ceil(originalLevelNumber / 10);
             if (groupIndex === 3 || groupIndex === 7) {
                 campaignThemeId = 'magma_core';
             } else if (groupIndex === 4 || groupIndex === 8) {

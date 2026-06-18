@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v99';
-import { ViscosityList } from './viscosity.js?v=v99';
+import { audio } from './audio.js?v=v100';
+import { ViscosityList } from './viscosity.js?v=v100';
 
 export class UIManager {
     constructor(game) {
@@ -191,14 +191,7 @@ export class UIManager {
         const groups = [
             { id: 1, title: "🚀 İLK ADIMLAR", start: 1, end: 10, class: "group-1" },
             { id: 2, title: "🧪 TOKSİK HÜCRE", start: 11, end: 20, class: "group-2" },
-            { id: 3, title: "🌌 KOZMİK ÇEKİRDEK", start: 21, end: 30, class: "group-3" },
-            { id: 4, title: "🚇 METRO HATTI", start: 31, end: 40, class: "group-2" },
-            { id: 5, title: "⚙️ MEKANİK DEPO", start: 41, end: 50, class: "group-3" },
-            { id: 6, title: "💎 KRİSTAL MAĞARA", start: 51, end: 60, class: "group-2" },
-            { id: 7, title: "🔥 LAV KANALLARI", start: 61, end: 70, class: "group-3" },
-            { id: 8, title: "🏭 ASİT SANTRALİ", start: 71, end: 80, class: "group-2" },
-            { id: 9, title: "🌀 SİNGÜLARİTE", start: 81, end: 90, class: "group-3" },
-            { id: 10, title: "🏁 SON SINIR", start: 91, end: 100, class: "group-1" }
+            { id: 3, title: "🌌 KOZMİK ÇEKİRDEK", start: 21, end: 30, class: "group-3" }
         ];
 
         groups.forEach(g => {
@@ -903,14 +896,7 @@ export class UIManager {
         const groups = [
             { id: 1, start: 1, end: 10 },
             { id: 2, start: 11, end: 20 },
-            { id: 3, start: 21, end: 30 },
-            { id: 4, start: 31, end: 40 },
-            { id: 5, start: 41, end: 50 },
-            { id: 6, start: 51, end: 60 },
-            { id: 7, start: 61, end: 70 },
-            { id: 8, start: 71, end: 80 },
-            { id: 9, start: 81, end: 90 },
-            { id: 10, start: 91, end: 100 }
+            { id: 3, start: 21, end: 30 }
         ];
         groups.forEach(g => {
             const badge = document.getElementById(`chapter-badge-${g.id}`);
@@ -940,14 +926,7 @@ export class UIManager {
         const groups = [
             { id: 1, title: "🚀 İLK ADIMLAR" },
             { id: 2, title: "🧪 TOKSİK HÜCRE" },
-            { id: 3, title: "🌌 KOZMİK ÇEKİRDEK" },
-            { id: 4, title: "🚇 METRO HATTI" },
-            { id: 5, title: "⚙️ MEKANİK DEPO" },
-            { id: 6, title: "💎 KRİSTAL MAĞARA" },
-            { id: 7, title: "🔥 LAV KANALLARI" },
-            { id: 8, title: "🏗️ ASİT SANTRALİ" },
-            { id: 9, title: "🌀 SİNGÜLARİTE" },
-            { id: 10, title: "🏁 SON SINIR" }
+            { id: 3, title: "🌌 KOZMİK ÇEKİRDEK" }
         ];
         const chapterIdx = Math.ceil(bossLvl / 10) - 1;
         const chapterTitle = groups[chapterIdx] ? groups[chapterIdx].title : `BÖLÜM ${bossLvl}`;

@@ -106,7 +106,7 @@ html, body {
 #start-screen {
     background: transparent;
     align-items: flex-start;
-    padding: 1rem 0 1.5rem 0;
+    padding: 1rem 0 76px 0; /* Bottom space reserved for AdMob banner */
     justify-content: center;
 }
 
@@ -1889,9 +1889,9 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 /* Yatay Modda Başlangıç Ekranı İki Sütunlu Kompakt Yerleşim Optimizasyonu */
 @media (orientation: landscape) and (max-height: 640px) {
     #start-screen {
-        padding-top: 48px !important; /* Top space reserved for future ad banner */
-        padding-bottom: 0.8rem !important;
-        align-items: flex-end !important; /* Push menu card to the bottom */
+        padding-top: 10px !important;
+        padding-bottom: 72px !important; /* Space reserved for AdMob banner */
+        align-items: flex-start !important; /* Push menu card to the top */
         justify-content: center !important;
         overflow-y: auto !important;
         box-sizing: border-box !important;
@@ -1990,8 +1990,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     #start-screen #level-selector-wrapper {
         grid-column: 2 !important;
         grid-row: 1 / span 2 !important;
-        max-height: 220px !important; /* Enlarged from 180px */
-        min-height: 140px !important; /* Enlarged from 120px */
+        max-height: 140px !important; /* Compact level grid for landscape fitting */
+        min-height: 100px !important;
         margin-bottom: 0 !important;
         overflow-y: auto !important;
         align-self: stretch !important;
@@ -2047,8 +2047,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 /* Çok küçük ekranlar için yatay mod (420px veya daha az yükseklik) */
 @media (orientation: landscape) and (max-height: 420px) {
     #start-screen {
-        padding-top: 36px !important; /* Compact top space for ads on tiny devices */
-        padding-bottom: 0.4rem !important;
+        padding-top: 8px !important;
+        padding-bottom: 66px !important; /* Compact space for AdMob banner */
     }
 
     #start-screen .menu-card {
@@ -2526,5 +2526,52 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         opacity: 1;
         transform: scale(1.0);
         text-shadow: 0 0 10px rgba(6, 182, 212, 0.8), 0 0 35px rgba(217, 70, 239, 0.8);
+    }
+}
+
+/* AdMob Banner Placeholder styling */
+#admob-banner-placeholder {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 320px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 999;
+}
+
+/* Landscape compact overrides for settings modals to prevent layout overflow */
+@media (orientation: landscape) and (max-height: 640px) {
+    .star-gate-card {
+        padding: 0.8rem 1.2rem !important;
+        max-width: 380px !important;
+        width: 95% !important;
+        border-radius: 16px !important;
+    }
+    .star-gate-title {
+        font-size: 0.95rem !important;
+        margin-bottom: 0.1rem !important;
+    }
+    .menu-settings {
+        margin: 6px 0 !important;
+        gap: 8px !important;
+    }
+    .settings-control {
+        font-size: 0.8rem !important;
+    }
+    .volume-slider {
+        max-width: 100px !important;
+    }
+    #btn-close-settings {
+        padding: 0.4rem 1rem !important;
+        font-size: 0.85rem !important;
+        margin-top: 0.2rem !important;
     }
 }
