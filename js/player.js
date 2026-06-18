@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v92';
-import { audio } from './audio.js?v=v92';
+import { ViscosityStates } from './viscosity.js?v=v93';
+import { audio } from './audio.js?v=v93';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -63,6 +63,10 @@ export class Player {
         this.glowBoost = 0;
         this.onEvent = null;
         this.hasDoubleJumped = false;
+
+        // Alev/Sıcaklık mekanizması durumları
+        this.flameHeat = 0; // 0.0 - 1.0 arası alev sıcaklığı
+        this.inFlame = false; // Alevin içinde olup olmadığı
     }
 
     /**
@@ -104,6 +108,12 @@ export class Player {
      */
     setViscosity(stateId) {
         if (this.viscosity.id === stateId) return;
+
+        // Alev içindeyken pembe (HIGH) formdan başka forma geçilirse anında hasar ver
+        if (this.viscosity.id === 'HIGH' && stateId !== 'HIGH' && this.inFlame) {
+            this.takeDamage(1);
+        }
+
         this.viscosity = ViscosityStates[stateId];
         audio.playShift(stateId);
         audio.updateViscosityFilter(stateId);
@@ -782,6 +792,37 @@ export class Player {
         // Blob yay kuvvetleri fiziğini güncelle
         this.updateBlobPhysics();
 
+        // Alev/Sıcaklık mekanizması güncellemeleri
+        if (this.viscosity.id === 'HIGH') {
+            if (this.inFlame) {
+                if (this.invulnerableFrames <= 0) {
+                    this.flameHeat = Math.min(1.0, this.flameHeat + 1 / 120); // 120 frame = 2 saniye alev toleransı
+                    
+                    if (this.flameHeat >= 1.0) {
+                        this.takeDamage(1);
+                        this.flameHeat = 0;
+                    }
+                } else {
+                    // Hasar aldıktan sonra/dokunulmazken ısıyı sıfırla
+                    this.flameHeat = 0;
+                }
+            } else {
+                // Alevde değilse yavaşça soğusun
+                if (this.flameHeat > 0) {
+                    this.flameHeat = Math.max(0, this.flameHeat - 1 / 120); // 2 saniyede tamamen soğuma
+                }
+            }
+        } else {
+            // Diğer formlarda ısı her zaman sıfır
+            this.flameHeat = 0;
+        }
+
+        // Alevdeyken parçacık (steam) salınımı
+        if (this.inFlame && this.flameHeat > 0.1 && Math.random() < 0.3 && emitParticles) {
+            const particleColor = Math.random() < 0.5 ? '#f97316' : '#ef4444'; // Turuncu / Kırmızı
+            emitParticles(this.x, this.y, 'steam', particleColor, 1);
+        }
+
         // Parçacık izi (trail) salınımı
         this.trailTimer++;
         const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
@@ -1243,9 +1284,21 @@ export class Player {
         const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
         const speedGlow = Math.min(speed * 1.6, 12);
         const airGlow = !this.onGround ? 8 : 0;
-        const totalGlow = 10 + speedGlow + airGlow + (this.glowBoost || 0);
+        let totalGlow = 10 + speedGlow + airGlow + (this.glowBoost || 0);
 
-        ctx.shadowColor = this.viscosity.color;
+        if (this.flameHeat > 0) {
+            totalGlow += this.flameHeat * 15; // Isındıkça neon parlama artsın
+        }
+
+        // Gölge rengini alev sıcaklığına göre fuchsidan kırmızıya kaydır
+        if (this.flameHeat > 0 && this.viscosity.id === 'HIGH') {
+            const r = Math.round(217 + (239 - 217) * this.flameHeat);
+            const g = Math.round(70 + (68 - 70) * this.flameHeat);
+            const b = Math.round(239 + (68 - 239) * this.flameHeat);
+            ctx.shadowColor = `rgba(${r}, ${g}, ${b}, ${0.5 + this.flameHeat * 0.3})`;
+        } else {
+            ctx.shadowColor = this.viscosity.color;
+        }
         ctx.shadowBlur = totalGlow;
 
         // Şekli Bezier eğrileriyle yumuşatılmış olarak çiz
@@ -1287,6 +1340,15 @@ export class Player {
 
         ctx.closePath();
         ctx.fill();
+
+        // Isınma kızarıklık efekti (Gövde üzerine yarı saydam kırmızı katman)
+        if (this.flameHeat > 0) {
+            ctx.save();
+            ctx.fillStyle = `rgba(239, 68, 68, ${this.flameHeat * 0.75})`;
+            ctx.shadowBlur = 0; // Katman üzerine ekstra parlama vermemek için gölgeyi sıfırlıyoruz
+            ctx.fill();
+            ctx.restore();
+        }
 
         // İnce bir dış sınır (kontur) ekle
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';

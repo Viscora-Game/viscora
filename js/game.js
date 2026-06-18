@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v92';
-import { Level } from './level.js?v=v92';
-import { Enemy, GelChaser } from './enemies.js?v=v92';
-import { UIManager } from './ui.js?v=v92';
-import { audio } from './audio.js?v=v92';
-import { LevelEditor } from './editor.js?v=v92';
-import { Boss, CyberBoss } from './boss.js?v=v92';
+import { Player } from './player.js?v=v93';
+import { Level } from './level.js?v=v93';
+import { Enemy, GelChaser } from './enemies.js?v=v93';
+import { UIManager } from './ui.js?v=v93';
+import { audio } from './audio.js?v=v93';
+import { LevelEditor } from './editor.js?v=v93';
+import { Boss, CyberBoss } from './boss.js?v=v93';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1635,7 +1635,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v92', this.cssWidth - 10, 10);
+        this.ctx.fillText('v93', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug
         if (this.level && this.level.laserEmitters) {

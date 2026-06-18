@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v92';
-import { THEMES } from './generator.js?v=v92';
+import { audio } from './audio.js?v=v93';
+import { THEMES } from './generator.js?v=v93';
 
 /**
  * Viscora Level Design & Manager
@@ -3408,6 +3408,7 @@ export class Level {
      * Level verilerini günceller (Animasyonlar ve etkileşimler)
      */
     update(player) {
+        player.inFlame = false; // Her frame başında alev temasını sıfırla
         this.time += 0.05;
         this.portal.angle += 0.02;
 
@@ -4294,7 +4295,11 @@ export class Level {
                     const buffer = 4;
                     if (player.x + player.radius - buffer > flameArea.x && player.x - player.radius + buffer < flameArea.x + flameArea.w &&
                         player.y + player.radius - buffer > flameArea.y && player.y - player.radius + buffer < flameArea.y + flameArea.h) {
-                        player.takeDamage(1);
+                        if (player.viscosity.id === 'HIGH') {
+                            player.inFlame = true; // Pembe form alevin içine girdi, hasar almaz ama ısınır
+                        } else {
+                            player.takeDamage(1); // Diğer formlar anında hasar alır
+                        }
                     }
 
                     // Düşman alev temas kontrolü (Baiting - Sadece Jel Takipçi)
