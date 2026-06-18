@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v97';
-import { audio } from './audio.js?v=v97';
-import { LevelGenerator } from './generator.js?v=v97';
+import { Enemy, GelChaser } from './enemies.js?v=v98';
+import { audio } from './audio.js?v=v98';
+import { LevelGenerator } from './generator.js?v=v98';
 
 export class LevelEditor {
     constructor(game) {

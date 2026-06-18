@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v97';
-import { Level } from './level.js?v=v97';
-import { Enemy, GelChaser } from './enemies.js?v=v97';
-import { UIManager } from './ui.js?v=v97';
-import { audio } from './audio.js?v=v97';
-import { LevelEditor } from './editor.js?v=v97';
-import { Boss, CyberBoss } from './boss.js?v=v97';
+import { Player } from './player.js?v=v98';
+import { Level } from './level.js?v=v98';
+import { Enemy, GelChaser } from './enemies.js?v=v98';
+import { UIManager } from './ui.js?v=v98';
+import { audio } from './audio.js?v=v98';
+import { LevelEditor } from './editor.js?v=v98';
+import { Boss, CyberBoss } from './boss.js?v=v98';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1090,6 +1090,28 @@ export class GameManager {
                 document.getElementById('win-title').textContent = "TEBRİKLER, OYUNU BİTİRDİNİZ!";
                 document.getElementById('btn-next').textContent = "EN BAŞTAN OYNA";
             }
+            // Esprili ölüm sayacı mesajı
+            const deathEl = document.getElementById('win-deaths-text');
+            if (deathEl) {
+                const d = this.levelDeaths;
+                let deathMsg = '';
+                if (d === 0) {
+                    deathMsg = '☠️ 0 Ölüm — Bir damla bile dökülmedi!';
+                } else if (d === 1) {
+                    deathMsg = '☠️ 1 Ölüm — Sadece bir kaza, olur böyle şeyler.';
+                } else if (d <= 3) {
+                    deathMsg = `☠️ ${d} Ölüm — Hâlâ formdasın!`;
+                } else if (d <= 6) {
+                    deathMsg = `☠️ ${d} Ölüm — Bu bölüm seni sevmedi galiba.`;
+                } else if (d <= 10) {
+                    deathMsg = `☠️ ${d} Ölüm — Zemin seni tanıyor artık.`;
+                } else if (d <= 20) {
+                    deathMsg = `☠️ ${d} Ölüm — İnatçı jel, asla pes etmez!`;
+                } else {
+                    deathMsg = `☠️ ${d} Ölüm — Efsanevi direniş! Saygılar.`;
+                }
+                deathEl.textContent = deathMsg;
+            }
 
             this.ui.showScreen('win');
             this.ui.resetKeys();
@@ -1719,7 +1741,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v97', this.cssWidth - 10, 10);
+        this.ctx.fillText('v98', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
