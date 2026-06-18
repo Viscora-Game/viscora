@@ -1,5 +1,5 @@
-import { GameManager } from './game.js?v=v88';
-import { audio } from './audio.js?v=v88';
+import { GameManager } from './game.js?v=v89';
+import { audio } from './audio.js?v=v89';
 
 // Oyun Başlatma Girişi
 window.addEventListener('DOMContentLoaded', () => {

@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v88';
-import { Level } from './level.js?v=v88';
-import { Enemy, GelChaser } from './enemies.js?v=v88';
-import { UIManager } from './ui.js?v=v88';
-import { audio } from './audio.js?v=v88';
-import { LevelEditor } from './editor.js?v=v88';
-import { Boss, CyberBoss } from './boss.js?v=v88';
+import { Player } from './player.js?v=v89';
+import { Level } from './level.js?v=v89';
+import { Enemy, GelChaser } from './enemies.js?v=v89';
+import { UIManager } from './ui.js?v=v89';
+import { audio } from './audio.js?v=v89';
+import { LevelEditor } from './editor.js?v=v89';
+import { Boss, CyberBoss } from './boss.js?v=v89';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1627,6 +1627,32 @@ export class GameManager {
                 this.ctx.restore();
             }
         }
+
+        // Draw version indicator in the corner
+        this.ctx.save();
+        this.ctx.setTransform(this._dpr || 1, 0, 0, this._dpr || 1, 0, 0);
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+        this.ctx.font = '12px monospace';
+        this.ctx.textAlign = 'right';
+        this.ctx.textBaseline = 'top';
+        this.ctx.fillText('v88', this.cssWidth - 10, 10);
+        
+        // Print laser path coordinates for debug
+        if (this.level && this.level.laserEmitters) {
+            this.ctx.textAlign = 'left';
+            this.ctx.fillStyle = '#ff00ff';
+            this.level.laserEmitters.forEach((emitter, idx) => {
+                if (emitter.path) {
+                    let pathStr = `Emitter ${idx}: `;
+                    emitter.path.forEach(pt => {
+                        pathStr += `(${Math.round(pt.x)}, ${Math.round(pt.y)}) -> `;
+                    });
+                    this.ctx.fillText(pathStr, 10, 30 + idx * 20);
+                }
+            });
+        }
+        this.ctx.restore();
+
         this.ctx.restore();
 
         // --- AMBIENT THEME VIGNETTE OVERLAY ---
