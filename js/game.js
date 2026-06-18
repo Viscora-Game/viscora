@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v89';
-import { Level } from './level.js?v=v89';
-import { Enemy, GelChaser } from './enemies.js?v=v89';
-import { UIManager } from './ui.js?v=v89';
-import { audio } from './audio.js?v=v89';
-import { LevelEditor } from './editor.js?v=v89';
-import { Boss, CyberBoss } from './boss.js?v=v89';
+import { Player } from './player.js?v=v90';
+import { Level } from './level.js?v=v90';
+import { Enemy, GelChaser } from './enemies.js?v=v90';
+import { UIManager } from './ui.js?v=v90';
+import { audio } from './audio.js?v=v90';
+import { LevelEditor } from './editor.js?v=v90';
+import { Boss, CyberBoss } from './boss.js?v=v90';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1635,12 +1635,13 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v88', this.cssWidth - 10, 10);
+        this.ctx.fillText('v90', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug
         if (this.level && this.level.laserEmitters) {
             this.ctx.textAlign = 'left';
             this.ctx.fillStyle = '#ff00ff';
+            this.ctx.font = '10px monospace';
             this.level.laserEmitters.forEach((emitter, idx) => {
                 if (emitter.path) {
                     let pathStr = `Emitter ${idx}: `;
@@ -1650,6 +1651,13 @@ export class GameManager {
                     this.ctx.fillText(pathStr, 10, 30 + idx * 20);
                 }
             });
+            if (window.laserDebugs && window.laserDebugs.length > 0) {
+                this.ctx.fillStyle = '#00ff00';
+                window.laserDebugs.slice(0, 6).forEach((d, idx) => {
+                    let debugStr = `Dbg ${idx}: r(${Math.round(d.rx)},${Math.round(d.ry)}) dir(${d.dx},${d.dy}) box(${Math.round(d.x)},${Math.round(d.y)}) pct(${d.pct.toFixed(2)}) ix/iy(${Math.round(d.ix || d.iy)}) dst(${Math.round(d.dist)}) t(${d.mType})`;
+                    this.ctx.fillText(debugStr, 10, 70 + idx * 15);
+                });
+            }
         }
         this.ctx.restore();
 

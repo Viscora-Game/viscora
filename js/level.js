@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v89';
-import { THEMES } from './generator.js?v=v89';
+import { audio } from './audio.js?v=v90';
+import { THEMES } from './generator.js?v=v90';
 
 /**
  * Viscora Level Design & Manager
@@ -4144,6 +4144,7 @@ export class Level {
     updateLaserRouting(player) {
         if (!this.laserEmitters) this.laserEmitters = [];
         if (!this.laserReceivers) this.laserReceivers = [];
+        window.laserDebugs = [];
 
         // 1. Alıcıları sıfırla
         this.laserReceivers.forEach(r => r.activated = false);
@@ -4172,32 +4173,42 @@ export class Level {
             const mType = mirror.mirrorType;
             const isSlash = (mType === 'slash' || mType === 'top-left' || mType === 'bottom-right');
             
+            let dist = -1;
+            let detail = null;
+
             if (dx === 1) { // Right
                 if (ry >= mirror.y && ry <= mirror.y + mirror.h) {
                     const pct = (ry - mirror.y) / mirror.h;
                     const ix = mirror.x + mirror.w * (isSlash ? (1 - pct) : pct);
-                    if (rx <= ix) return ix - rx;
+                    if (rx <= ix) dist = ix - rx;
+                    detail = { rx, ry, dx, dy, x: mirror.x, y: mirror.y, w: mirror.w, h: mirror.h, pct, ix, dist, mType };
                 }
             } else if (dx === -1) { // Left
                 if (ry >= mirror.y && ry <= mirror.y + mirror.h) {
                     const pct = (ry - mirror.y) / mirror.h;
                     const ix = mirror.x + mirror.w * (isSlash ? (1 - pct) : pct);
-                    if (rx >= ix) return rx - ix;
+                    if (rx >= ix) dist = rx - ix;
+                    detail = { rx, ry, dx, dy, x: mirror.x, y: mirror.y, w: mirror.w, h: mirror.h, pct, ix, dist, mType };
                 }
             } else if (dy === 1) { // Down
                 if (rx >= mirror.x && rx <= mirror.x + mirror.w) {
                     const pct = (rx - mirror.x) / mirror.w;
                     const iy = mirror.y + mirror.h * (isSlash ? (1 - pct) : pct);
-                    if (ry <= iy) return iy - ry;
+                    if (ry <= iy) dist = iy - ry;
+                    detail = { rx, ry, dx, dy, x: mirror.x, y: mirror.y, w: mirror.w, h: mirror.h, pct, iy, dist, mType };
                 }
             } else if (dy === -1) { // Up
                 if (rx >= mirror.x && rx <= mirror.x + mirror.w) {
                     const pct = (rx - mirror.x) / mirror.w;
                     const iy = mirror.y + mirror.h * (isSlash ? (1 - pct) : pct);
-                    if (ry >= iy) return ry - iy;
+                    if (ry >= iy) dist = ry - iy;
+                    detail = { rx, ry, dx, dy, x: mirror.x, y: mirror.y, w: mirror.w, h: mirror.h, pct, iy, dist, mType };
                 }
             }
-            return -1;
+            if (detail) {
+                window.laserDebugs.push(detail);
+            }
+            return dist;
         };
 
         // 2. Her bir lazer vericisi için ışın yayılımını hesapla
