@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v96';
-import { Level } from './level.js?v=v96';
-import { Enemy, GelChaser } from './enemies.js?v=v96';
-import { UIManager } from './ui.js?v=v96';
-import { audio } from './audio.js?v=v96';
-import { LevelEditor } from './editor.js?v=v96';
-import { Boss, CyberBoss } from './boss.js?v=v96';
+import { Player } from './player.js?v=v97';
+import { Level } from './level.js?v=v97';
+import { Enemy, GelChaser } from './enemies.js?v=v97';
+import { UIManager } from './ui.js?v=v97';
+import { audio } from './audio.js?v=v97';
+import { LevelEditor } from './editor.js?v=v97';
+import { Boss, CyberBoss } from './boss.js?v=v97';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -29,6 +29,20 @@ const LEVEL_NAMES = [
     "SİBER KANALİZASYON",
     "VISCOREX REAKTÖRÜ"
 ];
+
+// Bölüm bazlı bağlamsal ipuçları — ilk kez tanıtılan mekanikler için kısa yardım metinleri
+const LEVEL_HINTS = {
+    0:  '🎮 E ile Form Değiştir!',
+    1:  '🧲 Pembe Formda Duvara Yapış!',
+    3:  '🧡 Bantlara Dikkat, Pembe Sızar!',
+    5:  '⚠️ Bazı Zeminler Çöker!',
+    6:  '📦 Kutuları İt, Plakalara Bas!',
+    9:  '🔥 Pembe Form Alevlere Dayanır!',
+    10: '👹 Kutuları Boss\'a Düşür!',
+    16: '⚡ Lazerleri Aynalarla Yönlendir!',
+    17: '🏹 Oklara Dikkat Et!',
+    20: '🤖 Fazlarını Öğren, Vuruşları Sav!'
+};
 
 export class GameManager {
     constructor(canvasId) {
@@ -87,6 +101,11 @@ export class GameManager {
         this.flashMaxDuration = 0;
         this.levelCardTimer = 0;
         this.levelCardMaxTime = 180;
+
+        // Bağlamsal İpucu Sistemi
+        this.levelDeaths = 0;       // Mevcut bölümdeki ölüm sayacı
+        this.hintTimer = 0;         // İpucu gösterim sayacı (frame)
+        this.hintMaxTime = 180;     // İpucu toplam süresi (~3 saniye)
 
         // Zaman Takibi
         this.lastTime = 0;
@@ -446,6 +465,10 @@ export class GameManager {
         this.splatters = [];
         this.bossRespawnsUsed = 0;
         this.levelCardTimer = showTitleCard ? this.levelCardMaxTime : 0;
+        if (showTitleCard) {
+            this.levelDeaths = 0; // Sadece yeni bölümde ölüm sayacını sıfırla
+            this.hintTimer = LEVEL_HINTS[this.currentLevel] ? this.hintMaxTime : 0;
+        }
         this.level.loadLevel(this.currentLevel);
         this.initBackgroundCells(); // Refresh theme-specific decoration layout for this level
         this.initEnemies(this.currentLevel);
@@ -509,6 +532,14 @@ export class GameManager {
      * Oyunu Yeniden Başlatır (Ölüm veya Tekrar Oyna sonrası)
      */
     restart() {
+        // Ölüm sayacını artır ve her 3 ölümde bir ipucu göster
+        this.levelDeaths++;
+        if (this.levelDeaths % 3 === 0 && LEVEL_HINTS[this.currentLevel]) {
+            this.hintTimer = this.hintMaxTime;
+        } else {
+            this.hintTimer = 0;
+        }
+
         if (this.difficulty === 'easy' && this.checkpointX !== undefined && this.checkpointY !== undefined && (this.checkpointX !== this.level.spawnX || this.checkpointY !== this.level.spawnY)) {
             this.state = 'PLAYING';
             this.particles = [];
@@ -846,6 +877,10 @@ export class GameManager {
         // Seviye başlık kartı sayacı güncelleme
         if (this.levelCardTimer > 0) {
             this.levelCardTimer -= dt;
+        }
+        // İpucu sayacı güncelleme
+        if (this.hintTimer > 0) {
+            this.hintTimer -= dt;
         }
         
         // HUD Canını Güncelle
@@ -1564,7 +1599,8 @@ export class GameManager {
                 
                 this.ctx.save();
                 const centerY = this.cssHeight / 2;
-                const stripeH = 120;
+                const hintText = LEVEL_HINTS[this.currentLevel];
+                const stripeH = hintText ? 140 : 120;
                 
                 // Glassmorphic background stripe in the center of the screen (Fades out to 0 opacity on left and right)
                 const bgGrad = this.ctx.createLinearGradient(0, 0, this.cssWidth, 0);
@@ -1625,7 +1661,54 @@ export class GameManager {
                 this.ctx.shadowBlur = 10;
                 this.ctx.fillRect(this.cssWidth / 2 - barW / 2, centerY + 38, barW, 3);
                 
+                // --- İPUCU METNİ (Bölüm kartı ile birlikte) ---
+                if (hintText) {
+                    const hintAlpha = alpha * Math.min(1.0, Math.max(0, (t - 30) / 20)); // Bölüm adından biraz sonra belirir
+                    this.ctx.font = '600 13px Outfit, sans-serif';
+                    this.ctx.fillStyle = `rgba(6, 182, 212, ${hintAlpha * 0.95})`;
+                    this.ctx.shadowColor = '#06b6d4';
+                    this.ctx.shadowBlur = 6;
+                    this.ctx.fillText(hintText, this.cssWidth / 2, centerY + 54);
+                }
+                
                 this.ctx.restore();
+            }
+
+            // --- ÖLÜM SONRASI BAĞIMSIZ İPUCU GÖSTERİMİ ---
+            if (this.hintTimer > 0 && this.levelCardTimer <= 0) {
+                const hText = LEVEL_HINTS[this.currentLevel];
+                if (hText) {
+                    const ht = this.hintMaxTime - this.hintTimer;
+                    let hAlpha = 1.0;
+                    if (ht < 20) {
+                        hAlpha = ht / 20; // Fade in
+                    } else if (ht > this.hintMaxTime - 30) {
+                        hAlpha = Math.max(0, (this.hintMaxTime - ht) / 30); // Fade out
+                    }
+
+                    this.ctx.save();
+                    const hY = 50; // Ekranın üst bölgesi
+
+                    // Glassmorphic arka plan şeridi
+                    const hBgGrad = this.ctx.createLinearGradient(0, 0, this.cssWidth, 0);
+                    hBgGrad.addColorStop(0, 'rgba(7, 11, 22, 0)');
+                    hBgGrad.addColorStop(0.3, `rgba(7, 11, 22, ${hAlpha * 0.4})`);
+                    hBgGrad.addColorStop(0.7, `rgba(7, 11, 22, ${hAlpha * 0.4})`);
+                    hBgGrad.addColorStop(1, 'rgba(7, 11, 22, 0)');
+                    this.ctx.fillStyle = hBgGrad;
+                    this.ctx.fillRect(0, hY - 18, this.cssWidth, 36);
+
+                    // İpucu metni
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.font = '600 14px Outfit, sans-serif';
+                    this.ctx.fillStyle = `rgba(6, 182, 212, ${hAlpha * 0.95})`;
+                    this.ctx.shadowColor = '#06b6d4';
+                    this.ctx.shadowBlur = 8;
+                    this.ctx.fillText(hText, this.cssWidth / 2, hY);
+
+                    this.ctx.restore();
+                }
             }
         }
 
@@ -1636,7 +1719,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v95', this.cssWidth - 10, 10);
+        this.ctx.fillText('v97', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
