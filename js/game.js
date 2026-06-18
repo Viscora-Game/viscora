@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v93';
-import { Level } from './level.js?v=v93';
-import { Enemy, GelChaser } from './enemies.js?v=v93';
-import { UIManager } from './ui.js?v=v93';
-import { audio } from './audio.js?v=v93';
-import { LevelEditor } from './editor.js?v=v93';
-import { Boss, CyberBoss } from './boss.js?v=v93';
+import { Player } from './player.js?v=v94';
+import { Level } from './level.js?v=v94';
+import { Enemy, GelChaser } from './enemies.js?v=v94';
+import { UIManager } from './ui.js?v=v94';
+import { audio } from './audio.js?v=v94';
+import { LevelEditor } from './editor.js?v=v94';
+import { Boss, CyberBoss } from './boss.js?v=v94';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -41,6 +41,7 @@ export class GameManager {
         // Oyun Durumu
         // 'MENU' | 'PLAYING' | 'PAUSED' | 'GAMEOVER' | 'WIN'
         this.state = 'MENU';
+        this.showDebug = false; // F3 ile hata ayıklama katmanını göster/gizle
         
         // Çözünürlük ve Boyutlar
         this.resizeCanvas();
@@ -1635,10 +1636,10 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v93', this.cssWidth - 10, 10);
+        this.ctx.fillText('v94', this.cssWidth - 10, 10);
         
-        // Print laser path coordinates for debug
-        if (this.level && this.level.laserEmitters) {
+        // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
+        if (this.showDebug && this.level && this.level.laserEmitters) {
             this.ctx.textAlign = 'left';
             this.ctx.fillStyle = '#ff00ff';
             this.ctx.font = '10px monospace';

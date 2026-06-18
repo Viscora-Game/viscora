@@ -1269,6 +1269,78 @@ class AudioManager {
             console.error("Error playing teleport SFX:", e);
         }
     }
+
+    /**
+     * Updates or creates the procedural sizzling sound for player flame heating.
+     * @param {number} intensity - The player's current flameHeat value (0.0 to 1.0)
+     */
+    updateSizzle(intensity) {
+        if (!this.ctx || this.isSfxMuted || this.sfxVolumeLevel === 0 || intensity <= 0 || !this.noiseBuffer) {
+            this.stopSizzle();
+            return;
+        }
+
+        try {
+            if (!this.sizzleNode) {
+                // Sizzle high-pass noise oscillator setup
+                this.sizzleNode = this.ctx.createBufferSource();
+                this.sizzleNode.buffer = this.noiseBuffer;
+                this.sizzleNode.loop = true;
+
+                this.sizzleFilter = this.ctx.createBiquadFilter();
+                this.sizzleFilter.type = 'highpass';
+                this.sizzleFilter.frequency.setValueAtTime(3000 + (intensity * 4000), this.ctx.currentTime);
+
+                this.sizzleGain = this.ctx.createGain();
+                this.sizzleGain.gain.setValueAtTime(0.0, this.ctx.currentTime);
+
+                this.sizzleNode.connect(this.sizzleFilter);
+                this.sizzleFilter.connect(this.sizzleGain);
+                this.sizzleGain.connect(this.sfxVolume);
+
+                this.sizzleNode.start();
+            }
+
+            if (this.sizzleGain && this.sizzleFilter) {
+                // Procedural crackling sizzle volume variation
+                const baseVolume = intensity * 0.12; // max volume 0.12
+                const crackle = (Math.random() - 0.5) * 0.03 * intensity;
+                const targetVolume = Math.max(0.001, baseVolume + crackle) * this.sfxVolumeLevel;
+                
+                this.sizzleGain.gain.linearRampToValueAtTime(targetVolume, this.ctx.currentTime + 0.05);
+                this.sizzleFilter.frequency.setValueAtTime(3000 + (intensity * 4000), this.ctx.currentTime);
+            }
+        } catch (e) {
+            console.warn("Error in updateSizzle:", e);
+        }
+    }
+
+    /**
+     * Stops and cleans up the sizzling audio nodes.
+     */
+    stopSizzle() {
+        if (this.sizzleNode) {
+            try {
+                this.sizzleNode.stop();
+            } catch (e) {}
+            try {
+                this.sizzleNode.disconnect();
+            } catch (e) {}
+            this.sizzleNode = null;
+        }
+        if (this.sizzleFilter) {
+            try {
+                this.sizzleFilter.disconnect();
+            } catch (e) {}
+            this.sizzleFilter = null;
+        }
+        if (this.sizzleGain) {
+            try {
+                this.sizzleGain.disconnect();
+            } catch (e) {}
+            this.sizzleGain = null;
+        }
+    }
 }
 
 // Export single audio instance

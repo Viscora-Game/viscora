@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v93';
-import { audio } from './audio.js?v=v93';
+import { ViscosityStates } from './viscosity.js?v=v94';
+import { audio } from './audio.js?v=v94';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -378,6 +378,10 @@ export class Player {
         this.activeColliders = colliders;
 
         if (this.isDead) {
+            this.flameHeat = 0;
+            if (typeof audio !== 'undefined' && audio.updateSizzle) {
+                audio.updateSizzle(0);
+            }
             if (this.deathType === 'melt' && this.meltTimer > 0) {
                 this.meltTimer--;
             }
@@ -821,6 +825,17 @@ export class Player {
         if (this.inFlame && this.flameHeat > 0.1 && Math.random() < 0.3 && emitParticles) {
             const particleColor = Math.random() < 0.5 ? '#f97316' : '#ef4444'; // Turuncu / Kırmızı
             emitParticles(this.x, this.y, 'steam', particleColor, 1);
+        }
+
+        // Soğurken duman/buhar salınımı (Açık mavi veya beyaz soğuma buharı)
+        if (!this.inFlame && this.flameHeat > 0 && Math.random() < 0.15 && emitParticles) {
+            const coolColor = Math.random() < 0.5 ? '#e0f2fe' : '#ffffff'; // Açık mavi veya Beyaz
+            emitParticles(this.x, this.y, 'steam', coolColor, 1);
+        }
+
+        // Isınma ses efekti şiddetini güncelle
+        if (typeof audio !== 'undefined' && audio.updateSizzle) {
+            audio.updateSizzle(this.flameHeat);
         }
 
         // Parçacık izi (trail) salınımı

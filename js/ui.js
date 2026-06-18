@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v93';
-import { ViscosityList } from './viscosity.js?v=v93';
+import { audio } from './audio.js?v=v94';
+import { ViscosityList } from './viscosity.js?v=v94';
 
 export class UIManager {
     constructor(game) {
@@ -91,6 +91,13 @@ export class UIManager {
                         this.game.editor.init();
                     }
                 }
+                return;
+            }
+
+            // F3 toggles showDebug ON/OFF
+            if (e.key === 'F3') {
+                e.preventDefault();
+                this.game.showDebug = !this.game.showDebug;
                 return;
             }
 
