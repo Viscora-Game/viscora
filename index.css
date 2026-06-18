@@ -2531,7 +2531,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 
 /* AdMob Banner Placeholder styling */
 #admob-banner-placeholder {
-    position: absolute;
+    position: fixed;
     bottom: 8px;
     left: 50%;
     transform: translateX(-50%);
