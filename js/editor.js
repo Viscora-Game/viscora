@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v84';
-import { audio } from './audio.js?v=v84';
-import { LevelGenerator } from './generator.js?v=v84';
+import { Enemy, GelChaser } from './enemies.js?v=v85';
+import { audio } from './audio.js?v=v85';
+import { LevelGenerator } from './generator.js?v=v85';
 
 export class LevelEditor {
     constructor(game) {
@@ -809,6 +809,9 @@ export class LevelEditor {
         lvl.levers = [];
         lvl.flamethrowers = [];
         lvl.arrowShooters = [];
+        lvl.laserEmitters = [];
+        lvl.laserReceivers = [];
+        lvl.staticMirrors = [];
         lvl.fallingPlatforms = [];
         lvl.breakablePlatforms = [];
         lvl.hiddenPassages = [];
@@ -1842,6 +1845,18 @@ export class LevelEditor {
             mirrorType: m.mirrorType
         }));
 
+        const arrowShooters = (lvl.arrowShooters || []).map(a => ({
+            x: Math.round(a.x),
+            y: Math.round(a.y),
+            w: Math.round(a.w || 48),
+            h: Math.round(a.h || 48),
+            dir: a.dir || 'right',
+            detectionRadius: a.detectionRadius !== undefined ? a.detectionRadius : 200,
+            fireInterval: a.fireInterval !== undefined ? a.fireInterval : 2.5,
+            arrowSpeed: a.arrowSpeed !== undefined ? a.arrowSpeed : 4.5,
+            arrowRange: a.arrowRange !== undefined ? a.arrowRange : 400
+        }));
+
         return {
             levelWidth: lvl.width,
             levelHeight: lvl.height,
@@ -1871,7 +1886,8 @@ export class LevelEditor {
             decorations,
             laserEmitters,
             laserReceivers,
-            staticMirrors
+            staticMirrors,
+            arrowShooters
         };
     }
 
