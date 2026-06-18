@@ -1990,8 +1990,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     #start-screen #level-selector-wrapper {
         grid-column: 2 !important;
         grid-row: 1 / span 2 !important;
-        max-height: 140px !important; /* Compact level grid for landscape fitting */
-        min-height: 100px !important;
+        max-height: 190px !important; /* Expanded grid height to stretch menu card downwards */
+        min-height: 150px !important;
         margin-bottom: 0 !important;
         overflow-y: auto !important;
         align-self: stretch !important;
@@ -2067,7 +2067,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     }
     
     #start-screen #level-selector-wrapper {
-        max-height: 90px !important;
+        max-height: 115px !important;
     }
     
     .menu-btn {
