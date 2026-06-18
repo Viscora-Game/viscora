@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v86';
-import { THEMES } from './generator.js?v=v86';
+import { audio } from './audio.js?v=v87';
+import { THEMES } from './generator.js?v=v87';
 
 /**
  * Viscora Level Design & Manager
@@ -2815,17 +2815,88 @@ export class Level {
             this.laserReceivers = [];
             this.staticMirrors = [];
         } else if (levelNumber === 18) {
+            // ═══════════════════════════════════════════════
+            // BÖLÜM 18: ÇİFT YÖNLÜ KORİDOR — Ölümcül Dikenler
+            // ═══════════════════════════════════════════════
             this.width = 1600;
             this.height = 600;
-            this.spawnX = 100;
+            this.spawnX = 60;
             this.spawnY = 380;
+            this.portal = { x: 20, y: 120, w: 60, h: 80, angle: 0 };
+
             this.platforms = [
-                { x: 0, y: 460, w: 1600, h: 140, type: 'normal' }
+                { x: 0, y: 460, w: 1600, h: 140, type: 'normal' },
+                { x: 0, y: 260, w: 1520, h: 40, type: 'normal' },
+                { x: 1560, y: 340, w: 40, h: 120, type: 'sticky', sticky: true }
             ];
-            this.hazards = [];
-            this.collectibles = [];
-            this.enemies = [];
-            this.portal = { x: 1400, y: 380, w: 60, h: 80, angle: 0 };
+
+            this.hazards = [
+                { x: 120, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 140, y: 440, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 280, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 360, y: 440, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 460, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 540, y: 440, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 620, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 740, y: 440, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 760, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 880, y: 440, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 960, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 1040, y: 440, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1120, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 1200, y: 440, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1320, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 1380, y: 440, w: 60, h: 20, type: 'spike', direction: 'up' },
+                { x: 1440, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' }
+            ];
+
+            this.enemies = [
+                { x: 240, y: 380, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4', type: 'patrol' },
+                { x: 440, y: 380, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4', type: 'patrol' },
+                { x: 700, y: 380, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4', type: 'patrol' },
+                { x: 940, y: 380, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4', type: 'patrol' },
+                { x: 1200, y: 380, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4', type: 'patrol' },
+                { x: 1320, y: 380, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4', type: 'patrol' },
+                { x: 1440, y: 380, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4', type: 'patrol' },
+                { x: 1120, y: 240, rangeX: 140, speed: 1.0, isVertical: false, color: '#10b981', type: 'chaser' },
+                { x: 560, y: 240, rangeX: 150, speed: 1.0, isVertical: false, color: '#10b981', type: 'chaser' },
+                { x: 880, y: 240, rangeX: 100, speed: 1.2, isVertical: false, color: '#f43f5e', type: 'patrol' },
+                { x: 280, y: 240, rangeX: 120, speed: 1.2, isVertical: false, color: '#f43f5e', type: 'patrol' },
+                { x: 1400, y: 240, rangeX: 120, speed: 1.2, isVertical: false, color: '#f43f5e', type: 'patrol' }
+            ];
+
+            this.fallingBlockTraps = [
+                { startX: 380, startY: 0, x: 380, y: 0, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
+                { startX: 1000, startY: 0, x: 1000, y: 0, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
+                { startX: 700, startY: 0, x: 700, y: 0, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 }
+            ];
+
+            this.arrowShooters = [
+                { x: 620, y: -80, w: 48, h: 48, dir: 'target', detectionRadius: 700, fireInterval: 2.5, arrowSpeed: 15.0, arrowRange: 500, fireTimer: 0, arrows: [] }
+            ];
+
+            this.collectibles = [
+                { x: 480, y: 380, color: '#eab308' },
+                { x: 1510, y: 340, color: '#eab308' },
+                { x: 700, y: 200, color: '#eab308' }
+            ];
+
+            this.gates = [];
+            this.movingPlatforms = [];
+            this.conveyors = [];
+            this.teleportPairs = [];
+            this.bouncePads = [];
+            this.buttons = [];
+            this.levers = [];
+            this.flamethrowers = [];
+            this.fallingPlatforms = [];
+            this.breakablePlatforms = [];
+            this.hiddenPassages = [];
+            this.vantuzPoints = [];
+            this.decorations = [];
+            this.laserEmitters = [];
+            this.laserReceivers = [];
+            this.staticMirrors = [];
         } else if (levelNumber === 19) {
             this.width = 1600;
             this.height = 600;
