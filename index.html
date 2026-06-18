@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v103">
+    <link rel="stylesheet" href="index.css?v=v104">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -128,7 +128,11 @@
         const origConsoleError = console.error;
         console.error = function(...args) {
             origConsoleError.apply(console, args);
-            showError('Console Error: ' + args.join(' '));
+            const msg = args.join(' ');
+            if (msg.toLowerCase().includes('service worker') || msg.toLowerCase().includes('serviceworker')) {
+                return;
+            }
+            showError('Console Error: ' + msg);
         };
     </script>
 </head>
@@ -677,7 +681,7 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v103"></script>
-    <script type="module" src="js/main.js?v=v103"></script>
+    <script src="js/controls_customizer.js?v=v104"></script>
+    <script type="module" src="js/main.js?v=v104"></script>
 </body>
 </html>
