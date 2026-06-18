@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v85';
-import { THEMES } from './generator.js?v=v85';
+import { audio } from './audio.js?v=v86';
+import { THEMES } from './generator.js?v=v86';
 
 /**
  * Viscora Level Design & Manager
@@ -2721,17 +2721,99 @@ export class Level {
                 { x: 1160, y: 260, w: 40, h: 40, mirrorType: 'top-right' }
             ];
         } else if (levelNumber === 17) {
-            this.width = 1600;
+            // ═══════════════════════════════════════════════
+            // BÖLÜM 17: SİBER VERİ MERKEZİ — Robotik Savunma
+            // ═══════════════════════════════════════════════
+            this.width = 3344;
             this.height = 600;
-            this.spawnX = 100;
+            this.spawnX = 80;
             this.spawnY = 380;
+            this.portal = { x: 2890, y: 330, w: 60, h: 80, angle: 0 };
+
             this.platforms = [
-                { x: 0, y: 460, w: 1600, h: 140, type: 'normal' }
+                { x: 0, y: 460, w: 3000, h: 140, type: 'normal' },
+                { x: 140, y: 260, w: 240, h: 40, type: 'normal' },
+                { x: 720, y: 260, w: 240, h: 40, type: 'normal' },
+                { x: 1480, y: 260, w: 240, h: 40, type: 'normal' },
+                { x: 2280, y: 260, w: 240, h: 40, type: 'normal' }
             ];
-            this.hazards = [];
-            this.collectibles = [];
-            this.enemies = [];
-            this.portal = { x: 1400, y: 380, w: 60, h: 80, angle: 0 };
+
+            this.hazards = [
+                { x: 170, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 750, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 290, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 230, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 1510, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 1570, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 870, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 810, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 1630, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 2430, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 2310, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' },
+                { x: 2370, y: 300, w: 60, h: 20, type: 'spike', direction: 'down' }
+            ];
+
+            this.enemies = [
+                { x: 1220, y: 420, rangeX: 250, speed: 1.0, isVertical: false, color: '#10b981', type: 'chaser' },
+                { x: 840, y: 220, rangeX: 150, speed: 1.0, isVertical: false, color: '#10b981', type: 'chaser' },
+                { x: 1610, y: 200, rangeX: 180, speed: 2.0, isVertical: false, color: '#eab308', type: 'patrol' },
+                { x: 2420, y: 220, rangeX: 180, speed: 2.0, isVertical: false, color: '#eab308', type: 'patrol' },
+                { x: 1440, y: 420, rangeX: 120, speed: 1.5, isVertical: true, color: '#d946ef', type: 'patrol' },
+                { x: 2400, y: 420, rangeX: 120, speed: 1.2, isVertical: false, color: '#f43f5e', type: 'patrol' },
+                { x: 660, y: 240, rangeX: 120, speed: 1.2, isVertical: true, color: '#06b6d4', type: 'patrol' },
+                { x: 2080, y: 320, rangeX: 180, speed: 2.0, isVertical: false, color: '#eab308', type: 'patrol' }
+            ];
+
+            this.pushBlocks = [
+                { x: 220, y: 210, w: 50, h: 50, startX: 220, startY: 210, isMirror: false, mirrorType: 'slash' },
+                { x: 820, y: 410, w: 50, h: 50, startX: 820, startY: 410, isMirror: false, mirrorType: 'slash' },
+                { x: 1590, y: 400, w: 50, h: 50, startX: 1590, startY: 400, isMirror: false, mirrorType: 'slash' }
+            ];
+
+            this.decorations = [
+                { x: 480, y: 140, w: 40, h: 60, type: 'server_rack', rotation: 0, state: 0, text: '', color: '' },
+                { x: 1160, y: 140, w: 40, h: 60, type: 'server_rack', rotation: 0, state: 0, text: '', color: '' },
+                { x: 1920, y: 100, w: 40, h: 60, type: 'server_rack', rotation: 0, state: 0, text: '', color: '' },
+                { x: 2660, y: 180, w: 40, h: 60, type: 'server_rack', rotation: 0, state: 0, text: '', color: '' },
+                { x: 140, y: 470, w: 40, h: 40, type: 'fan', rotation: 0, state: 0, text: '', color: '' },
+                { x: 340, y: 470, w: 40, h: 40, type: 'fan', rotation: 0, state: 0, text: '', color: '' },
+                { x: 720, y: 470, w: 40, h: 40, type: 'fan', rotation: 0, state: 0, text: '', color: '' },
+                { x: 920, y: 470, w: 40, h: 40, type: 'fan', rotation: 0, state: 0, text: '', color: '' },
+                { x: 1480, y: 470, w: 40, h: 40, type: 'fan', rotation: 0, state: 0, text: '', color: '' },
+                { x: 1680, y: 470, w: 40, h: 40, type: 'fan', rotation: 0, state: 0, text: '', color: '' },
+                { x: 2280, y: 470, w: 40, h: 40, type: 'fan', rotation: 0, state: 0, text: '', color: '' },
+                { x: 2480, y: 470, w: 40, h: 40, type: 'fan', rotation: 0, state: 0, text: '', color: '' }
+            ];
+
+            this.arrowShooters = [
+                { x: 520, y: 200, w: 48, h: 48, dir: 'target', detectionRadius: 250, fireInterval: 1.1, arrowSpeed: 9.5, arrowRange: 400, fireTimer: 0, arrows: [] },
+                { x: 1200, y: 200, w: 48, h: 48, dir: 'target', detectionRadius: 300, fireInterval: 1.5, arrowSpeed: 9.8, arrowRange: 400, fireTimer: 0, arrows: [] },
+                { x: 1960, y: 160, w: 48, h: 48, dir: 'target', detectionRadius: 350, fireInterval: 1.3, arrowSpeed: 9.5, arrowRange: 400, fireTimer: 0, arrows: [] },
+                { x: 2700, y: 240, w: 48, h: 48, dir: 'target', detectionRadius: 200, fireInterval: 2.5, arrowSpeed: 8.0, arrowRange: 400, fireTimer: 0, arrows: [] }
+            ];
+
+            this.collectibles = [
+                { x: 320, y: 200, color: '#eab308' },
+                { x: 840, y: 200, color: '#eab308' },
+                { x: 2380, y: 200, color: '#eab308' }
+            ];
+
+            this.gates = [];
+            this.movingPlatforms = [];
+            this.conveyors = [];
+            this.teleportPairs = [];
+            this.bouncePads = [];
+            this.buttons = [];
+            this.levers = [];
+            this.flamethrowers = [];
+            this.fallingPlatforms = [];
+            this.breakablePlatforms = [];
+            this.hiddenPassages = [];
+            this.fallingBlockTraps = [];
+            this.vantuzPoints = [];
+            this.laserEmitters = [];
+            this.laserReceivers = [];
+            this.staticMirrors = [];
         } else if (levelNumber === 18) {
             this.width = 1600;
             this.height = 600;
