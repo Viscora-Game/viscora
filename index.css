@@ -1537,6 +1537,37 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.map-expiry {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-normal);
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.15);
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.05);
+}
+
+.map-expiry.warning {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.08);
+    border-color: rgba(245, 158, 11, 0.15);
+    box-shadow: 0 0 5px rgba(245, 158, 11, 0.05);
+}
+
+.map-expiry.danger {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.15);
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.05);
+}
+
 .btn-like {
     background: rgba(217, 70, 239, 0.15);
     border: 1px solid rgba(217, 70, 239, 0.3);

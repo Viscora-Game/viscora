@@ -626,10 +626,28 @@ export class UIManager {
         const communityTabButtons = document.querySelectorAll('.community-tab-btn');
         let currentSort = 'popular'; // Varsayılan popüler sıralama
 
+        const formatRemainingTime = (seconds) => {
+            if (seconds <= 0) return "Süre doldu (Silinecek)";
+            const hours = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            
+            let result = '';
+            if (hours > 0) result += `${hours}sa `;
+            if (mins > 0 || hours > 0) result += `${mins}dk `;
+            result += `${secs}sn`;
+            return result;
+        };
+
         const loadCommunityMaps = async (sortType) => {
             const listEl = document.getElementById('community-map-list');
             if (!listEl) return;
             listEl.innerHTML = '<div class="no-maps">Yükleniyor...</div>';
+
+            if (this.communityInterval) {
+                clearInterval(this.communityInterval);
+                this.communityInterval = null;
+            }
 
             try {
                 const myUserId = localStorage.getItem('viscora_user_id') || 'anonymous';
@@ -651,10 +669,27 @@ export class UIManager {
                     
                     const isLiked = likedMaps.includes(level.id);
                     
+                    const playedTimeStr = level.lastPlayedAt || level.createdAt;
+                    const playedTime = new Date(playedTimeStr).getTime();
+                    const now = Date.now();
+                    const ageSeconds = (now - playedTime) / 1000;
+                    const allowedSeconds = 24 * 3600 + (level.likes * 12 * 3600);
+                    const remainingSeconds = Math.max(0, allowedSeconds - ageSeconds);
+
+                    let expiryClass = '';
+                    if (remainingSeconds < 6 * 3600) {
+                        expiryClass = 'danger';
+                    } else if (remainingSeconds < 12 * 3600) {
+                        expiryClass = 'warning';
+                    }
+
                     item.innerHTML = `
                         <div class="map-info">
                             <h3>${level.name}</h3>
                             <div class="map-author">Tasarımcı: <span>${level.author}</span></div>
+                            <div class="map-expiry ${expiryClass}" id="expiry-${level.id}" data-played-at="${playedTimeStr}" data-likes="${level.likes}">
+                                ⏳ <span class="expiry-timer">${formatRemainingTime(remainingSeconds)}</span>
+                            </div>
                         </div>
                         <div class="map-actions">
                             <div class="map-likes">
@@ -680,6 +715,26 @@ export class UIManager {
                                 const updated = await likeRes.json();
                                 const countEl = item.querySelector(`#likes-${level.id}`);
                                 if (countEl) countEl.textContent = updated.likes;
+
+                                const expiryEl = item.querySelector(`#expiry-${level.id}`);
+                                if (expiryEl) {
+                                    expiryEl.setAttribute('data-likes', updated.likes);
+                                    const pTimeStr = expiryEl.getAttribute('data-played-at');
+                                    const pTime = new Date(pTimeStr).getTime();
+                                    const ageSecs = (Date.now() - pTime) / 1000;
+                                    const allowedSecs = 24 * 3600 + (updated.likes * 12 * 3600);
+                                    const remSecs = Math.max(0, allowedSecs - ageSecs);
+                                    
+                                    const timerSpan = expiryEl.querySelector('.expiry-timer');
+                                    if (timerSpan) timerSpan.textContent = formatRemainingTime(remSecs);
+
+                                    expiryEl.classList.remove('warning', 'danger');
+                                    if (remSecs < 6 * 3600) {
+                                        expiryEl.classList.add('danger');
+                                    } else if (remSecs < 12 * 3600) {
+                                        expiryEl.classList.add('warning');
+                                    }
+                                }
                                 
                                 likeBtn.classList.add('liked');
                                 likeBtn.textContent = 'Beğenildi';
@@ -696,6 +751,10 @@ export class UIManager {
                     // Oyna Butonu Olayı
                     const playBtn = item.querySelector('.btn-play-map');
                     playBtn.addEventListener('click', () => {
+                        if (this.communityInterval) {
+                            clearInterval(this.communityInterval);
+                            this.communityInterval = null;
+                        }
                         this.showScreen('hud');
                         
                         // Custom level verisini direkt loadLevel ile yükle
@@ -710,6 +769,32 @@ export class UIManager {
 
                     listEl.appendChild(item);
                 });
+
+                // Canlı sayaç interval'ini kur
+                this.communityInterval = setInterval(() => {
+                    const timerEls = listEl.querySelectorAll('.map-expiry');
+                    timerEls.forEach(el => {
+                        const pTimeStr = el.getAttribute('data-played-at');
+                        const likes = parseInt(el.getAttribute('data-likes')) || 0;
+                        const pTime = new Date(pTimeStr).getTime();
+                        const ageSecs = (Date.now() - pTime) / 1000;
+                        const allowedSecs = 24 * 3600 + (likes * 12 * 3600);
+                        const remSecs = Math.max(0, allowedSecs - ageSecs);
+                        
+                        const timerSpan = el.querySelector('.expiry-timer');
+                        if (timerSpan) {
+                            timerSpan.textContent = formatRemainingTime(remSecs);
+                        }
+                        
+                        el.classList.remove('warning', 'danger');
+                        if (remSecs < 6 * 3600) {
+                            el.classList.add('danger');
+                        } else if (remSecs < 12 * 3600) {
+                            el.classList.add('warning');
+                        }
+                    });
+                }, 1000);
+
             } catch (err) {
                 console.warn("Haritaları yükleme hatası:", err);
                 listEl.innerHTML = `
@@ -740,6 +825,10 @@ export class UIManager {
 
         if (btnCloseCommunity) {
             this.bindTouchClick(btnCloseCommunity, () => {
+                if (this.communityInterval) {
+                    clearInterval(this.communityInterval);
+                    this.communityInterval = null;
+                }
                 this.showScreen('start');
             });
         }

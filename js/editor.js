@@ -127,6 +127,17 @@ export class LevelEditor {
                 box-sizing: border-box;
                 overflow-y: auto;
                 transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                touch-action: pan-y !important;
+                -webkit-overflow-scrolling: touch;
+            }
+            #viscora-editor-panel * {
+                touch-action: pan-y !important;
+            }
+            #viscora-editor-panel input, 
+            #viscora-editor-panel select, 
+            #viscora-editor-panel textarea {
+                user-select: text !important;
+                -webkit-user-select: text !important;
             }
             #viscora-editor-panel.collapsed {
                 transform: translateX(320px);
@@ -209,6 +220,9 @@ export class LevelEditor {
                 align-items: center;
                 justify-content: center;
                 gap: 5px;
+                white-space: normal;
+                word-break: break-word;
+                line-height: 1.2;
             }
             .editor-btn:hover {
                 background: rgba(217, 70, 239, 0.15);
@@ -354,6 +368,84 @@ export class LevelEditor {
             /* Hide HTML Screens when editing */
             .editor-active-screen-override {
                 display: none !important;
+            }
+            
+            /* Responsive styles for mobile phones */
+            @media (max-width: 768px) {
+                #viscora-editor-panel {
+                    width: 240px !important;
+                    padding: 8px !important;
+                }
+                #viscora-editor-panel.collapsed {
+                    transform: translateX(240px) !important;
+                }
+                .panel-toggle-btn {
+                    width: 26px !important;
+                    height: 50px !important;
+                    left: -26px !important;
+                    font-size: 15px !important;
+                }
+                .editor-title {
+                    font-size: 14px !important;
+                    margin-bottom: 3px !important;
+                }
+                .editor-subtitle {
+                    font-size: 9px !important;
+                    margin-bottom: 10px !important;
+                }
+                .editor-section {
+                    margin-bottom: 10px !important;
+                    padding-bottom: 8px !important;
+                }
+                .section-lbl {
+                    font-size: 10px !important;
+                    margin-bottom: 4px !important;
+                }
+                .tools-grid {
+                    gap: 4px !important;
+                }
+                .editor-btn {
+                    padding: 5px 6px !important;
+                    font-size: 10px !important;
+                    gap: 3px !important;
+                    border-radius: 4px !important;
+                }
+                .editor-btn.primary {
+                    font-size: 11px !important;
+                    padding: 7px !important;
+                }
+                .editor-input-group {
+                    font-size: 10px !important;
+                    margin-bottom: 4px !important;
+                }
+                .editor-input-group label {
+                    width: 60px !important;
+                }
+                .editor-input-group input, .editor-input-group select {
+                    padding: 3px 4px !important;
+                    font-size: 10px !important;
+                }
+                .editor-checkbox-group {
+                    font-size: 10px !important;
+                    margin-bottom: 6px !important;
+                }
+                .editor-sub-section summary {
+                    padding: 6px 8px !important;
+                    font-size: 10px !important;
+                }
+                #editor-inspector-content {
+                    font-size: 10px !important;
+                }
+                #editor-inspector-content div {
+                    font-size: 10px !important;
+                }
+                #editor-inspector-content span {
+                    font-size: 9px !important;
+                }
+                #editor-inspector-content button {
+                    font-size: 9px !important;
+                    padding: 4px 6px !important;
+                }
             }
         `;
         document.head.appendChild(style);
@@ -637,6 +729,17 @@ export class LevelEditor {
         `;
 
         document.getElementById('game-container').appendChild(this.panel);
+
+        // Touch events propagation blocker on panel to allow native scrolling and prevent panning the editor map
+        this.panel.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+        }, { passive: true });
+        this.panel.addEventListener('touchmove', (e) => {
+            e.stopPropagation();
+        }, { passive: true });
+        this.panel.addEventListener('touchend', (e) => {
+            e.stopPropagation();
+        }, { passive: true });
 
         // Olay Dinleyicileri Ekle
         this.panel.querySelectorAll('.editor-btn[data-tool]').forEach(btn => {

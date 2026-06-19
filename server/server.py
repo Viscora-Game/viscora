@@ -74,8 +74,10 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
 
                 creator_id = level.get('creatorId', '')
 
-                # 24 saat = 86400 saniye
-                if age_seconds > 86400 and creator_id != user_id:
+                # 24 saat = 86400 saniye (Beğeni başına +12 saat = 43200 saniye ekle)
+                likes = level.get('likes', 0)
+                allowed_age_seconds = 86400 + (likes * 12 * 3600)
+                if age_seconds > allowed_age_seconds and creator_id != user_id:
                     changed = True
                     continue # Veritabanından sil
 
