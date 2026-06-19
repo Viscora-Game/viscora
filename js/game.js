@@ -579,6 +579,7 @@ export class GameManager {
     /**
      * Ödüllü Reklam: Checkpoint'ten Full Canla Devam Et
      * Oyuncu reklam izledikten sonra son checkpoint'inden tam canla başlar.
+     * Eğer checkpoint yoksa bölümün ~%50'sinde güvenli bir nokta hesaplanır.
      */
     rewardedContinue() {
         const game = this;
@@ -586,78 +587,107 @@ export class GameManager {
             type: 'reward',
             name: 'rewarded-continue',
             beforeAd: () => {
-                // Reklam başlamadan önce sesi kapat
                 audio.suspend();
             },
             afterAd: () => {
-                // Reklam bittikten sonra sesi aç
                 audio.resume();
             },
             adDismissed: () => {
-                // Oyuncu reklamı manuel kapattı — ödül verilmez
                 audio.resume();
             },
             adViewed: () => {
-                // Reklam başarıyla tamamlandı — ödülü ver
-                game.rewardedContinueUsed = true;
-                game.state = 'PLAYING';
-                game.particles = [];
-                game.splatters = [];
-                game.level.resetLevelRuntimeState();
-                game.initEnemies(game.currentLevel);
-                game.bossRespawnsUsed = 0;
-                if (game.currentLevel === 10) {
-                    game.boss = new Boss(1200, 300);
-                } else if (game.currentLevel === 20) {
-                    game.boss = new CyberBoss(1200, 300);
-                }
-                let maxH = 3;
-                if (game.difficulty === 'easy') maxH = 3;
-                else if (game.difficulty === 'normal') maxH = 3;
-                else if (game.difficulty === 'hard') maxH = 2;
-                game.player.maxHealth = maxH;
-                game.player.health = maxH; // Full can
-                game.player.respawn(game.checkpointX, game.checkpointY, maxH);
-                game.ui.showScreen('hud');
-                game.ui.updateHUDHealth(game.player.health);
-                game.ui.updateHUDViscosity(game.player.viscosity);
-                game.emitParticles(game.checkpointX, game.checkpointY, 'shift', '#f59e0b', 30);
-                audio.playShift('LOW');
-                game.lastTime = performance.now();
-                game.physicsAccumulator = 0;
+                game._executeRewardedContinue();
             },
             adBreakDone: (info) => {
-                // SDK hazır değilse veya reklam bulunamadıysa da ödülü ver (test ortamı)
                 if (info.breakStatus === 'notReady' || info.breakStatus === 'frequencyCapped' || info.breakStatus === 'other') {
-                    game.rewardedContinueUsed = true;
-                    game.state = 'PLAYING';
-                    game.particles = [];
-                    game.splatters = [];
-                    game.level.resetLevelRuntimeState();
-                    game.initEnemies(game.currentLevel);
-                    game.bossRespawnsUsed = 0;
-                    if (game.currentLevel === 10) {
-                        game.boss = new Boss(1200, 300);
-                    } else if (game.currentLevel === 20) {
-                        game.boss = new CyberBoss(1200, 300);
-                    }
-                    let maxH = 3;
-                    if (game.difficulty === 'easy') maxH = 3;
-                    else if (game.difficulty === 'normal') maxH = 3;
-                    else if (game.difficulty === 'hard') maxH = 2;
-                    game.player.maxHealth = maxH;
-                    game.player.health = maxH;
-                    game.player.respawn(game.checkpointX, game.checkpointY, maxH);
-                    game.ui.showScreen('hud');
-                    game.ui.updateHUDHealth(game.player.health);
-                    game.ui.updateHUDViscosity(game.player.viscosity);
-                    game.emitParticles(game.checkpointX, game.checkpointY, 'shift', '#f59e0b', 30);
-                    audio.resume();
-                    game.lastTime = performance.now();
-                    game.physicsAccumulator = 0;
+                    game._executeRewardedContinue();
                 }
             }
         });
+    }
+
+    /**
+     * Ödüllü devam mantığını yürüten iç metot.
+     * Checkpoint yoksa bölümün %50'sinde güvenli bir platform üzerinde otomatik checkpoint oluşturur.
+     */
+    _executeRewardedContinue() {
+        this.rewardedContinueUsed = true;
+
+        // Eğer checkpoint hâlâ spawn noktasıysa (checkpoint yok), %50 noktasını bul
+        if (this.checkpointX === this.level.spawnX && this.checkpointY === this.level.spawnY) {
+            const midPoint = this._findMidLevelSafePoint();
+            if (midPoint) {
+                this.checkpointX = midPoint.x;
+                this.checkpointY = midPoint.y;
+            }
+        }
+
+        this.state = 'PLAYING';
+        this.particles = [];
+        this.splatters = [];
+        this.level.resetLevelRuntimeState();
+        this.initEnemies(this.currentLevel);
+        this.bossRespawnsUsed = 0;
+        if (this.currentLevel === 10) {
+            this.boss = new Boss(1200, 300);
+        } else if (this.currentLevel === 20) {
+            this.boss = new CyberBoss(1200, 300);
+        }
+        let maxH = 3;
+        if (this.difficulty === 'easy') maxH = 3;
+        else if (this.difficulty === 'normal') maxH = 3;
+        else if (this.difficulty === 'hard') maxH = 2;
+        this.player.maxHealth = maxH;
+        this.player.health = maxH;
+        this.player.respawn(this.checkpointX, this.checkpointY, maxH);
+        this.player.invulnerableFrames = 90; // 1.5 saniye yeniden doğuş koruması
+        this.ui.showScreen('hud');
+        this.ui.updateHUDHealth(this.player.health);
+        this.ui.updateHUDViscosity(this.player.viscosity);
+        this.emitParticles(this.checkpointX, this.checkpointY, 'shift', '#f59e0b', 30);
+        audio.playShift('LOW');
+        audio.resume();
+        this.lastTime = performance.now();
+        this.physicsAccumulator = 0;
+    }
+
+    /**
+     * Bölümün yaklaşık %50 noktasında güvenli bir platform üzerinde konum bulur.
+     * Checkpoint olmayan bölümlerde ödüllü devam için kullanılır.
+     */
+    _findMidLevelSafePoint() {
+        const targetX = this.level.width * 0.50;
+        const platforms = this.level.platforms || [];
+        const hazards = this.level.hazards || [];
+
+        // Normal veya kaygan platformları hedef X'e yakınlığa göre sırala
+        const candidates = platforms
+            .filter(p => (p.type === 'normal' || p.type === 'slippery') && p.w >= 50 && p.y >= 180 && p.y <= 490)
+            .map(p => ({ p, dist: Math.abs((p.x + p.w / 2) - targetX) }))
+            .filter(({ dist }) => dist < 600)
+            .sort((a, b) => a.dist - b.dist);
+
+        for (const { p: platform } of candidates) {
+            const margin = 25;
+            const cpX = Math.max(platform.x + margin, Math.min(platform.x + platform.w - margin, targetX));
+            const cpY = platform.y - 32;
+
+            // Platform üstünde tehlike var mı?
+            const cpRadius = 25;
+            const hasNearbyHazard = hazards.some(h => {
+                const xOverlap = (cpX + cpRadius) > h.x && (cpX - cpRadius) < (h.x + h.w);
+                const yNear = (h.y + h.h) >= (platform.y - 60) && h.y <= (platform.y + 30);
+                if (h.type === 'spike' && h.direction === 'down' && h.y >= platform.y) return false;
+                return xOverlap && yNear;
+            });
+
+            if (hasNearbyHazard) continue;
+
+            return { x: cpX, y: cpY };
+        }
+
+        // Hiçbir güvenli nokta bulunamadıysa null dön (spawn noktasında kalır)
+        return null;
     }
 
     /**
