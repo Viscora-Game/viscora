@@ -444,11 +444,9 @@ export class LevelEditor {
                 <div class="section-lbl">Sistem</div>
                 <div class="tools-grid">
                     <button class="editor-btn primary" id="editor-playtest-btn">▶ PLAY TEST (P)</button>
-                    <button class="editor-btn" id="editor-export-btn">💾 SAVE LEVEL</button>
-                    <button class="editor-btn" id="editor-import-btn">📂 LOAD LEVEL</button>
-                    <button class="editor-btn" id="editor-share-btn" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee; border-color: rgba(6, 182, 212, 0.35);">📤 PAYLAŞ</button>
+                    <button class="editor-btn" id="editor-export-btn">💾 KAYDET</button>
+                    <button class="editor-btn" id="editor-share-btn" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee; border-color: rgba(6, 182, 212, 0.35); grid-column: span 2;">📤 PAYLAŞ</button>
                     <button class="editor-btn danger" id="editor-clear-btn" style="grid-column: span 2;">⚠️ CLEAR LEVEL</button>
-                    <button class="editor-btn warning" id="editor-reset-campaign-btn" style="grid-column: span 2; margin-top: 5px; background: rgba(234, 179, 8, 0.15); color: #facc15; border-color: rgba(234, 179, 8, 0.35);">🔄 SIFIRLA (VARSAYILAN HARİTA)</button>
                     <button class="editor-btn danger" id="editor-exit-btn" style="grid-column: span 2; margin-top: 5px; background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.35);">🏠 EXIT TO MENU</button>
                 </div>
             </div>
@@ -679,35 +677,17 @@ export class LevelEditor {
 
         // Sistem butonları
         document.getElementById('editor-playtest-btn').addEventListener('click', () => this.startPlaytest());
-        document.getElementById('editor-export-btn').addEventListener('click', () => this.exportLevelJSON());
-        document.getElementById('editor-import-btn').addEventListener('click', () => this.importLevelJSON());
+        document.getElementById('editor-export-btn').addEventListener('click', () => {
+            this.saveToLocalStorage();
+            alert('Tasarımınız başarıyla kaydedildi!');
+        });
         document.getElementById('editor-share-btn').addEventListener('click', () => this.publishToCommunity());
         document.getElementById('editor-clear-btn').addEventListener('click', () => {
             if (confirm('Bölümdeki tüm objeler silinecek! Emin misiniz?')) {
                 this.clearLevel();
             }
         });
-        document.getElementById('editor-reset-campaign-btn').addEventListener('click', () => {
-            if (confirm('Bu seviye için yaptığınız tüm düzenlemeler silinecek ve kampanya varsayılanına sıfırlanacak! Emin misiniz?')) {
-                localStorage.removeItem('viscora_custom_level_' + this.game.currentLevel);
-                this.game.level.loadLevel(this.game.currentLevel);
-                
-                // Clear editor and game state to default campaign levels
-                this.game.enemies = [];
-                this.game.particles = [];
-                this.game.splatters = [];
-                this.game.initEnemies(this.game.currentLevel);
-                this.game.player.respawn(this.game.level.spawnX, this.game.level.spawnY);
-                this.game.camera.x = Math.max(0, this.game.level.spawnX - this.game.cssWidth / 2);
-                this.game.camera.y = Math.max(0, this.game.level.spawnY - this.game.cssHeight / 2);
-                
-                this.selectedObject = null;
-                this.selectedObjectType = '';
-                this.updateInspector();
-                audio.playPlateActivate();
-                alert('Seviye başarıyla kampanya varsayılanına sıfırlandı!');
-            }
-        });
+
         document.getElementById('editor-exit-btn').addEventListener('click', () => {
             if (confirm('Editörden çıkıp ana menüye dönmek istiyor musunuz? Kaydedilmemiş değişiklikler kaybolabilir.')) {
                 this.deactivate();
@@ -1862,6 +1842,8 @@ export class LevelEditor {
         }));
 
         return {
+            name: lvl.name || "Özel Seviye",
+            themeId: (lvl.theme && lvl.theme.id) ? lvl.theme.id : 'neon_sewer',
             levelWidth: lvl.width,
             levelHeight: lvl.height,
             spawn: { x: Math.round(lvl.spawnX), y: Math.round(lvl.spawnY) },
@@ -1948,21 +1930,21 @@ export class LevelEditor {
      * Seviyeyi topluluk sunucusunda paylaşır
      */
     publishToCommunity() {
-        const mapName = prompt("Lütfen Harita Adını Girin:", "Özel Harita");
-        if (mapName === null) return;
-        if (!mapName.trim()) {
-            alert("Harita adı boş olamaz!");
-            return;
-        }
-
-        const authorName = prompt("Lütfen Yapımcı Adını Girin:", "Tasarımcı");
-        if (authorName === null) return;
-        if (!authorName.trim()) {
-            alert("Yapımcı adı boş olamaz!");
-            return;
+        const mapName = this.game.level.name || "Özel Harita";
+        let authorName = localStorage.getItem('viscora_author_name') || '';
+        if (!authorName) {
+            authorName = prompt("Lütfen Yapımcı Adını Girin:", "Tasarımcı");
+            if (authorName === null) return;
+            authorName = authorName.trim();
+            if (!authorName) {
+                alert("Yapımcı adı boş olamaz!");
+                return;
+            }
+            localStorage.setItem('viscora_author_name', authorName);
         }
 
         const exportObj = this.getLevelDataObj();
+        const myUserId = localStorage.getItem('viscora_user_id') || 'anonymous';
 
         // Sunucuya gönder
         fetch(`${API_BASE}/api/levels`, {
@@ -1973,6 +1955,7 @@ export class LevelEditor {
             body: JSON.stringify({
                 name: mapName,
                 author: authorName,
+                creatorId: myUserId,
                 data: exportObj
             })
         })

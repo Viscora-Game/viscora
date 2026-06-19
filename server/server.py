@@ -57,9 +57,37 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
         if path == '/api/levels':
             db = read_db()
             sort_type = query.get('sort', ['new'])[0]
+            user_id = query.get('userId', [''])[0]
 
+            # 24 saat boyunca oynanmayan haritaları temizle (sahibi hariç)
+            cleaned_db = []
+            changed = False
+            now = datetime.now()
+
+            for level in db:
+                played_str = level.get('lastPlayedAt') or level.get('createdAt')
+                try:
+                    played_time = datetime.fromisoformat(played_str)
+                    age_seconds = (now - played_time).total_seconds()
+                except Exception:
+                    age_seconds = 0
+
+                creator_id = level.get('creatorId', '')
+
+                # 24 saat = 86400 saniye
+                if age_seconds > 86400 and creator_id != user_id:
+                    changed = True
+                    continue # Veritabanından sil
+
+                cleaned_db.append(level)
+
+            if changed:
+                write_db(cleaned_db)
+                db = cleaned_db
+
+            # En çok beğeni alan en üstte olacak şekilde sırala (beğeni sayıları eşitse en son eklenen en üstte olur)
             if sort_type == 'popular':
-                db.sort(key=lambda x: (-x.get('likes', 0), x.get('createdAt', '')))
+                db.sort(key=lambda x: (x.get('likes', 0), x.get('createdAt', '')), reverse=True)
             else:
                 db.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
 
@@ -94,6 +122,7 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
         if path == '/api/levels':
             name = body.get('name')
             author = body.get('author')
+            creator_id = body.get('creatorId', '')
             data = body.get('data')
 
             if not name or not author or not data:
@@ -107,9 +136,11 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 'id': f'map_{int(datetime.now().timestamp() * 1000)}_{random.randint(100, 999)}',
                 'name': name.strip(),
                 'author': author.strip(),
+                'creatorId': creator_id,
                 'data': data,
                 'likes': 0,
-                'createdAt': datetime.now().isoformat()
+                'createdAt': datetime.now().isoformat(),
+                'lastPlayedAt': datetime.now().isoformat()
             }
             db.append(new_level)
 
@@ -151,6 +182,35 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_response(404)
                     self.end_headers()
                     self.wfile.write('{"error": "Harita bulunamadı."}'.encode('utf-8'))
+            else:
+                self.send_response(400)
+                self.end_headers()
+
+        # 3. Harita oynanma/tıklanma zamanı güncelleme: POST /api/levels/<id>/play
+        elif path.startswith('/api/levels/') and path.endswith('/play'):
+            parts = path.split('/')
+            if len(parts) >= 4:
+                level_id = parts[3]
+                db = read_db()
+                found = None
+                for level in db:
+                    if level['id'] == level_id:
+                        level['lastPlayedAt'] = datetime.now().isoformat()
+                        found = level
+                        break
+
+                if found:
+                    if write_db(db):
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'application/json; charset=utf-8')
+                        self.end_headers()
+                        self.wfile.write('{"status": "ok"}'.encode('utf-8'))
+                    else:
+                        self.send_response(500)
+                        self.end_headers()
+                else:
+                    self.send_response(404)
+                    self.end_headers()
             else:
                 self.send_response(400)
                 self.end_headers()

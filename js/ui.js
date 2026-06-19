@@ -10,6 +10,13 @@ export class UIManager {
         this.game = game;
         this.codexReferrer = 'start';
         
+        // Initialize User ID for Community Map ownership checks
+        let myUserId = localStorage.getItem('viscora_user_id');
+        if (!myUserId) {
+            myUserId = 'user_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+            localStorage.setItem('viscora_user_id', myUserId);
+        }
+        
         // Girdi Kontrolleri (Keyboard)
         this.keys = {
             left: false,
@@ -625,7 +632,8 @@ export class UIManager {
             listEl.innerHTML = '<div class="no-maps">Yükleniyor...</div>';
 
             try {
-                const res = await fetch(`${API_BASE}/api/levels?sort=${sortType}`);
+                const myUserId = localStorage.getItem('viscora_user_id') || 'anonymous';
+                const res = await fetch(`${API_BASE}/api/levels?sort=${sortType}&userId=${myUserId}`);
                 if (!res.ok) throw new Error("Sunucu hatası.");
                 const levels = await res.json();
 
@@ -694,6 +702,9 @@ export class UIManager {
                         audio.init();
                         audio.startMusic();
                         
+                        // Send play event to backend to update lastPlayedAt
+                        fetch(`${API_BASE}/api/levels/${level.id}/play`, { method: 'POST' }).catch(() => {});
+                        
                         this.game.startCustomLevel(level.data);
                     });
 
@@ -743,6 +754,15 @@ export class UIManager {
 
         if (btnDesignMap && designSetupModal) {
             this.bindTouchClick(btnDesignMap, () => {
+                const savedLevelData = localStorage.getItem('viscora_custom_level_999');
+                if (savedLevelData) {
+                    if (confirm("Kaldığınız yerden devam etmek ister misiniz? (Hayır derseniz mevcut tasarımınız silinip yeni bölüm oluşturulacaktır)")) {
+                        this.game.currentLevel = 999;
+                        this.game.editor.init();
+                        return;
+                    }
+                }
+
                 if (txtDesignName) txtDesignName.value = '';
                 if (selectDesignTheme) selectDesignTheme.value = 'neon_sewer';
                 designSetupModal.classList.remove('hidden');
@@ -757,6 +777,16 @@ export class UIManager {
 
         if (btnDesignCreate && designSetupModal) {
             this.bindTouchClick(btnDesignCreate, () => {
+                const today = new Date().toDateString();
+                let designHistory = JSON.parse(localStorage.getItem('viscora_design_history') || '{}');
+                if (designHistory.date !== today) {
+                    designHistory = { date: today, count: 0 };
+                }
+                if (designHistory.count >= 5) {
+                    alert("Günlük 5 bölüm tasarlama limitinize ulaştınız!");
+                    return;
+                }
+
                 const name = txtDesignName ? txtDesignName.value.trim() : '';
                 if (!name) {
                     alert("Lütfen bir bölüm adı girin!");
@@ -785,6 +815,10 @@ export class UIManager {
                 localStorage.setItem('viscora_custom_level_999', JSON.stringify(blankLevel));
                 this.game.currentLevel = 999;
                 
+                // Artır ve kaydet
+                designHistory.count++;
+                localStorage.setItem('viscora_design_history', JSON.stringify(designHistory));
+
                 // Editörü başlat
                 this.game.editor.init();
             });

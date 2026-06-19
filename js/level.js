@@ -25,7 +25,7 @@ export class Level {
      */
     loadLevel(levelNumber, isEditorOrPlaytest = false) {
         let originalLevelNumber = levelNumber;
-        if (typeof levelNumber === 'number' && levelNumber > 20) {
+        if (typeof levelNumber === 'number' && levelNumber > 20 && levelNumber !== 999) {
             levelNumber = ((levelNumber - 1) % 20) + 1;
         }
         this.currentLevel = originalLevelNumber;
@@ -77,6 +77,7 @@ export class Level {
             try {
                 this.width = Math.max(800, data.levelWidth || data.width || 2000);
                 this.height = Math.max(600, data.levelHeight || data.height || 600);
+                this.name = data.name || "Özel Seviye";
 
                 if (data.spawn) {
                     this.spawnX = data.spawn.x !== undefined ? data.spawn.x : 80;
