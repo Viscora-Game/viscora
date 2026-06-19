@@ -1336,19 +1336,11 @@ export class GameManager {
                     const isHardcoreMode = (this.difficulty === 'hardcore');
 
                     if (btnContinue) {
-                        if (this.levelDeaths >= 4 && !this.rewardedContinueUsed && !isHardcoreMode && !isCustom) {
-                            btnContinue.classList.remove('hidden');
-                        } else {
-                            btnContinue.classList.add('hidden');
-                        }
+                        btnContinue.style.display = (this.levelDeaths >= 4 && !this.rewardedContinueUsed && !isHardcoreMode && !isCustom) ? '' : 'none';
                     }
                     if (btnSkip) {
                         const maxLvl = 30;
-                        if (this.levelDeaths >= 7 && !this.rewardedSkipUsed && !isHardcoreMode && !isCustom && this.currentLevel < maxLvl) {
-                            btnSkip.classList.remove('hidden');
-                        } else {
-                            btnSkip.classList.add('hidden');
-                        }
+                        btnSkip.style.display = (this.levelDeaths >= 7 && !this.rewardedSkipUsed && !isHardcoreMode && !isCustom && this.currentLevel < maxLvl) ? '' : 'none';
                     }
 
                     this.ui.showScreen('gameover');
