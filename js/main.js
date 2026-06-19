@@ -1,5 +1,5 @@
-import { GameManager } from './game.js?v=v108';
-import { audio } from './audio.js?v=v108';
+import { GameManager } from './game.js?v=v109';
+import { audio } from './audio.js?v=v109';
 
 // Oyun Başlatma Girişi
 window.addEventListener('DOMContentLoaded', () => {
@@ -25,11 +25,8 @@ window.addEventListener('DOMContentLoaded', () => {
         if (isSwReload) {
             sessionStorage.removeItem('viscora_sw_reloaded');
             splash.remove();
-        } else {
-            splashTimeout = setTimeout(() => {
-                removeSplash();
-            }, 3500);
         }
+        // Otomatik kaldırma kaldırıldı; kullanıcının dokunarak tam ekrana geçmesi beklenir.
     }
 
     // GameManager nesnesi oluşturulur (Canvas kimliğini veriyoruz)
@@ -48,9 +45,12 @@ window.addEventListener('DOMContentLoaded', () => {
         window.removeEventListener('keydown', unlockAudio);
     };
 
-    window.addEventListener('click', unlockAudio);
-    window.addEventListener('touchend', unlockAudio);
-    window.addEventListener('keydown', unlockAudio);
+    // 500ms gecikme ile dinleyicileri ekle ki sayfa yüklenirken kazara tetiklenmesin (event bleeding engellenir)
+    setTimeout(() => {
+        window.addEventListener('click', unlockAudio);
+        window.addEventListener('touchend', unlockAudio);
+        window.addEventListener('keydown', unlockAudio);
+    }, 500);
 
     // Mobil tam ekran desteği tetikleyicisi (Opsiyonel estetik iyileştirme)
     const requestFullScreen = () => {

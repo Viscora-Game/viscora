@@ -13,7 +13,33 @@ if not os.path.exists(DB_FILE):
     with open(DB_FILE, 'w', encoding='utf-8') as f:
         json.dump([], f, indent=2)
 
+# MongoDB Desteği
+MONGO_URI = os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URI')
+mongo_collection = None
+
+if MONGO_URI:
+    try:
+        from pymongo import MongoClient
+        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+        # Veritabanı adını URI'den ayıkla, varsayılan 'viscora'
+        db_name = 'viscora'
+        parsed_uri = urllib.parse.urlparse(MONGO_URI)
+        if parsed_uri.path and parsed_uri.path != '/':
+            db_name = parsed_uri.path.strip('/')
+        mongo_db = client[db_name]
+        mongo_collection = mongo_db['levels']
+        print(f"MongoDB bağlantısı başarılı! Veritabanı: {db_name}, Koleksiyon: levels")
+    except Exception as e:
+        print("MongoDB bağlantı hatası, yerel JSON dosyasına geçiliyor:", e)
+        mongo_collection = None
+
 def read_db():
+    if mongo_collection is not None:
+        try:
+            return list(mongo_collection.find({}, {'_id': False}))
+        except Exception as e:
+            print("MongoDB okuma hatası, yerel JSON dosyasına geçiliyor:", e)
+
     try:
         with open(DB_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
@@ -22,6 +48,20 @@ def read_db():
         return []
 
 def write_db(data):
+    if mongo_collection is not None:
+        try:
+            # Her seviyeyi kendi ID'sine göre güncelle veya yoksa ekle (upsert)
+            for level in data:
+                level_id = level.get('id')
+                if level_id:
+                    mongo_collection.update_one({'id': level_id}, {'$set': level}, upsert=True)
+            # Eğer db_maps'ten kalıcı silinenler varsa onları MongoDB'den de sil
+            existing_ids = [l.get('id') for l in data if l.get('id')]
+            mongo_collection.delete_many({'id': {'$nin': existing_ids}})
+            return True
+        except Exception as e:
+            print("MongoDB yazma hatası, yerel JSON dosyasına geçiliyor:", e)
+
     try:
         with open(DB_FILE, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
