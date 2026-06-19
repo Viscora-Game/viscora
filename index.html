@@ -138,7 +138,13 @@
         console.error = function(...args) {
             origConsoleError.apply(console, args);
             const msg = args.join(' ');
-            if (msg.toLowerCase().includes('service worker') || msg.toLowerCase().includes('serviceworker')) {
+            const lowerMsg = msg.toLowerCase();
+            if (lowerMsg.includes('service worker') || 
+                lowerMsg.includes('serviceworker') ||
+                lowerMsg.includes('failed to fetch') ||
+                lowerMsg.includes('networkerror') ||
+                lowerMsg.includes('onrender.com') ||
+                lowerMsg.includes('cors')) {
                 return;
             }
             showError('Console Error: ' + msg);

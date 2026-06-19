@@ -681,7 +681,7 @@ export class UIManager {
                                 localStorage.setItem('viscora_liked_maps', JSON.stringify(likedMaps));
                             }
                         } catch (err) {
-                            console.error("Beğeni gönderme hatası:", err);
+                            console.warn("Beğeni gönderme hatası:", err);
                         }
                     });
 
@@ -700,8 +700,23 @@ export class UIManager {
                     listEl.appendChild(item);
                 });
             } catch (err) {
-                console.error("Haritaları yükleme hatası:", err);
-                listEl.innerHTML = '<div class="no-maps">Topluluk sunucusuna bağlanılamadı. Lütfen sunucunun (server.py) çalıştığından emin olun!</div>';
+                console.warn("Haritaları yükleme hatası:", err);
+                listEl.innerHTML = `
+                    <div class="no-maps" style="text-align: center; padding: 30px 10px;">
+                        <p style="margin-bottom: 12px; color: #ff5555; font-weight: bold; font-size: 18px;">⚠️ Bağlantı Başarısız</p>
+                        <p style="font-size: 14px; color: #ccc; margin-bottom: 20px; line-height: 1.5;">
+                            Sunucu uykuda olabilir (ücretsiz plan sebebiyle uyanması 30-50 saniye sürebilir).<br>
+                            Lütfen biraz bekleyip tekrar deneyin.
+                        </p>
+                        <button id="btn-retry-community" class="menu-btn" style="padding: 10px 20px; font-size: 14px; margin: 0 auto; display: block; background: linear-gradient(135deg, #ff007f, #7f00ff); border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);">
+                            🔄 Yeniden Dene
+                        </button>
+                    </div>
+                `;
+                const retryBtn = document.getElementById('btn-retry-community');
+                if (retryBtn) {
+                    retryBtn.addEventListener('click', () => loadCommunityMaps(sortType));
+                }
             }
         };
 

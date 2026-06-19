@@ -1984,8 +1984,8 @@ export class LevelEditor {
             alert(`Haritanız "${data.name}" başarıyla topluluk sunucusunda paylaşıldı!`);
         })
         .catch(err => {
-            console.error("Paylaşım hatası:", err);
-            alert("Harita paylaşılamadı. Topluluk API sunucusunun (server.py) arka planda çalıştığından emin olun!");
+            console.warn("Paylaşım hatası:", err);
+            alert("Harita paylaşılamadı. Sunucu uykuda olabilir veya geçici bir internet sorunu yaşanıyor olabilir. Lütfen birkaç saniye sonra tekrar deneyin!");
         });
     }
 
