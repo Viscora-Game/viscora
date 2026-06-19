@@ -59,9 +59,10 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
             sort_type = query.get('sort', ['new'])[0]
             user_id = query.get('userId', [''])[0]
 
-            # 24 saat boyunca oynanmayan haritaları temizle (sahibi hariç)
+            # 24 saat boyunca oynanmayan haritaları sahibinden gizle, 30 gün boyunca hiç oynanmamışsa kalıcı sil
+            response_db = []
             cleaned_db = []
-            changed = False
+            db_changed = False
             now = datetime.now()
 
             for level in db:
@@ -73,30 +74,33 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                     age_seconds = 0
 
                 creator_id = level.get('creatorId', '')
-
-                # 24 saat = 86400 saniye (Beğeni başına +12 saat = 43200 saniye ekle)
                 likes = level.get('likes', 0)
                 allowed_age_seconds = 86400 + (likes * 12 * 3600)
-                if age_seconds > allowed_age_seconds and creator_id != user_id:
-                    changed = True
-                    continue # Veritabanından sil
+
+                # Kalıcı Silme: Son oynanıştan itibaren 30 gün geçmişse db'den tamamen kaldır (Sahibi dahil)
+                if age_seconds > allowed_age_seconds + (30 * 86400):
+                    db_changed = True
+                    continue # db_maps.json'a dahil etme
 
                 cleaned_db.append(level)
 
-            if changed:
+                # Yanıt Filtreleme: Süre dolmadıysa VEYA istek atan kişi bölümün yaratıcısıysa göster
+                if age_seconds <= allowed_age_seconds or creator_id == user_id:
+                    response_db.append(level)
+
+            if db_changed:
                 write_db(cleaned_db)
-                db = cleaned_db
 
             # En çok beğeni alan en üstte olacak şekilde sırala (beğeni sayıları eşitse en son eklenen en üstte olur)
             if sort_type == 'popular':
-                db.sort(key=lambda x: (x.get('likes', 0), x.get('createdAt', '')), reverse=True)
+                response_db.sort(key=lambda x: (x.get('likes', 0), x.get('createdAt', '')), reverse=True)
             else:
-                db.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
+                response_db.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
 
             self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
-            self.wfile.write(json.dumps(db, ensure_ascii=False).encode('utf-8'))
+            self.wfile.write(json.dumps(response_db, ensure_ascii=False).encode('utf-8'))
         else:
             # Diğer tüm istekleri (index.html, js/, css/ vb.) standart SimpleHTTPRequestHandler ile sun
             super().do_GET()

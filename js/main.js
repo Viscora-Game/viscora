@@ -1,17 +1,35 @@
-import { GameManager } from './game.js?v=v106';
-import { audio } from './audio.js?v=v106';
+import { GameManager } from './game.js?v=v108';
+import { audio } from './audio.js?v=v108';
 
 // Oyun Başlatma Girişi
 window.addEventListener('DOMContentLoaded', () => {
     // Giriş Animasyonu (Splash Screen) Kontrolü
     const splash = document.getElementById('splash-screen');
-    if (splash) {
-        setTimeout(() => {
+    let splashTimeout = null;
+    let removeTimeout = null;
+
+    const removeSplash = () => {
+        if (splash && !splash.classList.contains('fade-out')) {
+            if (splashTimeout) clearTimeout(splashTimeout);
+            if (removeTimeout) clearTimeout(removeTimeout);
             splash.classList.add('fade-out');
             setTimeout(() => {
                 splash.remove();
             }, 600);
-        }, 3500);
+        }
+    };
+
+    if (splash) {
+        // SW güncellemesinden dolayı sayfa yenilendiyse, açılış ekranını beklemeden hemen kaldır
+        const isSwReload = sessionStorage.getItem('viscora_sw_reloaded') === 'true';
+        if (isSwReload) {
+            sessionStorage.removeItem('viscora_sw_reloaded');
+            splash.remove();
+        } else {
+            splashTimeout = setTimeout(() => {
+                removeSplash();
+            }, 3500);
+        }
     }
 
     // GameManager nesnesi oluşturulur (Canvas kimliğini veriyoruz)
@@ -22,6 +40,7 @@ window.addEventListener('DOMContentLoaded', () => {
         audio.init();
         audio.unlock();
         requestFullScreen();
+        removeSplash(); // Dokunulduğunda splash'ı hemen geç
         
         // Dinleyicileri temizle
         window.removeEventListener('click', unlockAudio);

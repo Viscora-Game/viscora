@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v106">
+    <link rel="stylesheet" href="index.css?v=v108">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -104,16 +104,6 @@
                 navigator.serviceWorker.register('./sw.js')
                     .then(reg => {
                         console.log('Service Worker başarıyla kaydedildi:', reg.scope);
-                        reg.addEventListener('updatefound', () => {
-                            const newWorker = reg.installing;
-                            if (newWorker) {
-                                newWorker.addEventListener('statechange', () => {
-                                    if (newWorker.state === 'activated') {
-                                        window.location.reload();
-                                    }
-                                });
-                            }
-                        });
                     })
                     .catch(err => console.error('Service Worker kayıt hatası:', err));
             });
@@ -122,6 +112,7 @@
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 if (!refreshing) {
                     refreshing = true;
+                    sessionStorage.setItem('viscora_sw_reloaded', 'true');
                     window.location.reload();
                 }
             });
@@ -229,6 +220,7 @@
             <div class="blob blob-2"></div>
         </div>
         <h1 class="splash-logo">VISCORA</h1>
+        <div class="splash-tap-hint">BAŞLAMAK İÇİN EKRANA DOKUNUN</div>
     </div>
 
     <!-- SVG Gooey Filter Definition -->
@@ -804,7 +796,7 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v106"></script>
-    <script type="module" src="js/main.js?v=v106"></script>
+    <script src="js/controls_customizer.js?v=v108"></script>
+    <script type="module" src="js/main.js?v=v108"></script>
 </body>
 </html>

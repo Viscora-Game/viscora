@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v106';
-import { ViscosityList } from './viscosity.js?v=v106';
+import { audio } from './audio.js?v=v108';
+import { ViscosityList } from './viscosity.js?v=v108';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -873,7 +873,7 @@ export class UIManager {
         }
 
         if (btnDesignCreate && designSetupModal) {
-            this.bindTouchClick(btnDesignCreate, () => {
+            this.bindTouchClick(btnDesignCreate, async () => {
                 const today = new Date().toDateString();
                 let designHistory = JSON.parse(localStorage.getItem('viscora_design_history') || '{}');
                 if (designHistory.date !== today) {
@@ -890,6 +890,30 @@ export class UIManager {
                     return;
                 }
                 const themeId = selectDesignTheme ? selectDesignTheme.value : 'neon_sewer';
+
+                // Sunucuda aynı isimde harita var mı kontrol et
+                btnDesignCreate.disabled = true;
+                const originalText = btnDesignCreate.innerText;
+                btnDesignCreate.innerText = "Kontrol ediliyor...";
+
+                try {
+                    const res = await fetch(`${API_BASE}/api/levels`);
+                    if (res.ok) {
+                        const levels = await res.json();
+                        const exists = levels.some(lvl => lvl.name.trim().toLowerCase() === name.toLowerCase());
+                        if (exists) {
+                            alert("Bu bölüm adı zaten mevcut! Lütfen farklı bir isim girin.");
+                            btnDesignCreate.disabled = false;
+                            btnDesignCreate.innerText = originalText;
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Sunucu çakışma kontrolü başarısız, devam ediliyor:", e);
+                }
+
+                btnDesignCreate.disabled = false;
+                btnDesignCreate.innerText = originalText;
 
                 // Modalı kapat
                 designSetupModal.classList.add('hidden');

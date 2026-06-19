@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v106';
-import { audio } from './audio.js?v=v106';
-import { LevelGenerator } from './generator.js?v=v106';
+import { Enemy, GelChaser } from './enemies.js?v=v108';
+import { audio } from './audio.js?v=v108';
+import { LevelGenerator } from './generator.js?v=v108';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -36,9 +36,12 @@ export class LevelEditor {
         this.dragOffsetX = 0;
         this.dragOffsetY = 0;
 
-        // Touch states for mobile pinch zoom
+        // Touch states for mobile pinch zoom & drag
         this.touchStartDistance = 0;
         this.touchStartZoom = 1.0;
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchHasMoved = false;
 
         // UI Panel DOM Element
         this.panel = null;
@@ -633,6 +636,10 @@ export class LevelEditor {
                     </select>
                 </div>
                 <div class="editor-input-group">
+                    <label>Bölüm Adı</label>
+                    <input type="text" id="editor-level-name" value="${this.game.level.name || ''}" placeholder="Bölüm Adı">
+                </div>
+                <div class="editor-input-group">
                     <label>Harita Genişlik</label>
                     <input type="number" id="editor-level-width" value="${this.game.level.width}">
                 </div>
@@ -804,7 +811,15 @@ export class LevelEditor {
             this.gridSize = parseInt(sizeSel.value);
         });
 
-        // Harita Boyutları
+        // Harita Başlığı ve Boyutları
+        const nameInput = document.getElementById('editor-level-name');
+        if (nameInput) {
+            nameInput.addEventListener('change', (e) => {
+                this.game.level.name = nameInput.value.trim() || "Özel Harita";
+                this.saveToLocalStorage();
+            });
+        }
+
         const widthInput = document.getElementById('editor-level-width');
         widthInput.addEventListener('change', (e) => {
             this.game.level.width = Math.max(800, parseInt(widthInput.value) || 2000);
@@ -866,6 +881,8 @@ export class LevelEditor {
             LevelGenerator.generate(this.game, seedInput, difficulty);
             
             // Update input values on the screen
+            const nameEl = document.getElementById('editor-level-name');
+            if (nameEl) nameEl.value = this.game.level.name || '';
             document.getElementById('editor-level-width').value = this.game.level.width;
             document.getElementById('editor-level-height').value = this.game.level.height;
             
@@ -1682,23 +1699,62 @@ export class LevelEditor {
         // Editor panelini geçici olarak gizle
         this.panel.style.display = 'none';
 
-        // Playtest ekran uyarısı oluştur (Nasıl çıkılacağını göstermek için)
         const tip = document.createElement('div');
         tip.id = 'editor-playtest-tip';
         tip.style.position = 'fixed';
         tip.style.top = '10px';
         tip.style.left = '50%';
         tip.style.transform = 'translateX(-50%)';
-        tip.style.background = 'rgba(15, 23, 42, 0.8)';
+        tip.style.background = 'rgba(15, 23, 42, 0.95)';
         tip.style.color = '#10b981';
-        tip.style.padding = '8px 16px';
-        tip.style.borderRadius = '20px';
+        tip.style.padding = '6px 16px';
+        tip.style.borderRadius = '30px';
         tip.style.fontSize = '12px';
         tip.style.fontWeight = 'bold';
         tip.style.border = '1px solid #10b981';
         tip.style.zIndex = '999999';
-        tip.innerHTML = '🎮 PLAYTEST MODU — Çıkmak ve Düzenlemeye Dönmek için ESC veya T tuşuna basın';
+        tip.style.display = 'flex';
+        tip.style.alignItems = 'center';
+        tip.style.justifyContent = 'center';
+        tip.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.3)';
+        
+        tip.innerHTML = `
+            <span>🎮 PLAYTEST MODU (ESC / T)</span>
+            <button id="editor-playtest-exit-btn" style="
+                background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
+                color: #fff;
+                border: none;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-weight: 800;
+                font-size: 11px;
+                cursor: pointer;
+                margin-left: 14px;
+                box-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                font-family: inherit;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+                transition: transform 0.1s ease;
+            ">🛑 TESTİ BİTİR</button>
+        `;
         document.body.appendChild(tip);
+
+        // Bind touch and click to exit playtest
+        const exitBtn = document.getElementById('editor-playtest-exit-btn');
+        if (exitBtn) {
+            exitBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.stopPlaytest();
+            });
+            exitBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.stopPlaytest();
+            }, { passive: false });
+        }
 
         // Reset level state first
         this.game.level.resetLevelRuntimeState();
@@ -2662,6 +2718,8 @@ export class LevelEditor {
                     lvl.staticMirrors = [];
                 }
 
+                const nameEl = document.getElementById('editor-level-name');
+                if (nameEl) nameEl.value = lvl.name || '';
                 document.getElementById('editor-level-width').value = lvl.width;
                 document.getElementById('editor-level-height').value = lvl.height;
                 
@@ -3689,7 +3747,7 @@ export class LevelEditor {
     }
 
     /**
-     * Mobil dokunmatik pinch zoom başlangıcı
+     * Mobil dokunmatik pinch zoom ve sürükleme başlangıcı
      */
     handleTouchStart(e) {
         if (!this.active || this.game.state !== 'EDITOR') return;
@@ -3702,19 +3760,76 @@ export class LevelEditor {
             const dy = t1.clientY - t2.clientY;
             this.touchStartDistance = Math.sqrt(dx * dx + dy * dy);
             this.touchStartZoom = this.game.camera.zoom || 1.0;
+            this.isPanning = false;
+            this.isDragging = false;
         } else if (e.touches.length === 1) {
-            // Tek parmak ile haritayı kaydırma (Pan)
             const t = e.touches[0];
-            this.isPanning = true;
-            this.panStartX = t.clientX;
-            this.panStartY = t.clientY;
-            this.cameraStartX = this.game.camera.x;
-            this.cameraStartY = this.game.camera.y;
+            this.touchStartX = t.clientX;
+            this.touchStartY = t.clientY;
+            this.touchHasMoved = false;
+
+            const rect = this.game.canvas.getBoundingClientRect();
+            const clientX = t.clientX - rect.left;
+            const clientY = t.clientY - rect.top;
+            const zoom = this.game.camera.zoom || 1.0;
+            const halfW = this.game.cssWidth / 2;
+            const halfH = this.game.cssHeight / 2;
+            
+            const mouseX = (clientX - halfW) / zoom + this.game.camera.x + halfW;
+            const mouseY = (clientY - halfH) / zoom + this.game.camera.y + halfH;
+
+            if (this.activeTool === 'select') {
+                const hit = this.getObjectAt(mouseX, mouseY);
+                if (hit) {
+                    this.selectedObject = hit.obj;
+                    this.selectedObjectType = hit.type;
+                    this.isDragging = true;
+                    this.isPanning = false;
+                    
+                    if (hit.type === 'spawn') {
+                        this.dragOffsetX = mouseX - this.game.level.spawnX;
+                        this.dragOffsetY = mouseY - this.game.level.spawnY;
+                    } else if (hit.type === 'portal' || hit.type === 'collectible') {
+                        this.dragOffsetX = mouseX - (hit.obj.x + 20);
+                        this.dragOffsetY = mouseY - (hit.obj.y + 30);
+                    } else if (hit.type === 'teleportPair') {
+                        if (this.draggedPortalEnd === 1) {
+                            this.dragOffsetX = mouseX - hit.obj.x1;
+                            this.dragOffsetY = mouseY - hit.obj.y1;
+                        } else {
+                            this.dragOffsetX = mouseX - hit.obj.x2;
+                            this.dragOffsetY = mouseY - hit.obj.y2;
+                        }
+                    } else {
+                        this.dragOffsetX = mouseX - hit.obj.x;
+                        this.dragOffsetY = mouseY - hit.obj.y;
+                    }
+                    audio.playPlateActivate(); // Hafif çıt sesi
+                } else {
+                    this.selectedObject = null;
+                    this.selectedObjectType = '';
+                    this.isDragging = false;
+                    this.isPanning = true;
+                    this.panStartX = t.clientX;
+                    this.panStartY = t.clientY;
+                    this.cameraStartX = this.game.camera.x;
+                    this.cameraStartY = this.game.camera.y;
+                }
+                this.updateInspector();
+            } else {
+                // Yaratım modunda varsayılan olarak kaydırma (Pan) başlat
+                // Eğer parmak hareket ettirilmeden çekilirse (tap), handleTouchEnd objeyi yerleştirecek
+                this.isPanning = true;
+                this.panStartX = t.clientX;
+                this.panStartY = t.clientY;
+                this.cameraStartX = this.game.camera.x;
+                this.cameraStartY = this.game.camera.y;
+            }
         }
     }
 
     /**
-     * Mobil dokunmatik pinch zoom ve kaydırma hareketi
+     * Mobil dokunmatik pinch zoom ve sürükleme hareketi
      */
     handleTouchMove(e) {
         if (!this.active || this.game.state !== 'EDITOR') return;
@@ -3745,15 +3860,82 @@ export class LevelEditor {
                 this.game.camera.zoom = newZoom;
                 this.clampCamera();
             }
-        } else if (e.touches.length === 1 && this.isPanning) {
-            e.preventDefault();
+        } else if (e.touches.length === 1) {
             const t = e.touches[0];
-            const dx = t.clientX - this.panStartX;
-            const dy = t.clientY - this.panStartY;
-            const zoom = this.game.camera.zoom || 1.0;
-            this.game.camera.x = this.cameraStartX - dx / zoom;
-            this.game.camera.y = this.cameraStartY - dy / zoom;
-            this.clampCamera();
+
+            // Dokunma hareket etti mi kontrol et (hata marjı: 8px)
+            const moveDist = Math.sqrt(Math.pow(t.clientX - this.touchStartX, 2) + Math.pow(t.clientY - this.touchStartY, 2));
+            if (moveDist > 8) {
+                this.touchHasMoved = true;
+            }
+
+            if (this.isDragging && this.selectedObject) {
+                e.preventDefault();
+                const rect = this.game.canvas.getBoundingClientRect();
+                const clientX = t.clientX - rect.left;
+                const clientY = t.clientY - rect.top;
+                const zoom = this.game.camera.zoom || 1.0;
+                const halfW = this.game.cssWidth / 2;
+                const halfH = this.game.cssHeight / 2;
+                
+                const mouseX = (clientX - halfW) / zoom + this.game.camera.x + halfW;
+                const mouseY = (clientY - halfH) / zoom + this.game.camera.y + halfH;
+                
+                let newX = mouseX - this.dragOffsetX;
+                let newY = mouseY - this.dragOffsetY;
+
+                if (this.gridSnap) {
+                    newX = Math.round(newX / this.gridSize) * this.gridSize;
+                    newY = Math.round(newY / this.gridSize) * this.gridSize;
+                }
+
+                const type = this.selectedObjectType;
+                const obj = this.selectedObject;
+
+                if (type === 'spawn') {
+                    this.game.level.spawnX = newX;
+                    this.game.level.spawnY = newY;
+                } else if (type === 'portal') {
+                    obj.x = newX;
+                    obj.y = newY;
+                } else if (type === 'collectible' || type === 'enemy') {
+                    obj.x = newX;
+                    obj.y = newY;
+                } else if (type === 'movingPlatform') {
+                    const diffX = newX - obj.x;
+                    const diffY = newY - obj.y;
+                    obj.x = newX;
+                    obj.y = newY;
+                    obj.startX = newX;
+                    obj.startY = newY;
+                    obj.targetX += diffX;
+                    obj.targetY += diffY;
+                } else if (type === 'teleportPair') {
+                    if (this.draggedPortalEnd === 1) {
+                        obj.x1 = newX;
+                        obj.y1 = newY;
+                    } else {
+                        obj.x2 = newX;
+                        obj.y2 = newY;
+                    }
+                } else {
+                    obj.x = newX;
+                    obj.y = newY;
+                    if (obj.startX !== undefined) {
+                        obj.startX = newX;
+                        obj.startY = newY;
+                    }
+                }
+                this.updateInspector();
+            } else if (this.isPanning) {
+                e.preventDefault();
+                const dx = t.clientX - this.panStartX;
+                const dy = t.clientY - this.panStartY;
+                const zoom = this.game.camera.zoom || 1.0;
+                this.game.camera.x = this.cameraStartX - dx / zoom;
+                this.game.camera.y = this.cameraStartY - dy / zoom;
+                this.clampCamera();
+            }
         }
     }
 
@@ -3762,7 +3944,23 @@ export class LevelEditor {
      */
     handleTouchEnd(e) {
         this.touchStartDistance = 0;
+
+        if (this.isDragging) {
+            this.saveToLocalStorage(); // Sürükleme sonrası kaydet
+        }
+
+        // Eğer kaydırma/sürükleme yapılmadıysa ve yaratım modundaysa objeyi yerleştir
+        if (!this.touchHasMoved && this.activeTool !== 'select') {
+            this.onMouseDown({
+                clientX: this.touchStartX,
+                clientY: this.touchStartY,
+                button: 0,
+                preventDefault: () => {}
+            });
+        }
+
         this.isPanning = false;
+        this.isDragging = false;
     }
 
     /**

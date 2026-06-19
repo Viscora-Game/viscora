@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v106';
-import { Level } from './level.js?v=v106';
-import { Enemy, GelChaser } from './enemies.js?v=v106';
-import { UIManager } from './ui.js?v=v106';
-import { audio } from './audio.js?v=v106';
-import { LevelEditor } from './editor.js?v=v106';
-import { Boss, CyberBoss } from './boss.js?v=v106';
+import { Player } from './player.js?v=v108';
+import { Level } from './level.js?v=v108';
+import { Enemy, GelChaser } from './enemies.js?v=v108';
+import { UIManager } from './ui.js?v=v108';
+import { audio } from './audio.js?v=v108';
+import { LevelEditor } from './editor.js?v=v108';
+import { Boss, CyberBoss } from './boss.js?v=v108';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -60,6 +60,32 @@ export class GameManager {
         // Çözünürlük ve Boyutlar
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
+
+        // Fullscreen geçişlerinde ekran boyutlarının gecikmeli güncellenmesini önlemek için dinleyiciler
+        document.addEventListener('fullscreenchange', () => {
+            this.resizeCanvas();
+            setTimeout(() => this.resizeCanvas(), 100);
+            setTimeout(() => this.resizeCanvas(), 300);
+            setTimeout(() => this.resizeCanvas(), 600);
+        });
+        document.addEventListener('webkitfullscreenchange', () => {
+            this.resizeCanvas();
+            setTimeout(() => this.resizeCanvas(), 100);
+            setTimeout(() => this.resizeCanvas(), 300);
+            setTimeout(() => this.resizeCanvas(), 600);
+        });
+        document.addEventListener('mozfullscreenchange', () => {
+            this.resizeCanvas();
+            setTimeout(() => this.resizeCanvas(), 100);
+            setTimeout(() => this.resizeCanvas(), 300);
+            setTimeout(() => this.resizeCanvas(), 600);
+        });
+        document.addEventListener('MSFullscreenChange', () => {
+            this.resizeCanvas();
+            setTimeout(() => this.resizeCanvas(), 100);
+            setTimeout(() => this.resizeCanvas(), 300);
+            setTimeout(() => this.resizeCanvas(), 600);
+        });
 
         // Modül Nesneleri
         const savedLvl = localStorage.getItem('viscora_unlocked_level');
@@ -2034,7 +2060,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v106', this.cssWidth - 10, 10);
+        this.ctx.fillText('v108', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
