@@ -695,6 +695,7 @@ export class GameManager {
                     }
                     localStorage.setItem('viscora_progress', JSON.stringify(progress));
                 } catch(e) { /* localStorage hatası yoksay */ }
+                game.ui.showScreen('hud');
                 game.nextLevel();
             },
             adBreakDone: (info) => {
@@ -713,6 +714,7 @@ export class GameManager {
                         }
                         localStorage.setItem('viscora_progress', JSON.stringify(progress));
                     } catch(e) {}
+                    game.ui.showScreen('hud');
                     game.nextLevel();
                 }
             }
