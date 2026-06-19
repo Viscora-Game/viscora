@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v110';
-import { ViscosityList } from './viscosity.js?v=v110';
+import { audio } from './audio.js?v=v111';
+import { ViscosityList } from './viscosity.js?v=v111';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -375,6 +375,11 @@ export class UIManager {
         
         // Başlangıç Ekranı - Oyna
         this.bindTouchClick(document.getElementById('btn-play'), () => {
+            // Eğer geçerli bölüm seçili değilse (editör veya topluluk seviyesi sonrasındaki 999 durumu)
+            if (this.game.currentLevel === 999 || this.game.currentLevel === null || this.game.currentLevel === undefined) {
+                alert("Lütfen oynamak istediğiniz bölümü seçin!");
+                return;
+            }
             audio.init(); // İlk ses motoru tetiklemesi
             audio.startMusic();
             this.showScreen('hud');
