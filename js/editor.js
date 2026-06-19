@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v109';
-import { audio } from './audio.js?v=v109';
-import { LevelGenerator } from './generator.js?v=v109';
+import { Enemy, GelChaser } from './enemies.js?v=v110';
+import { audio } from './audio.js?v=v110';
+import { LevelGenerator } from './generator.js?v=v110';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -70,6 +70,10 @@ export class LevelEditor {
         this.active = true;
         this.game.state = 'EDITOR';
         this.game.ui.resetKeys();
+
+        // Editörde yön tuşlarını gizle
+        const mobileControls = document.getElementById('mobile-controls');
+        if (mobileControls) mobileControls.classList.add('hidden');
         
         // Load custom level from localStorage if it exists (otherwise loads campaign default)
         this.game.level.loadLevel(this.game.currentLevel, true);
@@ -963,6 +967,7 @@ export class LevelEditor {
         lvl.spawnX = 80;
         lvl.spawnY = 350;
         lvl.portal = { x: 300, y: 380, w: 60, h: 80, angle: 0 };
+        lvl.serverLevelId = null;
         
         // Center the camera on the spawn point
         this.game.camera.x = 0;
@@ -1763,6 +1768,13 @@ export class LevelEditor {
         this.game.state = 'PLAYING';
         document.getElementById('hud').classList.remove('hidden');
 
+        // Mobil/Dokunmatik cihaz ise yön tuşlarını göster
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        if (isTouchDevice || window.innerWidth < 1024) {
+            const mobileControls = document.getElementById('mobile-controls');
+            if (mobileControls) mobileControls.classList.remove('hidden');
+        }
+
         // Düşmanları başlat
         this.game.enemies = [];
         if (this.game.level.enemies) {
@@ -1790,6 +1802,10 @@ export class LevelEditor {
         
         const tip = document.getElementById('editor-playtest-tip');
         if (tip) tip.remove();
+
+        // Playtest bittiğinde yön tuşlarını gizle
+        const mobileControls = document.getElementById('mobile-controls');
+        if (mobileControls) mobileControls.classList.add('hidden');
 
         this.panel.style.display = 'flex';
         this.game.enemies = [];
@@ -2039,6 +2055,7 @@ export class LevelEditor {
         }));
 
         return {
+            serverLevelId: lvl.serverLevelId || null,
             name: lvl.name || "Özel Seviye",
             themeId: (lvl.theme && lvl.theme.id) ? lvl.theme.id : 'neon_sewer',
             levelWidth: lvl.width,
@@ -2127,13 +2144,17 @@ export class LevelEditor {
      * Seviyeyi topluluk sunucusunda paylaşır
      */
     publishToCommunity() {
-        showConfirmModal("Bölümünüzü paylaşmak istediğinize emin misiniz?", () => {
-            const mapName = this.game.level.name || "Özel Harita";
-            const authorName = localStorage.getItem('viscora_author_name') || "Tasarımcı";
-            const exportObj = this.getLevelDataObj();
-            const myUserId = localStorage.getItem('viscora_user_id') || 'anonymous';
+        const mapName = this.game.level.name || "Özel Harita";
+        const authorName = localStorage.getItem('viscora_author_name') || "Tasarımcı";
+        const exportObj = this.getLevelDataObj();
+        const myUserId = localStorage.getItem('viscora_user_id') || 'anonymous';
+        const serverLevelId = this.game.level.serverLevelId;
 
-            // Sunucuya gönder
+        const performNewPublish = () => {
+            // Sunucuya yeni harita olarak gönder (serverLevelId'yi yoksay/yeni id oluşturulacak)
+            const newExport = { ...exportObj };
+            newExport.serverLevelId = null;
+
             fetch(`${API_BASE}/api/levels`, {
                 method: 'POST',
                 headers: {
@@ -2143,7 +2164,7 @@ export class LevelEditor {
                     name: mapName,
                     author: authorName,
                     creatorId: myUserId,
-                    data: exportObj
+                    data: newExport
                 })
             })
             .then(async res => {
@@ -2158,7 +2179,10 @@ export class LevelEditor {
                 return res.json();
             })
             .then(data => {
-                alert(`Haritanız "${data.name}" başarıyla topluluk sunucusunda paylaşıldı!`);
+                // Sunucudan dönen yeni level ID'sini kaydet
+                this.game.level.serverLevelId = data.id;
+                this.saveToLocalStorage();
+                alert(`Haritanız "${data.name}" başarıyla yeni bir bölüm olarak topluluk sunucusunda paylaşıldı!`);
             })
             .catch(err => {
                 console.warn("Paylaşım hatası:", err);
@@ -2168,7 +2192,60 @@ export class LevelEditor {
                     alert("Harita paylaşılamadı. Sunucu uykuda olabilir veya geçici bir internet sorunu yaşanıyor olabilir. Lütfen birkaç saniye sonra tekrar deneyin!");
                 }
             });
-        });
+        };
+
+        const performUpdate = () => {
+            // Sunucudaki mevcut haritayı güncelle
+            fetch(`${API_BASE}/api/levels/${serverLevelId}/update`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: mapName,
+                    creatorId: myUserId,
+                    data: exportObj
+                })
+            })
+            .then(async res => {
+                if (!res.ok) {
+                    let errMsg = "Güncelleme hatası.";
+                    try {
+                        const errData = await res.json();
+                        if (errData && errData.error) errMsg = errData.error;
+                    } catch(e) {}
+                    throw new Error(errMsg);
+                }
+                return res.json();
+            })
+            .then(data => {
+                alert(`Haritanız "${data.name}" başarıyla güncellendi! Süresi ve beğenileri aynen korunacaktır.`);
+            })
+            .catch(err => {
+                console.warn("Güncelleme hatası:", err);
+                if (err.message === "Bu bölüm adı zaten mevcut.") {
+                    alert("Bu bölüm adı zaten mevcut! Lütfen farklı bir isim girip tekrar deneyin.");
+                } else if (err.message === "Bu bölümü güncelleme izniniz yok.") {
+                    alert("Bu bölümü güncelleme yetkiniz bulunmamaktadır (bölümün sahibi siz değilsiniz). Yeni bir bölüm olarak paylaşmayı deneyebilirsiniz.");
+                } else {
+                    alert("Harita güncellenemedi. Sunucu uykuda veya çevrimdışı olabilir. Lütfen birkaç saniye sonra tekrar deneyin!");
+                }
+            });
+        };
+
+        if (serverLevelId) {
+            // Eğer daha önce paylaşılmışsa kullanıcıya seçenek sun
+            window.showShareModal(
+                `"${mapName}" bölümünü daha önce paylaştınız. Bu bölümü değişikliklerinizle güncellemek mi istersiniz, yoksa yeni (ayrı) bir bölüm olarak mı yayınlamak istersiniz?`,
+                performUpdate,
+                performNewPublish
+            );
+        } else {
+            // İlk kez paylaşılıyorsa standart confirm modalı göster
+            showConfirmModal("Bölümünüzü paylaşmak istediğinize emin misiniz?", () => {
+                performNewPublish();
+            });
+        }
     }
 
     /**

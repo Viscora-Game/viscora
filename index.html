@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v109">
+    <link rel="stylesheet" href="index.css?v=v110">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -92,6 +92,53 @@
             noBtn.addEventListener('click', () => {
                 overlay.remove();
                 if (onNo) onNo();
+            });
+        };
+
+        window.showShareModal = function(msg, onUpdate, onPublishNew, onCancel) {
+            const existing = document.querySelector('.viscora-modal-overlay');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.className = 'viscora-modal-overlay';
+            
+            const modal = document.createElement('div');
+            modal.className = 'viscora-modal';
+            modal.style.width = '420px';
+            modal.style.maxWidth = '90vw';
+            
+            modal.innerHTML = `
+                <div class="viscora-modal-title">📤 BÖLÜMÜ PAYLAŞ</div>
+                <div class="viscora-modal-message" style="margin-bottom: 22px;">${msg}</div>
+                <div class="viscora-modal-actions" style="flex-direction: column; gap: 10px; align-items: stretch;">
+                    <button class="viscora-modal-btn primary" id="viscora-share-update" style="padding: 10px 16px; font-size: 0.85rem; width: 100%;">🔄 MEVCUT BÖLÜMÜ GÜNCELLE</button>
+                    <button class="viscora-modal-btn" id="viscora-share-new" style="padding: 10px 16px; font-size: 0.85rem; width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">✨ YENİ BÖLÜM OLARAK YAYINLA</button>
+                    <button class="viscora-modal-btn secondary" id="viscora-share-cancel" style="padding: 8px 16px; font-size: 0.85rem; width: 100%;">İPTAL</button>
+                </div>
+            `;
+            
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+
+            const updateBtn = modal.querySelector('#viscora-share-update');
+            const newBtn = modal.querySelector('#viscora-share-new');
+            const cancelBtn = modal.querySelector('#viscora-share-cancel');
+            
+            updateBtn.focus();
+            
+            updateBtn.addEventListener('click', () => {
+                overlay.remove();
+                if (onUpdate) onUpdate();
+            });
+            
+            newBtn.addEventListener('click', () => {
+                overlay.remove();
+                if (onPublishNew) onPublishNew();
+            });
+            
+            cancelBtn.addEventListener('click', () => {
+                overlay.remove();
+                if (onCancel) onCancel();
             });
         };
 
@@ -796,7 +843,7 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v109"></script>
-    <script type="module" src="js/main.js?v=v109"></script>
+    <script src="js/controls_customizer.js?v=v110"></script>
+    <script type="module" src="js/main.js?v=v110"></script>
 </body>
 </html>

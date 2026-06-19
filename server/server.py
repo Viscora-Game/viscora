@@ -269,6 +269,62 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 else:
                     self.send_response(404)
                     self.end_headers()
+        # 4. Harita güncelleme: POST /api/levels/<id>/update
+        elif path.startswith('/api/levels/') and path.endswith('/update'):
+            parts = path.split('/')
+            if len(parts) >= 4:
+                level_id = parts[3]
+                creator_id = body.get('creatorId', '')
+                new_data = body.get('data')
+                new_name = body.get('name')
+                
+                if not new_data:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write('{"error": "Güncellenecek veri bulunamadı."}'.encode('utf-8'))
+                    return
+                    
+                db = read_db()
+                found = None
+                for level in db:
+                    if level['id'] == level_id:
+                        found = level
+                        break
+                        
+                if found:
+                    # Sahibi kontrolü
+                    if found.get('creatorId') != creator_id:
+                        self.send_response(403)
+                        self.send_header('Content-Type', 'application/json; charset=utf-8')
+                        self.end_headers()
+                        self.wfile.write('{"error": "Bu bölümü güncelleme izniniz yok."}'.encode('utf-8'))
+                        return
+                    
+                    # Eğer isim değiştiyse ve çakışma varsa kontrol et
+                    if new_name and new_name.strip().lower() != found.get('name', '').strip().lower():
+                        for level in db:
+                            if level['id'] != level_id and level.get('name', '').strip().lower() == new_name.strip().lower():
+                                self.send_response(409)
+                                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                                self.end_headers()
+                                self.wfile.write('{"error": "Bu bölüm adı zaten mevcut."}'.encode('utf-8'))
+                                return
+                        found['name'] = new_name.strip()
+                        
+                    found['data'] = new_data
+                    
+                    if write_db(db):
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'application/json; charset=utf-8')
+                        self.end_headers()
+                        self.wfile.write(json.dumps(found, ensure_ascii=False).encode('utf-8'))
+                    else:
+                        self.send_response(500)
+                        self.end_headers()
+                else:
+                    self.send_response(404)
+                    self.end_headers()
+                    self.wfile.write('{"error": "Harita bulunamadı."}'.encode('utf-8'))
             else:
                 self.send_response(400)
                 self.end_headers()
