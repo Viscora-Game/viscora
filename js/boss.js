@@ -473,7 +473,7 @@ export class Boss {
                             
                             // Shatter the block immediately on impact for satisfying visual feedback
                             block.broken = true;
-                            block.respawnTimer = 1200; // 20 seconds respawn (1200 frames at 60fps)
+                            block.respawnTimer = 600; // 10 seconds respawn (600 frames at 60fps)
                             audio.playBlockPush();
                             if (player.game) {
                                 player.game.shakeCamera(5, 8);
@@ -505,7 +505,7 @@ export class Boss {
                 if (distance < this.radius) {
                     // Shatter the block!
                     block.broken = true;
-                    block.respawnTimer = 1200; // 20 seconds (1200 frames at 60fps)
+                    block.respawnTimer = 600; // 10 seconds (600 frames at 60fps)
                     audio.playBlockPush(); // Play sound effect
                     
                     // Emit slate/debris colored particles
