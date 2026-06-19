@@ -1336,7 +1336,7 @@ export class GameManager {
                     const isHardcoreMode = (this.difficulty === 'hardcore');
 
                     if (btnContinue) {
-                        if (this.levelDeaths >= 3 && !this.rewardedContinueUsed && !isHardcoreMode && !isCustom) {
+                        if (this.levelDeaths >= 4 && !this.rewardedContinueUsed && !isHardcoreMode && !isCustom) {
                             btnContinue.classList.remove('hidden');
                         } else {
                             btnContinue.classList.add('hidden');
@@ -1344,7 +1344,7 @@ export class GameManager {
                     }
                     if (btnSkip) {
                         const maxLvl = 30;
-                        if (this.levelDeaths >= 5 && !this.rewardedSkipUsed && !isHardcoreMode && !isCustom && this.currentLevel < maxLvl) {
+                        if (this.levelDeaths >= 7 && !this.rewardedSkipUsed && !isHardcoreMode && !isCustom && this.currentLevel < maxLvl) {
                             btnSkip.classList.remove('hidden');
                         } else {
                             btnSkip.classList.add('hidden');
