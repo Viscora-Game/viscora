@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v104';
-import { Level } from './level.js?v=v104';
-import { Enemy, GelChaser } from './enemies.js?v=v104';
-import { UIManager } from './ui.js?v=v104';
-import { audio } from './audio.js?v=v104';
-import { LevelEditor } from './editor.js?v=v104';
-import { Boss, CyberBoss } from './boss.js?v=v104';
+import { Player } from './player.js?v=v105';
+import { Level } from './level.js?v=v105';
+import { Enemy, GelChaser } from './enemies.js?v=v105';
+import { UIManager } from './ui.js?v=v105';
+import { audio } from './audio.js?v=v105';
+import { LevelEditor } from './editor.js?v=v105';
+import { Boss, CyberBoss } from './boss.js?v=v105';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -106,6 +106,10 @@ export class GameManager {
         this.levelDeaths = 0;       // Mevcut bölümdeki ölüm sayacı
         this.hintTimer = 0;         // İpucu gösterim sayacı (frame)
         this.hintMaxTime = 180;     // İpucu toplam süresi (~3 saniye)
+
+        // Ödüllü Reklam Bayrakları
+        this.rewardedContinueUsed = false;  // Bu bölümde devam hakkı kullanıldı mı?
+        this.rewardedSkipUsed = false;      // Bu bölümde atlama hakkı kullanıldı mı?
 
         // Zaman Takibi
         this.lastTime = 0;
@@ -468,6 +472,8 @@ export class GameManager {
         if (showTitleCard) {
             this.levelDeaths = 0; // Sadece yeni bölümde ölüm sayacını sıfırla
             this.hintTimer = LEVEL_HINTS[this.currentLevel] ? this.hintMaxTime : 0;
+            this.rewardedContinueUsed = false;
+            this.rewardedSkipUsed = false;
         }
         this.level.loadLevel(this.currentLevel);
         this.initBackgroundCells(); // Refresh theme-specific decoration layout for this level
@@ -568,6 +574,149 @@ export class GameManager {
                 this.start(false);
             }
         }
+    }
+
+    /**
+     * Ödüllü Reklam: Checkpoint'ten Full Canla Devam Et
+     * Oyuncu reklam izledikten sonra son checkpoint'inden tam canla başlar.
+     */
+    rewardedContinue() {
+        const game = this;
+        adBreak({
+            type: 'reward',
+            name: 'rewarded-continue',
+            beforeAd: () => {
+                // Reklam başlamadan önce sesi kapat
+                audio.suspend();
+            },
+            afterAd: () => {
+                // Reklam bittikten sonra sesi aç
+                audio.resume();
+            },
+            adDismissed: () => {
+                // Oyuncu reklamı manuel kapattı — ödül verilmez
+                audio.resume();
+            },
+            adViewed: () => {
+                // Reklam başarıyla tamamlandı — ödülü ver
+                game.rewardedContinueUsed = true;
+                game.state = 'PLAYING';
+                game.particles = [];
+                game.splatters = [];
+                game.level.resetLevelRuntimeState();
+                game.initEnemies(game.currentLevel);
+                game.bossRespawnsUsed = 0;
+                if (game.currentLevel === 10) {
+                    game.boss = new Boss(1200, 300);
+                } else if (game.currentLevel === 20) {
+                    game.boss = new CyberBoss(1200, 300);
+                }
+                let maxH = 3;
+                if (game.difficulty === 'easy') maxH = 3;
+                else if (game.difficulty === 'normal') maxH = 3;
+                else if (game.difficulty === 'hard') maxH = 2;
+                game.player.maxHealth = maxH;
+                game.player.health = maxH; // Full can
+                game.player.respawn(game.checkpointX, game.checkpointY, maxH);
+                game.ui.showScreen('hud');
+                game.ui.updateHUDHealth(game.player.health);
+                game.ui.updateHUDViscosity(game.player.viscosity);
+                game.emitParticles(game.checkpointX, game.checkpointY, 'shift', '#f59e0b', 30);
+                audio.playShift('LOW');
+                game.lastTime = performance.now();
+                game.physicsAccumulator = 0;
+            },
+            adBreakDone: (info) => {
+                // SDK hazır değilse veya reklam bulunamadıysa da ödülü ver (test ortamı)
+                if (info.breakStatus === 'notReady' || info.breakStatus === 'frequencyCapped' || info.breakStatus === 'other') {
+                    game.rewardedContinueUsed = true;
+                    game.state = 'PLAYING';
+                    game.particles = [];
+                    game.splatters = [];
+                    game.level.resetLevelRuntimeState();
+                    game.initEnemies(game.currentLevel);
+                    game.bossRespawnsUsed = 0;
+                    if (game.currentLevel === 10) {
+                        game.boss = new Boss(1200, 300);
+                    } else if (game.currentLevel === 20) {
+                        game.boss = new CyberBoss(1200, 300);
+                    }
+                    let maxH = 3;
+                    if (game.difficulty === 'easy') maxH = 3;
+                    else if (game.difficulty === 'normal') maxH = 3;
+                    else if (game.difficulty === 'hard') maxH = 2;
+                    game.player.maxHealth = maxH;
+                    game.player.health = maxH;
+                    game.player.respawn(game.checkpointX, game.checkpointY, maxH);
+                    game.ui.showScreen('hud');
+                    game.ui.updateHUDHealth(game.player.health);
+                    game.ui.updateHUDViscosity(game.player.viscosity);
+                    game.emitParticles(game.checkpointX, game.checkpointY, 'shift', '#f59e0b', 30);
+                    audio.resume();
+                    game.lastTime = performance.now();
+                    game.physicsAccumulator = 0;
+                }
+            }
+        });
+    }
+
+    /**
+     * Ödüllü Reklam: Bölümü Atla
+     * Oyuncu reklam izledikten sonra bir sonraki bölüme geçer (0 yıldız).
+     */
+    rewardedSkipLevel() {
+        const game = this;
+        adBreak({
+            type: 'reward',
+            name: 'rewarded-skip-level',
+            beforeAd: () => {
+                audio.suspend();
+            },
+            afterAd: () => {
+                audio.resume();
+            },
+            adDismissed: () => {
+                audio.resume();
+            },
+            adViewed: () => {
+                // Reklam başarıyla tamamlandı — bölümü atla
+                game.rewardedSkipUsed = true;
+                // İlerlemeyi kaydet (0 yıldız)
+                try {
+                    let progress = JSON.parse(localStorage.getItem('viscora_progress') || '{}');
+                    const lvlKey = 'level_' + game.currentLevel;
+                    if (!progress[lvlKey]) {
+                        progress[lvlKey] = { stars: 0, completed: true, skipped: true };
+                    }
+                    // Sonraki bölümün kilidini de aç
+                    const nextLvlKey = 'level_' + (game.currentLevel + 1);
+                    if (!progress[nextLvlKey]) {
+                        progress[nextLvlKey] = { unlocked: true };
+                    }
+                    localStorage.setItem('viscora_progress', JSON.stringify(progress));
+                } catch(e) { /* localStorage hatası yoksay */ }
+                game.nextLevel();
+            },
+            adBreakDone: (info) => {
+                // SDK hazır değilse de ödülü ver (test ortamı)
+                if (info.breakStatus === 'notReady' || info.breakStatus === 'frequencyCapped' || info.breakStatus === 'other') {
+                    game.rewardedSkipUsed = true;
+                    try {
+                        let progress = JSON.parse(localStorage.getItem('viscora_progress') || '{}');
+                        const lvlKey = 'level_' + game.currentLevel;
+                        if (!progress[lvlKey]) {
+                            progress[lvlKey] = { stars: 0, completed: true, skipped: true };
+                        }
+                        const nextLvlKey = 'level_' + (game.currentLevel + 1);
+                        if (!progress[nextLvlKey]) {
+                            progress[nextLvlKey] = { unlocked: true };
+                        }
+                        localStorage.setItem('viscora_progress', JSON.stringify(progress));
+                    } catch(e) {}
+                    game.nextLevel();
+                }
+            }
+        });
     }
 
     /**
@@ -1179,6 +1328,29 @@ export class GameManager {
 
                 if (!usedRespawn) {
                     this.state = 'GAMEOVER';
+
+                    // Ödüllü reklam butonlarının görünürlüğünü ayarla
+                    const btnContinue = document.getElementById('btn-rewarded-continue');
+                    const btnSkip = document.getElementById('btn-rewarded-skip');
+                    const isCustom = (this.currentLevel === 999);
+                    const isHardcoreMode = (this.difficulty === 'hardcore');
+
+                    if (btnContinue) {
+                        if (this.levelDeaths >= 3 && !this.rewardedContinueUsed && !isHardcoreMode && !isCustom) {
+                            btnContinue.classList.remove('hidden');
+                        } else {
+                            btnContinue.classList.add('hidden');
+                        }
+                    }
+                    if (btnSkip) {
+                        const maxLvl = 30;
+                        if (this.levelDeaths >= 5 && !this.rewardedSkipUsed && !isHardcoreMode && !isCustom && this.currentLevel < maxLvl) {
+                            btnSkip.classList.remove('hidden');
+                        } else {
+                            btnSkip.classList.add('hidden');
+                        }
+                    }
+
                     this.ui.showScreen('gameover');
                     this.ui.resetKeys();
                 }
@@ -1741,7 +1913,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v104', this.cssWidth - 10, 10);
+        this.ctx.fillText('v105', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {

@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v104';
-import { ViscosityList } from './viscosity.js?v=v104';
+import { audio } from './audio.js?v=v105';
+import { ViscosityList } from './viscosity.js?v=v105';
 
 export class UIManager {
     constructor(game) {
@@ -492,6 +492,16 @@ export class UIManager {
         // Başlangıçta ses durumlarını UI ile senkronize et
         updateMusicUI(Math.round(audio.musicVolumeLevel * 100), audio.isMusicMuted);
         updateSfxUI(Math.round(audio.sfxVolumeLevel * 100), audio.isSfxMuted);
+
+        // Ödüllü Reklam: Devam Et (Checkpoint'ten Full Canla)
+        this.bindTouchClick(document.getElementById('btn-rewarded-continue'), () => {
+            this.game.rewardedContinue();
+        });
+
+        // Ödüllü Reklam: Bölümü Atla
+        this.bindTouchClick(document.getElementById('btn-rewarded-skip'), () => {
+            this.game.rewardedSkipLevel();
+        });
 
         // Oyun Bitti Ekranı - Yeniden Dene
         this.bindTouchClick(document.getElementById('btn-retry'), () => {
