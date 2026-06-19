@@ -519,6 +519,44 @@ export class LevelEditor {
     }
 
     /**
+     * Editörden çıkıp doğrudan ana menüye döner (Sayfa yenilemeden)
+     */
+    exitEditorToMenu() {
+        this.active = false;
+        
+        // Remove panel from DOM
+        if (this.panel) {
+            this.panel.remove();
+            this.panel = null;
+        }
+
+        // Remove custom styles
+        const styles = document.getElementById('editor-custom-styles');
+        if (styles) styles.remove();
+
+        // Restore UI screens
+        this.showAllScreens();
+
+        // Reset cursor
+        this.game.canvas.style.cursor = 'default';
+
+        // Set game state and transition to main menu screen
+        this.game.state = 'MENU';
+        this.game.ui.showScreen('start');
+        
+        // Clean the ?editor=true parameter from URL without reloading
+        if (window.location.search.includes('editor=true')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        // Restart menu music if audio is initialized
+        if (typeof audio !== 'undefined' && audio.init) {
+            audio.init();
+            audio.startMusic();
+        }
+    }
+
+    /**
      * Editör UI Sidebar panelini kurar
      */
     createEditorUI() {
@@ -793,9 +831,7 @@ export class LevelEditor {
 
         document.getElementById('editor-exit-btn').addEventListener('click', () => {
             if (confirm('Editörden çıkıp ana menüye dönmek istiyor musunuz? Kaydedilmemiş değişiklikler kaybolabilir.')) {
-                this.deactivate();
-                // Clean the ?editor=true parameter from URL and reload to main menu
-                window.location.href = window.location.origin + window.location.pathname;
+                this.exitEditorToMenu();
             }
         });
 
