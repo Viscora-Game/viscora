@@ -1,6 +1,10 @@
 import { audio } from './audio.js?v=v105';
 import { ViscosityList } from './viscosity.js?v=v105';
 
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? ''
+    : 'https://viscora.onrender.com';
+
 export class UIManager {
     constructor(game) {
         this.game = game;
@@ -621,7 +625,7 @@ export class UIManager {
             listEl.innerHTML = '<div class="no-maps">Yükleniyor...</div>';
 
             try {
-                const res = await fetch(`/api/levels?sort=${sortType}`);
+                const res = await fetch(`${API_BASE}/api/levels?sort=${sortType}`);
                 if (!res.ok) throw new Error("Sunucu hatası.");
                 const levels = await res.json();
 
@@ -663,7 +667,7 @@ export class UIManager {
                         if (likedMaps.includes(level.id)) return;
                         
                         try {
-                            const likeRes = await fetch(`/api/levels/${level.id}/like`, { method: 'POST' });
+                            const likeRes = await fetch(`${API_BASE}/api/levels/${level.id}/like`, { method: 'POST' });
                             if (likeRes.ok) {
                                 const updated = await likeRes.json();
                                 const countEl = item.querySelector(`#likes-${level.id}`);

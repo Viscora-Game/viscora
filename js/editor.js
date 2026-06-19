@@ -7,6 +7,10 @@ import { Enemy, GelChaser } from './enemies.js?v=v105';
 import { audio } from './audio.js?v=v105';
 import { LevelGenerator } from './generator.js?v=v105';
 
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? ''
+    : 'https://viscora.onrender.com';
+
 export class LevelEditor {
     constructor(game) {
         this.game = game;
@@ -1961,7 +1965,7 @@ export class LevelEditor {
         const exportObj = this.getLevelDataObj();
 
         // Sunucuya gönder
-        fetch('/api/levels', {
+        fetch(`${API_BASE}/api/levels`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
