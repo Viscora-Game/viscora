@@ -612,12 +612,37 @@ export class GameManager {
     _executeRewardedContinue() {
         this.rewardedContinueUsed = true;
 
-        // Eğer checkpoint hâlâ spawn noktasıysa (checkpoint yok), %50 noktasını bul
+        // Reklam izlendiğinde en yakın checkpoint'i bul ve oraya at (doğrudan değmemiş olsa bile)
+        if (this.level.checkpoints && this.level.checkpoints.length > 0) {
+            let closestCp = null;
+            let minDistance = Infinity;
+            this.level.checkpoints.forEach(cp => {
+                const dx = this.player.x - cp.x;
+                const dy = this.player.y - cp.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    closestCp = cp;
+                }
+            });
+            if (closestCp) {
+                // Oyuncu checkpoint'i geçmişse VEYA checkpoint'e çok yakınsa (en fazla 200px gerisindeyse)
+                if (this.player.x >= closestCp.x - 200) {
+                    this.checkpointX = closestCp.x;
+                    this.checkpointY = closestCp.y;
+                }
+            }
+        }
+
+        // Eğer checkpoint hâlâ spawn noktasıysa (checkpoint yoksa veya henüz ilkine ulaşılmamışsa), sadece bölümün kendi checkpoint'i yoksa %50 noktasını bul
         if (this.checkpointX === this.level.spawnX && this.checkpointY === this.level.spawnY) {
-            const midPoint = this._findMidLevelSafePoint();
-            if (midPoint) {
-                this.checkpointX = midPoint.x;
-                this.checkpointY = midPoint.y;
+            const hasCheckpoints = this.level.checkpoints && this.level.checkpoints.length > 0;
+            if (!hasCheckpoints) {
+                const midPoint = this._findMidLevelSafePoint();
+                if (midPoint) {
+                    this.checkpointX = midPoint.x;
+                    this.checkpointY = midPoint.y;
+                }
             }
         }
 
