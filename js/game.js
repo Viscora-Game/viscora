@@ -1357,7 +1357,7 @@ export class GameManager {
         }
 
         // --- OYUN BİTTİ (ÖLÜM) KONTROLÜ ---
-        if (this.player.isDead) {
+        if (this.player.isDead && this.state === 'PLAYING') {
             // Eğer erime animasyonu varsa, animasyon bitene kadar gameover ekranını beklet
             if (this.player.deathType === 'melt' && this.player.meltTimer > 0) {
                 // Not: Oyuncu güncellenmesi döngünün yukarısında zaten yapıldığı için
@@ -1467,7 +1467,7 @@ export class GameManager {
                     }
                     if (btnSkip) {
                         const maxLvl = 30;
-                        const isBossLevel = (this.currentLevel === 10 || this.currentLevel === 20);
+                        const isBossLevel = this.isBossLevel();
                         const deathThreshold = isBossLevel ? 10 : 7;
                         btnSkip.style.display = (this.levelDeaths >= deathThreshold && !this.rewardedSkipUsed && !isHardcoreMode && !isCustom && this.currentLevel < maxLvl) ? '' : 'none';
                     }
