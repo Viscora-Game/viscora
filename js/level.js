@@ -6313,7 +6313,7 @@ export class Level {
         });
 
         // --- BİTİŞ PORTALINI ÇİZ ---
-        const isBossActive = game && (game.currentLevel === 10 || game.currentLevel === 20) && game.boss && !game.boss.isDead;
+        const isBossActive = game && game.isBossLevel && game.isBossLevel() && game.boss && !game.boss.isDead;
         if (!isBossActive) {
             ctx.save();
             const p = this.portal;

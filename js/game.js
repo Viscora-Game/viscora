@@ -447,6 +447,19 @@ export class GameManager {
         }
     }
 
+    getMappedLevel() {
+        let lvl = this.currentLevel;
+        if (typeof lvl === 'number' && lvl > 20 && lvl !== 999) {
+            return ((lvl - 1) % 20) + 1;
+        }
+        return lvl;
+    }
+
+    isBossLevel() {
+        const mapped = this.getMappedLevel();
+        return (mapped === 10 || mapped === 20);
+    }
+
     calculateStars() {
         let limit3Stars = 40;
         let limit2Stars = 50;
@@ -466,7 +479,7 @@ export class GameManager {
         }
 
         // Boss bölümlerinde süre limiti %30 artar
-        const isBossLevel = (this.currentLevel === 10 || this.currentLevel === 20 || this.boss !== null);
+        const isBossLevel = (this.isBossLevel() || this.boss !== null);
         if (isBossLevel) {
             limit3Stars *= 1.3;
             limit2Stars *= 1.3;
@@ -496,9 +509,10 @@ export class GameManager {
         this.level.loadLevel(this.currentLevel);
         this.initBackgroundCells(); // Refresh theme-specific decoration layout for this level
         this.initEnemies(this.currentLevel);
-        if (this.currentLevel === 10) {
+        const mappedLvl = this.getMappedLevel();
+        if (mappedLvl === 10) {
             this.boss = new Boss(1200, 300); // Boss spawn at x: 1200, y: 300
-        } else if (this.currentLevel === 20) {
+        } else if (mappedLvl === 20) {
             this.boss = new CyberBoss(1200, 300); // CyberBoss spawn at x: 1200, y: 300
         } else {
             this.boss = null;
@@ -570,9 +584,10 @@ export class GameManager {
             this.level.resetLevelRuntimeState();
             this.initEnemies(this.currentLevel);
             this.bossRespawnsUsed = 0;
-            if (this.currentLevel === 10) {
+            const mappedLvl = this.getMappedLevel();
+            if (mappedLvl === 10) {
                 this.boss = new Boss(1200, 300);
-            } else if (this.currentLevel === 20) {
+            } else if (mappedLvl === 20) {
                 this.boss = new CyberBoss(1200, 300);
             }
             let maxH = 3;
@@ -670,9 +685,10 @@ export class GameManager {
         this.level.resetLevelRuntimeState();
         this.initEnemies(this.currentLevel);
         this.bossRespawnsUsed = 0;
-        if (this.currentLevel === 10) {
+        const mappedLvl = this.getMappedLevel();
+        if (mappedLvl === 10) {
             this.boss = new Boss(1200, 300);
-        } else if (this.currentLevel === 20) {
+        } else if (mappedLvl === 20) {
             this.boss = new CyberBoss(1200, 300);
         }
         let maxH = 3;
