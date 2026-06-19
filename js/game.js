@@ -448,14 +448,32 @@ export class GameManager {
     }
 
     calculateStars() {
-        let limit = 37.5;
-        if (this.difficulty === 'easy') limit = 30;
-        else if (this.difficulty === 'normal') limit = 37.5;
-        else if (this.difficulty === 'hard') limit = 45;
-        else if (this.difficulty === 'hardcore') limit = 60;
+        let limit3Stars = 40;
+        let limit2Stars = 50;
 
-        if (this.gameTime <= limit) return 3;
-        if (this.gameTime <= limit * 1.5) return 2;
+        if (this.difficulty === 'easy') {
+            limit3Stars = 45;
+            limit2Stars = 55;
+        } else if (this.difficulty === 'normal') {
+            limit3Stars = 40;
+            limit2Stars = 50;
+        } else if (this.difficulty === 'hard') {
+            limit3Stars = 52.5;
+            limit2Stars = 67.5;
+        } else if (this.difficulty === 'hardcore') {
+            limit3Stars = 67.5;
+            limit2Stars = 90;
+        }
+
+        // Boss bölümlerinde süre limiti %30 artar
+        const isBossLevel = (this.currentLevel === 10 || this.currentLevel === 20 || this.boss !== null);
+        if (isBossLevel) {
+            limit3Stars *= 1.3;
+            limit2Stars *= 1.3;
+        }
+
+        if (this.gameTime <= limit3Stars) return 3;
+        if (this.gameTime <= limit2Stars) return 2;
         return 1;
     }
 
