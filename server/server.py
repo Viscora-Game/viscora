@@ -5,7 +5,7 @@ import random
 import urllib.parse
 from datetime import datetime
 
-PORT = 8080
+PORT = int(os.environ.get('PORT', 8080))
 DB_FILE = os.path.join(os.path.dirname(__file__), 'db_maps.json')
 
 # Veritabanını hazırla
