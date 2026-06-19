@@ -134,6 +134,16 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 return
 
             db = read_db()
+            
+            # Bölüm adı çakışması kontrolü
+            for level in db:
+                if level.get('name', '').strip().lower() == name.strip().lower():
+                    self.send_response(409) # 409 Conflict
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write('{"error": "Bu bölüm adı zaten mevcut."}'.encode('utf-8'))
+                    return
+
             new_level = {
                 'id': f'map_{int(datetime.now().timestamp() * 1000)}_{random.randint(100, 999)}',
                 'name': name.strip(),

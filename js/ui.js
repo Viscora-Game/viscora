@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v105';
-import { ViscosityList } from './viscosity.js?v=v105';
+import { audio } from './audio.js?v=v106';
+import { ViscosityList } from './viscosity.js?v=v106';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -845,11 +845,19 @@ export class UIManager {
             this.bindTouchClick(btnDesignMap, () => {
                 const savedLevelData = localStorage.getItem('viscora_custom_level_999');
                 if (savedLevelData) {
-                    if (confirm("Kaldığınız yerden devam etmek ister misiniz? (Hayır derseniz mevcut tasarımınız silinip yeni bölüm oluşturulacaktır)")) {
-                        this.game.currentLevel = 999;
-                        this.game.editor.init();
-                        return;
-                    }
+                    showConfirmModal(
+                        "Kaldığınız yerden devam etmek ister misiniz? (Hayır derseniz mevcut tasarımınız silinip yeni bölüm oluşturulacaktır)",
+                        () => {
+                            this.game.currentLevel = 999;
+                            this.game.editor.init();
+                        },
+                        () => {
+                            if (txtDesignName) txtDesignName.value = '';
+                            if (selectDesignTheme) selectDesignTheme.value = 'neon_sewer';
+                            designSetupModal.classList.remove('hidden');
+                        }
+                    );
+                    return;
                 }
 
                 if (txtDesignName) txtDesignName.value = '';

@@ -2716,3 +2716,103 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         margin-top: 0.2rem !important;
     }
 }
+
+/* Custom Premium Alert & Confirm Modal */
+.viscora-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 10, 15, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 9999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: viscoraModalFadeIn 0.2s ease-out;
+    touch-action: none !important;
+}
+
+.viscora-modal {
+    background: rgba(18, 18, 28, 0.95);
+    border: 2px solid rgba(217, 70, 239, 0.4);
+    box-shadow: 0 0 30px rgba(217, 70, 239, 0.25);
+    border-radius: 12px;
+    padding: 24px;
+    width: 380px;
+    max-width: 90vw;
+    color: #f3f4f6;
+    font-family: 'Outfit', sans-serif;
+    text-align: center;
+    box-sizing: border-box;
+    animation: viscoraModalZoomIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    touch-action: none !important;
+}
+
+.viscora-modal-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #d946ef;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 8px rgba(217, 70, 239, 0.3);
+}
+
+.viscora-modal-message {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #cbd5e1;
+    margin-bottom: 20px;
+}
+
+.viscora-modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.viscora-modal-btn {
+    padding: 8px 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    outline: none;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.viscora-modal-btn.primary {
+    background: linear-gradient(135deg, #d946ef 0%, #a855f7 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 12px rgba(217, 70, 239, 0.2);
+}
+
+.viscora-modal-btn.primary:hover {
+    box-shadow: 0 4px 15px rgba(217, 70, 239, 0.4);
+    transform: translateY(-1px);
+}
+
+.viscora-modal-btn.secondary {
+    background: rgba(30, 41, 59, 0.6);
+    color: #cbd5e1;
+}
+
+.viscora-modal-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+@keyframes viscoraModalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes viscoraModalZoomIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}

@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v105">
+    <link rel="stylesheet" href="index.css?v=v106">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -28,6 +28,76 @@
     </script>
     <link rel="manifest" href="manifest.json">
     <script>
+        // Custom Premium Alert & Confirm Dialogs to bypass native browser alert/confirm domain prefixing
+        window.showAlertModal = function(msg) {
+            const existing = document.querySelector('.viscora-modal-overlay');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.className = 'viscora-modal-overlay';
+            
+            const modal = document.createElement('div');
+            modal.className = 'viscora-modal';
+            
+            modal.innerHTML = `
+                <div class="viscora-modal-title">⚡ BİLGİLENDİRME</div>
+                <div class="viscora-modal-message">${msg}</div>
+                <div class="viscora-modal-actions">
+                    <button class="viscora-modal-btn primary">TAMAM</button>
+                </div>
+            `;
+            
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+
+            const btn = modal.querySelector('.viscora-modal-btn');
+            btn.focus();
+            btn.addEventListener('click', () => {
+                overlay.remove();
+            });
+        };
+
+        window.showConfirmModal = function(msg, onYes, onNo) {
+            const existing = document.querySelector('.viscora-modal-overlay');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.className = 'viscora-modal-overlay';
+            
+            const modal = document.createElement('div');
+            modal.className = 'viscora-modal';
+            
+            modal.innerHTML = `
+                <div class="viscora-modal-title">❓ ONAY</div>
+                <div class="viscora-modal-message">${msg}</div>
+                <div class="viscora-modal-actions">
+                    <button class="viscora-modal-btn secondary" id="viscora-confirm-no">İPTAL</button>
+                    <button class="viscora-modal-btn primary" id="viscora-confirm-yes">EVET</button>
+                </div>
+            `;
+            
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+
+            const yesBtn = modal.querySelector('#viscora-confirm-yes');
+            const noBtn = modal.querySelector('#viscora-confirm-no');
+            
+            yesBtn.focus();
+            
+            yesBtn.addEventListener('click', () => {
+                overlay.remove();
+                if (onYes) onYes();
+            });
+            
+            noBtn.addEventListener('click', () => {
+                overlay.remove();
+                if (onNo) onNo();
+            });
+        };
+
+        // Override default window.alert globally
+        window.alert = window.showAlertModal;
+
         // Service Worker Kaydı (PWA & Offline Desteği + Otomatik Güncelleme)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -734,7 +804,7 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v105"></script>
-    <script type="module" src="js/main.js?v=v105"></script>
+    <script src="js/controls_customizer.js?v=v106"></script>
+    <script type="module" src="js/main.js?v=v106"></script>
 </body>
 </html>

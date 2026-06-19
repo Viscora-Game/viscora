@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v105';
-import { audio } from './audio.js?v=v105';
-import { LevelGenerator } from './generator.js?v=v105';
+import { Enemy, GelChaser } from './enemies.js?v=v106';
+import { audio } from './audio.js?v=v106';
+import { LevelGenerator } from './generator.js?v=v106';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -129,6 +129,19 @@ export class LevelEditor {
                 transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                 touch-action: pan-y !important;
                 -webkit-overflow-scrolling: touch;
+            }
+            #viscora-editor-panel::-webkit-scrollbar {
+                width: 6px !important;
+            }
+            #viscora-editor-panel::-webkit-scrollbar-track {
+                background: rgba(15, 23, 42, 0.4) !important;
+            }
+            #viscora-editor-panel::-webkit-scrollbar-thumb {
+                background: rgba(217, 70, 239, 0.4) !important;
+                border-radius: 3px !important;
+            }
+            #viscora-editor-panel::-webkit-scrollbar-thumb:hover {
+                background: rgba(217, 70, 239, 0.6) !important;
             }
             #viscora-editor-panel * {
                 touch-action: pan-y !important;
@@ -768,17 +781,6 @@ export class LevelEditor {
 
         document.getElementById('game-container').appendChild(this.panel);
 
-        // Touch events propagation blocker on panel to allow native scrolling and prevent panning the editor map
-        this.panel.addEventListener('touchstart', (e) => {
-            e.stopPropagation();
-        }, { passive: true });
-        this.panel.addEventListener('touchmove', (e) => {
-            e.stopPropagation();
-        }, { passive: true });
-        this.panel.addEventListener('touchend', (e) => {
-            e.stopPropagation();
-        }, { passive: true });
-
         // Olay Dinleyicileri Ekle
         this.panel.querySelectorAll('.editor-btn[data-tool]').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -824,15 +826,15 @@ export class LevelEditor {
         });
         document.getElementById('editor-share-btn').addEventListener('click', () => this.publishToCommunity());
         document.getElementById('editor-clear-btn').addEventListener('click', () => {
-            if (confirm('Bölümdeki tüm objeler silinecek! Emin misiniz?')) {
+            showConfirmModal('Bölümdeki tüm objeler silinecek! Emin misiniz?', () => {
                 this.clearLevel();
-            }
+            });
         });
 
         document.getElementById('editor-exit-btn').addEventListener('click', () => {
-            if (confirm('Editörden çıkıp ana menüye dönmek istiyor musunuz? Kaydedilmemiş değişiklikler kaybolabilir.')) {
+            showConfirmModal('Editörden çıkıp ana menüye dönmek istiyor musunuz? Kaydedilmemiş değişiklikler kaybolabilir.', () => {
                 this.exitEditorToMenu();
-            }
+            });
         });
 
         // Rastgele Seviye Üretme Butonu
@@ -2069,45 +2071,47 @@ export class LevelEditor {
      * Seviyeyi topluluk sunucusunda paylaşır
      */
     publishToCommunity() {
-        const mapName = this.game.level.name || "Özel Harita";
-        let authorName = localStorage.getItem('viscora_author_name') || '';
-        if (!authorName) {
-            authorName = prompt("Lütfen Yapımcı Adını Girin:", "Tasarımcı");
-            if (authorName === null) return;
-            authorName = authorName.trim();
-            if (!authorName) {
-                alert("Yapımcı adı boş olamaz!");
-                return;
-            }
-            localStorage.setItem('viscora_author_name', authorName);
-        }
+        showConfirmModal("Bölümünüzü paylaşmak istediğinize emin misiniz?", () => {
+            const mapName = this.game.level.name || "Özel Harita";
+            const authorName = localStorage.getItem('viscora_author_name') || "Tasarımcı";
+            const exportObj = this.getLevelDataObj();
+            const myUserId = localStorage.getItem('viscora_user_id') || 'anonymous';
 
-        const exportObj = this.getLevelDataObj();
-        const myUserId = localStorage.getItem('viscora_user_id') || 'anonymous';
-
-        // Sunucuya gönder
-        fetch(`${API_BASE}/api/levels`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                name: mapName,
-                author: authorName,
-                creatorId: myUserId,
-                data: exportObj
+            // Sunucuya gönder
+            fetch(`${API_BASE}/api/levels`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: mapName,
+                    author: authorName,
+                    creatorId: myUserId,
+                    data: exportObj
+                })
             })
-        })
-        .then(res => {
-            if (!res.ok) throw new Error("Sunucu hatası.");
-            return res.json();
-        })
-        .then(data => {
-            alert(`Haritanız "${data.name}" başarıyla topluluk sunucusunda paylaşıldı!`);
-        })
-        .catch(err => {
-            console.warn("Paylaşım hatası:", err);
-            alert("Harita paylaşılamadı. Sunucu uykuda olabilir veya geçici bir internet sorunu yaşanıyor olabilir. Lütfen birkaç saniye sonra tekrar deneyin!");
+            .then(async res => {
+                if (!res.ok) {
+                    let errMsg = "Sunucu hatası.";
+                    try {
+                        const errData = await res.json();
+                        if (errData && errData.error) errMsg = errData.error;
+                    } catch(e) {}
+                    throw new Error(errMsg);
+                }
+                return res.json();
+            })
+            .then(data => {
+                alert(`Haritanız "${data.name}" başarıyla topluluk sunucusunda paylaşıldı!`);
+            })
+            .catch(err => {
+                console.warn("Paylaşım hatası:", err);
+                if (err.message === "Bu bölüm adı zaten mevcut.") {
+                    alert("Bu bölüm adı zaten mevcut! Lütfen editörün 'Seviye & Izgara' ayarlarından farklı bir bölüm adı girip tekrar deneyin.");
+                } else {
+                    alert("Harita paylaşılamadı. Sunucu uykuda olabilir veya geçici bir internet sorunu yaşanıyor olabilir. Lütfen birkaç saniye sonra tekrar deneyin!");
+                }
+            });
         });
     }
 
