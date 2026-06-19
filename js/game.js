@@ -1372,7 +1372,9 @@ export class GameManager {
                     }
                     if (btnSkip) {
                         const maxLvl = 30;
-                        btnSkip.style.display = (this.levelDeaths >= 7 && !this.rewardedSkipUsed && !isHardcoreMode && !isCustom && this.currentLevel < maxLvl) ? '' : 'none';
+                        const isBossLevel = (this.currentLevel === 10 || this.currentLevel === 20);
+                        const deathThreshold = isBossLevel ? 10 : 7;
+                        btnSkip.style.display = (this.levelDeaths >= deathThreshold && !this.rewardedSkipUsed && !isHardcoreMode && !isCustom && this.currentLevel < maxLvl) ? '' : 'none';
                     }
 
                     this.ui.showScreen('gameover');

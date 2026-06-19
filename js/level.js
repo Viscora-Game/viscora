@@ -3490,8 +3490,8 @@ export class Level {
             });
         }
 
-        // Checkpoint çarpışma kontrolü (Sadece kolay modda)
-        if (this.checkpoints && player.game && player.game.difficulty === 'easy') {
+        // Checkpoint çarpışma kontrolü (Kolay, normal ve zor modda)
+        if (this.checkpoints && player.game && (player.game.difficulty === 'easy' || player.game.difficulty === 'normal' || player.game.difficulty === 'hard')) {
             this.checkpoints.forEach(cp => {
                 const dx = player.x - cp.x;
                 const dy = player.y - cp.y;
@@ -3502,9 +3502,12 @@ export class Level {
                         cp.activated = true;
                         player.game.checkpointX = cp.x;
                         player.game.checkpointY = cp.y;
-                        audio.playCollect();
-                        if (player.game.emitParticles) {
-                            player.game.emitParticles(cp.x, cp.y, 'shift', '#10b981', 15);
+                        // Sadece kolay modda ses ve parçacık efekti çıkar (Normal ve zor modda görünmez/sessiz)
+                        if (player.game.difficulty === 'easy') {
+                            audio.playCollect();
+                            if (player.game.emitParticles) {
+                                player.game.emitParticles(cp.x, cp.y, 'shift', '#10b981', 15);
+                            }
                         }
                     }
                 }
