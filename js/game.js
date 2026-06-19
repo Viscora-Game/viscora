@@ -1392,8 +1392,44 @@ export class GameManager {
                     const isCustom = (this.currentLevel === 999);
                     const isHardcoreMode = (this.difficulty === 'hardcore');
 
+                    let canContinueRewardingly = false;
+                    if (this.levelDeaths >= 4 && !this.rewardedContinueUsed && !isHardcoreMode && !isCustom) {
+                        let checkX = this.checkpointX;
+                        let checkY = this.checkpointY;
+                        if (this.level.checkpoints && this.level.checkpoints.length > 0) {
+                            let closestCp = null;
+                            let minDistance = Infinity;
+                            this.level.checkpoints.forEach(cp => {
+                                const dx = this.player.x - cp.x;
+                                const dy = this.player.y - cp.y;
+                                const dist = Math.sqrt(dx * dx + dy * dy);
+                                if (dist < minDistance) {
+                                    minDistance = dist;
+                                    closestCp = cp;
+                                }
+                            });
+                            if (closestCp && this.player.x >= closestCp.x - 200) {
+                                checkX = closestCp.x;
+                                checkY = closestCp.y;
+                            }
+                        }
+                        if (checkX === this.level.spawnX && checkY === this.level.spawnY) {
+                            const hasCheckpoints = this.level.checkpoints && this.level.checkpoints.length > 0;
+                            if (!hasCheckpoints) {
+                                const midPoint = this._findMidLevelSafePoint();
+                                if (midPoint) {
+                                    checkX = midPoint.x;
+                                    checkY = midPoint.y;
+                                }
+                            }
+                        }
+                        if (checkX !== this.level.spawnX || checkY !== this.level.spawnY) {
+                            canContinueRewardingly = true;
+                        }
+                    }
+
                     if (btnContinue) {
-                        btnContinue.style.display = (this.levelDeaths >= 4 && !this.rewardedContinueUsed && !isHardcoreMode && !isCustom) ? '' : 'none';
+                        btnContinue.style.display = canContinueRewardingly ? '' : 'none';
                     }
                     if (btnSkip) {
                         const maxLvl = 30;
