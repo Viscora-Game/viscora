@@ -349,6 +349,38 @@
             </div>
         </div>
 
+        <!-- Bölüm Tasarla Kurulum Modalı -->
+        <div id="design-setup-modal" class="star-gate-overlay hidden">
+            <div class="star-gate-card sound-settings-card" style="max-width: 450px;">
+                <h2 class="star-gate-title">🛠️ YENİ BÖLÜM TASARLA</h2>
+                <div class="menu-settings" style="display: flex; flex-direction: column; gap: 15px; width: 100%; margin: 20px 0;">
+                    
+                    <!-- Bölüm Adı Girişi -->
+                    <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; text-align: left;">
+                        <label for="txt-design-name" style="font-size: 0.95rem; color: var(--text-secondary); font-weight: 600;">BÖLÜM ADI</label>
+                        <input type="text" id="txt-design-name" placeholder="Bölümümün Adı" style="padding: 10px; border-radius: 4px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 0.95rem; width: 100%; box-sizing: border-box;">
+                    </div>
+                    
+                    <!-- Tema Seçimi -->
+                    <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; text-align: left;">
+                        <label for="select-design-theme" style="font-size: 0.95rem; color: var(--text-secondary); font-weight: 600;">GÖRSEL TEMA</label>
+                        <select id="select-design-theme" style="padding: 10px; border-radius: 4px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 0.95rem; width: 100%; box-sizing: border-box; cursor: pointer;">
+                            <option value="neon_sewer">🟢 Neon Kanalizasyon</option>
+                            <option value="toxic_lab">🟡 Toksik Laboratuvar</option>
+                            <option value="magma_core">🔴 Magma Çekirdeği</option>
+                            <option value="gravity_chasm">🟣 Yerçekimi Yarası</option>
+                        </select>
+                    </div>
+                    
+                </div>
+                
+                <div style="display: flex; gap: 10px; width: 100%;">
+                    <button id="btn-design-cancel" class="menu-btn" style="flex: 1; background: #334155;">İPTAL</button>
+                    <button id="btn-design-create" class="menu-btn primary-btn" style="flex: 1;">TASARLA</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Yıldız Kapısı Modalı (Boss bölümünü kilitli olduğunda gösterilir) -->
         <div id="star-gate-modal" class="star-gate-overlay hidden">
             <div class="star-gate-card">
@@ -681,10 +713,11 @@
                     <button id="btn-close-community" class="close-btn" type="button" aria-label="Kapat">❌</button>
                 </div>
                 
-                <!-- Sekmeler -->
-                <div class="community-tabs">
-                    <button class="community-tab-btn active" data-tab="popular">🔥 POPÜLER</button>
-                    <button class="community-tab-btn" data-tab="new">✨ EN YENİ</button>
+                <!-- Bölüm Tasarla Butonu -->
+                <div style="display: flex; justify-content: center; width: 100%; margin-bottom: 20px;">
+                    <button id="btn-design-map" class="menu-btn" style="padding: 12px 24px; font-size: 1.05rem; background: linear-gradient(135deg, #00f2fe, #4facfe); border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4); transition: transform 0.2s, box-shadow 0.2s; border-bottom: 2px solid rgba(0,0,0,0.2);">
+                        🛠️ Bölüm Tasarla
+                    </button>
                 </div>
                 
                 <!-- Harita Listesi Grid -->

@@ -705,7 +705,7 @@ export class UIManager {
                     <div class="no-maps" style="text-align: center; padding: 30px 10px;">
                         <p style="margin-bottom: 12px; color: #ff5555; font-weight: bold; font-size: 18px;">⚠️ Bağlantı Başarısız</p>
                         <p style="font-size: 14px; color: #ccc; margin-bottom: 20px; line-height: 1.5;">
-                            Sunucu uykuda olabilir (ücretsiz plan sebebiyle uyanması 30-50 saniye sürebilir).<br>
+                            Sunucu uyandırılıyor olabilir (ilk bağlantı 30-50 saniye sürebilir).<br>
                             Lütfen biraz bekleyip tekrar deneyin.
                         </p>
                         <button id="btn-retry-community" class="menu-btn" style="padding: 10px 20px; font-size: 14px; margin: 0 auto; display: block; background: linear-gradient(135deg, #ff007f, #7f00ff); border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);">
@@ -730,6 +730,63 @@ export class UIManager {
         if (btnCloseCommunity) {
             this.bindTouchClick(btnCloseCommunity, () => {
                 this.showScreen('start');
+            });
+        }
+
+        // --- BÖLÜM TASARLA KONTROLLERİ ---
+        const btnDesignMap = document.getElementById('btn-design-map');
+        const designSetupModal = document.getElementById('design-setup-modal');
+        const btnDesignCancel = document.getElementById('btn-design-cancel');
+        const btnDesignCreate = document.getElementById('btn-design-create');
+        const txtDesignName = document.getElementById('txt-design-name');
+        const selectDesignTheme = document.getElementById('select-design-theme');
+
+        if (btnDesignMap && designSetupModal) {
+            this.bindTouchClick(btnDesignMap, () => {
+                if (txtDesignName) txtDesignName.value = '';
+                if (selectDesignTheme) selectDesignTheme.value = 'neon_sewer';
+                designSetupModal.classList.remove('hidden');
+            });
+        }
+
+        if (btnDesignCancel && designSetupModal) {
+            this.bindTouchClick(btnDesignCancel, () => {
+                designSetupModal.classList.add('hidden');
+            });
+        }
+
+        if (btnDesignCreate && designSetupModal) {
+            this.bindTouchClick(btnDesignCreate, () => {
+                const name = txtDesignName ? txtDesignName.value.trim() : '';
+                if (!name) {
+                    alert("Lütfen bir bölüm adı girin!");
+                    return;
+                }
+                const themeId = selectDesignTheme ? selectDesignTheme.value : 'neon_sewer';
+
+                // Modalı kapat
+                designSetupModal.classList.add('hidden');
+                
+                // Boş bölüm verisi oluştur
+                const blankLevel = {
+                    name: name,
+                    themeId: themeId,
+                    width: 2000,
+                    height: 600,
+                    spawn: { x: 80, y: 350 },
+                    portal: { x: 1800, y: 380, w: 60, h: 80, angle: 0 },
+                    platforms: [
+                        { x: 0, y: 460, w: 400, h: 140, type: 'normal' },
+                        { x: 1700, y: 460, w: 300, h: 140, type: 'normal' }
+                    ]
+                };
+
+                // LocalStorage'a 999 olarak kaydet ki editor yükleyebilsin
+                localStorage.setItem('viscora_custom_level_999', JSON.stringify(blankLevel));
+                this.game.currentLevel = 999;
+                
+                // Editörü başlat
+                this.game.editor.init();
             });
         }
 
