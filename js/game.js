@@ -538,8 +538,7 @@ export class GameManager {
      * Oyunu Yeniden Başlatır (Ölüm veya Tekrar Oyna sonrası)
      */
     restart() {
-        // Ölüm sayacını artır ve her 3 ölümde bir ipucu göster
-        this.levelDeaths++;
+        // Her 3 ölümde bir ipucu göster (sayaç gameover geçişinde artırılıyor)
         if (this.levelDeaths % 3 === 0 && LEVEL_HINTS[this.currentLevel]) {
             this.hintTimer = this.hintMaxTime;
         } else {
@@ -1360,6 +1359,7 @@ export class GameManager {
 
                 if (!usedRespawn) {
                     this.state = 'GAMEOVER';
+                    this.levelDeaths++; // Ölüm sayacını gameover anında artır
 
                     // Ödüllü reklam butonlarının görünürlüğünü ayarla
                     const btnContinue = document.getElementById('btn-rewarded-continue');
