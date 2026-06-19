@@ -3,7 +3,7 @@ import json
 import os
 import random
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timezone
 
 PORT = int(os.environ.get('PORT', 8080))
 DB_FILE = os.path.join(os.path.dirname(__file__), 'db_maps.json')
@@ -103,12 +103,14 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
             response_db = []
             cleaned_db = []
             db_changed = False
-            now = datetime.now()
+            now = datetime.now(timezone.utc)
 
             for level in db:
                 played_str = level.get('lastPlayedAt') or level.get('createdAt')
                 try:
                     played_time = datetime.fromisoformat(played_str)
+                    if played_time.tzinfo is None:
+                        played_time = played_time.replace(tzinfo=timezone.utc)
                     age_seconds = (now - played_time).total_seconds()
                 except Exception:
                     age_seconds = 0
@@ -189,14 +191,14 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                     return
 
             new_level = {
-                'id': f'map_{int(datetime.now().timestamp() * 1000)}_{random.randint(100, 999)}',
+                'id': f'map_{int(datetime.now(timezone.utc).timestamp() * 1000)}_{random.randint(100, 999)}',
                 'name': name.strip(),
                 'author': author.strip(),
                 'creatorId': creator_id,
                 'data': data,
                 'likes': 0,
-                'createdAt': datetime.now().isoformat(),
-                'lastPlayedAt': datetime.now().isoformat()
+                'createdAt': datetime.now(timezone.utc).isoformat(),
+                'lastPlayedAt': datetime.now(timezone.utc).isoformat()
             }
             db.append(new_level)
 
@@ -251,7 +253,7 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 found = None
                 for level in db:
                     if level['id'] == level_id:
-                        level['lastPlayedAt'] = datetime.now().isoformat()
+                        level['lastPlayedAt'] = datetime.now(timezone.utc).isoformat()
                         found = level
                         break
 
