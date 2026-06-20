@@ -116,14 +116,15 @@ def is_offensive(text):
     # Kelimelere ayır
     words = re.findall(r'[a-z0-9]+', clean_text)
     
-    # Kısa/Özel kelimeler (birebir eşleşmesi gerekenler, örn. "sik" sıkıntı kelimesini engellememeli)
-    short_bad = {'amk', 'aq', 'sik', 'pic', 'got', 'oc', 'pust', 'puşt', 'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto', 'fetö'}
+    # Kısa/Özel kelimeler (birebir eşleşmesi gerekenler, örn. "sik" veya "am" tek başına engellenmeli ama "kamu", "sıkıntı" engellenmemeli)
+    short_bad = {'amk', 'aq', 'sik', 'am', 'got', 'göt', 'pic', 'piç', 'oc', 'pust', 'puşt', 'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto', 'fetö'}
     
     # Alt kelime olarak eşleşebilecek uzun/genel küfürler ve siyasi hassas kelimeler
     long_bad = {
         'yarrak', 'yarak', 'tassak', 'tasak', 'orospu', 'siktir', 'pezevenk', 'kahpe', 
-        'amcik', 'meme', 'fuck', 'bitch', 'kaltak', 'erdogan', 'erdoğan', 'pkk', 
-        'kilicdaroglu', 'kılıçdaroğlu', 'imamoglu', 'imamoğlu', 'ataturk', 'atatürk'
+        'amcik', 'amcık', 'meme', 'fuck', 'bitch', 'kaltak', 'erdogan', 'erdoğan', 'pkk', 
+        'kilicdaroglu', 'kılıçdaroğlu', 'imamoglu', 'imamoğlu', 'ataturk', 'atatürk',
+        'siken', 'domaltan', 'domalt'
     }
     
     for word in words:

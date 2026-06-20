@@ -56,6 +56,20 @@ def run_tests():
         ("şiktir", True), # turkish character variation
         ("pkk_sektörü", True), # substring match inside word
         ("kılıçdaroğlu_fan", True),
+
+        # Newly requested terms
+        ("am", True),
+        ("göt", True),
+        ("meme", True),
+        ("yarrak", True),
+        ("siken", True),
+        ("domaltan", True),
+        ("domaltma", True),
+        ("domaltan_harita", True),
+        ("siken_tasarimci", True),
+        ("a.m", True),
+        ("g.ö.t", True),
+        ("m.e.m.e", True),
     ]
 
     passed = 0

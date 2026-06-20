@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v118';
-import { audio } from './audio.js?v=v118';
-import { LevelGenerator } from './generator.js?v=v118';
+import { Enemy, GelChaser } from './enemies.js?v=v119';
+import { audio } from './audio.js?v=v119';
+import { LevelGenerator } from './generator.js?v=v119';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -25,11 +25,12 @@ function isOffensive(text) {
     
     const words = cleanText.match(/[a-z0-9]+/g) || [];
     
-    const shortBad = new Set(['amk', 'aq', 'sik', 'pic', 'got', 'oc', 'pust', 'puşt', 'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto', 'fetö']);
+    const shortBad = new Set(['amk', 'aq', 'sik', 'am', 'got', 'göt', 'pic', 'piç', 'oc', 'pust', 'puşt', 'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto', 'fetö']);
     const longBad = new Set([
         'yarrak', 'yarak', 'tassak', 'tasak', 'orospu', 'siktir', 'pezevenk', 'kahpe', 
-        'amcik', 'meme', 'fuck', 'bitch', 'kaltak', 'erdogan', 'erdoğan', 'pkk', 
-        'kilicdaroglu', 'kılıçdaroğlu', 'imamoglu', 'imamoğlu', 'ataturk', 'atatürk'
+        'amcik', 'amcık', 'meme', 'fuck', 'bitch', 'kaltak', 'erdogan', 'erdoğan', 'pkk', 
+        'kilicdaroglu', 'kılıçdaroğlu', 'imamoglu', 'imamoğlu', 'ataturk', 'atatürk',
+        'siken', 'domaltan', 'domalt'
     ]);
     
     const normalizedShortBad = Array.from(shortBad).map(word => {
