@@ -21,7 +21,15 @@ mongo_db_name = None
 
 if MONGO_URI:
     try:
-        from pymongo import MongoClient
+        try:
+            from pymongo import MongoClient
+        except ImportError:
+            import subprocess
+            import sys
+            print("pymongo modülü bulunamadı, çalışma zamanında yükleniyor...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "pymongo", "dnspython"])
+            from pymongo import MongoClient
+            
         client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
         # Veritabanı adını URI'den ayıkla, varsayılan 'viscora'
         db_name = 'viscora'

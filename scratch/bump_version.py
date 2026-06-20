@@ -1,7 +1,7 @@
 import os
 
-old_ver = 'v111'
-new_ver = 'v112'
+old_ver = 'v112'
+new_ver = 'v113'
 
 
 # 1. Update js/ files imports
