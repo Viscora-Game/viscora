@@ -1,5 +1,5 @@
-import { GameManager } from './game.js?v=v115';
-import { audio } from './audio.js?v=v115';
+import { GameManager } from './game.js?v=v116';
+import { audio } from './audio.js?v=v116';
 
 // Oyun Başlatma Girişi
 window.addEventListener('DOMContentLoaded', () => {
@@ -52,28 +52,11 @@ window.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('keydown', unlockAudio);
     }, 500);
 
-    // Mobil tam ekran desteği tetikleyicisi (Opsiyonel estetik iyileştirme)
-    const requestFullScreen = () => {
-        const doc = window.document;
-        const docEl = doc.documentElement;
-
-        const requestFullScreenFunc = docEl.requestFullscreen || 
-                                      docEl.mozRequestFullScreen || 
-                                      docEl.webkitRequestFullScreen || 
-                                      docEl.msRequestFullscreen;
-
-        if (requestFullScreenFunc && !doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-            requestFullScreenFunc.call(docEl).catch(err => {
-                console.log(`Tam ekrana geçiş hatası: ${err.message}`);
-            });
-        }
-    };
-
-    // OYNA butonuna basıldığında ses aktifleştirilir
+    // OYNA butonuna basıldığında ses aktifleştirilir (Tam ekran tetikleyicisi kaldırıldı)
     const playBtn = document.getElementById('btn-play');
     if (playBtn) {
         playBtn.addEventListener('click', () => {
-            requestFullScreen();
+            // Ses aktivasyonu click handler ile zaten gerçekleşiyor
         });
     }
 });
