@@ -131,17 +131,48 @@ class ShopManager {
         this.load();
     }
 
+    generateSignature(total, spent, ownedStr) {
+        const salt = "ViscoraSecretSaltKey_2026_xYz";
+        const str = `${total}_${spent}_${ownedStr}_${salt}`;
+        let hash1 = 5381;
+        let hash2 = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash1 = ((hash1 << 5) + hash1) + char;
+            hash2 = char + (hash2 << 6) + (hash2 << 16) - hash2;
+        }
+        return (hash1 >>> 0).toString(16) + (hash2 >>> 0).toString(16);
+    }
+
     load() {
         this.totalCrystals = parseInt(localStorage.getItem('viscora_total_crystals')) || 0;
         this.spentCrystals = parseInt(localStorage.getItem('viscora_spent_crystals')) || 0;
         
+        let ownedStr = localStorage.getItem('viscora_owned_items');
         try {
-            this.ownedItems = JSON.parse(localStorage.getItem('viscora_owned_items'));
+            this.ownedItems = JSON.parse(ownedStr);
         } catch (e) {
             this.ownedItems = null;
         }
         if (!Array.isArray(this.ownedItems)) {
             this.ownedItems = ['default_trail', 'default_glow', 'default_eyes'];
+            ownedStr = JSON.stringify(this.ownedItems);
+        }
+
+        // Validate local signature to prevent client-side hacks (F12 Console / Storage edits)
+        const storedSig = localStorage.getItem('viscora_balance_sig');
+        const expectedSig = this.generateSignature(this.totalCrystals, this.spentCrystals, ownedStr);
+        
+        if ((this.totalCrystals > 0 || this.ownedItems.length > 3) && storedSig !== expectedSig) {
+            console.warn("Kozmetik veri doğrulaması başarısız! Veriler sıfırlandı.");
+            this.totalCrystals = 0;
+            this.spentCrystals = 0;
+            this.ownedItems = ['default_trail', 'default_glow', 'default_eyes'];
+            this.activeTrail = 'default_trail';
+            this.activeGlow = 'default_glow';
+            this.activeEyes = 'default_eyes';
+            this.save();
+            return;
         }
 
         this.activeTrail = localStorage.getItem('viscora_active_trail') || 'default_trail';
@@ -150,9 +181,13 @@ class ShopManager {
     }
 
     save() {
+        const ownedStr = JSON.stringify(this.ownedItems);
+        const sig = this.generateSignature(this.totalCrystals, this.spentCrystals, ownedStr);
+        
         localStorage.setItem('viscora_total_crystals', this.totalCrystals);
         localStorage.setItem('viscora_spent_crystals', this.spentCrystals);
-        localStorage.setItem('viscora_owned_items', JSON.stringify(this.ownedItems));
+        localStorage.setItem('viscora_owned_items', ownedStr);
+        localStorage.setItem('viscora_balance_sig', sig);
         localStorage.setItem('viscora_active_trail', this.activeTrail);
         localStorage.setItem('viscora_active_glow', this.activeGlow);
         localStorage.setItem('viscora_active_eyes', this.activeEyes);

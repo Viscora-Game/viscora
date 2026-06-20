@@ -2162,26 +2162,37 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         grid-row: 3 !important;
         display: flex !important;
         flex-direction: row !important;
-        gap: 0.6rem !important;
+        gap: 0.4rem !important;
         width: 100% !important;
         max-width: none !important;
         margin: 0 !important;
     }
     
     #start-screen #btn-play {
-        flex: 1.2 !important; /* OYNA butonu biraz daha geniş */
+        flex: 1.2 !important;
         margin: 0 !important;
-        font-size: 0.95rem !important;
-        padding: 0.5rem 1rem !important;
+        font-size: 0.82rem !important;
+        padding: 0.5rem 0.4rem !important;
         border-radius: 10px !important;
+        white-space: nowrap !important;
     }
     
     #start-screen #btn-community {
-        flex: 1 !important;
+        flex: 1.8 !important;
         margin: 0 !important;
-        font-size: 0.8rem !important;
-        padding: 0.5rem 1.0rem !important;
+        font-size: 0.76rem !important;
+        padding: 0.5rem 0.4rem !important;
         border-radius: 10px !important;
+        white-space: nowrap !important;
+    }
+
+    #start-screen #btn-shop {
+        flex: 1.6 !important;
+        margin: 0 !important;
+        font-size: 0.76rem !important;
+        padding: 0.5rem 0.4rem !important;
+        border-radius: 10px !important;
+        white-space: nowrap !important;
     }
 }
 
