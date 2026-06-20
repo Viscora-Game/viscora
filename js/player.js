@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v123';
-import { audio } from './audio.js?v=v123';
+import { ViscosityStates } from './viscosity.js?v=v124';
+import { audio } from './audio.js?v=v124';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -1345,17 +1345,7 @@ export class Player {
             const b = Math.round(239 + (68 - 239) * this.flameHeat);
             ctx.shadowColor = `rgba(${r}, ${g}, ${b}, ${0.5 + this.flameHeat * 0.3})`;
         } else {
-            let glowColor = this.viscosity.color;
-            if (window.shopManager) {
-                const activeGlow = window.shopManager.getActiveCosmetic('glow');
-                if (activeGlow && activeGlow !== 'default_glow') {
-                    if (activeGlow === 'gold_glow') glowColor = '#f59e0b';
-                    else if (activeGlow === 'fire_glow') glowColor = '#ef4444';
-                    else if (activeGlow === 'diamond_glow') glowColor = '#38bdf8';
-                    else if (activeGlow === 'night_glow') glowColor = '#8b5cf6';
-                }
-            }
-            ctx.shadowColor = glowColor;
+            ctx.shadowColor = this.viscosity.color;
         }
         ctx.shadowBlur = totalGlow;
 
@@ -1428,7 +1418,7 @@ export class Player {
 
         ctx.fillStyle = '#ffffff';
         ctx.shadowColor = '#ffffff';
-        ctx.shadowBlur = activeEyes === 'pixel_eyes' ? 0 : 4;
+        ctx.shadowBlur = (activeEyes === 'sunglasses' || activeEyes === 'joke_glasses') ? 0 : 4;
 
         if (activeEyes === 'cute_eyes') {
             // İri Gözler
@@ -1454,41 +1444,93 @@ export class Player {
             ctx.arc(this.x - 7.5 + dx + dx*0.3, this.y - 4.5 + dy + dy*0.3, 0.8, 0, Math.PI * 2);
             ctx.arc(this.x + 4.5 + dx + dx*0.3, this.y - 4.5 + dy + dy*0.3, 0.8, 0, Math.PI * 2);
             ctx.fill();
-        } else if (activeEyes === 'focused_eyes') {
-            // Odaklanmış dar gözler
+        } else if (activeEyes === 'sunglasses') {
+            // Güneş Gözlüğü (Havalı siyah camlar)
+            ctx.fillStyle = '#1e293b';
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 1.2;
+            
+            // Sol cam (hafif açılı yuvarlatılmış dikdörtgen)
             ctx.beginPath();
-            if (ctx.ellipse) {
-                ctx.ellipse(this.x - 6 + dx, this.y - 3 + dy, 4, 1.2, 0, 0, Math.PI * 2);
+            if (ctx.roundRect) {
+                ctx.roundRect(this.x - 10 + dx, this.y - 5 + dy, 6, 4, 1);
             } else {
-                ctx.arc(this.x - 6 + dx, this.y - 3 + dy, 2, 0, Math.PI * 2);
+                ctx.rect(this.x - 10 + dx, this.y - 5 + dy, 6, 4);
             }
             ctx.fill();
+            ctx.stroke();
+            
+            // Sağ cam
+            ctx.beginPath();
+            if (ctx.roundRect) {
+                ctx.roundRect(this.x + 4 + dx, this.y - 5 + dy, 6, 4, 1);
+            } else {
+                ctx.rect(this.x + 4 + dx, this.y - 5 + dy, 6, 4);
+            }
+            ctx.fill();
+            ctx.stroke();
+            
+            // Köprü
+            ctx.beginPath();
+            ctx.moveTo(this.x - 4 + dx, this.y - 3 + dy);
+            ctx.lineTo(this.x + 4 + dx, this.y - 3 + dy);
+            ctx.stroke();
+            
+            // Gözlük parıltısı (Beyaz minik çizgi)
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(this.x - 9 + dx, this.y - 4 + dy);
+            ctx.lineTo(this.x - 7 + dx, this.y - 2 + dy);
+            ctx.moveTo(this.x + 5 + dx, this.y - 4 + dy);
+            ctx.lineTo(this.x + 7 + dx, this.y - 2 + dy);
+            ctx.stroke();
+        } else if (activeEyes === 'joke_glasses') {
+            // Şaka Gözlüğü (Kalın çerçeveler, pembe burun, bıyık)
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 1.5;
+            
+            // Kalın siyah çerçeveler (Gözler)
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(this.x - 6 + dx, this.y - 3 + dy, 4.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
             
             ctx.beginPath();
-            if (ctx.ellipse) {
-                ctx.ellipse(this.x + 6 + dx, this.y - 3 + dy, 4, 1.2, 0, 0, Math.PI * 2);
-            } else {
-                ctx.arc(this.x + 6 + dx, this.y - 3 + dy, 2, 0, Math.PI * 2);
-            }
+            ctx.arc(this.x + 6 + dx, this.y - 3 + dy, 4.2, 0, Math.PI * 2);
             ctx.fill();
+            ctx.stroke();
+            
+            // Göz bebekleri (Komik)
+            ctx.fillStyle = '#0a0a0f';
+            ctx.beginPath();
+            ctx.arc(this.x - 5.5 + dx, this.y - 3 + dy, 1.2, 0, Math.PI * 2);
+            ctx.arc(this.x + 5.5 + dx, this.y - 3 + dy, 1.2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Köprü
+            ctx.beginPath();
+            ctx.moveTo(this.x - 2 + dx, this.y - 4 + dy);
+            ctx.lineTo(this.x + 2 + dx, this.y - 4 + dy);
+            ctx.stroke();
 
-            // Göz bebekleri
-            ctx.fillStyle = '#0a0a0f';
-            ctx.shadowBlur = 0;
+            // Büyük Pembe Komik Burun
+            ctx.fillStyle = '#fb7185';
             ctx.beginPath();
-            ctx.arc(this.x - 6 + dx + dx*0.3, this.y - 3 + dy + dy*0.3, 0.8, 0, Math.PI * 2);
-            ctx.arc(this.x + 6 + dx + dx*0.3, this.y - 3 + dy + dy*0.3, 0.8, 0, Math.PI * 2);
+            ctx.arc(this.x + dx, this.y + 0.5 + dy, 3.2, 0, Math.PI * 2);
             ctx.fill();
-        } else if (activeEyes === 'pixel_eyes') {
-            // Piksel gözler
-            ctx.fillRect(this.x - 8.5 + dx, this.y - 5.5 + dy, 5, 5);
-            ctx.fillRect(this.x + 3.5 + dx, this.y - 5.5 + dy, 5, 5);
+            ctx.stroke();
             
-            // Göz bebekleri
-            ctx.fillStyle = '#0a0a0f';
-            ctx.shadowBlur = 0;
-            ctx.fillRect(this.x - 7.5 + dx + dx*0.3, this.y - 4.5 + dy + dy*0.3, 2, 2);
-            ctx.fillRect(this.x + 4.5 + dx + dx*0.3, this.y - 4.5 + dy + dy*0.3, 2, 2);
+            // Bıyık (Siyah kıvrım)
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.moveTo(this.x - 7 + dx, this.y + 4 + dy);
+            ctx.quadraticCurveTo(this.x - 3 + dx, this.y + 2 + dy, this.x + dx, this.y + 4.5 + dy);
+            ctx.quadraticCurveTo(this.x + 3 + dx, this.y + 2 + dy, this.x + 7 + dx, this.y + 4 + dy);
+            ctx.quadraticCurveTo(this.x + 4 + dx, this.y + 6.5 + dy, this.x + dx, this.y + 5.5 + dy);
+            ctx.quadraticCurveTo(this.x - 4 + dx, this.y + 6.5 + dy, this.x - 7 + dx, this.y + 4 + dy);
+            ctx.fill();
         } else {
             // Varsayılan / Kızgın
             ctx.beginPath();
@@ -1522,6 +1564,134 @@ export class Player {
                 ctx.lineTo(this.x + 2 + dx, this.y - 4 + dy);
                 ctx.stroke();
             }
+        }
+
+        // --- AKSESUARLAR (Şapkalar) ---
+        let activeAccessory = 'default_accessory';
+        if (window.shopManager) {
+            activeAccessory = window.shopManager.getActiveCosmetic('accessory') || 'default_accessory';
+        }
+
+        if (activeAccessory && activeAccessory !== 'default_accessory') {
+            ctx.save();
+            ctx.shadowBlur = 0; // Şapkada gölge parlaması olmasın
+            
+            const topX = this.x;
+            const topY = this.y - this.radius + 3; // Başın üst kenarına hafifçe gömülü dursun
+            
+            if (activeAccessory === 'cowboy_hat') {
+                // Kovboy Şapkası (Kahverengi)
+                ctx.fillStyle = '#78350f';
+                
+                // Şapka siperi (Brim)
+                ctx.beginPath();
+                if (ctx.ellipse) {
+                    ctx.ellipse(topX, topY, 15, 3, 0, 0, Math.PI * 2);
+                } else {
+                    ctx.arc(topX, topY, 8, 0, Math.PI * 2);
+                }
+                ctx.fill();
+                
+                // Şapka gövdesi (Crown)
+                ctx.beginPath();
+                ctx.moveTo(topX - 8, topY - 1);
+                ctx.quadraticCurveTo(topX - 8, topY - 10, topX - 5, topY - 11);
+                ctx.quadraticCurveTo(topX, topY - 8, topX + 5, topY - 11);
+                ctx.quadraticCurveTo(topX + 8, topY - 1, topX + 8, topY - 1);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Şapka şeridi (Siyah band)
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(topX - 8, topY - 3, 16, 2);
+            } else if (activeAccessory === 'wizard_hat') {
+                // Büyücü Şapkası (Mor & Altın Yıldızlı)
+                ctx.fillStyle = '#581c87';
+                
+                // Siper
+                ctx.beginPath();
+                if (ctx.ellipse) {
+                    ctx.ellipse(topX, topY, 14, 3, 0, 0, Math.PI * 2);
+                } else {
+                    ctx.arc(topX, topY, 8, 0, Math.PI * 2);
+                }
+                ctx.fill();
+                
+                // Koni
+                ctx.beginPath();
+                ctx.moveTo(topX - 8, topY - 1);
+                ctx.lineTo(topX + 8, topY - 1);
+                ctx.quadraticCurveTo(topX + 2, topY - 13, topX - 2, topY - 17);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Altın şerit
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillRect(topX - 6.5, topY - 3, 13, 2);
+                
+                // Yıldız ucu
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.arc(topX - 2, topY - 17.5, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (activeAccessory === 'crown') {
+                // Kral Tacı (Altın & Yakut)
+                ctx.fillStyle = '#f59e0b';
+                
+                // Gövde ve 3 sivri uç
+                ctx.beginPath();
+                ctx.moveTo(topX - 9, topY);
+                ctx.lineTo(topX - 9, topY - 5);
+                ctx.lineTo(topX - 5, topY - 2);
+                ctx.lineTo(topX, topY - 8);
+                ctx.lineTo(topX + 5, topY - 2);
+                ctx.lineTo(topX + 9, topY - 5);
+                ctx.lineTo(topX + 9, topY);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Yakut süslemeler (Kırmızı noktalar)
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(topX - 9, topY - 5, 1.2, 0, Math.PI * 2);
+                ctx.arc(topX, topY - 8, 1.2, 0, Math.PI * 2);
+                ctx.arc(topX + 9, topY - 5, 1.2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Mavi süslemeler (Bandın üzerinde)
+                ctx.fillStyle = '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(topX - 4, topY - 1.2, 1, 0, Math.PI * 2);
+                ctx.arc(topX + 4, topY - 1.2, 1, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (activeAccessory === 'santa_hat') {
+                // Noel Baba Şapkası (Kırmızı & Beyaz ponpon)
+                ctx.fillStyle = '#f1f5f9';
+                ctx.beginPath();
+                if (ctx.ellipse) {
+                    ctx.ellipse(topX, topY, 12, 3, 0, 0, Math.PI * 2);
+                } else {
+                    ctx.arc(topX, topY, 8, 0, Math.PI * 2);
+                }
+                ctx.fill();
+                
+                // Kırmızı gövde (Sağa bükülen)
+                ctx.fillStyle = '#dc2626';
+                ctx.beginPath();
+                ctx.moveTo(topX - 9, topY - 1);
+                ctx.lineTo(topX + 9, topY - 1);
+                ctx.quadraticCurveTo(topX + 3, topY - 13, topX + 11, topY - 9);
+                ctx.lineTo(topX + 6, topY - 5);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Beyaz ponpon
+                ctx.fillStyle = '#f1f5f9';
+                ctx.beginPath();
+                ctx.arc(topX + 11, topY - 9, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
         }
 
         ctx.restore();

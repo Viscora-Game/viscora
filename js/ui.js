@@ -1,6 +1,6 @@
-import { audio } from './audio.js?v=v123';
-import { ViscosityList } from './viscosity.js?v=v123';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v123';
+import { audio } from './audio.js?v=v124';
+import { ViscosityList } from './viscosity.js?v=v124';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v124';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -770,13 +770,18 @@ export class UIManager {
                             <div class="preview-trail-particle" style="background: #3b82f6; left: 34px; top: 18px; border-radius: 50%;"></div>
                         `;
                     }
-                } else if (item.category === 'glow') {
-                    let color = '#06b6d4';
-                    if (item.id === 'gold_glow') color = '#f59e0b';
-                    else if (item.id === 'fire_glow') color = '#ef4444';
-                    else if (item.id === 'diamond_glow') color = '#38bdf8';
-                    else if (item.id === 'night_glow') color = '#8b5cf6';
-                    previewHtml = `<div class="preview-glow-ring" style="color: ${color};"></div>`;
+                } else if (item.category === 'accessory') {
+                    if (item.id === 'cowboy_hat') {
+                        previewHtml = `<div style="font-size: 2.2rem; display: flex; align-items: center; justify-content: center; height: 100%;">🤠</div>`;
+                    } else if (item.id === 'wizard_hat') {
+                        previewHtml = `<div style="font-size: 2.2rem; display: flex; align-items: center; justify-content: center; height: 100%;">🧙</div>`;
+                    } else if (item.id === 'crown') {
+                        previewHtml = `<div style="font-size: 2.2rem; display: flex; align-items: center; justify-content: center; height: 100%;">👑</div>`;
+                    } else if (item.id === 'santa_hat') {
+                        previewHtml = `<div style="font-size: 2.2rem; display: flex; align-items: center; justify-content: center; height: 100%;">🎅</div>`;
+                    } else {
+                        previewHtml = `<div style="font-size: 1.5rem; color: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; height: 100%;">❌</div>`;
+                    }
                 } else if (item.category === 'eyes') {
                     if (item.id === 'cute_eyes') {
                         previewHtml = `
@@ -789,20 +794,10 @@ export class UIManager {
                                 </div>
                             </div>
                         `;
-                    } else if (item.id === 'focused_eyes') {
-                        previewHtml = `
-                            <div class="preview-eye-shape">
-                                <div style="width: 8px; height: 2.5px; background: #000; border-radius: 1px;"></div>
-                                <div style="width: 8px; height: 2.5px; background: #000; border-radius: 1px;"></div>
-                            </div>
-                        `;
-                    } else if (item.id === 'pixel_eyes') {
-                        previewHtml = `
-                            <div class="preview-eye-shape">
-                                <div style="width: 6px; height: 6px; background: #000; border-radius: 0;"></div>
-                                <div style="width: 6px; height: 6px; background: #000; border-radius: 0;"></div>
-                            </div>
-                        `;
+                    } else if (item.id === 'sunglasses') {
+                        previewHtml = `<div style="font-size: 2.2rem; display: flex; align-items: center; justify-content: center; height: 100%;">😎</div>`;
+                    } else if (item.id === 'joke_glasses') {
+                        previewHtml = `<div style="font-size: 2.2rem; display: flex; align-items: center; justify-content: center; height: 100%;">🥸</div>`;
                     } else if (item.id === 'angry_eyes') {
                         previewHtml = `
                             <div class="preview-eye-shape" style="flex-direction: column;">

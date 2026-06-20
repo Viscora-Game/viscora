@@ -41,46 +41,46 @@ export const SHOP_ITEMS = [
         config: { color: 'rainbow', type: 'trail' }
     },
 
-    // Glows
+    // Accessories
     {
-        id: 'default_glow',
-        name: 'Varsayılan Parlama',
-        category: 'glow',
+        id: 'default_accessory',
+        name: 'Aksesuar Yok',
+        category: 'accessory',
         price: 0,
-        description: 'Karakterin kendi renginde normal neon parlama.',
-        config: { color: 'default' }
+        description: 'Herhangi bir başlık veya şapka takmaz.',
+        config: { type: 'none' }
     },
     {
-        id: 'gold_glow',
-        name: '👑 Altın Aura',
-        category: 'glow',
+        id: 'cowboy_hat',
+        name: '🤠 Kovboy Şapkası',
+        category: 'accessory',
         price: 30,
-        description: 'Göz alıcı asil altın sarısı parıltı.',
-        config: { color: '#f59e0b' }
+        description: 'Vahşi batının efsanevi kovboy şapkası.',
+        config: { type: 'cowboy' }
     },
     {
-        id: 'fire_glow',
-        name: '🔥 Ateş Aurası',
-        category: 'glow',
+        id: 'wizard_hat',
+        name: '🧙 Büyücü Şapkası',
+        category: 'accessory',
         price: 30,
-        description: 'Radyaktif kırmızı renkte tehlikeli aura.',
-        config: { color: '#ef4444' }
+        description: 'Gizemli güçler barındıran büyücü şapkası.',
+        config: { type: 'wizard' }
     },
     {
-        id: 'diamond_glow',
-        name: '💎 Elmas Aura',
-        category: 'glow',
+        id: 'crown',
+        name: '👑 Kral Tacı',
+        category: 'accessory',
         price: 40,
-        description: 'Berrak ve parlak bir elmas mavisi ışık.',
-        config: { color: '#38bdf8' }
+        description: 'Viscora dünyasının gerçek yöneticilerine özel.',
+        config: { type: 'crown' }
     },
     {
-        id: 'night_glow',
-        name: '🌙 Gece Aurası',
-        category: 'glow',
+        id: 'santa_hat',
+        name: '🎅 Noel Şapkası',
+        category: 'accessory',
         price: 40,
-        description: 'Gizemli karanlık gecelerin kozmik mor aurası.',
-        config: { color: '#8b5cf6' }
+        description: 'Kırmızı, yumuşak ve şenlikli noel şapkası.',
+        config: { type: 'santa' }
     },
 
     // Eyes
@@ -109,20 +109,20 @@ export const SHOP_ITEMS = [
         config: { style: 'cute' }
     },
     {
-        id: 'focused_eyes',
-        name: '😎 Odaklanmış',
+        id: 'sunglasses',
+        name: '😎 Güneş Gözlüğü',
         category: 'eyes',
         price: 25,
-        description: 'Hız ve konsantrasyonu yansıtan dar bakışlar.',
-        config: { style: 'focused' }
+        description: 'Havalı ve tarz sahibi güneş gözlüğü.',
+        config: { style: 'sunglasses' }
     },
     {
-        id: 'pixel_eyes',
-        name: '🤖 Piksel Gözler',
+        id: 'joke_glasses',
+        name: '🥸 Şaka Gözlüğü',
         category: 'eyes',
         price: 30,
-        description: 'Retro tarzdaki kare 8-bit dijital gözler.',
-        config: { style: 'pixel' }
+        description: 'Büyük burunlu ve bıyıklı eğlenceli gözlük.',
+        config: { style: 'joke' }
     }
 ];
 
@@ -155,7 +155,7 @@ class ShopManager {
             this.ownedItems = null;
         }
         if (!Array.isArray(this.ownedItems)) {
-            this.ownedItems = ['default_trail', 'default_glow', 'default_eyes'];
+            this.ownedItems = ['default_trail', 'default_accessory', 'default_eyes'];
             ownedStr = JSON.stringify(this.ownedItems);
         }
 
@@ -167,17 +167,66 @@ class ShopManager {
             console.warn("Kozmetik veri doğrulaması başarısız! Veriler sıfırlandı.");
             this.totalCrystals = 0;
             this.spentCrystals = 0;
-            this.ownedItems = ['default_trail', 'default_glow', 'default_eyes'];
+            this.ownedItems = ['default_trail', 'default_accessory', 'default_eyes'];
             this.activeTrail = 'default_trail';
-            this.activeGlow = 'default_glow';
+            this.activeAccessory = 'default_accessory';
             this.activeEyes = 'default_eyes';
             this.save();
             return;
         }
 
         this.activeTrail = localStorage.getItem('viscora_active_trail') || 'default_trail';
-        this.activeGlow = localStorage.getItem('viscora_active_glow') || 'default_glow';
+        this.activeAccessory = localStorage.getItem('viscora_active_accessory') || localStorage.getItem('viscora_active_glow') || 'default_accessory';
         this.activeEyes = localStorage.getItem('viscora_active_eyes') || 'default_eyes';
+
+        // Migrate old glow and eye cosmetics to new accessories and glasses
+        let migrated = false;
+        const migrationMap = {
+            'default_glow': 'default_accessory',
+            'gold_glow': 'cowboy_hat',
+            'fire_glow': 'wizard_hat',
+            'diamond_glow': 'crown',
+            'night_glow': 'santa_hat',
+            'pixel_eyes': 'joke_glasses',
+            'focused_eyes': 'sunglasses'
+        };
+
+        for (let i = 0; i < this.ownedItems.length; i++) {
+            const oldId = this.ownedItems[i];
+            if (migrationMap[oldId]) {
+                const newId = migrationMap[oldId];
+                if (!this.ownedItems.includes(newId)) {
+                    this.ownedItems[i] = newId;
+                } else {
+                    this.ownedItems[i] = null;
+                }
+                migrated = true;
+            }
+        }
+        this.ownedItems = this.ownedItems.filter(item => item !== null);
+
+        if (migrationMap[this.activeAccessory]) {
+            this.activeAccessory = migrationMap[this.activeAccessory];
+            migrated = true;
+        }
+        if (migrationMap[this.activeEyes]) {
+            this.activeEyes = migrationMap[this.activeEyes];
+            migrated = true;
+        }
+
+        // Clean up any remaining default_glow references
+        if (this.ownedItems.includes('default_glow')) {
+            this.ownedItems = this.ownedItems.filter(item => item !== 'default_glow');
+            migrated = true;
+        }
+        if (!this.ownedItems.includes('default_accessory')) {
+            this.ownedItems.push('default_accessory');
+            migrated = true;
+        }
+
+        if (migrated) {
+            this.save();
+        }
     }
 
     save() {
@@ -189,7 +238,7 @@ class ShopManager {
         localStorage.setItem('viscora_owned_items', ownedStr);
         localStorage.setItem('viscora_balance_sig', sig);
         localStorage.setItem('viscora_active_trail', this.activeTrail);
-        localStorage.setItem('viscora_active_glow', this.activeGlow);
+        localStorage.setItem('viscora_active_accessory', this.activeAccessory);
         localStorage.setItem('viscora_active_eyes', this.activeEyes);
     }
 
@@ -230,8 +279,8 @@ class ShopManager {
 
         if (item.category === 'trail') {
             this.activeTrail = itemId;
-        } else if (item.category === 'glow') {
-            this.activeGlow = itemId;
+        } else if (item.category === 'accessory') {
+            this.activeAccessory = itemId;
         } else if (item.category === 'eyes') {
             this.activeEyes = itemId;
         }
@@ -239,13 +288,13 @@ class ShopManager {
         this.save();
         
         // Dispatch custom event to notify cosmetic changes
-        window.dispatchEvent(new CustomEvent('viscora_cosmetics_changed', { detail: { activeTrail: this.activeTrail, activeGlow: this.activeGlow, activeEyes: this.activeEyes } }));
+        window.dispatchEvent(new CustomEvent('viscora_cosmetics_changed', { detail: { activeTrail: this.activeTrail, activeAccessory: this.activeAccessory, activeEyes: this.activeEyes } }));
         return { success: true };
     }
 
     getActiveCosmetic(category) {
         if (category === 'trail') return this.activeTrail;
-        if (category === 'glow') return this.activeGlow;
+        if (category === 'accessory') return this.activeAccessory;
         if (category === 'eyes') return this.activeEyes;
         return 'default';
     }
