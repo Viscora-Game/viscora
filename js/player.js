@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v125';
-import { audio } from './audio.js?v=v125';
+import { ViscosityStates } from './viscosity.js?v=v126';
+import { audio } from './audio.js?v=v126';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -1605,7 +1605,7 @@ export class Player {
                 ctx.fillStyle = '#1e293b';
                 ctx.fillRect(topX - 8, topY - 3, 16, 2);
             } else if (activeAccessory === 'wizard_hat') {
-                // Büyücü Şapkası (Mor & Altın Yıldızlı)
+                // Büyücü Şapkası (Mor & Altın Yıldızlı) - Daha uzun ve belirgin
                 ctx.fillStyle = '#581c87';
                 
                 // Siper
@@ -1617,11 +1617,11 @@ export class Player {
                 }
                 ctx.fill();
                 
-                // Koni
+                // Koni (Daha yüksek)
                 ctx.beginPath();
                 ctx.moveTo(topX - 8, topY - 1);
                 ctx.lineTo(topX + 8, topY - 1);
-                ctx.quadraticCurveTo(topX + 2, topY - 13, topX - 2, topY - 17);
+                ctx.quadraticCurveTo(topX + 2, topY - 13, topX - 3, topY - 22);
                 ctx.closePath();
                 ctx.fill();
                 
@@ -1632,70 +1632,75 @@ export class Player {
                 // Yıldız ucu
                 ctx.fillStyle = '#fbbf24';
                 ctx.beginPath();
-                ctx.arc(topX - 2, topY - 17.5, 1.5, 0, Math.PI * 2);
+                ctx.arc(topX - 3, topY - 22.5, 1.8, 0, Math.PI * 2);
                 ctx.fill();
             } else if (activeAccessory === 'crown') {
-                // Kral Tacı (Altın & Yakut)
+                // Kral Tacı (Altın & Yakut) - Daha görkemli ve geniş
                 ctx.fillStyle = '#f59e0b';
                 
                 // Gövde ve 3 sivri uç
                 ctx.beginPath();
-                ctx.moveTo(topX - 9, topY);
-                ctx.lineTo(topX - 9, topY - 5);
-                ctx.lineTo(topX - 5, topY - 2);
-                ctx.lineTo(topX, topY - 8);
-                ctx.lineTo(topX + 5, topY - 2);
-                ctx.lineTo(topX + 9, topY - 5);
-                ctx.lineTo(topX + 9, topY);
+                ctx.moveTo(topX - 11, topY);
+                ctx.lineTo(topX - 11, topY - 6);
+                ctx.lineTo(topX - 6, topY - 2);
+                ctx.lineTo(topX, topY - 10);
+                ctx.lineTo(topX + 6, topY - 2);
+                ctx.lineTo(topX + 11, topY - 6);
+                ctx.lineTo(topX + 11, topY);
                 ctx.closePath();
                 ctx.fill();
                 
                 // Yakut süslemeler (Kırmızı noktalar)
                 ctx.fillStyle = '#ef4444';
                 ctx.beginPath();
-                ctx.arc(topX - 9, topY - 5, 1.2, 0, Math.PI * 2);
-                ctx.arc(topX, topY - 8, 1.2, 0, Math.PI * 2);
-                ctx.arc(topX + 9, topY - 5, 1.2, 0, Math.PI * 2);
+                ctx.arc(topX - 11, topY - 6, 1.5, 0, Math.PI * 2);
+                ctx.arc(topX, topY - 10, 1.5, 0, Math.PI * 2);
+                ctx.arc(topX + 11, topY - 6, 1.5, 0, Math.PI * 2);
                 ctx.fill();
                 
                 // Mavi süslemeler (Bandın üzerinde)
                 ctx.fillStyle = '#3b82f6';
                 ctx.beginPath();
-                ctx.arc(topX - 4, topY - 1.2, 1, 0, Math.PI * 2);
-                ctx.arc(topX + 4, topY - 1.2, 1, 0, Math.PI * 2);
+                ctx.arc(topX - 5, topY - 1.5, 1.2, 0, Math.PI * 2);
+                ctx.arc(topX + 5, topY - 1.5, 1.2, 0, Math.PI * 2);
                 ctx.fill();
             } else if (activeAccessory === 'santa_hat') {
-                // Noel Baba Şapkası (Kırmızı & Beyaz ponpon)
-                // Daha pofuduk ve yüksek tasarım
+                // Noel Baba Şapkası (Kırmızı & Beyaz ponpon) - Dolgun, pofuduk ve sarkık tasarım
+                
+                // Beyaz yün siper (Kalın ve pofuduk)
                 ctx.fillStyle = '#f1f5f9';
                 ctx.beginPath();
                 if (ctx.ellipse) {
-                    ctx.ellipse(topX, topY - 1, 11, 4, 0, 0, Math.PI * 2);
+                    ctx.ellipse(topX, topY - 1.5, 13, 4.5, 0, 0, Math.PI * 2);
                 } else {
-                    ctx.arc(topX, topY - 1, 8, 0, Math.PI * 2);
+                    ctx.arc(topX, topY - 1.5, 9, 0, Math.PI * 2);
                 }
                 ctx.fill();
                 
-                // Kırmızı gövde (Sağa bükülen, yüksek ve dolgun)
+                // Kırmızı gövde (Dolu ve kıvrık duran hat)
                 ctx.fillStyle = '#dc2626';
                 ctx.beginPath();
-                ctx.moveTo(topX - 9, topY - 2);
-                // Sol kenar tepe noktasına yükseliyor
-                ctx.quadraticCurveTo(topX - 7, topY - 22, topX + 1, topY - 22);
-                // Tepe noktasından sağa/aşağı bükülüyor
-                ctx.quadraticCurveTo(topX + 9, topY - 22, topX + 12, topY - 12);
-                // Bükülen uç
-                ctx.lineTo(topX + 8, topY - 9);
-                // İç kıvrım sol tabana geri dönüyor
-                ctx.quadraticCurveTo(topX + 3, topY - 16, topX - 3, topY - 16);
-                ctx.quadraticCurveTo(topX - 8, topY - 11, topX - 9, topY - 2);
+                ctx.moveTo(topX - 11, topY - 2);
+                
+                // Sol taraftan yukarı yuvarlakça uzanış
+                ctx.quadraticCurveTo(topX - 9, topY - 25, topX - 1, topY - 27);
+                // Tepe kıvrımından sağa doğru bükülüp aşağı sarkış
+                ctx.quadraticCurveTo(topX + 7, topY - 27, topX + 12, topY - 16);
+                // Ponponun bağlanacağı düz uç kısmı
+                ctx.lineTo(topX + 9, topY - 13);
+                // İç kıvrımın dolgunca sol tarafa geçişi
+                ctx.quadraticCurveTo(topX + 3, topY - 19, topX - 2, topY - 19);
+                // Sağ tabana doğru iniş ve birleşim
+                ctx.quadraticCurveTo(topX + 5, topY - 12, topX + 11, topY - 2);
+                ctx.lineTo(topX - 11, topY - 2);
+                
                 ctx.closePath();
                 ctx.fill();
                 
-                // Beyaz ponpon (Bükülen ucun ucunda)
+                // Beyaz ponpon (Ucun ucuna asılı durur)
                 ctx.fillStyle = '#f1f5f9';
                 ctx.beginPath();
-                ctx.arc(topX + 10, topY - 10, 3, 0, Math.PI * 2);
+                ctx.arc(topX + 11.5, topY - 14.5, 3.5, 0, Math.PI * 2);
                 ctx.fill();
             }
             ctx.restore();

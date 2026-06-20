@@ -12,7 +12,7 @@ export const SHOP_ITEMS = [
         id: 'fire_trail',
         name: '🔥 Ateş İzi',
         category: 'trail',
-        price: 25,
+        price: 50,
         description: 'Arkanızda yanan alev parçacıkları bırakır.',
         config: { color: 'fire', type: 'steam' }
     },
@@ -20,7 +20,7 @@ export const SHOP_ITEMS = [
         id: 'ice_trail',
         name: '❄️ Buz İzi',
         category: 'trail',
-        price: 25,
+        price: 50,
         description: 'Soğuk kış rüzgarları ve buz parçacıkları.',
         config: { color: 'ice', type: 'trail' }
     },
@@ -28,7 +28,7 @@ export const SHOP_ITEMS = [
         id: 'gold_trail',
         name: '🌟 Altın İzi',
         category: 'trail',
-        price: 35,
+        price: 50,
         description: 'Zengin altın ışıltıları saçan parçacıklar.',
         config: { color: 'gold', type: 'shift' }
     },
@@ -36,7 +36,7 @@ export const SHOP_ITEMS = [
         id: 'rainbow_trail',
         name: '🌈 Gökkuşağı İzi',
         category: 'trail',
-        price: 50,
+        price: 100,
         description: 'Sürekli renk değiştiren büyüleyici gökkuşağı.',
         config: { color: 'rainbow', type: 'trail' }
     },
@@ -62,7 +62,7 @@ export const SHOP_ITEMS = [
         id: 'wizard_hat',
         name: '🧙 Büyücü Şapkası',
         category: 'accessory',
-        price: 30,
+        price: 35,
         description: 'Gizemli güçler barındıran büyücü şapkası.',
         config: { type: 'wizard' }
     },
@@ -70,7 +70,7 @@ export const SHOP_ITEMS = [
         id: 'crown',
         name: '👑 Kral Tacı',
         category: 'accessory',
-        price: 40,
+        price: 45,
         description: 'Viscora dünyasının gerçek yöneticilerine özel.',
         config: { type: 'crown' }
     },
@@ -78,7 +78,7 @@ export const SHOP_ITEMS = [
         id: 'santa_hat',
         name: '🎅 Noel Şapkası',
         category: 'accessory',
-        price: 40,
+        price: 50,
         description: 'Kırmızı, yumuşak ve şenlikli noel şapkası.',
         config: { type: 'santa' }
     },
@@ -96,7 +96,7 @@ export const SHOP_ITEMS = [
         id: 'angry_eyes',
         name: '😠 Kızgın Gözler',
         category: 'eyes',
-        price: 20,
+        price: 30,
         description: 'Düşmanlara korku salan sert çatık kaşlar.',
         config: { style: 'angry' }
     },
@@ -104,7 +104,7 @@ export const SHOP_ITEMS = [
         id: 'cute_eyes',
         name: '🥺 İri Gözler',
         category: 'eyes',
-        price: 20,
+        price: 35,
         description: 'Işıltılı, kocaman ve sevimli anime gözleri.',
         config: { style: 'cute' }
     },
@@ -112,7 +112,7 @@ export const SHOP_ITEMS = [
         id: 'sunglasses',
         name: '😎 Güneş Gözlüğü',
         category: 'eyes',
-        price: 25,
+        price: 45,
         description: 'Havalı ve tarz sahibi güneş gözlüğü.',
         config: { style: 'sunglasses' }
     },
@@ -120,7 +120,7 @@ export const SHOP_ITEMS = [
         id: 'joke_glasses',
         name: '🥸 Şaka Gözlüğü',
         category: 'eyes',
-        price: 30,
+        price: 100,
         description: 'Büyük burunlu ve bıyıklı eğlenceli gözlük.',
         config: { style: 'joke' }
     }
