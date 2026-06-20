@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v120';
-import { Level } from './level.js?v=v120';
-import { Enemy, GelChaser } from './enemies.js?v=v120';
-import { UIManager } from './ui.js?v=v120';
-import { audio } from './audio.js?v=v120';
-import { LevelEditor } from './editor.js?v=v120';
-import { Boss, CyberBoss } from './boss.js?v=v120';
+import { Player } from './player.js?v=v121';
+import { Level } from './level.js?v=v121';
+import { Enemy, GelChaser } from './enemies.js?v=v121';
+import { UIManager } from './ui.js?v=v121';
+import { audio } from './audio.js?v=v121';
+import { LevelEditor } from './editor.js?v=v121';
+import { Boss, CyberBoss } from './boss.js?v=v121';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -572,6 +572,9 @@ export class GameManager {
         this.gameTime = 0;
         this.particles = [];
         this.splatters = [];
+        this.boss = null; // Önceki boss bölümünden kalan boss'u temizle
+        this.bossRespawnsUsed = 0;
+        this.enemies = []; // Önceki bölümden kalan düşmanları temizle
         this.levelCardTimer = 0; // No level title card for custom maps
         this.level.loadLevel(levelData);
         this.initBackgroundCells(); // Generate standard decorations
@@ -616,6 +619,8 @@ export class GameManager {
                 this.boss = new Boss(1200, 300);
             } else if (mappedLvl === 20) {
                 this.boss = new CyberBoss(1200, 300);
+            } else {
+                this.boss = null;
             }
             let maxH = 3;
             this.player.maxHealth = maxH;
@@ -717,6 +722,8 @@ export class GameManager {
             this.boss = new Boss(1200, 300);
         } else if (mappedLvl === 20) {
             this.boss = new CyberBoss(1200, 300);
+        } else {
+            this.boss = null;
         }
         let maxH = 3;
         if (this.difficulty === 'easy') maxH = 3;
