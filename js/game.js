@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v119';
-import { Level } from './level.js?v=v119';
-import { Enemy, GelChaser } from './enemies.js?v=v119';
-import { UIManager } from './ui.js?v=v119';
-import { audio } from './audio.js?v=v119';
-import { LevelEditor } from './editor.js?v=v119';
-import { Boss, CyberBoss } from './boss.js?v=v119';
+import { Player } from './player.js?v=v120';
+import { Level } from './level.js?v=v120';
+import { Enemy, GelChaser } from './enemies.js?v=v120';
+import { UIManager } from './ui.js?v=v120';
+import { audio } from './audio.js?v=v120';
+import { LevelEditor } from './editor.js?v=v120';
+import { Boss, CyberBoss } from './boss.js?v=v120';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1386,6 +1386,11 @@ export class GameManager {
                 deathEl.textContent = deathMsg;
             }
 
+            // Dokunsal geri bildirim: Bölüm tamamlandı kutlama hissiyatı
+            if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                navigator.vibrate([50, 40, 80, 40, 50]);
+            }
+
             this.ui.showScreen('win');
             this.ui.resetKeys();
         }
@@ -1401,6 +1406,7 @@ export class GameManager {
                 if (!this.player.deathSplashDone) {
                     this.emitParticles(this.player.x, this.player.y, 'enemy_pop', this.player.viscosity.color, 35);
                     this.shakeCamera(18, 25);
+                    if (navigator.vibrate) navigator.vibrate(120);
                     this.player.deathSplashDone = true;
                 }
                 

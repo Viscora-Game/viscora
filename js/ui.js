@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v119';
-import { ViscosityList } from './viscosity.js?v=v119';
+import { audio } from './audio.js?v=v120';
+import { ViscosityList } from './viscosity.js?v=v120';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -895,6 +895,15 @@ export class UIManager {
 
         if (btnCommunity) {
             this.bindTouchClick(btnCommunity, () => {
+                // Proaktif çevrimdışı kontrolü
+                if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+                    showConfirmModal(
+                        '📡 Bağlantı Yok\n\nTopluluk sunucuları internet bağlantısı gerektirir.\nLütfen bağlantınızı kontrol edip tekrar deneyin.\n\nKampanya modunu çevrimdışı oynayabilirsiniz.',
+                        () => {},
+                        () => {}
+                    );
+                    return;
+                }
                 this.showScreen('community');
                 loadCommunityMaps(currentSort);
             });
@@ -1068,6 +1077,11 @@ export class UIManager {
         
         this.game.player.setViscosity(nextState.id);
         this.updateHUDViscosity(nextState);
+
+        // Dokunsal geri bildirim: Viskozite değişimi hissiyatı
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+            navigator.vibrate(35);
+        }
 
         // Cilalama: Shift partikülleri fırlat
         this.game.emitParticles(

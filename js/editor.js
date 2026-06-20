@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v119';
-import { audio } from './audio.js?v=v119';
-import { LevelGenerator } from './generator.js?v=v119';
+import { Enemy, GelChaser } from './enemies.js?v=v120';
+import { audio } from './audio.js?v=v120';
+import { LevelGenerator } from './generator.js?v=v120';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -2238,6 +2238,16 @@ export class LevelEditor {
      * Seviyeyi topluluk sunucusunda paylaşır
      */
     publishToCommunity() {
+        // Proaktif çevrimdışı kontrolü
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            showConfirmModal(
+                '📡 Bağlantı Yok\n\nHarita paylaşmak için internet bağlantısı gereklidir.\nLütfen bağlantınızı kontrol edip tekrar deneyin.',
+                () => {},
+                () => {}
+            );
+            return;
+        }
+
         const mapName = this.game.level.name || "Özel Harita";
         const authorName = localStorage.getItem('viscora_author_name') || "Tasarımcı";
 

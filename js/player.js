@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v119';
-import { audio } from './audio.js?v=v119';
+import { ViscosityStates } from './viscosity.js?v=v120';
+import { audio } from './audio.js?v=v120';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -139,6 +139,7 @@ export class Player {
         this.glowBoost = 25; // Hasar durumunda aşırı parlama
         
         audio.playDamage();
+        if (navigator.vibrate) navigator.vibrate(60);
         
         if (this.onEvent) this.onEvent('damage');
         
@@ -757,6 +758,11 @@ export class Player {
             const squishImpact = Math.min(this.prevVy * 0.075, 0.7);
             this.applySquish(squishImpact * 0.95, -squishImpact * 0.85);
             audio.playLand(this.prevVy);
+            
+            // Hard landing triggers haptic vibration
+            if (navigator.vibrate && this.prevVy > 4) {
+                navigator.vibrate(Math.min(20 + Math.floor(this.prevVy * 3), 50));
+            }
 
             if (this.onEvent) {
                 this.onEvent('land', this.prevVy);

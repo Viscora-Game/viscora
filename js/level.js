@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v119';
-import { THEMES } from './generator.js?v=v119';
+import { audio } from './audio.js?v=v120';
+import { THEMES } from './generator.js?v=v120';
 
 /**
  * Viscora Level Design & Manager
@@ -3504,6 +3504,10 @@ export class Level {
                         cp.activated = true;
                         player.game.checkpointX = cp.x;
                         player.game.checkpointY = cp.y;
+                        // Dokunsal geri bildirim: Checkpoint kaydedildi hissiyatı
+                        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                            navigator.vibrate([30, 20, 30]);
+                        }
                         // Sadece kolay modda ses ve parçacık efekti çıkar (Normal ve zor modda görünmez/sessiz)
                         if (player.game.difficulty === 'easy') {
                             audio.playCollect();
