@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v117';
-import { Level } from './level.js?v=v117';
-import { Enemy, GelChaser } from './enemies.js?v=v117';
-import { UIManager } from './ui.js?v=v117';
-import { audio } from './audio.js?v=v117';
-import { LevelEditor } from './editor.js?v=v117';
-import { Boss, CyberBoss } from './boss.js?v=v117';
+import { Player } from './player.js?v=v118';
+import { Level } from './level.js?v=v118';
+import { Enemy, GelChaser } from './enemies.js?v=v118';
+import { UIManager } from './ui.js?v=v118';
+import { audio } from './audio.js?v=v118';
+import { LevelEditor } from './editor.js?v=v118';
+import { Boss, CyberBoss } from './boss.js?v=v118';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -55,6 +55,7 @@ export class GameManager {
         // Oyun Durumu
         // 'MENU' | 'PLAYING' | 'PAUSED' | 'GAMEOVER' | 'WIN'
         this.state = 'MENU';
+        this.isCommunityPlay = false;
         this.showDebug = false; // F3 ile hata ayıklama katmanını göster/gizle
         
         // Çözünürlük ve Boyutlar
@@ -879,7 +880,14 @@ export class GameManager {
         this.particles = [];
         this.splatters = [];
         audio.stopMusic();
-        this.ui.showScreen('start');
+        
+        if (this.isCommunityPlay) {
+            this.isCommunityPlay = false;
+            this.ui.showScreen('community');
+        } else {
+            this.ui.showScreen('start');
+        }
+        
         this.ui.updateLevelButtonsUI();
     }
 

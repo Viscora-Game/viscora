@@ -3,13 +3,83 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v117';
-import { audio } from './audio.js?v=v117';
-import { LevelGenerator } from './generator.js?v=v117';
+import { Enemy, GelChaser } from './enemies.js?v=v118';
+import { audio } from './audio.js?v=v118';
+import { LevelGenerator } from './generator.js?v=v118';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
     : 'https://viscora.onrender.com';
+
+function isOffensive(text) {
+    if (!text) return false;
+    let cleanText = text.toLowerCase().trim();
+    
+    const turkishMap = {
+        'ı': 'i', 'ğ': 'g', 'ü': 'u', 'ş': 's', 'ö': 'o', 'ç': 'c',
+        'â': 'a', 'î': 'i', 'û': 'u'
+    };
+    for (const [k, v] of Object.entries(turkishMap)) {
+        cleanText = cleanText.split(k).join(v);
+    }
+    
+    const words = cleanText.match(/[a-z0-9]+/g) || [];
+    
+    const shortBad = new Set(['amk', 'aq', 'sik', 'pic', 'got', 'oc', 'pust', 'puşt', 'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto', 'fetö']);
+    const longBad = new Set([
+        'yarrak', 'yarak', 'tassak', 'tasak', 'orospu', 'siktir', 'pezevenk', 'kahpe', 
+        'amcik', 'meme', 'fuck', 'bitch', 'kaltak', 'erdogan', 'erdoğan', 'pkk', 
+        'kilicdaroglu', 'kılıçdaroğlu', 'imamoglu', 'imamoğlu', 'ataturk', 'atatürk'
+    ]);
+    
+    const normalizedShortBad = Array.from(shortBad).map(word => {
+        let w = word.toLowerCase();
+        for (const [k, v] of Object.entries(turkishMap)) {
+            w = w.split(k).join(v);
+        }
+        return w;
+    });
+
+    const normalizedLongBad = Array.from(longBad).map(word => {
+        let w = word.toLowerCase();
+        for (const [k, v] of Object.entries(turkishMap)) {
+            w = w.split(k).join(v);
+        }
+        return w;
+    });
+
+    for (const word of words) {
+        if (normalizedShortBad.includes(word) || normalizedLongBad.includes(word)) {
+            return true;
+        }
+        for (const bad of normalizedLongBad) {
+            if (word.includes(bad)) {
+                return true;
+            }
+        }
+    }
+
+    // Noktalama işaretlerini ve boşlukları temizleyip kontrol et (Aşma koruması örn. p.k.k veya a.m.k)
+    const noPuncText = cleanText.replace(/[^a-z0-9]/g, '');
+    for (const bad of normalizedShortBad) {
+        if (noPuncText === bad) {
+            return true;
+        }
+    }
+    for (const bad of normalizedLongBad) {
+        if (noPuncText.includes(bad)) {
+            return true;
+        }
+    }
+    
+    for (const bad of normalizedLongBad) {
+        if (cleanText.includes(bad)) {
+            return true;
+        }
+    }
+    
+    return false;
+}
 
 export class LevelEditor {
     constructor(game) {
@@ -644,6 +714,10 @@ export class LevelEditor {
                     <input type="text" id="editor-level-name" value="${this.game.level.name || ''}" placeholder="Bölüm Adı">
                 </div>
                 <div class="editor-input-group">
+                    <label>Tasarımcı Adı</label>
+                    <input type="text" id="editor-author-name" value="${localStorage.getItem('viscora_author_name') || 'Tasarımcı'}" placeholder="Tasarımcı Adı">
+                </div>
+                <div class="editor-input-group">
                     <label>Harita Genişlik</label>
                     <input type="number" id="editor-level-width" value="${this.game.level.width}">
                 </div>
@@ -819,8 +893,27 @@ export class LevelEditor {
         const nameInput = document.getElementById('editor-level-name');
         if (nameInput) {
             nameInput.addEventListener('change', (e) => {
-                this.game.level.name = nameInput.value.trim() || "Özel Harita";
+                const newName = nameInput.value.trim();
+                if (isOffensive(newName)) {
+                    alert("Bölüm adı uygunsuz, argo veya siyasi içerik içeremez!");
+                    nameInput.value = this.game.level.name || '';
+                    return;
+                }
+                this.game.level.name = newName || "Özel Harita";
                 this.saveToLocalStorage();
+            });
+        }
+
+        const authorInput = document.getElementById('editor-author-name');
+        if (authorInput) {
+            authorInput.addEventListener('change', (e) => {
+                const newAuthor = authorInput.value.trim();
+                if (isOffensive(newAuthor)) {
+                    alert("Tasarımcı adı uygunsuz, argo veya siyasi içerik içeremez!");
+                    authorInput.value = localStorage.getItem('viscora_author_name') || 'Tasarımcı';
+                    return;
+                }
+                localStorage.setItem('viscora_author_name', newAuthor || "Tasarımcı");
             });
         }
 
@@ -2146,6 +2239,16 @@ export class LevelEditor {
     publishToCommunity() {
         const mapName = this.game.level.name || "Özel Harita";
         const authorName = localStorage.getItem('viscora_author_name') || "Tasarımcı";
+
+        if (isOffensive(mapName)) {
+            alert("Bölüm adı uygunsuz, argo veya siyasi içerik içeremez!");
+            return;
+        }
+        if (isOffensive(authorName)) {
+            alert("Tasarımcı adı uygunsuz, argo veya siyasi içerik içeremez!");
+            return;
+        }
+
         const exportObj = this.getLevelDataObj();
         const myUserId = localStorage.getItem('viscora_user_id') || 'anonymous';
         const serverLevelId = this.game.level.serverLevelId;

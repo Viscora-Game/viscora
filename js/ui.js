@@ -1,9 +1,79 @@
-import { audio } from './audio.js?v=v117';
-import { ViscosityList } from './viscosity.js?v=v117';
+import { audio } from './audio.js?v=v118';
+import { ViscosityList } from './viscosity.js?v=v118';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
     : 'https://viscora.onrender.com';
+
+function isOffensive(text) {
+    if (!text) return false;
+    let cleanText = text.toLowerCase().trim();
+    
+    const turkishMap = {
+        'ı': 'i', 'ğ': 'g', 'ü': 'u', 'ş': 's', 'ö': 'o', 'ç': 'c',
+        'â': 'a', 'î': 'i', 'û': 'u'
+    };
+    for (const [k, v] of Object.entries(turkishMap)) {
+        cleanText = cleanText.split(k).join(v);
+    }
+    
+    const words = cleanText.match(/[a-z0-9]+/g) || [];
+    
+    const shortBad = new Set(['amk', 'aq', 'sik', 'pic', 'got', 'oc', 'pust', 'puşt', 'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto', 'fetö']);
+    const longBad = new Set([
+        'yarrak', 'yarak', 'tassak', 'tasak', 'orospu', 'siktir', 'pezevenk', 'kahpe', 
+        'amcik', 'meme', 'fuck', 'bitch', 'kaltak', 'erdogan', 'erdoğan', 'pkk', 
+        'kilicdaroglu', 'kılıçdaroğlu', 'imamoglu', 'imamoğlu', 'ataturk', 'atatürk'
+    ]);
+    
+    const normalizedShortBad = Array.from(shortBad).map(word => {
+        let w = word.toLowerCase();
+        for (const [k, v] of Object.entries(turkishMap)) {
+            w = w.split(k).join(v);
+        }
+        return w;
+    });
+
+    const normalizedLongBad = Array.from(longBad).map(word => {
+        let w = word.toLowerCase();
+        for (const [k, v] of Object.entries(turkishMap)) {
+            w = w.split(k).join(v);
+        }
+        return w;
+    });
+
+    for (const word of words) {
+        if (normalizedShortBad.includes(word) || normalizedLongBad.includes(word)) {
+            return true;
+        }
+        for (const bad of normalizedLongBad) {
+            if (word.includes(bad)) {
+                return true;
+            }
+        }
+    }
+
+    // Noktalama işaretlerini ve boşlukları temizleyip kontrol et (Aşma koruması örn. p.k.k veya a.m.k)
+    const noPuncText = cleanText.replace(/[^a-z0-9]/g, '');
+    for (const bad of normalizedShortBad) {
+        if (noPuncText === bad) {
+            return true;
+        }
+    }
+    for (const bad of normalizedLongBad) {
+        if (noPuncText.includes(bad)) {
+            return true;
+        }
+    }
+    
+    for (const bad of normalizedLongBad) {
+        if (cleanText.includes(bad)) {
+            return true;
+        }
+    }
+    
+    return false;
+}
 
 export class UIManager {
     constructor(game) {
@@ -769,6 +839,7 @@ export class UIManager {
                         // Send play event to backend to update lastPlayedAt
                         fetch(`${API_BASE}/api/levels/${level.id}/play`, { method: 'POST' }).catch(() => {});
                         
+                        this.game.isCommunityPlay = true;
                         this.game.startCustomLevel(level.data);
                     });
 
@@ -849,6 +920,10 @@ export class UIManager {
         if (btnDesignMap && designSetupModal) {
             this.bindTouchClick(btnDesignMap, () => {
                 const savedLevelData = localStorage.getItem('viscora_custom_level_999');
+                const txtDesignAuthor = document.getElementById('txt-design-author');
+                if (txtDesignAuthor) {
+                    txtDesignAuthor.value = localStorage.getItem('viscora_author_name') || '';
+                }
                 if (savedLevelData) {
                     showConfirmModal(
                         "Kaldığınız yerden devam etmek ister misiniz? (Hayır derseniz mevcut tasarımınız silinip yeni bölüm oluşturulacaktır)",
@@ -859,6 +934,7 @@ export class UIManager {
                         () => {
                             if (txtDesignName) txtDesignName.value = '';
                             if (selectDesignTheme) selectDesignTheme.value = 'neon_sewer';
+                            if (txtDesignAuthor) txtDesignAuthor.value = localStorage.getItem('viscora_author_name') || '';
                             designSetupModal.classList.remove('hidden');
                         }
                     );
@@ -867,6 +943,7 @@ export class UIManager {
 
                 if (txtDesignName) txtDesignName.value = '';
                 if (selectDesignTheme) selectDesignTheme.value = 'neon_sewer';
+                if (txtDesignAuthor) txtDesignAuthor.value = localStorage.getItem('viscora_author_name') || '';
                 designSetupModal.classList.remove('hidden');
             });
         }
@@ -894,6 +971,23 @@ export class UIManager {
                     alert("Lütfen bir bölüm adı girin!");
                     return;
                 }
+                const txtDesignAuthor = document.getElementById('txt-design-author');
+                const author = txtDesignAuthor ? txtDesignAuthor.value.trim() : '';
+                if (!author) {
+                    alert("Lütfen bir tasarımcı adı girin!");
+                    return;
+                }
+
+                if (isOffensive(name)) {
+                    alert("Bölüm adı uygunsuz, argo veya siyasi içerik içeremez!");
+                    return;
+                }
+                if (isOffensive(author)) {
+                    alert("Tasarımcı adı uygunsuz, argo veya siyasi içerik içeremez!");
+                    return;
+                }
+
+                localStorage.setItem('viscora_author_name', author);
                 const themeId = selectDesignTheme ? selectDesignTheme.value : 'neon_sewer';
 
                 // Sunucuda aynı isimde harita var mı kontrol et
@@ -1059,6 +1153,17 @@ export class UIManager {
             const screen = this.screens[screenName];
             if (screen) {
                 screen.classList.remove('hidden');
+            }
+            
+            if (screenName === 'pause' || screenName === 'gameover' || screenName === 'win') {
+                const btnPause = document.getElementById('btn-main-menu');
+                const btnGameover = document.getElementById('btn-main-menu-gameover');
+                const btnWin = document.getElementById('btn-main-menu-win');
+                const targetText = this.game.isCommunityPlay ? "🏠 TOPLULUK EKRANINA DÖN" : "🏠 ANA MENÜYE DÖN";
+                
+                if (btnPause) btnPause.textContent = targetText;
+                if (btnGameover) btnGameover.textContent = targetText;
+                if (btnWin) btnWin.textContent = targetText;
             }
         }
     }

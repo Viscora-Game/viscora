@@ -98,6 +98,63 @@ def write_db(data):
         print("Veritabanı yazma hatası:", e)
         return False
 
+import re
+
+def is_offensive(text):
+    if not text:
+        return False
+    clean_text = text.lower().strip()
+    
+    # Türkçe karakterleri İngilizce eşleniklerine çevirerek aşma koruması (Fuzzy matching)
+    turkish_map = {
+        'ı': 'i', 'ğ': 'g', 'ü': 'u', 'ş': 's', 'ö': 'o', 'ç': 'c',
+        'â': 'a', 'î': 'i', 'û': 'u'
+    }
+    for k, v in turkish_map.items():
+        clean_text = clean_text.replace(k, v)
+        
+    # Kelimelere ayır
+    words = re.findall(r'[a-z0-9]+', clean_text)
+    
+    # Kısa/Özel kelimeler (birebir eşleşmesi gerekenler, örn. "sik" sıkıntı kelimesini engellememeli)
+    short_bad = {'amk', 'aq', 'sik', 'pic', 'got', 'oc', 'pust', 'puşt', 'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto', 'fetö'}
+    
+    # Alt kelime olarak eşleşebilecek uzun/genel küfürler ve siyasi hassas kelimeler
+    long_bad = {
+        'yarrak', 'yarak', 'tassak', 'tasak', 'orospu', 'siktir', 'pezevenk', 'kahpe', 
+        'amcik', 'meme', 'fuck', 'bitch', 'kaltak', 'erdogan', 'erdoğan', 'pkk', 
+        'kilicdaroglu', 'kılıçdaroğlu', 'imamoglu', 'imamoğlu', 'ataturk', 'atatürk'
+    }
+    
+    for word in words:
+        if word in short_bad or word in long_bad:
+            return True
+        for bad in long_bad:
+            if bad in word:
+                return True
+                
+    # Noktalama işaretlerini ve boşlukları temizleyip kontrol et (Aşma koruması örn. p.k.k veya a.m.k)
+    no_punc_text = re.sub(r'[^a-z0-9]', '', clean_text)
+    for bad in short_bad:
+        bad_clean = bad
+        for k, v in turkish_map.items():
+            bad_clean = bad_clean.replace(k, v)
+        if no_punc_text == bad_clean:
+            return True
+
+    for bad in long_bad:
+        bad_clean = bad
+        for k, v in turkish_map.items():
+            bad_clean = bad_clean.replace(k, v)
+        if bad_clean in no_punc_text:
+            return True
+
+    for bad in long_bad:
+        if bad in clean_text:
+            return True
+            
+    return False
+
 class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         # Statik dosyaları projenin ana klasöründen (server klasörünün bir üstü) sun
@@ -240,6 +297,13 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write('{"error": "Harita adı, yapımcı ve harita verileri zorunludur."}'.encode('utf-8'))
                 return
 
+            if is_offensive(name) or is_offensive(author):
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write('{"error": "Bölüm adı veya yapımcı adı uygunsuz/siyasi içerik içeremez."}'.encode('utf-8'))
+                return
+
             db = read_db()
             
             # Bölüm adı çakışması kontrolü
@@ -363,6 +427,12 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                     
                     # Eğer isim değiştiyse ve çakışma varsa kontrol et
                     if new_name and new_name.strip().lower() != found.get('name', '').strip().lower():
+                        if is_offensive(new_name):
+                            self.send_response(400)
+                            self.send_header('Content-Type', 'application/json; charset=utf-8')
+                            self.end_headers()
+                            self.wfile.write('{"error": "Bölüm adı uygunsuz/siyasi içerik içeremez."}'.encode('utf-8'))
+                            return
                         for level in db:
                             if level['id'] != level_id and level.get('name', '').strip().lower() == new_name.strip().lower():
                                 self.send_response(409)
