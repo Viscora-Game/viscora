@@ -1,5 +1,5 @@
-import { GameManager } from './game.js?v=v116';
-import { audio } from './audio.js?v=v116';
+import { GameManager } from './game.js?v=v117';
+import { audio } from './audio.js?v=v117';
 
 // Oyun Başlatma Girişi
 window.addEventListener('DOMContentLoaded', () => {
@@ -36,7 +36,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const unlockAudio = () => {
         audio.init();
         audio.unlock();
-        requestFullScreen();
         removeSplash(); // Dokunulduğunda splash'ı hemen geç
         
         // Dinleyicileri temizle
