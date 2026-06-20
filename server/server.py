@@ -26,8 +26,18 @@ if MONGO_URI:
         except ImportError:
             import subprocess
             import sys
+            import site
             print("pymongo modülü bulunamadı, çalışma zamanında yükleniyor...")
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "pymongo", "dnspython"])
+            cmd = [sys.executable, "-m", "pip", "install", "--user", "pymongo", "dnspython"]
+            res = subprocess.run(cmd, capture_output=True, text=True)
+            if res.returncode != 0:
+                raise Exception(f"pip install failed (code {res.returncode}): {res.stderr} | stdout: {res.stdout}")
+            
+            # Kullanıcı dizinini yola ekle
+            user_site = site.getusersitepackages()
+            if user_site not in sys.path:
+                sys.path.append(user_site)
+                
             from pymongo import MongoClient
             
         client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
