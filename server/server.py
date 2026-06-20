@@ -16,6 +16,8 @@ if not os.path.exists(DB_FILE):
 # MongoDB Desteği
 MONGO_URI = os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URI')
 mongo_collection = None
+mongo_error = None
+mongo_db_name = None
 
 if MONGO_URI:
     try:
@@ -26,12 +28,20 @@ if MONGO_URI:
         parsed_uri = urllib.parse.urlparse(MONGO_URI)
         if parsed_uri.path and parsed_uri.path != '/':
             db_name = parsed_uri.path.strip('/')
+        mongo_db_name = db_name
         mongo_db = client[db_name]
+        
+        # Bağlantıyı test et (pymongo varsayılan olarak tembeldir)
+        client.admin.command('ping')
+        
         mongo_collection = mongo_db['levels']
         print(f"MongoDB bağlantısı başarılı! Veritabanı: {db_name}, Koleksiyon: levels")
     except Exception as e:
+        mongo_error = str(e)
         print("MongoDB bağlantı hatası, yerel JSON dosyasına geçiliyor:", e)
         mongo_collection = None
+else:
+    mongo_error = "MONGODB_URI environment variable is not set."
 
 def read_db():
     if mongo_collection is not None:
@@ -143,6 +153,39 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
             self.wfile.write(json.dumps(response_db, ensure_ascii=False).encode('utf-8'))
+        elif path == '/api/status':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            
+            masked_uri = None
+            if MONGO_URI:
+                try:
+                    parsed = urllib.parse.urlparse(MONGO_URI)
+                    if parsed.password:
+                        # Replace the password in the netloc
+                        netloc_parts = parsed.netloc.split('@')
+                        if len(netloc_parts) > 1:
+                            creds = netloc_parts[0].split(':')
+                            user = creds[0]
+                            netloc_parts[0] = f"{user}:***"
+                        new_netloc = '@'.join(netloc_parts)
+                        masked_uri = parsed._replace(netloc=new_netloc).geturl()
+                    else:
+                        masked_uri = parsed.geturl()
+                except Exception as parse_err:
+                    masked_uri = f"Error parsing URI: {str(parse_err)}"
+                    
+            status_data = {
+                "mongodb_connected": mongo_collection is not None,
+                "mongodb_db_name": mongo_db_name,
+                "mongodb_error": mongo_error,
+                "mongodb_uri_configured": MONGO_URI is not None,
+                "mongodb_uri_masked": masked_uri,
+                "server_time_utc": datetime.now(timezone.utc).isoformat(),
+                "environment_keys": list(os.environ.keys())
+            }
+            self.wfile.write(json.dumps(status_data, ensure_ascii=False).encode('utf-8'))
         else:
             # Diğer tüm istekleri (index.html, js/, css/ vb.) standart SimpleHTTPRequestHandler ile sun
             super().do_GET()
