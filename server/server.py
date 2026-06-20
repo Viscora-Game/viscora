@@ -28,7 +28,7 @@ if MONGO_URI:
             import sys
             import site
             print("pymongo modülü bulunamadı, çalışma zamanında yükleniyor...")
-            cmd = [sys.executable, "-m", "pip", "install", "--user", "pymongo", "dnspython"]
+            cmd = [sys.executable, "-m", "pip", "install", "--user", "--break-system-packages", "pymongo", "dnspython"]
             res = subprocess.run(cmd, capture_output=True, text=True)
             if res.returncode != 0:
                 raise Exception(f"pip install failed (code {res.returncode}): {res.stderr} | stdout: {res.stdout}")
