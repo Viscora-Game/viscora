@@ -323,6 +323,7 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 'creatorId': creator_id,
                 'data': data,
                 'likes': 0,
+                'tags': body.get('tags', []),
                 'createdAt': datetime.now(timezone.utc).isoformat(),
                 'lastPlayedAt': datetime.now(timezone.utc).isoformat()
             }
@@ -444,6 +445,8 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                         found['name'] = new_name.strip()
                         
                     found['data'] = new_data
+                    if 'tags' in body:
+                        found['tags'] = body.get('tags', [])
                     
                     if write_db(db):
                         self.send_response(200)

@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v121';
-import { THEMES } from './generator.js?v=v121';
+import { audio } from './audio.js?v=v122';
+import { THEMES } from './generator.js?v=v122';
 
 /**
  * Viscora Level Design & Manager
@@ -3482,6 +3482,9 @@ export class Level {
                     player.y + player.radius > c.y - 12 && player.y - player.radius < c.y + 12) {
                     
                     c.collected = true;
+                    if (window.shopManager) {
+                        window.shopManager.addCrystals(1);
+                    }
                     player.heal(1);
                     audio.playCollect();
                     

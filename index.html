@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v121">
+    <link rel="stylesheet" href="index.css?v=v122">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -382,6 +382,9 @@
                 <div class="brand">
                     <h1 class="game-title">VISCORA</h1>
                     <div class="game-subtitle">VISCOUS ODYSSEY</div>
+                    <div class="crystal-balance-container" style="display: flex; align-items: center; justify-content: center; gap: 6px; margin: 8px 0; font-size: 0.95rem; font-weight: bold; color: #00f2fe; text-shadow: 0 0 10px rgba(0, 242, 254, 0.4);">
+                        <span>💎</span> <span id="menu-crystal-count">0</span> Kristal
+                    </div>
                 </div>
                 <!-- Üst Butonlar (Rehber ve Ses) -->
                 <div class="start-top-buttons" style="display: flex; gap: 8px; justify-content: center; margin-bottom: 0.7rem; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto;">
@@ -419,6 +422,7 @@
                 <div class="menu-actions-wrapper" style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 320px; margin: 10px auto 0 auto;">
                     <button id="btn-play" class="menu-btn primary-btn" style="margin-top: 0;">OYNA</button>
                     <button id="btn-community" class="menu-btn secondary-btn" type="button" style="margin-top: 0;">🌐 TOPLULUK SUNUCULARI</button>
+                    <button id="btn-shop" class="menu-btn secondary-btn" type="button" style="margin-top: 0;">🛍️ KRİSTAL DÜKKANI</button>
                 </div>
             </div>
 
@@ -820,6 +824,40 @@
             </div>
         </div>
 
+        <!-- Kristal Dükkanı Ekranı (Crystal Shop Screen) -->
+        <div id="shop-screen" class="screen hidden">
+            <div class="menu-card community-card animate-fade-in" style="max-width: 680px;">
+                <div class="community-header">
+                    <h2>🛍️ KRİSTAL DÜKKANI</h2>
+                    <button id="btn-close-shop" class="close-btn" type="button" aria-label="Kapat">❌</button>
+                </div>
+                
+                <!-- Bakiye ve Bilgi alanı -->
+                <div class="shop-header-row" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 12px; box-sizing: border-box; flex-wrap: wrap; gap: 10px;">
+                    <div class="shop-balance-display" style="font-size: 1.1rem; font-weight: bold; color: #00f2fe; text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);">
+                        Bakiyeniz: 💎 <span id="shop-crystal-balance">0</span> Kristal
+                    </div>
+                    <div style="font-size: 0.8rem; color: #94a3b8; font-style: italic; max-width: 250px; text-align: right;">
+                        Canını da dolduran kristalleri topladıkça dükkanda harca!
+                    </div>
+                </div>
+
+                <!-- Kategori Sekmeleri -->
+                <div class="shop-tabs" style="display: flex; gap: 8px; width: 100%; margin-bottom: 20px; box-sizing: border-box;">
+                    <button class="community-tab-btn active" data-category="trail" type="button">🌈 İz Efekti</button>
+                    <button class="community-tab-btn" data-category="glow" type="button">✨ Parlama</button>
+                    <button class="community-tab-btn" data-category="eyes" type="button">👀 Göz Stili</button>
+                </div>
+
+                <!-- Dükkan İçeriği Listesi -->
+                <div class="community-content-container" style="max-height: 380px; overflow-y: auto;">
+                    <div id="shop-item-list" class="shop-grid">
+                        <!-- JS ile doldurulacak -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Topluluk Sunucuları Ekranı (Community Dashboard) -->
         <div id="community-screen" class="screen hidden">
             <div class="menu-card community-card animate-fade-in">
@@ -828,14 +866,29 @@
                     <button id="btn-close-community" class="close-btn" type="button" aria-label="Kapat">❌</button>
                 </div>
                 
-                <!-- Üst Alan: Popüler Bölümler Başlığı ve Tasarla Butonu -->
-                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 12px; box-sizing: border-box;">
-                    <span style="font-size: 1.2rem; font-weight: 800; color: #ff5e62; display: flex; align-items: center; gap: 8px; text-shadow: 0 0 10px rgba(255, 94, 98, 0.3);">
-                        🔥 POPÜLER BÖLÜMLER
-                    </span>
+                <!-- Üst Alan: Tab Sistemi, Tasarla Butonu, Arama ve Etiket Filtresi -->
+                <div class="community-tabs-row" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 12px; box-sizing: border-box; flex-wrap: wrap; gap: 10px;">
+                    <div class="community-tabs" style="margin-bottom: 0;">
+                        <button class="community-tab-btn active" id="tab-popular" type="button">🔥 Popüler</button>
+                        <button class="community-tab-btn" id="tab-new" type="button">🆕 En Yeni</button>
+                    </div>
                     <button id="btn-design-map" class="menu-btn" style="padding: 10px 20px; font-size: 0.95rem; background: linear-gradient(135deg, #00f2fe, #4facfe); border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3); transition: transform 0.2s; border-bottom: 2px solid rgba(0,0,0,0.2);">
                         🛠️ Bölüm Tasarla
                     </button>
+                </div>
+
+                <div class="search-filter-row" style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 15px; box-sizing: border-box;">
+                    <div class="search-box-container" style="position: relative; width: 100%;">
+                        <input type="text" id="community-search-input" placeholder="🔍 Bölüm adı veya tasarımcı ara..." style="width: 100%; padding: 12px 16px; font-size: 0.95rem; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(6, 182, 212, 0.4); border-radius: 8px; color: #fff; box-sizing: border-box; outline: none; font-family: inherit; transition: all 0.3s ease;">
+                    </div>
+                    <div class="tags-filter-container" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%;">
+                        <span style="font-size: 0.85rem; font-weight: bold; color: #94a3b8; margin-right: 4px;">Etiketler:</span>
+                        <button class="tag-filter-btn" data-tag="Bulmaca" type="button">🧩 Bulmaca</button>
+                        <button class="tag-filter-btn" data-tag="Aksiyon" type="button">⚔️ Aksiyon</button>
+                        <button class="tag-filter-btn" data-tag="Kolay" type="button">🟢 Kolay</button>
+                        <button class="tag-filter-btn" data-tag="Zor" type="button">🔴 Zor</button>
+                        <button class="tag-filter-btn" data-tag="Kısa" type="button">⚡ Kısa</button>
+                    </div>
                 </div>
                 
                 <!-- Harita Listesi Grid -->
@@ -849,7 +902,7 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v121"></script>
-    <script type="module" src="js/main.js?v=v121"></script>
+    <script src="js/controls_customizer.js?v=v122"></script>
+    <script type="module" src="js/main.js?v=v122"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
-import { audio } from './audio.js?v=v121';
-import { ViscosityList } from './viscosity.js?v=v121';
+import { audio } from './audio.js?v=v122';
+import { ViscosityList } from './viscosity.js?v=v122';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v122';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -105,7 +106,8 @@ export class UIManager {
             win: document.getElementById('win-screen'),
             gameover: document.getElementById('gameover-screen'),
             codex: document.getElementById('codex-screen'),
-            community: document.getElementById('community-screen')
+            community: document.getElementById('community-screen'),
+            shop: document.getElementById('shop-screen')
         };
         
         this.hud = document.getElementById('hud');
@@ -696,11 +698,220 @@ export class UIManager {
             });
         });
 
+        // --- KRİSTAL DÜKKANI BAKIYE VE EKRAN BAĞLANTILARI ---
+        const btnShop = document.getElementById('btn-shop');
+        const btnCloseShop = document.getElementById('btn-close-shop');
+        const shopTabButtons = document.querySelectorAll('.shop-tabs .community-tab-btn');
+        const listShopEl = document.getElementById('shop-item-list');
+        let activeShopCategory = 'trail';
+
+        const updateCrystalUI = () => {
+            const balance = window.shopManager ? window.shopManager.getBalance() : 0;
+            const menuCounter = document.getElementById('menu-crystal-count');
+            const shopCounter = document.getElementById('shop-crystal-balance');
+            if (menuCounter) menuCounter.textContent = balance;
+            if (shopCounter) shopCounter.textContent = balance;
+        };
+
+        window.addEventListener('viscora_crystals_changed', (e) => {
+            const menuCounter = document.getElementById('menu-crystal-count');
+            const shopCounter = document.getElementById('shop-crystal-balance');
+            if (menuCounter) menuCounter.textContent = e.detail.balance;
+            if (shopCounter) shopCounter.textContent = e.detail.balance;
+        });
+
+        // initial load of crystals
+        setTimeout(updateCrystalUI, 100);
+
+        const renderShopItems = () => {
+            if (!listShopEl || !window.shopManager || !window.SHOP_ITEMS) return;
+            listShopEl.innerHTML = '';
+
+            const items = window.SHOP_ITEMS.filter(item => item.category === activeShopCategory);
+            const balance = window.shopManager.getBalance();
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'shop-item';
+                
+                const isOwned = window.shopManager.isOwned(item.id);
+                const isActive = window.shopManager.getActiveCosmetic(item.category) === item.id;
+                
+                if (isActive) {
+                    card.classList.add('equipped');
+                }
+
+                // Generates HTML preview based on item category
+                let previewHtml = '';
+                if (item.category === 'trail') {
+                    if (item.id === 'default_trail') {
+                        previewHtml = `<div class="preview-trail-particle" style="background: #06b6d4; left: 24px; top: 24px; box-shadow: 0 0 8px #06b6d4; border-radius: 50%;"></div>`;
+                    } else if (item.id === 'fire_trail') {
+                        previewHtml = `
+                            <div class="preview-trail-particle" style="background: #ef4444; left: 15px; top: 24px; box-shadow: 0 0 8px #ef4444; border-radius: 50%;"></div>
+                            <div class="preview-trail-particle" style="background: #f97316; left: 24px; top: 16px; box-shadow: 0 0 8px #f97316; border-radius: 50%;"></div>
+                            <div class="preview-trail-particle" style="background: #f59e0b; left: 33px; top: 26px; box-shadow: 0 0 8px #f59e0b; border-radius: 50%;"></div>
+                        `;
+                    } else if (item.id === 'ice_trail') {
+                        previewHtml = `
+                            <div class="preview-trail-particle" style="background: #38bdf8; left: 15px; top: 20px; box-shadow: 0 0 8px #38bdf8; border-radius: 50%;"></div>
+                            <div class="preview-trail-particle" style="background: #ffffff; left: 24px; top: 28px; box-shadow: 0 0 8px #ffffff; border-radius: 50%;"></div>
+                            <div class="preview-trail-particle" style="background: #7dd3fc; left: 33px; top: 18px; box-shadow: 0 0 8px #7dd3fc; border-radius: 50%;"></div>
+                        `;
+                    } else if (item.id === 'gold_trail') {
+                        previewHtml = `
+                            <div class="preview-trail-particle" style="background: #fbbf24; left: 18px; top: 20px; box-shadow: 0 0 8px #fbbf24; border-radius: 50%;"></div>
+                            <div class="preview-trail-particle" style="background: #fbbf24; left: 30px; top: 24px; box-shadow: 0 0 8px #fbbf24; border-radius: 50%;"></div>
+                        `;
+                    } else if (item.id === 'rainbow_trail') {
+                        previewHtml = `
+                            <div class="preview-trail-particle" style="background: #ef4444; left: 14px; top: 20px; border-radius: 50%;"></div>
+                            <div class="preview-trail-particle" style="background: #10b981; left: 24px; top: 26px; border-radius: 50%;"></div>
+                            <div class="preview-trail-particle" style="background: #3b82f6; left: 34px; top: 18px; border-radius: 50%;"></div>
+                        `;
+                    }
+                } else if (item.category === 'glow') {
+                    let color = '#06b6d4';
+                    if (item.id === 'gold_glow') color = '#f59e0b';
+                    else if (item.id === 'fire_glow') color = '#ef4444';
+                    else if (item.id === 'diamond_glow') color = '#38bdf8';
+                    else if (item.id === 'night_glow') color = '#8b5cf6';
+                    previewHtml = `<div class="preview-glow-ring" style="color: ${color};"></div>`;
+                } else if (item.category === 'eyes') {
+                    if (item.id === 'cute_eyes') {
+                        previewHtml = `
+                            <div class="preview-eye-shape">
+                                <div class="preview-eye-pupil" style="width: 8px; height: 8px; border-radius: 50%; background: #000; display:flex; justify-content:center; align-items:center; position:relative;">
+                                    <div style="width: 2.5px; height: 2.5px; background: #fff; border-radius: 50%; position: absolute; top: 1px; left: 1px;"></div>
+                                </div>
+                                <div class="preview-eye-pupil" style="width: 8px; height: 8px; border-radius: 50%; background: #000; display:flex; justify-content:center; align-items:center; position:relative;">
+                                    <div style="width: 2.5px; height: 2.5px; background: #fff; border-radius: 50%; position: absolute; top: 1px; left: 1px;"></div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (item.id === 'focused_eyes') {
+                        previewHtml = `
+                            <div class="preview-eye-shape">
+                                <div style="width: 8px; height: 2.5px; background: #000; border-radius: 1px;"></div>
+                                <div style="width: 8px; height: 2.5px; background: #000; border-radius: 1px;"></div>
+                            </div>
+                        `;
+                    } else if (item.id === 'pixel_eyes') {
+                        previewHtml = `
+                            <div class="preview-eye-shape">
+                                <div style="width: 6px; height: 6px; background: #000; border-radius: 0;"></div>
+                                <div style="width: 6px; height: 6px; background: #000; border-radius: 0;"></div>
+                            </div>
+                        `;
+                    } else if (item.id === 'angry_eyes') {
+                        previewHtml = `
+                            <div class="preview-eye-shape" style="flex-direction: column;">
+                                <div style="display: flex; gap: 8px; margin-bottom: -1px;">
+                                    <div style="width: 8px; height: 2px; background: #000; transform: rotate(18deg); transform-origin: right;"></div>
+                                    <div style="width: 8px; height: 2px; background: #000; transform: rotate(-18deg); transform-origin: left;"></div>
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <div class="preview-eye-pupil" style="width: 4px; height: 4px;"></div>
+                                    <div class="preview-eye-pupil" style="width: 4px; height: 4px;"></div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // default eyes
+                        previewHtml = `
+                            <div class="preview-eye-shape">
+                                <div class="preview-eye-pupil" style="width: 5px; height: 5px;"></div>
+                                <div class="preview-eye-pupil" style="width: 5px; height: 5px;"></div>
+                            </div>
+                        `;
+                    }
+                }
+
+                let actionBtnHtml = '';
+                if (isActive) {
+                    actionBtnHtml = `<button class="shop-item-btn active" disabled>KULLANIMDA</button>`;
+                } else if (isOwned) {
+                    actionBtnHtml = `<button class="shop-item-btn equip" data-id="${item.id}">DONAT</button>`;
+                } else {
+                    actionBtnHtml = `<button class="shop-item-btn buy" data-id="${item.id}">SATIN AL</button>`;
+                }
+
+                const priceDisplay = item.price > 0 ? `💎 ${item.price}` : 'Ücretsiz';
+
+                card.innerHTML = `
+                    <div class="shop-item-preview-box">
+                        ${previewHtml}
+                    </div>
+                    <div class="shop-item-name">${item.name}</div>
+                    <div class="shop-item-description">${item.description}</div>
+                    <div class="shop-item-price" style="${item.price === 0 ? 'color:#10b981;' : ''}">${priceDisplay}</div>
+                    ${actionBtnHtml}
+                `;
+
+                const btnBuy = card.querySelector('.shop-item-btn.buy');
+                if (btnBuy) {
+                    btnBuy.addEventListener('click', () => {
+                        const result = window.shopManager.purchase(item.id);
+                        if (result.success) {
+                            renderShopItems();
+                            updateCrystalUI();
+                        } else {
+                            alert(result.message);
+                        }
+                    });
+                }
+
+                const btnEquip = card.querySelector('.shop-item-btn.equip');
+                if (btnEquip) {
+                    btnEquip.addEventListener('click', () => {
+                        const result = window.shopManager.equip(item.id);
+                        if (result.success) {
+                            renderShopItems();
+                        } else {
+                            alert(result.message);
+                        }
+                    });
+                }
+
+                listShopEl.appendChild(card);
+            });
+        };
+
+        if (btnShop) {
+            this.bindTouchClick(btnShop, () => {
+                this.showScreen('shop');
+                renderShopItems();
+                updateCrystalUI();
+            });
+        }
+
+        if (btnCloseShop) {
+            this.bindTouchClick(btnCloseShop, () => {
+                this.showScreen('start');
+            });
+        }
+
+        shopTabButtons.forEach(btn => {
+            this.bindTouchClick(btn, () => {
+                activeShopCategory = btn.getAttribute('data-category');
+                shopTabButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderShopItems();
+            });
+        });
+
+
         // --- TOPLULUK SUNUCULARI ÇALIŞMASI ---
         const btnCommunity = document.getElementById('btn-community');
         const btnCloseCommunity = document.getElementById('btn-close-community');
-        const communityTabButtons = document.querySelectorAll('.community-tab-btn');
+        const communityTabButtons = document.querySelectorAll('.community-tabs .community-tab-btn');
+        const searchInput = document.getElementById('community-search-input');
+        const tagFilterButtons = document.querySelectorAll('.tag-filter-btn');
+        
         let currentSort = 'popular'; // Varsayılan popüler sıralama
+        this.fetchedLevels = [];
+        this.activeTagFilter = null;
+        this.searchQuery = '';
 
         const formatRemainingTime = (seconds) => {
             if (seconds <= 0) return "Süre doldu (Silinecek)";
@@ -713,6 +924,191 @@ export class UIManager {
             if (mins > 0 || hours > 0) result += `${mins}dk `;
             result += `${secs}sn`;
             return result;
+        };
+
+        const renderFilteredCommunityMaps = () => {
+            const listEl = document.getElementById('community-map-list');
+            if (!listEl) return;
+
+            if (this.communityInterval) {
+                clearInterval(this.communityInterval);
+                this.communityInterval = null;
+            }
+
+            let filtered = this.fetchedLevels || [];
+            
+            // 1. Search Query Filter
+            if (this.searchQuery) {
+                const q = this.searchQuery.toLowerCase().trim();
+                filtered = filtered.filter(lvl => 
+                    lvl.name.toLowerCase().includes(q) || 
+                    lvl.author.toLowerCase().includes(q)
+                );
+            }
+
+            // 2. Tag Filter
+            if (this.activeTagFilter) {
+                filtered = filtered.filter(lvl => {
+                    const tags = lvl.tags || (lvl.data && lvl.data.tags) || [];
+                    return tags.includes(this.activeTagFilter);
+                });
+            }
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div class="no-maps">Eşleşen harita bulunamadı.</div>';
+                return;
+            }
+
+            listEl.innerHTML = '';
+            const likedMaps = JSON.parse(localStorage.getItem('viscora_liked_maps') || '[]');
+
+            filtered.forEach(level => {
+                const item = document.createElement('div');
+                item.className = 'map-item';
+                
+                const isLiked = likedMaps.includes(level.id);
+                
+                const playedTimeStr = level.lastPlayedAt || level.createdAt;
+                const playedTime = new Date(playedTimeStr).getTime();
+                const now = Date.now();
+                const ageSeconds = (now - playedTime) / 1000;
+                const allowedSeconds = 24 * 3600 + (level.likes * 12 * 3600);
+                const remainingSeconds = Math.max(0, allowedSeconds - ageSeconds);
+
+                let expiryClass = '';
+                if (remainingSeconds < 6 * 3600) {
+                    expiryClass = 'danger';
+                } else if (remainingSeconds < 12 * 3600) {
+                    expiryClass = 'warning';
+                }
+
+                // Render tag badges if any
+                const tags = level.tags || (level.data && level.data.tags) || [];
+                let tagsHtml = '';
+                if (tags.length > 0) {
+                    tagsHtml = `<div class="map-tags-row">` + tags.map(t => {
+                        let emoji = '🧩';
+                        if (t === 'Aksiyon') emoji = '⚔️';
+                        else if (t === 'Kolay') emoji = '🟢';
+                        else if (t === 'Zor') emoji = '🔴';
+                        else if (t === 'Kısa') emoji = '⚡';
+                        return `<span class="map-tag-badge">${emoji} ${t}</span>`;
+                    }).join('') + `</div>`;
+                }
+
+                item.innerHTML = `
+                    <div class="map-info">
+                        <h3>${level.name}</h3>
+                        <div class="map-author">Tasarımcı: <span>${level.author}</span></div>
+                        ${tagsHtml}
+                        <div class="map-expiry ${expiryClass}" id="expiry-${level.id}" data-played-at="${playedTimeStr}" data-likes="${level.likes}">
+                            ⏳ <span class="expiry-timer">${formatRemainingTime(remainingSeconds)}</span>
+                        </div>
+                    </div>
+                    <div class="map-actions">
+                        <div class="map-likes">
+                            <span>👍</span>
+                            <span class="like-count" id="likes-${level.id}">${level.likes}</span>
+                        </div>
+                        <button class="btn-like ${isLiked ? 'liked' : ''}" data-id="${level.id}" ${isLiked ? 'disabled' : ''}>
+                            ${isLiked ? 'Beğenildi' : 'Beğen'}
+                        </button>
+                        <button class="btn-play-map" data-id="${level.id}">▶️ Oyna</button>
+                    </div>
+                `;
+
+                // Beğeni Butonu Olayı
+                const likeBtn = item.querySelector('.btn-like');
+                likeBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    if (likedMaps.includes(level.id)) return;
+                    
+                    try {
+                        const likeRes = await fetch(`${API_BASE}/api/levels/${level.id}/like`, { method: 'POST' });
+                        if (likeRes.ok) {
+                            const updated = await likeRes.json();
+                            const countEl = item.querySelector(`#likes-${level.id}`);
+                            if (countEl) countEl.textContent = updated.likes;
+
+                            // Update in our memory list
+                            level.likes = updated.likes;
+
+                            const expiryEl = item.querySelector(`#expiry-${level.id}`);
+                            if (expiryEl) {
+                                expiryEl.setAttribute('data-likes', updated.likes);
+                                const pTimeStr = expiryEl.getAttribute('data-played-at');
+                                const pTime = new Date(pTimeStr).getTime();
+                                const ageSecs = (Date.now() - pTime) / 1000;
+                                const allowedSecs = 24 * 3600 + (updated.likes * 12 * 3600);
+                                const remSecs = Math.max(0, allowedSecs - ageSecs);
+                                
+                                const timerSpan = expiryEl.querySelector('.expiry-timer');
+                                if (timerSpan) timerSpan.textContent = formatRemainingTime(remSecs);
+
+                                expiryEl.classList.remove('warning', 'danger');
+                                if (remSecs < 6 * 3600) {
+                                    expiryEl.classList.add('danger');
+                                } else if (remSecs < 12 * 3600) {
+                                    expiryEl.classList.add('warning');
+                                }
+                            }
+                            
+                            likeBtn.classList.add('liked');
+                            likeBtn.textContent = 'Beğenildi';
+                            likeBtn.disabled = true;
+                            
+                            likedMaps.push(level.id);
+                            localStorage.setItem('viscora_liked_maps', JSON.stringify(likedMaps));
+                        }
+                    } catch (err) {
+                        console.warn("Beğeni gönderme hatası:", err);
+                    }
+                });
+
+                // Oyna Butonu Olayı
+                const playBtn = item.querySelector('.btn-play-map');
+                playBtn.addEventListener('click', () => {
+                    if (this.communityInterval) {
+                        clearInterval(this.communityInterval);
+                        this.communityInterval = null;
+                    }
+                    this.showScreen('hud');
+                    
+                    audio.init();
+                    audio.startMusic();
+                    
+                    fetch(`${API_BASE}/api/levels/${level.id}/play`, { method: 'POST' }).catch(() => {});
+                    
+                    this.game.isCommunityPlay = true;
+                    this.game.startCustomLevel(level.data);
+                });
+
+                listEl.appendChild(item);
+            });
+
+            this.communityInterval = setInterval(() => {
+                const timerEls = listEl.querySelectorAll('.map-expiry');
+                timerEls.forEach(el => {
+                    const pTimeStr = el.getAttribute('data-played-at');
+                    const likes = parseInt(el.getAttribute('data-likes')) || 0;
+                    const pTime = new Date(pTimeStr).getTime();
+                    const ageSecs = (Date.now() - pTime) / 1000;
+                    const allowedSecs = 24 * 3600 + (likes * 12 * 3600);
+                    const remSecs = Math.max(0, allowedSecs - ageSecs);
+                    
+                    const timerSpan = el.querySelector('.expiry-timer');
+                    if (timerSpan) {
+                        timerSpan.textContent = formatRemainingTime(remSecs);
+                    }
+                    
+                    el.classList.remove('warning', 'danger');
+                    if (remSecs < 6 * 3600) {
+                        el.classList.add('danger');
+                    } else if (remSecs < 12 * 3600) {
+                        el.classList.add('warning');
+                    }
+                });
+            }, 1000);
         };
 
         const loadCommunityMaps = async (sortType) => {
@@ -731,146 +1127,14 @@ export class UIManager {
                 if (!res.ok) throw new Error("Sunucu hatası.");
                 const levels = await res.json();
 
+                this.fetchedLevels = levels;
+
                 if (levels.length === 0) {
                     listEl.innerHTML = '<div class="no-maps">Henüz hiç harita paylaşılmamış. İlk paylaşan sen ol!</div>';
                     return;
                 }
 
-                listEl.innerHTML = '';
-                const likedMaps = JSON.parse(localStorage.getItem('viscora_liked_maps') || '[]');
-
-                levels.forEach(level => {
-                    const item = document.createElement('div');
-                    item.className = 'map-item';
-                    
-                    const isLiked = likedMaps.includes(level.id);
-                    
-                    const playedTimeStr = level.lastPlayedAt || level.createdAt;
-                    const playedTime = new Date(playedTimeStr).getTime();
-                    const now = Date.now();
-                    const ageSeconds = (now - playedTime) / 1000;
-                    const allowedSeconds = 24 * 3600 + (level.likes * 12 * 3600);
-                    const remainingSeconds = Math.max(0, allowedSeconds - ageSeconds);
-
-                    let expiryClass = '';
-                    if (remainingSeconds < 6 * 3600) {
-                        expiryClass = 'danger';
-                    } else if (remainingSeconds < 12 * 3600) {
-                        expiryClass = 'warning';
-                    }
-
-                    item.innerHTML = `
-                        <div class="map-info">
-                            <h3>${level.name}</h3>
-                            <div class="map-author">Tasarımcı: <span>${level.author}</span></div>
-                            <div class="map-expiry ${expiryClass}" id="expiry-${level.id}" data-played-at="${playedTimeStr}" data-likes="${level.likes}">
-                                ⏳ <span class="expiry-timer">${formatRemainingTime(remainingSeconds)}</span>
-                            </div>
-                        </div>
-                        <div class="map-actions">
-                            <div class="map-likes">
-                                <span>👍</span>
-                                <span class="like-count" id="likes-${level.id}">${level.likes}</span>
-                            </div>
-                            <button class="btn-like ${isLiked ? 'liked' : ''}" data-id="${level.id}" ${isLiked ? 'disabled' : ''}>
-                                ${isLiked ? 'Beğenildi' : 'Beğen'}
-                            </button>
-                            <button class="btn-play-map" data-id="${level.id}">▶️ Oyna</button>
-                        </div>
-                    `;
-
-                    // Beğeni Butonu Olayı
-                    const likeBtn = item.querySelector('.btn-like');
-                    likeBtn.addEventListener('click', async (e) => {
-                        e.stopPropagation();
-                        if (likedMaps.includes(level.id)) return;
-                        
-                        try {
-                            const likeRes = await fetch(`${API_BASE}/api/levels/${level.id}/like`, { method: 'POST' });
-                            if (likeRes.ok) {
-                                const updated = await likeRes.json();
-                                const countEl = item.querySelector(`#likes-${level.id}`);
-                                if (countEl) countEl.textContent = updated.likes;
-
-                                const expiryEl = item.querySelector(`#expiry-${level.id}`);
-                                if (expiryEl) {
-                                    expiryEl.setAttribute('data-likes', updated.likes);
-                                    const pTimeStr = expiryEl.getAttribute('data-played-at');
-                                    const pTime = new Date(pTimeStr).getTime();
-                                    const ageSecs = (Date.now() - pTime) / 1000;
-                                    const allowedSecs = 24 * 3600 + (updated.likes * 12 * 3600);
-                                    const remSecs = Math.max(0, allowedSecs - ageSecs);
-                                    
-                                    const timerSpan = expiryEl.querySelector('.expiry-timer');
-                                    if (timerSpan) timerSpan.textContent = formatRemainingTime(remSecs);
-
-                                    expiryEl.classList.remove('warning', 'danger');
-                                    if (remSecs < 6 * 3600) {
-                                        expiryEl.classList.add('danger');
-                                    } else if (remSecs < 12 * 3600) {
-                                        expiryEl.classList.add('warning');
-                                    }
-                                }
-                                
-                                likeBtn.classList.add('liked');
-                                likeBtn.textContent = 'Beğenildi';
-                                likeBtn.disabled = true;
-                                
-                                likedMaps.push(level.id);
-                                localStorage.setItem('viscora_liked_maps', JSON.stringify(likedMaps));
-                            }
-                        } catch (err) {
-                            console.warn("Beğeni gönderme hatası:", err);
-                        }
-                    });
-
-                    // Oyna Butonu Olayı
-                    const playBtn = item.querySelector('.btn-play-map');
-                    playBtn.addEventListener('click', () => {
-                        if (this.communityInterval) {
-                            clearInterval(this.communityInterval);
-                            this.communityInterval = null;
-                        }
-                        this.showScreen('hud');
-                        
-                        // Custom level verisini direkt loadLevel ile yükle
-                        audio.init();
-                        audio.startMusic();
-                        
-                        // Send play event to backend to update lastPlayedAt
-                        fetch(`${API_BASE}/api/levels/${level.id}/play`, { method: 'POST' }).catch(() => {});
-                        
-                        this.game.isCommunityPlay = true;
-                        this.game.startCustomLevel(level.data);
-                    });
-
-                    listEl.appendChild(item);
-                });
-
-                // Canlı sayaç interval'ini kur
-                this.communityInterval = setInterval(() => {
-                    const timerEls = listEl.querySelectorAll('.map-expiry');
-                    timerEls.forEach(el => {
-                        const pTimeStr = el.getAttribute('data-played-at');
-                        const likes = parseInt(el.getAttribute('data-likes')) || 0;
-                        const pTime = new Date(pTimeStr).getTime();
-                        const ageSecs = (Date.now() - pTime) / 1000;
-                        const allowedSecs = 24 * 3600 + (likes * 12 * 3600);
-                        const remSecs = Math.max(0, allowedSecs - ageSecs);
-                        
-                        const timerSpan = el.querySelector('.expiry-timer');
-                        if (timerSpan) {
-                            timerSpan.textContent = formatRemainingTime(remSecs);
-                        }
-                        
-                        el.classList.remove('warning', 'danger');
-                        if (remSecs < 6 * 3600) {
-                            el.classList.add('danger');
-                        } else if (remSecs < 12 * 3600) {
-                            el.classList.add('warning');
-                        }
-                    });
-                }, 1000);
+                renderFilteredCommunityMaps();
 
             } catch (err) {
                 console.warn("Haritaları yükleme hatası:", err);
@@ -895,7 +1159,6 @@ export class UIManager {
 
         if (btnCommunity) {
             this.bindTouchClick(btnCommunity, () => {
-                // Proaktif çevrimdışı kontrolü
                 if (typeof navigator !== 'undefined' && navigator.onLine === false) {
                     showConfirmModal(
                         '📡 Bağlantı Yok\n\nTopluluk sunucuları internet bağlantısı gerektirir.\nLütfen bağlantınızı kontrol edip tekrar deneyin.\n\nKampanya modunu çevrimdışı oynayabilirsiniz.',
@@ -904,6 +1167,13 @@ export class UIManager {
                     );
                     return;
                 }
+                
+                // Reset search and tag filters
+                this.searchQuery = '';
+                this.activeTagFilter = null;
+                if (searchInput) searchInput.value = '';
+                tagFilterButtons.forEach(b => b.classList.remove('active'));
+
                 this.showScreen('community');
                 loadCommunityMaps(currentSort);
             });
@@ -916,6 +1186,34 @@ export class UIManager {
                     this.communityInterval = null;
                 }
                 this.showScreen('start');
+            });
+        }
+
+        // Bind tag filter click events
+        tagFilterButtons.forEach(btn => {
+            this.bindTouchClick(btn, () => {
+                const tag = btn.getAttribute('data-tag');
+                if (this.activeTagFilter === tag) {
+                    this.activeTagFilter = null;
+                    btn.classList.remove('active');
+                } else {
+                    this.activeTagFilter = tag;
+                    tagFilterButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                }
+                renderFilteredCommunityMaps();
+            });
+        });
+
+        // Bind search input debounce
+        if (searchInput) {
+            let debounceTimer = null;
+            searchInput.addEventListener('input', (e) => {
+                if (debounceTimer) clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    this.searchQuery = e.target.value;
+                    renderFilteredCommunityMaps();
+                }, 300);
             });
         }
 
@@ -1000,7 +1298,6 @@ export class UIManager {
                 localStorage.setItem('viscora_author_name', author);
                 const themeId = selectDesignTheme ? selectDesignTheme.value : 'neon_sewer';
 
-                // Sunucuda aynı isimde harita var mı kontrol et
                 btnDesignCreate.disabled = true;
                 const originalText = btnDesignCreate.innerText;
                 btnDesignCreate.innerText = "Kontrol ediliyor...";
@@ -1024,10 +1321,8 @@ export class UIManager {
                 btnDesignCreate.disabled = false;
                 btnDesignCreate.innerText = originalText;
 
-                // Modalı kapat
                 designSetupModal.classList.add('hidden');
                 
-                // Boş bölüm verisi oluştur
                 const blankLevel = {
                     name: name,
                     themeId: themeId,
@@ -1041,22 +1336,19 @@ export class UIManager {
                     ]
                 };
 
-                // LocalStorage'a 999 olarak kaydet ki editor yükleyebilsin
                 localStorage.setItem('viscora_custom_level_999', JSON.stringify(blankLevel));
                 this.game.currentLevel = 999;
                 
-                // Artır ve kaydet
                 designHistory.count++;
                 localStorage.setItem('viscora_design_history', JSON.stringify(designHistory));
 
-                // Editörü başlat
                 this.game.editor.init();
             });
         }
 
         communityTabButtons.forEach(btn => {
             this.bindTouchClick(btn, () => {
-                currentSort = btn.getAttribute('data-tab');
+                currentSort = btn.id === 'tab-popular' ? 'popular' : 'new';
                 communityTabButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 loadCommunityMaps(currentSort);

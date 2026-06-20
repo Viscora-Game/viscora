@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v121';
-import { audio } from './audio.js?v=v121';
+import { ViscosityStates } from './viscosity.js?v=v122';
+import { audio } from './audio.js?v=v122';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -851,11 +851,38 @@ export class Player {
         
         if (this.trailTimer % trailFrequency === 0 && emitParticles && speed > 0.8) {
             const count = Math.min(Math.floor(speed * 0.35) + 1, 3);
+            let trailColor = this.viscosity.particleColor;
+            let trailType = 'trail';
+            
+            if (window.shopManager) {
+                const activeTrail = window.shopManager.getActiveCosmetic('trail');
+                if (activeTrail && activeTrail !== 'default_trail') {
+                    if (activeTrail === 'fire_trail') {
+                        const colors = ['#ef4444', '#f97316', '#f59e0b'];
+                        trailColor = colors[Math.floor(Math.random() * colors.length)];
+                        trailType = 'steam';
+                    } else if (activeTrail === 'ice_trail') {
+                        const colors = ['#38bdf8', '#7dd3fc', '#e0f2fe', '#ffffff'];
+                        trailColor = colors[Math.floor(Math.random() * colors.length)];
+                        trailType = 'trail';
+                    } else if (activeTrail === 'gold_trail') {
+                        const colors = ['#fbbf24', '#f59e0b', '#ffffff'];
+                        trailColor = colors[Math.floor(Math.random() * colors.length)];
+                        trailType = 'shift';
+                    } else if (activeTrail === 'rainbow_trail') {
+                        if (this.rainbowHue === undefined) this.rainbowHue = 0;
+                        this.rainbowHue = (this.rainbowHue + 8) % 360;
+                        trailColor = `hsl(${this.rainbowHue}, 100%, 60%)`;
+                        trailType = 'trail';
+                    }
+                }
+            }
+            
             emitParticles(
                 this.x - (this.vx / (speed || 1)) * (this.radius * 0.8),
                 this.y - (this.vy / (speed || 1)) * (this.radius * 0.8),
-                'trail',
-                this.viscosity.particleColor,
+                trailType,
+                trailColor,
                 count
             );
         }
@@ -1318,7 +1345,17 @@ export class Player {
             const b = Math.round(239 + (68 - 239) * this.flameHeat);
             ctx.shadowColor = `rgba(${r}, ${g}, ${b}, ${0.5 + this.flameHeat * 0.3})`;
         } else {
-            ctx.shadowColor = this.viscosity.color;
+            let glowColor = this.viscosity.color;
+            if (window.shopManager) {
+                const activeGlow = window.shopManager.getActiveCosmetic('glow');
+                if (activeGlow && activeGlow !== 'default_glow') {
+                    if (activeGlow === 'gold_glow') glowColor = '#f59e0b';
+                    else if (activeGlow === 'fire_glow') glowColor = '#ef4444';
+                    else if (activeGlow === 'diamond_glow') glowColor = '#38bdf8';
+                    else if (activeGlow === 'night_glow') glowColor = '#8b5cf6';
+                }
+            }
+            ctx.shadowColor = glowColor;
         }
         ctx.shadowBlur = totalGlow;
 
@@ -1384,28 +1421,108 @@ export class Player {
         const dx = speedMagnitude > 0.1 ? (this.vx / speedMagnitude) * eyeOffsetMultiplier : 0;
         const dy = speedMagnitude > 0.1 ? (this.vy / speedMagnitude) * eyeOffsetMultiplier : 0;
 
-        // İki parlak küçük beyaz göz çiz
+        let activeEyes = 'default_eyes';
+        if (window.shopManager) {
+            activeEyes = window.shopManager.getActiveCosmetic('eyes') || 'default_eyes';
+        }
+
         ctx.fillStyle = '#ffffff';
         ctx.shadowColor = '#ffffff';
-        ctx.shadowBlur = 4;
-        
-        // Sol Göz
-        ctx.beginPath();
-        ctx.arc(this.x - 6 + dx, this.y - 3 + dy, 3, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Sağ Göz
-        ctx.beginPath();
-        ctx.arc(this.x + 6 + dx, this.y - 3 + dy, 3, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.shadowBlur = activeEyes === 'pixel_eyes' ? 0 : 4;
 
-        // Göz bebekleri (Merkeze bakan küçük siyah noktalar)
-        ctx.fillStyle = '#0a0a0f';
-        ctx.shadowBlur = 0;
-        ctx.beginPath();
-        ctx.arc(this.x - 6 + dx + dx*0.3, this.y - 3 + dy + dy*0.3, 1.2, 0, Math.PI * 2);
-        ctx.arc(this.x + 6 + dx + dx*0.3, this.y - 3 + dy + dy*0.3, 1.2, 0, Math.PI * 2);
-        ctx.fill();
+        if (activeEyes === 'cute_eyes') {
+            // İri Gözler
+            ctx.beginPath();
+            ctx.arc(this.x - 6 + dx, this.y - 3 + dy, 4.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(this.x + 6 + dx, this.y - 3 + dy, 4.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Göz bebekleri (İri)
+            ctx.fillStyle = '#0a0a0f';
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.arc(this.x - 6 + dx + dx*0.3, this.y - 3 + dy + dy*0.3, 2.2, 0, Math.PI * 2);
+            ctx.arc(this.x + 6 + dx + dx*0.3, this.y - 3 + dy + dy*0.3, 2.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Parıltı ekle
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(this.x - 7.5 + dx + dx*0.3, this.y - 4.5 + dy + dy*0.3, 0.8, 0, Math.PI * 2);
+            ctx.arc(this.x + 4.5 + dx + dx*0.3, this.y - 4.5 + dy + dy*0.3, 0.8, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (activeEyes === 'focused_eyes') {
+            // Odaklanmış dar gözler
+            ctx.beginPath();
+            if (ctx.ellipse) {
+                ctx.ellipse(this.x - 6 + dx, this.y - 3 + dy, 4, 1.2, 0, 0, Math.PI * 2);
+            } else {
+                ctx.arc(this.x - 6 + dx, this.y - 3 + dy, 2, 0, Math.PI * 2);
+            }
+            ctx.fill();
+            
+            ctx.beginPath();
+            if (ctx.ellipse) {
+                ctx.ellipse(this.x + 6 + dx, this.y - 3 + dy, 4, 1.2, 0, 0, Math.PI * 2);
+            } else {
+                ctx.arc(this.x + 6 + dx, this.y - 3 + dy, 2, 0, Math.PI * 2);
+            }
+            ctx.fill();
+
+            // Göz bebekleri
+            ctx.fillStyle = '#0a0a0f';
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.arc(this.x - 6 + dx + dx*0.3, this.y - 3 + dy + dy*0.3, 0.8, 0, Math.PI * 2);
+            ctx.arc(this.x + 6 + dx + dx*0.3, this.y - 3 + dy + dy*0.3, 0.8, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (activeEyes === 'pixel_eyes') {
+            // Piksel gözler
+            ctx.fillRect(this.x - 8.5 + dx, this.y - 5.5 + dy, 5, 5);
+            ctx.fillRect(this.x + 3.5 + dx, this.y - 5.5 + dy, 5, 5);
+            
+            // Göz bebekleri
+            ctx.fillStyle = '#0a0a0f';
+            ctx.shadowBlur = 0;
+            ctx.fillRect(this.x - 7.5 + dx + dx*0.3, this.y - 4.5 + dy + dy*0.3, 2, 2);
+            ctx.fillRect(this.x + 4.5 + dx + dx*0.3, this.y - 4.5 + dy + dy*0.3, 2, 2);
+        } else {
+            // Varsayılan / Kızgın
+            ctx.beginPath();
+            ctx.arc(this.x - 6 + dx, this.y - 3 + dy, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(this.x + 6 + dx, this.y - 3 + dy, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Göz bebekleri
+            ctx.fillStyle = '#0a0a0f';
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.arc(this.x - 6 + dx + dx*0.3, this.y - 3 + dy + dy*0.3, 1.2, 0, Math.PI * 2);
+            ctx.arc(this.x + 6 + dx + dx*0.3, this.y - 3 + dy + dy*0.3, 1.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (activeEyes === 'angry_eyes') {
+                ctx.strokeStyle = '#0a0a0f';
+                ctx.lineWidth = 1.5;
+                // Sol Kaş
+                ctx.beginPath();
+                ctx.moveTo(this.x - 9 + dx, this.y - 7 + dy);
+                ctx.lineTo(this.x - 2 + dx, this.y - 4 + dy);
+                ctx.stroke();
+                
+                // Sağ Kaş
+                ctx.beginPath();
+                ctx.moveTo(this.x + 9 + dx, this.y - 7 + dy);
+                ctx.lineTo(this.x + 2 + dx, this.y - 4 + dy);
+                ctx.stroke();
+            }
+        }
 
         ctx.restore();
     }

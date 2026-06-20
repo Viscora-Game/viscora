@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v121';
-import { audio } from './audio.js?v=v121';
-import { LevelGenerator } from './generator.js?v=v121';
+import { Enemy, GelChaser } from './enemies.js?v=v122';
+import { audio } from './audio.js?v=v122';
+import { LevelGenerator } from './generator.js?v=v122';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -538,6 +538,31 @@ export class LevelEditor {
                     padding: 4px 6px !important;
                 }
             }
+            .editor-tag-btn {
+                background: rgba(30, 41, 59, 0.4);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                color: #94a3b8;
+                padding: 4px 8px;
+                font-size: 11px;
+                font-weight: 600;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: inline-flex;
+                align-items: center;
+                gap: 3px;
+            }
+            .editor-tag-btn:hover {
+                background: rgba(6, 182, 212, 0.12);
+                border-color: rgba(6, 182, 212, 0.3);
+                color: #22d3ee;
+            }
+            .editor-tag-btn.active {
+                background: rgba(6, 182, 212, 0.25);
+                border-color: #22d3ee;
+                color: #fff;
+                box-shadow: 0 0 8px rgba(6, 182, 212, 0.35);
+            }
         `;
         document.head.appendChild(style);
 
@@ -656,6 +681,13 @@ export class LevelEditor {
         this.panel = document.createElement('div');
         this.panel.id = 'viscora-editor-panel';
 
+        const activeTags = this.game.level.tags || [];
+        const isBulmacaActive = activeTags.includes('Bulmaca') ? 'active' : '';
+        const isAksiyonActive = activeTags.includes('Aksiyon') ? 'active' : '';
+        const isKolayActive = activeTags.includes('Kolay') ? 'active' : '';
+        const isZorActive = activeTags.includes('Zor') ? 'active' : '';
+        const isKisaActive = activeTags.includes('Kısa') ? 'active' : '';
+
         this.panel.innerHTML = `
             <div class="editor-title">VISCORA EDITOR</div>
             <div class="editor-subtitle">BÖLÜM TASARIMCISI</div>
@@ -725,6 +757,16 @@ export class LevelEditor {
                 <div class="editor-input-group">
                     <label>Harita Yükseklik</label>
                     <input type="number" id="editor-level-height" value="${this.game.level.height}">
+                </div>
+                <div class="editor-input-group" style="grid-column: span 2; margin-top: 8px; flex-direction: column; align-items: flex-start;">
+                    <label style="display: block; margin-bottom: 6px; width: 100%;">Etiketler (En Fazla 2 Adet)</label>
+                    <div class="editor-tags-container" style="display: flex; flex-wrap: wrap; gap: 6px; width: 100%;">
+                        <button class="editor-tag-btn ${isBulmacaActive}" data-tag="Bulmaca">🧩 Bulmaca</button>
+                        <button class="editor-tag-btn ${isAksiyonActive}" data-tag="Aksiyon">⚔️ Aksiyon</button>
+                        <button class="editor-tag-btn ${isKolayActive}" data-tag="Kolay">🟢 Kolay</button>
+                        <button class="editor-tag-btn ${isZorActive}" data-tag="Zor">🔴 Zor</button>
+                        <button class="editor-tag-btn ${isKisaActive}" data-tag="Kısa">⚡ Kısa</button>
+                    </div>
                 </div>
             </div>
 
@@ -866,6 +908,28 @@ export class LevelEditor {
         `;
 
         document.getElementById('game-container').appendChild(this.panel);
+
+        // Etiket Butonları Bağlantısı
+        const tagBtns = this.panel.querySelectorAll('.editor-tag-btn');
+        tagBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.game.level.tags = this.game.level.tags || [];
+                const tag = btn.getAttribute('data-tag');
+                const idx = this.game.level.tags.indexOf(tag);
+                
+                if (idx !== -1) {
+                    this.game.level.tags.splice(idx, 1);
+                } else {
+                    if (this.game.level.tags.length >= 2) {
+                        alert("En fazla 2 etiket seçebilirsiniz!");
+                        return;
+                    }
+                    this.game.level.tags.push(tag);
+                }
+                this.updateTagButtonsUI();
+                this.saveToLocalStorage();
+            });
+        });
 
         // Olay Dinleyicileri Ekle
         this.panel.querySelectorAll('.editor-btn[data-tool]').forEach(btn => {
@@ -1012,6 +1076,20 @@ export class LevelEditor {
         });
     }
 
+    updateTagButtonsUI() {
+        if (!this.panel) return;
+        const activeTags = this.game.level.tags || [];
+        const btns = this.panel.querySelectorAll('.editor-tag-btn');
+        btns.forEach(btn => {
+            const tag = btn.getAttribute('data-tag');
+            if (activeTags.includes(tag)) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
     /**
      * Editör yan panelinin görünürlüğünü açar/kapatır (Drawer Slide)
      */
@@ -1070,6 +1148,9 @@ export class LevelEditor {
         this.selectedObject = null;
         this.selectedObjectType = '';
         this.updateInspector();
+        
+        lvl.tags = [];
+        this.updateTagButtonsUI();
     }
 
     /**
@@ -1860,6 +1941,8 @@ export class LevelEditor {
 
         // Seviye ve Düşmanları yükle
         this.game.state = 'PLAYING';
+        this.game.currentLevel = 999;
+        this.game.boss = null;
         document.getElementById('hud').classList.remove('hidden');
 
         // Mobil/Dokunmatik cihaz ise yön tuşlarını göster
@@ -2151,6 +2234,7 @@ export class LevelEditor {
         return {
             serverLevelId: lvl.serverLevelId || null,
             name: lvl.name || "Özel Seviye",
+            tags: lvl.tags || [],
             themeId: (lvl.theme && lvl.theme.id) ? lvl.theme.id : 'neon_sewer',
             levelWidth: lvl.width,
             levelHeight: lvl.height,
@@ -2278,6 +2362,7 @@ export class LevelEditor {
                     name: mapName,
                     author: authorName,
                     creatorId: myUserId,
+                    tags: newExport.tags || [],
                     data: newExport
                 })
             })
@@ -2318,6 +2403,7 @@ export class LevelEditor {
                 body: JSON.stringify({
                     name: mapName,
                     creatorId: myUserId,
+                    tags: exportObj.tags || [],
                     data: exportObj
                 })
             })

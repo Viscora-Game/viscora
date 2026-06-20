@@ -2843,3 +2843,205 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     from { transform: scale(0.9); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
 }
+
+/* Community Search & Tag Filters */
+.tag-filter-btn {
+    background: rgba(30, 41, 59, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: inherit;
+    outline: none;
+}
+
+.tag-filter-btn:hover {
+    background: rgba(6, 182, 212, 0.12);
+    border-color: rgba(6, 182, 212, 0.35);
+    color: #ffffff;
+}
+
+.tag-filter-btn.active {
+    background: rgba(6, 182, 212, 0.25);
+    border-color: var(--color-low);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+}
+
+/* Map Card Tag Badges */
+.map-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.map-tag-badge {
+    background: rgba(6, 182, 212, 0.1);
+    border: 1px solid rgba(6, 182, 212, 0.25);
+    color: var(--color-low);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* --------------------------------------------------
+   KRİSTAL DÜKKANI (CRYSTAL SHOP) TASARIMI
+-------------------------------------------------- */
+
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 5px;
+}
+
+.shop-item {
+    background: rgba(15, 23, 42, 0.45);
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.shop-item:hover {
+    border-color: rgba(6, 182, 212, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.15);
+}
+
+.shop-item-preview-box {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    border: 1px dashed rgba(255,255,255,0.05);
+}
+
+.shop-item-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 5px;
+}
+
+.shop-item-description {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-bottom: 12px;
+    min-height: 32px;
+}
+
+.shop-item-price {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #fbbf24;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.shop-item-btn {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    border: none;
+    outline: none;
+}
+
+.shop-item-btn.buy {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.shop-item-btn.buy:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.45);
+}
+
+.shop-item-btn.equip {
+    background: rgba(6, 182, 212, 0.1);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    color: #22d3ee;
+}
+
+.shop-item-btn.equip:hover {
+    background: rgba(6, 182, 212, 0.2);
+    color: #ffffff;
+}
+
+.shop-item-btn.active {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    cursor: default;
+    border: none;
+}
+
+.shop-item.equipped {
+    border-color: rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
+}
+
+/* Custom previews for cosmetic elements in the shop card */
+.preview-trail-particle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: absolute;
+}
+
+.preview-glow-ring {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    filter: drop-shadow(0 0 6px currentColor);
+}
+
+.preview-eye-shape {
+    width: 28px;
+    height: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: relative;
+}
+
+.preview-eye-pupil {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ffffff;
+}
+

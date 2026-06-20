@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v121';
-import { Level } from './level.js?v=v121';
-import { Enemy, GelChaser } from './enemies.js?v=v121';
-import { UIManager } from './ui.js?v=v121';
-import { audio } from './audio.js?v=v121';
-import { LevelEditor } from './editor.js?v=v121';
-import { Boss, CyberBoss } from './boss.js?v=v121';
+import { Player } from './player.js?v=v122';
+import { Level } from './level.js?v=v122';
+import { Enemy, GelChaser } from './enemies.js?v=v122';
+import { UIManager } from './ui.js?v=v122';
+import { audio } from './audio.js?v=v122';
+import { LevelEditor } from './editor.js?v=v122';
+import { Boss, CyberBoss } from './boss.js?v=v122';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -577,6 +577,7 @@ export class GameManager {
         this.enemies = []; // Önceki bölümden kalan düşmanları temizle
         this.levelCardTimer = 0; // No level title card for custom maps
         this.level.loadLevel(levelData);
+        this.initEnemies(this.currentLevel);
         this.initBackgroundCells(); // Generate standard decorations
         let maxH = 3;
         if (this.difficulty === 'easy') maxH = 3;
@@ -886,6 +887,8 @@ export class GameManager {
         this.ui.resetKeys();
         this.particles = [];
         this.splatters = [];
+        this.boss = null;
+        this.enemies = [];
         audio.stopMusic();
         
         if (this.isCommunityPlay) {
