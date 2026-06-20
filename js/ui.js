@@ -1,6 +1,6 @@
-import { audio } from './audio.js?v=v129';
-import { ViscosityList } from './viscosity.js?v=v129';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v129';
+import { audio } from './audio.js?v=v130';
+import { ViscosityList } from './viscosity.js?v=v130';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v130';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -188,38 +188,38 @@ export class UIManager {
             if (this.game.state !== 'PLAYING') return;
             if (e.repeat) return;
 
-            const key = e.key.toLowerCase();
-            if (key === 'a' || e.key === 'ArrowLeft') {
+            const key = e.key ? e.key.toLowerCase() : '';
+            if (key === 'a' || (e.key && e.key === 'ArrowLeft')) {
                 this.keys.left = true;
-            } else if (key === 'd' || e.key === 'ArrowRight') {
+            } else if (key === 'd' || (e.key && e.key === 'ArrowRight')) {
                 this.keys.right = true;
-            } else if (key === 'w' || e.key === 'ArrowUp') {
+            } else if (key === 'w' || (e.key && e.key === 'ArrowUp')) {
                 this.keys.up = true;
                 this.game.player.jump(false);
-            } else if (key === 's' || e.key === 'ArrowDown') {
+            } else if (key === 's' || (e.key && e.key === 'ArrowDown')) {
                 this.keys.down = true;
-            } else if (e.key === ' ') {
+            } else if (e.key && e.key === ' ') {
                 this.keys.jump = true;
                 this.game.player.jump(true);
-            } else if (e.key === 'Shift' || key === 'e') {
+            } else if ((e.key && e.key === 'Shift') || key === 'e') {
                 this.triggerViscosityShift();
-            } else if (e.key === 'Escape' || key === 'p') {
+            } else if ((e.key && e.key === 'Escape') || key === 'p') {
                 this.game.togglePause();
             }
         });
 
         // Tuş bırakma
         window.addEventListener('keyup', (e) => {
-            const key = e.key.toLowerCase();
-            if (key === 'a' || e.key === 'ArrowLeft') {
+            const key = e.key ? e.key.toLowerCase() : '';
+            if (key === 'a' || (e.key && e.key === 'ArrowLeft')) {
                 this.keys.left = false;
-            } else if (key === 'd' || e.key === 'ArrowRight') {
+            } else if (key === 'd' || (e.key && e.key === 'ArrowRight')) {
                 this.keys.right = false;
-            } else if (key === 'w' || e.key === 'ArrowUp') {
+            } else if (key === 'w' || (e.key && e.key === 'ArrowUp')) {
                 this.keys.up = false;
-            } else if (key === 's' || e.key === 'ArrowDown') {
+            } else if (key === 's' || (e.key && e.key === 'ArrowDown')) {
                 this.keys.down = false;
-            } else if (e.key === ' ') {
+            } else if (e.key && e.key === ' ') {
                 this.keys.jump = false;
             }
         });

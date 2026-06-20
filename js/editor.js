@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v129';
-import { audio } from './audio.js?v=v129';
-import { LevelGenerator } from './generator.js?v=v129';
+import { Enemy, GelChaser } from './enemies.js?v=v130';
+import { audio } from './audio.js?v=v130';
+import { LevelGenerator } from './generator.js?v=v130';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -3966,10 +3966,10 @@ export class LevelEditor {
         if (this.game.state !== 'EDITOR') return;
 
         // Yön ve WASD tuşlarını takip et
-        if (e.key in this.keys) {
+        if (e.key && e.key in this.keys) {
             this.keys[e.key] = true;
         }
-        const lowerKey = e.key.toLowerCase();
+        const lowerKey = e.key ? e.key.toLowerCase() : '';
         if (lowerKey === 'w' || lowerKey === 'a' || lowerKey === 's' || lowerKey === 'd') {
             this.keys[lowerKey] = true;
         }
@@ -4002,10 +4002,10 @@ export class LevelEditor {
     onKeyUp(e) {
         if (!this.active) return;
         
-        if (e.key in this.keys) {
+        if (e.key && e.key in this.keys) {
             this.keys[e.key] = false;
         }
-        const lowerKey = e.key.toLowerCase();
+        const lowerKey = e.key ? e.key.toLowerCase() : '';
         if (lowerKey === 'w' || lowerKey === 'a' || lowerKey === 's' || lowerKey === 'd') {
             this.keys[lowerKey] = false;
         }
