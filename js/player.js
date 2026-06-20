@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v126';
-import { audio } from './audio.js?v=v126';
+import { ViscosityStates } from './viscosity.js?v=v127';
+import { audio } from './audio.js?v=v127';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -1347,7 +1347,7 @@ export class Player {
         } else {
             ctx.shadowColor = this.viscosity.color;
         }
-        ctx.shadowBlur = totalGlow;
+        ctx.shadowBlur = Math.min(totalGlow, 20); // Performans için gölge bulanıklığını 20px ile sınırla
 
         // Şekli Bezier eğrileriyle yumuşatılmış olarak çiz
         ctx.beginPath();
