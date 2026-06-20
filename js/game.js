@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v127';
-import { Level } from './level.js?v=v127';
-import { Enemy, GelChaser } from './enemies.js?v=v127';
-import { UIManager } from './ui.js?v=v127';
-import { audio } from './audio.js?v=v127';
-import { LevelEditor } from './editor.js?v=v127';
-import { Boss, CyberBoss } from './boss.js?v=v127';
+import { Player } from './player.js?v=v128';
+import { Level } from './level.js?v=v128';
+import { Enemy, GelChaser } from './enemies.js?v=v128';
+import { UIManager } from './ui.js?v=v128';
+import { audio } from './audio.js?v=v128';
+import { LevelEditor } from './editor.js?v=v128';
+import { Boss, CyberBoss } from './boss.js?v=v128';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -612,7 +612,7 @@ export class GameManager {
             this.state = 'PLAYING';
             this.particles = [];
             this.splatters = [];
-            this.level.resetLevelRuntimeState();
+            this.level.resetLevelRuntimeState(true);
             this.initEnemies(this.currentLevel);
             this.bossRespawnsUsed = 0;
             const mappedLvl = this.getMappedLevel();
@@ -715,7 +715,7 @@ export class GameManager {
         this.state = 'PLAYING';
         this.particles = [];
         this.splatters = [];
-        this.level.resetLevelRuntimeState();
+        this.level.resetLevelRuntimeState(true);
         this.initEnemies(this.currentLevel);
         this.bossRespawnsUsed = 0;
         const mappedLvl = this.getMappedLevel();

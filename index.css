@@ -1025,11 +1025,29 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 }
 
 .dpad-right {
-    display: flex;
-    flex-direction: column;
+    display: grid !important;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto;
     gap: 0.5rem;
+    align-items: end;
+    justify-items: end;
     pointer-events: auto;
-    align-items: center;
+}
+
+#btn-down {
+    grid-column: 1;
+    grid-row: 1;
+    margin-right: -10px; /* Ergonomik kümeleme için hafif sağa kaydır */
+}
+
+#btn-shift {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+#btn-jump {
+    grid-column: 2;
+    grid-row: 2;
 }
 
 .control-btn {
@@ -3054,5 +3072,24 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     height: 6px;
     border-radius: 50%;
     background: #ffffff;
+}
+
+/* Shop Preview & Toast Styles */
+.shop-preview-panel {
+    transition: border-color 0.3s ease;
+}
+.shop-preview-panel:hover {
+    border-color: rgba(0, 242, 254, 0.4) !important;
+}
+
+@keyframes toast-in-out {
+    0% { transform: translate(-50%, 20px); opacity: 0; }
+    12% { transform: translate(-50%, 0); opacity: 1; }
+    88% { transform: translate(-50%, 0); opacity: 1; }
+    100% { transform: translate(-50%, -20px); opacity: 0; }
+}
+
+.shop-toast {
+    animation: toast-in-out 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 

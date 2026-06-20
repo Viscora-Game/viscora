@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v127';
-import { THEMES } from './generator.js?v=v127';
+import { audio } from './audio.js?v=v128';
+import { THEMES } from './generator.js?v=v128';
 
 /**
  * Viscora Level Design & Manager
@@ -7162,7 +7162,7 @@ export class Level {
     /**
      * Resets the level's interactive components to their initial editor state
      */
-    resetLevelRuntimeState() {
+    resetLevelRuntimeState(isCheckpointRespawn = false) {
         this.time = 0;
         
         if (this.movingPlatforms) {
@@ -7178,19 +7178,48 @@ export class Level {
 
         if (this.gates) {
             this.gates.forEach(gate => {
-                gate.disabled = false;
+                let isLinkedToActiveTrigger = false;
+                if (isCheckpointRespawn) {
+                    if (this.levers) {
+                        isLinkedToActiveTrigger = this.levers.some(l => l.linkedGateId === gate.id && l.activated);
+                    }
+                    if (!isLinkedToActiveTrigger && this.buttons) {
+                        isLinkedToActiveTrigger = this.buttons.some(b => b.linkedGateId === gate.id && b.activated);
+                    }
+                    if (!isLinkedToActiveTrigger && this.pressurePlates) {
+                        isLinkedToActiveTrigger = this.pressurePlates.some(p => p.linkedGateId === gate.id && p.activated);
+                    }
+                }
+                if (!isLinkedToActiveTrigger) {
+                    gate.disabled = false;
+                }
             });
         }
 
         if (this.flamethrowers) {
             this.flamethrowers.forEach(f => {
+                let isLinkedToActiveTrigger = false;
+                if (isCheckpointRespawn) {
+                    if (this.levers) {
+                        isLinkedToActiveTrigger = this.levers.some(l => l.linkedGateId === f.id && l.activated);
+                    }
+                    if (!isLinkedToActiveTrigger && this.buttons) {
+                        isLinkedToActiveTrigger = this.buttons.some(b => b.linkedGateId === f.id && b.activated);
+                    }
+                    if (!isLinkedToActiveTrigger && this.pressurePlates) {
+                        isLinkedToActiveTrigger = this.pressurePlates.some(p => p.linkedGateId === f.id && p.activated);
+                    }
+                }
+                
                 f.x = f.startX !== undefined ? f.startX : f.x;
                 f.y = f.startY !== undefined ? f.startY : f.y;
                 f.progress = 0;
                 f.moveDir = 1;
-                f.disabled = false;
                 f.active = true;
                 f.currentLength = 0;
+                if (!isLinkedToActiveTrigger) {
+                    f.disabled = false;
+                }
             });
         }
 
@@ -7203,13 +7232,18 @@ export class Level {
 
         if (this.collectibles) {
             this.collectibles.forEach(c => {
-                c.collected = false;
+                // Collectibles shouldn't reset on checkpoint spawn if already collected
+                if (!isCheckpointRespawn) {
+                    c.collected = false;
+                }
             });
         }
 
         if (this.pressurePlates) {
             this.pressurePlates.forEach(plate => {
-                plate.activated = false;
+                if (!isCheckpointRespawn) {
+                    plate.activated = false;
+                }
             });
         }
 
@@ -7240,15 +7274,19 @@ export class Level {
 
         if (this.buttons) {
             this.buttons.forEach(button => {
-                button.activated = false;
-                button.timer = 0;
+                if (!isCheckpointRespawn) {
+                    button.activated = false;
+                    button.timer = 0;
+                }
             });
         }
 
         if (this.levers) {
             this.levers.forEach(lever => {
-                lever.activated = false;
-                lever.cooldown = 0;
+                if (!isCheckpointRespawn) {
+                    lever.activated = false;
+                    lever.cooldown = 0;
+                }
             });
         }
 

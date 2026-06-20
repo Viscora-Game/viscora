@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v127';
-import { audio } from './audio.js?v=v127';
-import { LevelGenerator } from './generator.js?v=v127';
+import { Enemy, GelChaser } from './enemies.js?v=v128';
+import { audio } from './audio.js?v=v128';
+import { LevelGenerator } from './generator.js?v=v128';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -1602,25 +1602,50 @@ export class LevelEditor {
                 el.addEventListener('focus', () => {
                     this.inputFocused = true;
                 });
-                el.addEventListener('blur', () => {
+                el.addEventListener('blur', (e) => {
                     this.inputFocused = false;
+                    // On blur, update the input value with the actual clamped value
+                    if (el.tagName === 'INPUT') {
+                        const finalVal = callback(e.target.value);
+                        if (finalVal !== undefined && finalVal !== null) {
+                            el.value = finalVal;
+                        }
+                    }
                 });
             }
         };
 
         if (type !== 'spawn' && type !== 'teleportPair') {
-            addUpdateEvent('inspect-x', (val) => { obj.x = parseInt(val) || 0; if(obj.startX !== undefined) obj.startX = obj.x; });
-            addUpdateEvent('inspect-y', (val) => { obj.y = parseInt(val) || 0; if(obj.startY !== undefined) obj.startY = obj.y; });
-            addUpdateEvent('inspect-w', (val) => { obj.w = parseInt(val) || 0; });
-            addUpdateEvent('inspect-h', (val) => { obj.h = parseInt(val) || 0; });
+            addUpdateEvent('inspect-x', (val) => { 
+                const xVal = parseInt(val) || 0;
+                obj.x = Math.max(-5000, Math.min(xVal, 25000)); 
+                if(obj.startX !== undefined) obj.startX = obj.x; 
+                return obj.x;
+            });
+            addUpdateEvent('inspect-y', (val) => { 
+                const yVal = parseInt(val) || 0;
+                obj.y = Math.max(-5000, Math.min(yVal, 15000)); 
+                if(obj.startY !== undefined) obj.startY = obj.y; 
+                return obj.y;
+            });
+            addUpdateEvent('inspect-w', (val) => { 
+                const wVal = parseInt(val) || 4;
+                obj.w = Math.max(4, Math.min(wVal, 3000)); 
+                return obj.w;
+            });
+            addUpdateEvent('inspect-h', (val) => { 
+                const hVal = parseInt(val) || 4;
+                obj.h = Math.max(4, Math.min(hVal, 3000)); 
+                return obj.h;
+            });
         } else if (type === 'teleportPair') {
-            addUpdateEvent('inspect-x1', (val) => { obj.x1 = parseInt(val) || 0; });
-            addUpdateEvent('inspect-y1', (val) => { obj.y1 = parseInt(val) || 0; });
-            addUpdateEvent('inspect-x2', (val) => { obj.x2 = parseInt(val) || 0; });
-            addUpdateEvent('inspect-y2', (val) => { obj.y2 = parseInt(val) || 0; });
+            addUpdateEvent('inspect-x1', (val) => { obj.x1 = Math.max(-5000, Math.min(parseInt(val) || 0, 25000)); return obj.x1; });
+            addUpdateEvent('inspect-y1', (val) => { obj.y1 = Math.max(-5000, Math.min(parseInt(val) || 0, 15000)); return obj.y1; });
+            addUpdateEvent('inspect-x2', (val) => { obj.x2 = Math.max(-5000, Math.min(parseInt(val) || 0, 25000)); return obj.x2; });
+            addUpdateEvent('inspect-y2', (val) => { obj.y2 = Math.max(-5000, Math.min(parseInt(val) || 0, 15000)); return obj.y2; });
         } else {
-            addUpdateEvent('inspect-spawn-x', (val) => { this.game.level.spawnX = parseInt(val) || 80; });
-            addUpdateEvent('inspect-spawn-y', (val) => { this.game.level.spawnY = parseInt(val) || 350; });
+            addUpdateEvent('inspect-spawn-x', (val) => { this.game.level.spawnX = Math.max(0, Math.min(parseInt(val) || 80, 25000)); return this.game.level.spawnX; });
+            addUpdateEvent('inspect-spawn-y', (val) => { this.game.level.spawnY = Math.max(0, Math.min(parseInt(val) || 350, 15000)); return this.game.level.spawnY; });
         }
 
         addUpdateEvent('inspect-spike-dir', (val) => {
@@ -1658,10 +1683,12 @@ export class LevelEditor {
         if (type === 'decoration') {
             addUpdateEvent('inspect-deco-text', (val) => {
                 obj.text = val;
+                return val;
             });
             
             addUpdateEvent('inspect-deco-color', (val) => {
                 obj.color = val;
+                return val;
             });
             
             const rotateBtn = document.getElementById('inspect-deco-rotate-btn');
@@ -1687,9 +1714,9 @@ export class LevelEditor {
             else { obj.sticky = false; obj.slippery = false; }
         });
 
-        addUpdateEvent('inspect-target-x', (val) => { obj.targetX = parseInt(val) || 0; });
-        addUpdateEvent('inspect-target-y', (val) => { obj.targetY = parseInt(val) || 0; });
-        addUpdateEvent('inspect-speed', (val) => { obj.speed = parseFloat(val) || 0.015; });
+        addUpdateEvent('inspect-target-x', (val) => { obj.targetX = Math.max(-5000, Math.min(parseInt(val) || 0, 25000)); return obj.targetX; });
+        addUpdateEvent('inspect-target-y', (val) => { obj.targetY = Math.max(-5000, Math.min(parseInt(val) || 0, 15000)); return obj.targetY; });
+        addUpdateEvent('inspect-speed', (val) => { obj.speed = Math.max(0.001, Math.min(parseFloat(val) || 0.015, 0.5)); return obj.speed; });
         
         const setStartBtn = document.getElementById('inspect-set-start-btn');
         if (setStartBtn) {
@@ -1712,7 +1739,7 @@ export class LevelEditor {
         }
 
         addUpdateEvent('inspect-gate-type', (val) => { obj.type = val; });
-        addUpdateEvent('inspect-gate-id', (val) => { obj.id = parseInt(val) || 101; });
+        addUpdateEvent('inspect-gate-id', (val) => { obj.id = parseInt(val) || 101; return obj.id; });
 
         addUpdateEvent('inspect-enemy-type', (val) => {
             obj.type = val;
@@ -1723,8 +1750,8 @@ export class LevelEditor {
             this.updateInspector();
         });
 
-        addUpdateEvent('inspect-enemy-range', (val) => { obj.rangeX = parseInt(val) || 150; });
-        addUpdateEvent('inspect-enemy-speed', (val) => { obj.speed = parseFloat(val) || 1.2; });
+        addUpdateEvent('inspect-enemy-range', (val) => { obj.rangeX = Math.max(10, Math.min(parseInt(val) || 150, 2500)); return obj.rangeX; });
+        addUpdateEvent('inspect-enemy-speed', (val) => { obj.speed = Math.max(0.1, Math.min(parseFloat(val) || 1.2, 10.0)); return obj.speed; });
         
         const enemyVert = document.getElementById('inspect-enemy-vertical');
         if (enemyVert) {
@@ -1733,17 +1760,17 @@ export class LevelEditor {
                 this.saveToLocalStorage();
             });
         }
-        addUpdateEvent('inspect-enemy-color', (val) => { obj.color = val; });
-        addUpdateEvent('inspect-collectible-color', (val) => { obj.color = val; });
-        addUpdateEvent('inspect-conveyor-dir', (val) => { obj.direction = parseInt(val) || 1; });
-        addUpdateEvent('inspect-conveyor-speed', (val) => { obj.speed = parseFloat(val) || 1.5; });
-        addUpdateEvent('inspect-bounce-force', (val) => { obj.force = parseFloat(val) || 12.0; });
-        addUpdateEvent('inspect-teleport-color', (val) => { obj.color = val; });
-        addUpdateEvent('inspect-trigger-gate', (val) => { obj.linkedGateId = parseInt(val) || 101; });
+        addUpdateEvent('inspect-enemy-color', (val) => { obj.color = val; return val; });
+        addUpdateEvent('inspect-collectible-color', (val) => { obj.color = val; return val; });
+        addUpdateEvent('inspect-conveyor-dir', (val) => { obj.direction = parseInt(val) || 1; return obj.direction; });
+        addUpdateEvent('inspect-conveyor-speed', (val) => { obj.speed = Math.max(0.1, Math.min(parseFloat(val) || 1.5, 15.0)); return obj.speed; });
+        addUpdateEvent('inspect-bounce-force', (val) => { obj.force = Math.max(1.0, Math.min(parseFloat(val) || 12.0, 40.0)); return obj.force; });
+        addUpdateEvent('inspect-teleport-color', (val) => { obj.color = val; return val; });
+        addUpdateEvent('inspect-trigger-gate', (val) => { obj.linkedGateId = parseInt(val) || 101; return obj.linkedGateId; });
 
         addUpdateEvent('inspect-flame-dir', (val) => { obj.dir = val; });
-        addUpdateEvent('inspect-flame-range', (val) => { obj.range = parseInt(val) || 200; });
-        addUpdateEvent('inspect-flame-id', (val) => { obj.id = parseInt(val) || 9001; });
+        addUpdateEvent('inspect-flame-range', (val) => { obj.range = Math.max(10, Math.min(parseInt(val) || 200, 2000)); return obj.range; });
+        addUpdateEvent('inspect-flame-id', (val) => { obj.id = parseInt(val) || 9001; return obj.id; });
         
         const flameActive = document.getElementById('inspect-flame-active');
         if (flameActive) {
@@ -1770,18 +1797,18 @@ export class LevelEditor {
         }
 
         addUpdateEvent('inspect-flame-move-axis', (val) => { obj.moveAxis = val; });
-        addUpdateEvent('inspect-flame-move-range', (val) => { obj.moveRange = parseInt(val) || 100; });
-        addUpdateEvent('inspect-flame-move-speed', (val) => { obj.moveSpeed = parseFloat(val) || 1.5; });
+        addUpdateEvent('inspect-flame-move-range', (val) => { obj.moveRange = Math.max(10, Math.min(parseInt(val) || 100, 2000)); return obj.moveRange; });
+        addUpdateEvent('inspect-flame-move-speed', (val) => { obj.moveSpeed = Math.max(0.1, Math.min(parseFloat(val) || 1.5, 15.0)); return obj.moveSpeed; });
 
         addUpdateEvent('inspect-arrow-dir', (val) => { obj.dir = val; });
-        addUpdateEvent('inspect-arrow-radius', (val) => { obj.detectionRadius = parseInt(val) || 200; });
-        addUpdateEvent('inspect-arrow-interval', (val) => { obj.fireInterval = parseFloat(val) || 2.5; });
-        addUpdateEvent('inspect-arrow-speed', (val) => { obj.arrowSpeed = parseFloat(val) || 4.5; });
-        addUpdateEvent('inspect-arrow-range', (val) => { obj.arrowRange = parseInt(val) || 400; });
+        addUpdateEvent('inspect-arrow-radius', (val) => { obj.detectionRadius = Math.max(10, Math.min(parseInt(val) || 200, 1500)); return obj.detectionRadius; });
+        addUpdateEvent('inspect-arrow-interval', (val) => { obj.fireInterval = Math.max(0.2, Math.min(parseFloat(val) || 2.5, 15.0)); return obj.fireInterval; });
+        addUpdateEvent('inspect-arrow-speed', (val) => { obj.arrowSpeed = Math.max(0.5, Math.min(parseFloat(val) || 4.5, 25.0)); return obj.arrowSpeed; });
+        addUpdateEvent('inspect-arrow-range', (val) => { obj.arrowRange = Math.max(10, Math.min(parseInt(val) || 400, 3000)); return obj.arrowRange; });
 
-        addUpdateEvent('inspect-laser-emitter-dir', (val) => { obj.direction = parseInt(val) || 0; });
-        addUpdateEvent('inspect-laser-emitter-color', (val) => { obj.color = val; });
-        addUpdateEvent('inspect-laser-receiver-gate', (val) => { obj.linkedGateId = parseInt(val) || 101; });
+        addUpdateEvent('inspect-laser-emitter-dir', (val) => { obj.direction = parseInt(val) || 0; return obj.direction; });
+        addUpdateEvent('inspect-laser-emitter-color', (val) => { obj.color = val; return val; });
+        addUpdateEvent('inspect-laser-receiver-gate', (val) => { obj.linkedGateId = parseInt(val) || 101; return obj.linkedGateId; });
 
         const blockMirror = document.getElementById('inspect-block-mirror');
         if (blockMirror) {
@@ -3872,37 +3899,37 @@ export class LevelEditor {
             const obj = this.selectedObject;
 
             if (type === 'spawn') {
-                this.game.level.spawnX = newX;
-                this.game.level.spawnY = newY;
+                this.game.level.spawnX = Math.max(0, Math.min(newX, 25000));
+                this.game.level.spawnY = Math.max(0, Math.min(newY, 15000));
             } else if (type === 'portal') {
-                obj.x = newX;
-                obj.y = newY;
+                obj.x = Math.max(-5000, Math.min(newX, 25000));
+                obj.y = Math.max(-5000, Math.min(newY, 15000));
             } else if (type === 'collectible' || type === 'enemy') {
-                obj.x = newX;
-                obj.y = newY;
+                obj.x = Math.max(-5000, Math.min(newX, 25000));
+                obj.y = Math.max(-5000, Math.min(newY, 15000));
             } else if (type === 'movingPlatform') {
                 const diffX = newX - obj.x;
                 const diffY = newY - obj.y;
-                obj.x = newX;
-                obj.y = newY;
-                obj.startX = newX;
-                obj.startY = newY;
-                obj.targetX += diffX;
-                obj.targetY += diffY;
+                obj.x = Math.max(-5000, Math.min(newX, 25000));
+                obj.y = Math.max(-5000, Math.min(newY, 15000));
+                obj.startX = obj.x;
+                obj.startY = obj.y;
+                obj.targetX = Math.max(-5000, Math.min(obj.targetX + diffX, 25000));
+                obj.targetY = Math.max(-5000, Math.min(obj.targetY + diffY, 15000));
             } else if (type === 'teleportPair') {
                 if (this.draggedPortalEnd === 1) {
-                    obj.x1 = newX;
-                    obj.y1 = newY;
+                    obj.x1 = Math.max(-5000, Math.min(newX, 25000));
+                    obj.y1 = Math.max(-5000, Math.min(newY, 15000));
                 } else {
-                    obj.x2 = newX;
-                    obj.y2 = newY;
+                    obj.x2 = Math.max(-5000, Math.min(newX, 25000));
+                    obj.y2 = Math.max(-5000, Math.min(newY, 15000));
                 }
             } else {
-                obj.x = newX;
-                obj.y = newY;
+                obj.x = Math.max(-5000, Math.min(newX, 25000));
+                obj.y = Math.max(-5000, Math.min(newY, 15000));
                 if (obj.startX !== undefined) {
-                    obj.startX = newX;
-                    obj.startY = newY;
+                    obj.startX = obj.x;
+                    obj.startY = obj.y;
                 }
             }
 

@@ -1270,6 +1270,66 @@ class AudioManager {
         }
     }
 
+    playShopPurchase() {
+        try {
+            if (!this.ctx || this.isMuted || this.isSfxMuted || this.sfxVolumeLevel === 0) return;
+            this.resume();
+
+            const now = this.ctx.currentTime;
+            
+            // Major chord arpeggio for purchase celebration (C5, E5, G5, C6)
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, idx) => {
+                const noteTime = now + idx * 0.08;
+                
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, noteTime);
+                
+                gain.gain.setValueAtTime(0.28, noteTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, noteTime + 0.35);
+                
+                osc.connect(gain);
+                gain.connect(this.sfxVolume);
+                
+                osc.start(noteTime);
+                osc.stop(noteTime + 0.35);
+            });
+        } catch (e) {
+            console.error("Error playing shop purchase SFX:", e);
+        }
+    }
+
+    playShopEquip() {
+        try {
+            if (!this.ctx || this.isMuted || this.isSfxMuted || this.sfxVolumeLevel === 0) return;
+            this.resume();
+
+            const now = this.ctx.currentTime;
+            
+            // Quick high pitch double click chime
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.setValueAtTime(1320, now + 0.05);
+            
+            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+            
+            osc.connect(gain);
+            gain.connect(this.sfxVolume);
+            
+            osc.start(now);
+            osc.stop(now + 0.15);
+        } catch (e) {
+            console.error("Error playing shop equip SFX:", e);
+        }
+    }
+
     /**
      * Updates or creates the procedural sizzling sound for player flame heating.
      * @param {number} intensity - The player's current flameHeat value (0.0 to 1.0)

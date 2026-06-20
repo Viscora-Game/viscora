@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v127">
+    <link rel="stylesheet" href="index.css?v=v128">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -842,6 +842,19 @@
                     </div>
                 </div>
 
+                <!-- Canlı Karakter Görünüm Önizleme -->
+                <div class="shop-preview-panel" style="display: flex; align-items: center; justify-content: center; gap: 15px; background: rgba(30, 30, 48, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px; margin-bottom: 15px; box-sizing: border-box; width: 100%;">
+                    <div style="text-align: left; flex: 1;">
+                        <div style="font-size: 0.95rem; font-weight: bold; color: #f1f5f9; margin-bottom: 2px;">👀 Karakter Canlı Önizleme</div>
+                        <div style="font-size: 0.75rem; color: #94a3b8; line-height: 1.3;">
+                            Öğelerin üzerine gelerek (veya dokunarak) karakterinizde nasıl duracağını canlı olarak görün!
+                        </div>
+                    </div>
+                    <div class="preview-avatar-container" style="position: relative; width: 70px; height: 70px; background: rgba(10, 10, 20, 0.6); border: 1.5px solid #00f2fe; box-shadow: 0 0 12px rgba(0,242,254,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: visible;">
+                        <canvas id="shop-preview-canvas" width="70" height="70" style="display: block; width: 70px; height: 70px;"></canvas>
+                    </div>
+                </div>
+
                 <!-- Kategori Sekmeleri -->
                 <div class="shop-tabs" style="display: flex; gap: 8px; width: 100%; margin-bottom: 20px; box-sizing: border-box;">
                     <button class="community-tab-btn active" data-category="trail" type="button">🌈 İz Efekti</button>
@@ -902,7 +915,7 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v127"></script>
-    <script type="module" src="js/main.js?v=v127"></script>
+    <script src="js/controls_customizer.js?v=v128"></script>
+    <script type="module" src="js/main.js?v=v128"></script>
 </body>
 </html>

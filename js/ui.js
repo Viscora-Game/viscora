@@ -1,6 +1,6 @@
-import { audio } from './audio.js?v=v127';
-import { ViscosityList } from './viscosity.js?v=v127';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v127';
+import { audio } from './audio.js?v=v128';
+import { ViscosityList } from './viscosity.js?v=v128';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v128';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -723,6 +723,348 @@ export class UIManager {
         // initial load of crystals
         setTimeout(updateCrystalUI, 100);
 
+        // Canlı Önizleme Geçici Seçimleri ve Animasyon Döngüsü
+        let tempTrail = null;
+        let tempAccessory = null;
+        let tempEyes = null;
+        let previewParticles = [];
+        let previewHue = 0;
+        let previewAnimFrame = null;
+
+        const triggerConfetti = () => {
+            const colors = ['#00f2fe', '#4facfe', '#10b981', '#fbbf24', '#f43f5e', '#a855f7'];
+            for (let i = 0; i < 40; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-particle';
+                const size = 6 + Math.random() * 8;
+                const startLeft = 20 + Math.random() * 60;
+                
+                piece.style.cssText = `
+                    position: fixed;
+                    top: -20px;
+                    left: ${startLeft}%;
+                    width: ${size}px;
+                    height: ${size}px;
+                    background-color: ${colors[Math.floor(Math.random() * colors.length)]};
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+                    opacity: ${0.6 + Math.random() * 0.4};
+                    z-index: 9999;
+                    transform: rotate(${Math.random() * 360}deg);
+                    pointer-events: none;
+                    transition: transform 2.5s ease-out, top 2.5s ease-in-out, opacity 2.5s ease-out;
+                `;
+                
+                document.body.appendChild(piece);
+                
+                setTimeout(() => {
+                    const targetLeft = startLeft + (Math.random() - 0.5) * 15;
+                    const targetTop = window.innerHeight + 20;
+                    piece.style.top = `${targetTop}px`;
+                    piece.style.left = `${targetLeft}%`;
+                    piece.style.transform = `rotate(${Math.random() * 720}deg)`;
+                    piece.style.opacity = '0';
+                    
+                    setTimeout(() => piece.remove(), 2500);
+                }, 50);
+            }
+        };
+
+        const showToast = (message, isSuccess = true) => {
+            // Remove existing toasts first to prevent stacking overlaps
+            const oldToasts = document.querySelectorAll('.shop-toast');
+            oldToasts.forEach(t => t.remove());
+
+            const toast = document.createElement('div');
+            toast.className = 'shop-toast';
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 40px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(15, 23, 42, 0.95);
+                border: 1.5px solid ${isSuccess ? '#10b981' : '#ef4444'};
+                box-shadow: 0 0 15px ${isSuccess ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'};
+                color: #fff;
+                padding: 12px 24px;
+                border-radius: 30px;
+                font-weight: bold;
+                font-size: 0.95rem;
+                z-index: 10000;
+                pointer-events: none;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            `;
+            toast.innerHTML = `${isSuccess ? '🎉' : '❌'} ${message}`;
+            document.body.appendChild(toast);
+            
+            if (isSuccess) {
+                triggerConfetti();
+            }
+
+            setTimeout(() => {
+                toast.remove();
+            }, 2500);
+        };
+
+        const updatePreviewAvatar = () => {
+            const canvas = document.getElementById('shop-preview-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, 70, 70);
+            
+            const activeTrail = tempTrail || (window.shopManager ? window.shopManager.getActiveCosmetic('trail') : 'default_trail');
+            const activeAccessory = tempAccessory || (window.shopManager ? window.shopManager.getActiveCosmetic('accessory') : 'default_accessory');
+            const activeEyes = tempEyes || (window.shopManager ? window.shopManager.getActiveCosmetic('eyes') : 'default_eyes');
+            
+            const px = 35;
+            const py = 42;
+            const radius = 12;
+            
+            // 1. Emit trail particles
+            previewHue = (previewHue + 2.5) % 360;
+            if (activeTrail && activeTrail !== 'default_trail' && Math.random() < 0.35) {
+                let pColor = '#06b6d4';
+                if (activeTrail === 'fire_trail') {
+                    pColor = Math.random() > 0.5 ? '#ef4444' : '#f97316';
+                } else if (activeTrail === 'ice_trail') {
+                    pColor = Math.random() > 0.5 ? '#38bdf8' : '#ffffff';
+                } else if (activeTrail === 'gold_trail') {
+                    pColor = '#fbbf24';
+                } else if (activeTrail === 'rainbow_trail') {
+                    pColor = `hsl(${previewHue}, 100%, 60%)`;
+                }
+                previewParticles.push({
+                    x: px + (Math.random() - 0.5) * 16,
+                    y: py + radius - 3,
+                    vx: (Math.random() - 0.5) * 0.8,
+                    vy: 0.6 + Math.random() * 1.2,
+                    size: 1.5 + Math.random() * 2.5,
+                    life: 25 + Math.random() * 15,
+                    color: pColor
+                });
+            }
+            
+            // Update & Draw particles
+            previewParticles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = Math.max(0, p.life / 40);
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1.0;
+            previewParticles = previewParticles.filter(p => p.life > 0);
+            
+            // 2. Draw Body (bobbing)
+            const bob = Math.sin(Date.now() / 150) * 1.2;
+            const finalY = py + bob;
+            
+            ctx.fillStyle = '#06b6d4';
+            ctx.beginPath();
+            ctx.arc(px, finalY, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            
+            // 3. Draw Eyes
+            const eyeX = px;
+            const eyeY = finalY - 1;
+            
+            if (activeEyes === 'cute_eyes') {
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(eyeX - 4.2, eyeY, 3.5, 0, Math.PI * 2);
+                ctx.arc(eyeX + 4.2, eyeY, 3.5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(eyeX - 4.2, eyeY, 1.8, 0, Math.PI * 2);
+                ctx.arc(eyeX + 4.2, eyeY, 1.8, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (activeEyes === 'angry_eyes') {
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 1.2;
+                ctx.beginPath();
+                ctx.moveTo(eyeX - 7.5, eyeY - 2);
+                ctx.lineTo(eyeX - 2, eyeY - 0.2);
+                ctx.moveTo(eyeX + 7.5, eyeY - 2);
+                ctx.lineTo(eyeX + 2, eyeY - 0.2);
+                ctx.stroke();
+                
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(eyeX - 4.2, eyeY + 0.6, 1.5, 0, Math.PI * 2);
+                ctx.arc(eyeX + 4.2, eyeY + 0.6, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (activeEyes === 'sunglasses') {
+                ctx.fillStyle = '#1e293b';
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 1.0;
+                
+                ctx.beginPath();
+                ctx.rect(eyeX - 8, eyeY - 1.5, 5, 3.2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.rect(eyeX + 3, eyeY - 1.5, 5, 3.2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(eyeX - 3, eyeY - 0.5);
+                ctx.lineTo(eyeX + 3, eyeY - 0.5);
+                ctx.stroke();
+            } else if (activeEyes === 'joke_glasses') {
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 1.2;
+                ctx.fillStyle = '#ffffff';
+                
+                ctx.beginPath();
+                ctx.arc(eyeX - 5, eyeY + 0.5, 3.2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(eyeX + 5, eyeY + 0.5, 3.2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(eyeX - 4.5, eyeY + 0.5, 1.0, 0, Math.PI * 2);
+                ctx.arc(eyeX + 4.5, eyeY + 0.5, 1.0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#fb7185';
+                ctx.beginPath();
+                ctx.arc(eyeX, eyeY + 3.2, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.moveTo(eyeX - 6, eyeY + 6);
+                ctx.quadraticCurveTo(eyeX - 2, eyeY + 4.5, eyeX, eyeY + 6.2);
+                ctx.quadraticCurveTo(eyeX + 2, eyeY + 4.5, eyeX + 6, eyeY + 6);
+                ctx.quadraticCurveTo(eyeX + 3.5, eyeY + 7.8, eyeX, eyeY + 7.0);
+                ctx.quadraticCurveTo(eyeX - 3.5, eyeY + 7.8, eyeX - 6, eyeY + 6);
+                ctx.fill();
+            } else {
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(eyeX - 4.5, eyeY, 1.8, 0, Math.PI * 2);
+                ctx.arc(eyeX + 4.5, eyeY, 1.8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 4. Draw Accessory (Hats)
+            const topX = px;
+            const topY = finalY - radius + 2.5;
+            
+            if (activeAccessory === 'cowboy_hat') {
+                ctx.fillStyle = '#78350f';
+                ctx.beginPath();
+                if (ctx.ellipse) {
+                    ctx.ellipse(topX, topY, 11, 2.2, 0, 0, Math.PI * 2);
+                } else {
+                    ctx.arc(topX, topY, 6, 0, Math.PI * 2);
+                }
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.moveTo(topX - 6.5, topY - 0.8);
+                ctx.quadraticCurveTo(topX - 6.5, topY - 8, topX - 4, topY - 9);
+                ctx.quadraticCurveTo(topX, topY - 6.5, topX + 4, topY - 9);
+                ctx.quadraticCurveTo(topX + 6.5, topY - 0.8, topX + 6.5, topY - 0.8);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(topX - 6.5, topY - 2.2, 13, 1.5);
+            } else if (activeAccessory === 'wizard_hat') {
+                ctx.fillStyle = '#581c87';
+                ctx.beginPath();
+                if (ctx.ellipse) {
+                    ctx.ellipse(topX, topY, 11, 2.5, 0, 0, Math.PI * 2);
+                } else {
+                    ctx.arc(topX, topY, 6, 0, Math.PI * 2);
+                }
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.moveTo(topX - 6.5, topY - 0.8);
+                ctx.lineTo(topX + 6.5, topY - 0.8);
+                ctx.quadraticCurveTo(topX + 1.5, topY - 10, topX - 2.2, topY - 17);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillRect(topX - 5.0, topY - 2.2, 10, 1.5);
+                
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.arc(topX - 2.2, topY - 17.5, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (activeAccessory === 'crown') {
+                ctx.fillStyle = '#f59e0b';
+                ctx.beginPath();
+                ctx.moveTo(topX - 9, topY);
+                ctx.lineTo(topX - 9, topY - 5);
+                ctx.lineTo(topX - 5, topY - 1.8);
+                ctx.lineTo(topX, topY - 7.5);
+                ctx.lineTo(topX + 5, topY - 1.8);
+                ctx.lineTo(topX + 9, topY - 5);
+                ctx.lineTo(topX + 9, topY);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(topX - 9, topY - 5, 1.0, 0, Math.PI * 2);
+                ctx.arc(topX, topY - 7.5, 1.0, 0, Math.PI * 2);
+                ctx.arc(topX + 9, topY - 5, 1.0, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (activeAccessory === 'santa_hat') {
+                ctx.fillStyle = '#f1f5f9';
+                ctx.beginPath();
+                if (ctx.ellipse) {
+                    ctx.ellipse(topX, topY - 1.0, 10, 3.2, 0, 0, Math.PI * 2);
+                } else {
+                    ctx.arc(topX, topY - 1.0, 7, 0, Math.PI * 2);
+                }
+                ctx.fill();
+                
+                ctx.fillStyle = '#dc2626';
+                ctx.beginPath();
+                ctx.moveTo(topX - 8, topY - 1.5);
+                ctx.quadraticCurveTo(topX - 7, topY - 19, topX - 1, topY - 20);
+                ctx.quadraticCurveTo(topX + 5.5, topY - 20, topX + 9, topY - 12);
+                ctx.lineTo(topX + 7, topY - 9.5);
+                ctx.quadraticCurveTo(topX + 2.2, topY - 14, topX - 1.5, topY - 14);
+                ctx.quadraticCurveTo(topX - 6.0, topY - 9, topX - 8, topY - 1.5);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.fillStyle = '#f1f5f9';
+                ctx.beginPath();
+                ctx.arc(topX + 8.5, topY - 10.5, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            if (window.gameInstance && window.gameInstance.state === 'SHOP') {
+                previewAnimFrame = requestAnimationFrame(updatePreviewAvatar);
+            } else {
+                previewAnimFrame = null;
+            }
+        };
+
         const renderShopItems = () => {
             if (!listShopEl || !window.shopManager || !window.SHOP_ITEMS) return;
             listShopEl.innerHTML = '';
@@ -843,15 +1185,58 @@ export class UIManager {
                     ${actionBtnHtml}
                 `;
 
+                // Card hover and touch listeners to preview items dynamically on the preview avatar canvas
+                card.addEventListener('mouseenter', () => {
+                    if (item.category === 'trail') {
+                        tempTrail = item.id;
+                    } else if (item.category === 'accessory') {
+                        tempAccessory = item.id;
+                    } else if (item.category === 'eyes') {
+                        tempEyes = item.id;
+                    }
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    if (item.category === 'trail') {
+                        tempTrail = null;
+                    } else if (item.category === 'accessory') {
+                        tempAccessory = null;
+                    } else if (item.category === 'eyes') {
+                        tempEyes = null;
+                    }
+                });
+                
+                card.addEventListener('touchstart', () => {
+                    if (item.category === 'trail') {
+                        tempTrail = item.id;
+                    } else if (item.category === 'accessory') {
+                        tempAccessory = item.id;
+                    } else if (item.category === 'eyes') {
+                        tempEyes = item.id;
+                    }
+                }, { passive: true });
+                
+                card.addEventListener('touchend', () => {
+                    if (item.category === 'trail') {
+                        tempTrail = null;
+                    } else if (item.category === 'accessory') {
+                        tempAccessory = null;
+                    } else if (item.category === 'eyes') {
+                        tempEyes = null;
+                    }
+                }, { passive: true });
+
                 const btnBuy = card.querySelector('.shop-item-btn.buy');
                 if (btnBuy) {
                     btnBuy.addEventListener('click', () => {
                         const result = window.shopManager.purchase(item.id);
                         if (result.success) {
+                            audio.playShopPurchase();
+                            showToast("Başarıyla satın alındı!", true);
                             renderShopItems();
                             updateCrystalUI();
                         } else {
-                            alert(result.message);
+                            showToast(result.message, false);
                         }
                     });
                 }
@@ -861,9 +1246,11 @@ export class UIManager {
                     btnEquip.addEventListener('click', () => {
                         const result = window.shopManager.equip(item.id);
                         if (result.success) {
+                            audio.playShopEquip();
+                            showToast("Başarıyla Donanıldı!", true);
                             renderShopItems();
                         } else {
-                            alert(result.message);
+                            showToast(result.message, false);
                         }
                     });
                 }
@@ -875,6 +1262,15 @@ export class UIManager {
         if (btnShop) {
             this.bindTouchClick(btnShop, () => {
                 this.showScreen('shop');
+                if (window.gameInstance) {
+                    window.gameInstance.state = 'SHOP';
+                }
+                tempTrail = null;
+                tempAccessory = null;
+                tempEyes = null;
+                if (!previewAnimFrame) {
+                    previewAnimFrame = requestAnimationFrame(updatePreviewAvatar);
+                }
                 renderShopItems();
                 updateCrystalUI();
             });
@@ -882,6 +1278,16 @@ export class UIManager {
 
         if (btnCloseShop) {
             this.bindTouchClick(btnCloseShop, () => {
+                if (window.gameInstance) {
+                    window.gameInstance.state = 'MENU';
+                }
+                if (previewAnimFrame) {
+                    cancelAnimationFrame(previewAnimFrame);
+                    previewAnimFrame = null;
+                }
+                tempTrail = null;
+                tempAccessory = null;
+                tempEyes = null;
                 this.showScreen('start');
             });
         }
@@ -891,6 +1297,10 @@ export class UIManager {
                 activeShopCategory = btn.getAttribute('data-category');
                 shopTabButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+                // Clear temporary preview selections when changing tabs
+                tempTrail = null;
+                tempAccessory = null;
+                tempEyes = null;
                 renderShopItems();
             });
         });
