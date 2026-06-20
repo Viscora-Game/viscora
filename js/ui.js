@@ -1,6 +1,6 @@
-import { audio } from './audio.js?v=v128';
-import { ViscosityList } from './viscosity.js?v=v128';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v128';
+import { audio } from './audio.js?v=v129';
+import { ViscosityList } from './viscosity.js?v=v129';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v129';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -1032,29 +1032,41 @@ export class UIManager {
                 ctx.arc(topX + 9, topY - 5, 1.0, 0, Math.PI * 2);
                 ctx.fill();
             } else if (activeAccessory === 'santa_hat') {
+                // Beyaz yün siper (Kalın ve pofuduk)
                 ctx.fillStyle = '#f1f5f9';
                 ctx.beginPath();
                 if (ctx.ellipse) {
-                    ctx.ellipse(topX, topY - 1.0, 10, 3.2, 0, 0, Math.PI * 2);
+                    ctx.ellipse(topX, topY - 1.2, 10.4, 3.6, 0, 0, Math.PI * 2);
                 } else {
-                    ctx.arc(topX, topY - 1.0, 7, 0, Math.PI * 2);
+                    ctx.arc(topX, topY - 1.2, 7, 0, Math.PI * 2);
                 }
                 ctx.fill();
                 
+                // Kırmızı gövde (Dolu ve kıvrık duran hat)
                 ctx.fillStyle = '#dc2626';
                 ctx.beginPath();
-                ctx.moveTo(topX - 8, topY - 1.5);
-                ctx.quadraticCurveTo(topX - 7, topY - 19, topX - 1, topY - 20);
-                ctx.quadraticCurveTo(topX + 5.5, topY - 20, topX + 9, topY - 12);
-                ctx.lineTo(topX + 7, topY - 9.5);
-                ctx.quadraticCurveTo(topX + 2.2, topY - 14, topX - 1.5, topY - 14);
-                ctx.quadraticCurveTo(topX - 6.0, topY - 9, topX - 8, topY - 1.5);
+                ctx.moveTo(topX - 9, topY - 1.5);
+                
+                // Sol taraftan yukarı yuvarlakça uzanış
+                ctx.quadraticCurveTo(topX - 7.2, topY - 20, topX - 0.8, topY - 21.6);
+                // Tepe kıvrımından sağa doğru bükülüp aşağı sarkış
+                ctx.quadraticCurveTo(topX + 5.6, topY - 21.6, topX + 9.6, topY - 12.8);
+                // Ponponun bağlanacağı düz uç kısmı
+                ctx.lineTo(topX + 7.2, topY - 10.4);
+                // İç kıvrımın dolgunca sol tarafa geçişi
+                ctx.quadraticCurveTo(topX + 2.4, topY - 15.2, topX - 1.6, topY - 15.2);
+                // Sağ tabana doğru iniş ve birleşim
+                ctx.quadraticCurveTo(topX + 4.0, topY - 9.6, topX + 8.8, topY - 1.6);
+                // Tabandan sola doğru kapatma çizgisi
+                ctx.lineTo(topX - 9, topY - 1.5);
+                
                 ctx.closePath();
                 ctx.fill();
                 
+                // Beyaz ponpon (Ucun ucuna asılı durur)
                 ctx.fillStyle = '#f1f5f9';
                 ctx.beginPath();
-                ctx.arc(topX + 8.5, topY - 10.5, 2.5, 0, Math.PI * 2);
+                ctx.arc(topX + 9.2, topY - 11.6, 2.8, 0, Math.PI * 2);
                 ctx.fill();
             }
             
