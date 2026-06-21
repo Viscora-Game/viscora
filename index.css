@@ -3146,17 +3146,42 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     #shop-screen .community-header {
         flex-shrink: 0 !important;
     }
+    /* Bakiye satırı: önizleme avatar'ını yanına al */
     #shop-screen .shop-header-row {
-        margin-bottom: 6px !important;
+        margin-bottom: 4px !important;
         flex-shrink: 0 !important;
+        flex-wrap: nowrap !important;
+        position: relative !important;
     }
+    /* Önizleme panelini kompakt inline avatar'a dönüştür */
     #shop-screen .shop-preview-panel {
-        padding: 6px 10px !important;
-        margin-bottom: 8px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        padding: 0 !important;
+        margin-bottom: 4px !important;
         flex-shrink: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        gap: 8px !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        width: auto !important;
+    }
+    /* Açıklama metnini gizle, sadece avatar kalsın */
+    #shop-screen .shop-preview-panel > div:first-child {
+        display: none !important;
+    }
+    /* Avatar'ı küçült */
+    #shop-screen .shop-preview-panel .preview-avatar-container {
+        width: 48px !important;
+        height: 48px !important;
+    }
+    #shop-screen .shop-preview-panel .preview-avatar-container canvas {
+        width: 48px !important;
+        height: 48px !important;
     }
     #shop-screen .shop-tabs {
-        margin-bottom: 8px !important;
+        margin-bottom: 6px !important;
         flex-shrink: 0 !important;
     }
     #shop-screen .shop-content-scroll {
@@ -3174,14 +3199,20 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         padding: 0.4rem 0.8rem !important;
         max-width: 90vw !important;
     }
-    #shop-screen .shop-preview-panel {
-        display: none !important; /* Hide preview box to save screen space */
+    /* Çok küçük ekranlarda da önizleme görünsün, daha da küçük */
+    #shop-screen .shop-preview-panel .preview-avatar-container {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    #shop-screen .shop-preview-panel .preview-avatar-container canvas {
+        width: 40px !important;
+        height: 40px !important;
     }
     #shop-screen .shop-header-row {
-        margin-bottom: 4px !important;
+        margin-bottom: 2px !important;
     }
     #shop-screen .shop-tabs {
-        margin-bottom: 6px !important;
+        margin-bottom: 4px !important;
     }
     #shop-screen .shop-content-scroll {
         max-height: none !important;
