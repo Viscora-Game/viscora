@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v144';
-import { THEMES } from './generator.js?v=v144';
+import { audio } from './audio.js?v=v145';
+import { THEMES } from './generator.js?v=v145';
 
 /**
  * Viscora Level Design & Manager
@@ -852,7 +852,11 @@ export class Level {
                 }
 ];
 
-            this.collectibles = [];
+            this.collectibles = [
+                { x: 400, y: 350, color: '#eab308', collected: false },
+                { x: 1200, y: 150, color: '#eab308', collected: false },
+                { x: 2100, y: 250, color: '#eab308', collected: false }
+            ];
             this.pressurePlates = [];
             this.pushBlocks = [];
             this.conveyors = [];
@@ -1312,7 +1316,9 @@ export class Level {
 
             this.collectibles = [
                 { x: 1180, y: 200, color: '#eab308', collected: false },
-                { x: 760, y: 140, color: '#eab308', collected: false }
+                { x: 760, y: 140, color: '#eab308', collected: false },
+                { x: 1480, y: -200, color: '#eab308', collected: false },
+                { x: 2380, y: 0, color: '#eab308', collected: false }
             ];
 
             this.enemies = [
@@ -1543,7 +1549,11 @@ export class Level {
                 { x: 2420, y: 180, w: 20, h: 280, type: 'net', id: 911, disabled: false }
             ];
 
-            this.collectibles = [];
+            this.collectibles = [
+                { x: 500, y: 380, color: '#eab308', collected: false },
+                { x: 1500, y: 400, color: '#eab308', collected: false },
+                { x: 2000, y: 80, color: '#eab308', collected: false }
+            ];
 
             this.enemies = [
                 { x: 1360, y: 360, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
@@ -1630,7 +1640,9 @@ export class Level {
 
             this.collectibles = [
                 { x: 560, y: 140, color: '#eab308', collected: false },
-                { x: 1000, y: 40, color: '#eab308', collected: false }
+                { x: 1000, y: 40, color: '#eab308', collected: false },
+                { x: 220, y: 280, color: '#eab308', collected: false },
+                { x: 1720, y: -20, color: '#eab308', collected: false }
             ];
 
             this.enemies = [
@@ -1762,7 +1774,9 @@ export class Level {
 
             this.collectibles = [
                 { x: 1900, y: 220, color: '#eab308', collected: false },
-                { x: 3140, y: 380, color: '#eab308', collected: false }
+                { x: 3140, y: 380, color: '#eab308', collected: false },
+                { x: 840, y: 160, color: '#eab308', collected: false },
+                { x: 3420, y: 80, color: '#eab308', collected: false }
             ];
 
             this.enemies = [
@@ -1898,7 +1912,6 @@ export class Level {
             this.collectibles = [
                 { x: 970, y: 240, color: '#eab308', collected: false },
                 { x: 2050, y: 400, color: '#eab308', collected: false },
-                { x: 2930, y: 350, color: '#eab308', collected: false },
                 { x: 3820, y: 240, color: '#eab308', collected: false },
                 { x: 4500, y: 400, color: '#eab308', collected: false }
             ];
@@ -2116,7 +2129,11 @@ export class Level {
 
             this.movingPlatforms = [];
             this.gates = [];
-            this.collectibles = [];
+            this.collectibles = [
+                { x: 500, y: 320, color: '#eab308', collected: false },
+                { x: 1000, y: 100, color: '#eab308', collected: false },
+                { x: 1600, y: 20, color: '#eab308', collected: false }
+            ];
 
             this.enemies = [
                 { x: 580, y: 100, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
@@ -2188,7 +2205,11 @@ export class Level {
                 { x: 1560, y: -220, w: 20, h: 220, type: 'yellowLaser', id: 69, disabled: false }
             ];
 
-            this.collectibles = [];
+            this.collectibles = [
+                { x: 350, y: 380, color: '#eab308', collected: false },
+                { x: 1350, y: 340, color: '#eab308', collected: false },
+                { x: 1950, y: 160, color: '#eab308', collected: false }
+            ];
 
             this.enemies = [
                 { x: 1340, y: 280, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
@@ -2342,6 +2363,12 @@ export class Level {
                 { x: 100, y: -20, w: 32, h: 32, linkedGateId: 1, activated: false, cooldown: 0 }
             ];
 
+            this.collectibles = [
+                { x: 410, y: 240, color: '#eab308', collected: false },
+                { x: 1410, y: 120, color: '#eab308', collected: false },
+                { x: 2020, y: 220, color: '#eab308', collected: false }
+            ];
+
             this.enemies = [
                 { x: 1660, y: 60, rangeX: 120, speed: 1.2, isVertical: false, color: '#f43f5e' },
                 { x: 1560, y: 360, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
@@ -2409,7 +2436,9 @@ export class Level {
 
             this.collectibles = [
                 { x: 980, y: 220, color: '#eab308', collected: false },
-                { x: 1840, y: 40, color: '#eab308', collected: false }
+                { x: 1840, y: 40, color: '#eab308', collected: false },
+                { x: 1290, y: 360, color: '#eab308', collected: false },
+                { x: 1850, y: 240, color: '#eab308', collected: false }
             ];
 
             this.enemies = [
@@ -2595,6 +2624,12 @@ export class Level {
                 { startX: 2450, startY: -210, x: 2450, y: -210, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 }
             ];
 
+            this.collectibles = [
+                { x: 500, y: 390, color: '#eab308', collected: false },
+                { x: 1000, y: 200, color: '#eab308', collected: false },
+                { x: 1500, y: -10, color: '#eab308', collected: false }
+            ];
+
             this.portal = { x: 2800, y: -100, w: 60, h: 80, angle: 0 };
         } else if (levelNumber === 15) {
             // ═══════════════════════════════════════════════
@@ -2669,6 +2704,12 @@ export class Level {
                 { startX: 920, startY: -120, x: 920, y: -120, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 },
                 { startX: 600, startY: -120, x: 600, y: -120, w: 60, h: 60, state: 'idle', vy: 0, timer: 0 }
             ];
+
+            this.collectibles = [
+                { x: 700, y: 340, color: '#eab308', collected: false },
+                { x: 1700, y: 300, color: '#eab308', collected: false },
+                { x: 2160, y: -20, color: '#eab308', collected: false }
+            ];
         } else if (levelNumber === 16) {
             // ═══════════════════════════════════════════════
             // BÖLÜM 16: MEKANİK KORİDORLAR
@@ -2726,6 +2767,12 @@ export class Level {
                 { x: 240, y: 260, w: 40, h: 40, mirrorType: 'top-left' },
                 { x: 1060, y: 260, w: 40, h: 40, mirrorType: 'bottom-left' },
                 { x: 1160, y: 260, w: 40, h: 40, mirrorType: 'top-right' }
+            ];
+
+            this.collectibles = [
+                { x: 500, y: 200, color: '#eab308', collected: false },
+                { x: 900, y: 200, color: '#eab308', collected: false },
+                { x: 1300, y: 200, color: '#eab308', collected: false }
             ];
         } else if (levelNumber === 17) {
             // ═══════════════════════════════════════════════
@@ -3192,7 +3239,11 @@ export class Level {
                 { x: 1920, y: 310, w: 40, h: 120, type: 'normal' }
             ];
             this.hazards = [];
-            this.collectibles = [];
+            this.collectibles = [
+                { x: 380, y: 70, color: '#eab308', collected: false },
+                { x: 830, y: 70, color: '#eab308', collected: false },
+                { x: 1320, y: 70, color: '#eab308', collected: false }
+            ];
             this.enemies = [
                 { x: 600, y: 150, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
                 { x: 1080, y: 140, rangeX: 180, speed: 2, isVertical: false, color: '#eab308' },
