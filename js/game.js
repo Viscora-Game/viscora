@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v145';
-import { Level } from './level.js?v=v145';
-import { Enemy, GelChaser } from './enemies.js?v=v145';
-import { UIManager } from './ui.js?v=v145';
-import { audio } from './audio.js?v=v145';
-import { LevelEditor } from './editor.js?v=v145';
-import { Boss, CyberBoss } from './boss.js?v=v145';
+import { Player } from './player.js?v=v146';
+import { Level } from './level.js?v=v146';
+import { Enemy, GelChaser } from './enemies.js?v=v146';
+import { UIManager } from './ui.js?v=v146';
+import { audio } from './audio.js?v=v146';
+import { LevelEditor } from './editor.js?v=v146';
+import { Boss, CyberBoss } from './boss.js?v=v146';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -2249,9 +2249,10 @@ export class GameManager {
                     const hx = mapX + hazard.x * scaleX;
                     const hy = mapY + hazard.y * scaleY;
                     const hw = Math.max(2, hazard.w * scaleX);
-                    const hh = Math.max(2, hazard.h * scaleY);
+                    let hh = Math.max(2, hazard.h * scaleY);
                     
                     if (hazard.type === 'acid') {
+                        hh = Math.max(2, (this.level.height - hazard.y) * scaleY);
                         this.ctx.fillStyle = (this.level.theme && this.level.theme.acidColor) ? this.level.theme.acidColor : '#22c55e'; // Toxic neon green for acid pools
                         this.ctx.fillRect(hx, hy, hw, hh);
                     } else if (hazard.type === 'spike') {

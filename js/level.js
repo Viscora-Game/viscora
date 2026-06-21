@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v145';
-import { THEMES } from './generator.js?v=v145';
+import { audio } from './audio.js?v=v146';
+import { THEMES } from './generator.js?v=v146';
 
 /**
  * Viscora Level Design & Manager
@@ -3912,10 +3912,11 @@ export class Level {
             // İğnelerin uzaktan vurmasını engellemek için daha geniş tolerans (buffer) tanımlanır
             const bufferX = hazard.type === 'spike' ? 13 : 5;
             const bufferY = hazard.type === 'spike' ? 12 : 5;
+            const maxHazardY = hazard.type === 'acid' ? this.height : (hazard.y + hazard.h);
             if (player.x + player.radius - bufferX > hazard.x && 
                 player.x - player.radius + bufferX < hazard.x + hazard.w &&
                 player.y + player.radius - bufferY > hazard.y &&
-                player.y - player.radius + bufferY < hazard.y + hazard.h) {
+                player.y - player.radius + bufferY < maxHazardY) {
                 
                 player.takeDamage(1);
             }
@@ -6362,34 +6363,18 @@ export class Level {
                     }
                 }
             } else if (hazard.type === 'acid') {
-                // Destek kolonları (y=600 tabanına kadar uzanan metal ayaklar)
-                ctx.save();
-                ctx.strokeStyle = '#1e293b';
-                ctx.lineWidth = 6;
-                ctx.beginPath();
-                ctx.moveTo(hazard.x + 3, hazard.y + hazard.h);
-                ctx.lineTo(hazard.x + 3, 600);
-                ctx.moveTo(hazard.x + hazard.w - 3, hazard.y + hazard.h);
-                ctx.lineTo(hazard.x + hazard.w - 3, 600);
-                if (hazard.w > 180) {
-                    ctx.moveTo(hazard.x + hazard.w / 2, hazard.y + hazard.h);
-                    ctx.lineTo(hazard.x + hazard.w / 2, 600);
-                }
-                ctx.stroke();
-                ctx.restore();
-
-                // U-Şeklinde Metal Hazne/Kazan
+                // U-Şeklinde Metal Hazne/Kazan (Tabana kadar uzanır)
                 ctx.save();
                 ctx.fillStyle = 'rgba(15, 23, 42, 0.45)'; // Yarı saydam tank içi metal arka plan
-                ctx.fillRect(hazard.x - 3, hazard.y + 4, hazard.w + 6, hazard.h);
+                ctx.fillRect(hazard.x - 3, hazard.y + 4, hazard.w + 6, this.height - hazard.y);
 
                 ctx.strokeStyle = '#334155'; // Kalın metal kenarlık
                 ctx.lineWidth = 5;
                 ctx.beginPath();
                 ctx.moveTo(hazard.x - 2.5, hazard.y);
-                ctx.lineTo(hazard.x - 2.5, hazard.y + hazard.h);
-                ctx.lineTo(hazard.x + hazard.w + 2.5, hazard.y + hazard.h);
-                ctx.lineTo(hazard.x + hazard.w + 2.5, hazard.y);
+                ctx.lineTo(hazard.x - 2.5, this.height);
+                ctx.moveTo(hazard.x + hazard.w + 2.5, hazard.y);
+                ctx.lineTo(hazard.x + hazard.w + 2.5, this.height);
                 ctx.stroke();
 
                 // Neon Yeşil Hazne Kenar Parlaması
@@ -6398,14 +6383,14 @@ export class Level {
                 ctx.stroke();
                 ctx.restore();
 
-                // Dalgalı Asit Havuzu
+                // Dalgalı Asit Havuzu (Tabana kadar uzanır)
                 ctx.save();
                 ctx.fillStyle = (this.theme && this.theme.acidColor) ? this.theme.acidColor : 'rgba(16, 185, 129, 0.8)'; // Yeşil asit
                 ctx.shadowColor = (this.theme && this.theme.acidColor) ? this.theme.acidColor : 'rgba(16, 185, 129, 0.5)';
                 ctx.shadowBlur = 15;
 
                 ctx.beginPath();
-                ctx.moveTo(hazard.x, hazard.y + hazard.h);
+                ctx.moveTo(hazard.x, this.height);
                 ctx.lineTo(hazard.x, hazard.y);
 
                 // Sinüs dalgalarıyla asit yüzeyi çiz (kenarlar sınırlandırılmış)
@@ -6420,16 +6405,16 @@ export class Level {
                     ctx.lineTo(wx, wy);
                 }
 
-                ctx.lineTo(hazard.x + hazard.w, hazard.y + hazard.h);
+                ctx.lineTo(hazard.x + hazard.w, this.height);
                 ctx.closePath();
                 ctx.fill();
 
-                // Kabarcıklar (Asit içindeki baloncuklar)
+                // Kabarcıklar (Asit içindeki baloncuklar tabandan yükselir)
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
                 ctx.shadowBlur = 0;
                 for (let b = 0; b < 6; b++) {
                     const bx = hazard.x + ((this.time * 20 + b * 70) % hazard.w);
-                    const by = hazard.y + hazard.h - 10 - ((this.time * 15 + b * 20) % (hazard.h - 10));
+                    const by = this.height - 10 - ((this.time * 15 + b * 20) % (this.height - hazard.y - 10));
                     ctx.beginPath();
                     ctx.arc(bx, by, 2 + (b % 3), 0, Math.PI * 2);
                     ctx.fill();
