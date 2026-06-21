@@ -3246,54 +3246,68 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         max-width: 100% !important;
         height: 100vh !important;
         max-height: 100vh !important;
-        padding: 0.5rem 1rem !important;
+        padding: 0.4rem 1rem !important;
         display: flex !important;
         flex-direction: column !important;
         overflow: hidden !important;
         margin: 0 !important;
         border-radius: 0 !important;
     }
+    /* Header kompakt */
     #shop-screen .community-header {
         flex-shrink: 0 !important;
+        padding-bottom: 0.25rem !important;
+        margin-bottom: 0.25rem !important;
     }
-    /* Bakiye satırı */
+    #shop-screen .community-header h2 {
+        font-size: 1rem !important;
+    }
+    /* Bakiye satırı — bilgi metnini gizle */
     #shop-screen .shop-header-row {
-        margin-bottom: 4px !important;
+        margin-bottom: 2px !important;
         flex-shrink: 0 !important;
         flex-wrap: nowrap !important;
     }
-    /* Önizleme panelini kompakt inline avatar'a dönüştür */
+    #shop-screen .shop-header-row > div:last-child {
+        display: none !important;
+    }
+    #shop-screen .shop-balance-display {
+        font-size: 0.9rem !important;
+    }
+    /* Önizleme paneli — sadece avatar, arka plan/kenarlık yok, sıfır padding */
     #shop-screen .shop-preview-panel {
-        display: flex !important;
-        flex-direction: row !important;
-        padding: 4px 8px !important;
-        margin-bottom: 4px !important;
+        padding: 0 !important;
+        margin-bottom: 2px !important;
         flex-shrink: 0 !important;
-        background: rgba(30, 30, 48, 0.3) !important;
-        border: 1px solid rgba(0, 242, 254, 0.15) !important;
-        border-radius: 10px !important;
-        gap: 8px !important;
-        align-items: center !important;
+        background: transparent !important;
+        border: none !important;
+        gap: 0 !important;
         justify-content: flex-end !important;
         width: auto !important;
     }
-    /* Açıklama metnini gizle, sadece avatar kalsın */
+    /* Açıklama metnini gizle */
     #shop-screen .shop-preview-panel > div:first-child {
         display: none !important;
     }
-    /* Avatar - yatayda 64px */
+    /* Avatar — 56px yatayda */
     #shop-screen .shop-preview-panel .preview-avatar-container {
-        width: 64px !important;
-        height: 64px !important;
+        width: 56px !important;
+        height: 56px !important;
     }
     #shop-screen .shop-preview-panel .preview-avatar-container canvas {
-        width: 64px !important;
-        height: 64px !important;
+        width: 56px !important;
+        height: 56px !important;
     }
+    /* Tabs kompakt */
     #shop-screen .shop-tabs {
-        margin-bottom: 4px !important;
+        margin-bottom: 3px !important;
         flex-shrink: 0 !important;
     }
+    #shop-screen .community-tab-btn {
+        padding: 5px 8px !important;
+        font-size: 0.72rem !important;
+    }
+    /* Ürün listesi kalan alanı doldursun */
     #shop-screen .shop-content-scroll {
         max-height: none !important;
         flex: 1 1 0 !important;
