@@ -529,13 +529,19 @@ h2 {
     box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.05);
 }
 .codex-icon.green-icon {
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+    border: 1px solid rgba(16, 185, 129, 0.35);
 }
 .codex-icon.blue-icon {
-    box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+    color: #00f2fe;
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.35);
+    border: 1px solid rgba(0, 242, 254, 0.35);
 }
 .codex-icon.pink-icon {
-    box-shadow: 0 0 10px rgba(217, 70, 239, 0.2);
+    color: #e100ff;
+    box-shadow: 0 0 12px rgba(225, 0, 255, 0.35);
+    border: 1px solid rgba(225, 0, 255, 0.35);
 }
 
 .codex-info {
@@ -3365,18 +3371,18 @@ button:hover .icon-svg,
 /* Special styling for Crystal Gem Icon */
 .icon-gem {
     color: #00f2fe;
-    filter: drop-shadow(0 0 4px rgba(0, 242, 254, 0.6));
-    animation: gemPulse 2s infinite ease-in-out;
+    filter: drop-shadow(0 0 5px rgba(0, 242, 254, 0.6));
+    animation: gemPulse 2.5s infinite ease-in-out;
 }
 
 @keyframes gemPulse {
     0%, 100% {
         transform: scale(1);
-        filter: drop-shadow(0 0 4px rgba(0, 242, 254, 0.6));
+        opacity: 0.9;
     }
     50% {
         transform: scale(1.12);
-        filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.9));
+        opacity: 1;
     }
 }
 
