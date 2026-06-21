@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v147';
+import { audio } from './audio.js?v=v148';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -897,13 +897,13 @@ export class TractorUFO {
             this.vx = 0;
             const isUnderneath = Math.abs(player.x - this.x) < 50 && player.y > this.y && player.y < this.y + this.beamHeight;
             if (isUnderneath) {
-                let pullForce = -0.7;
-                if (player.viscosityState) {
-                    const stateId = player.viscosityState.id;
+                let pullForce = -1.2;
+                if (player.viscosity) {
+                    const stateId = player.viscosity.id;
                     if (stateId === 'LOW') {
-                        pullForce = -1.6;
+                        pullForce = -2.6;
                     } else if (stateId === 'HIGH') {
-                        pullForce = -0.22;
+                        pullForce = -0.45;
                     }
                 }
                 
@@ -955,7 +955,7 @@ export class TractorUFO {
                 }
                 player.vy = -6.5;
             } else {
-                player.takeDamage();
+                player.takeDamage(1);
             }
         }
     }
@@ -1130,12 +1130,13 @@ export class SweeperUFO {
             }
 
             if (this.laserActive) {
-                const laserWidth = 16;
-                const hitPlayer = player.x + player.width > this.laserX - laserWidth && 
-                                  player.x - player.width < this.laserX + laserWidth && 
-                                  player.y > this.y && player.y < this.y + this.beamHeight;
+                const laserHalfWidth = 8;
+                const hitPlayer = player.x + player.radius > this.laserX - laserHalfWidth && 
+                                  player.x - player.radius < this.laserX + laserHalfWidth && 
+                                  player.y + player.radius > this.y + 10 && 
+                                  player.y - player.radius < this.y + this.beamHeight;
                 if (hitPlayer) {
-                    player.takeDamage();
+                    player.takeDamage(1);
                 }
             }
 
@@ -1200,7 +1201,7 @@ export class SweeperUFO {
                 }
                 player.vy = -6.5;
             } else {
-                player.takeDamage();
+                player.takeDamage(1);
             }
         }
     }

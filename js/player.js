@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v147';
-import { audio } from './audio.js?v=v147';
+import { ViscosityStates } from './viscosity.js?v=v148';
+import { audio } from './audio.js?v=v148';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -131,7 +131,7 @@ export class Player {
     /**
      * Hasar alma mekanizması
      */
-    takeDamage(amount, type = 'normal') {
+    takeDamage(amount = 1, type = 'normal') {
         if (this.invulnerableFrames > 0 || this.isDead) return;
         
         this.health -= amount;
