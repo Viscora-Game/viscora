@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v140';
-import { audio } from './audio.js?v=v140';
-import { LevelGenerator } from './generator.js?v=v140';
+import { Enemy, GelChaser } from './enemies.js?v=v141';
+import { audio } from './audio.js?v=v141';
+import { LevelGenerator } from './generator.js?v=v141';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -1102,6 +1102,7 @@ export class LevelEditor {
             toggleBtn.innerHTML = isCollapsed ? '‹' : '›';
         }
         audio.playPlateActivate(); // Sesli geribildirim
+        this.clampCamera();
     }
 
     /**
@@ -4277,7 +4278,11 @@ export class LevelEditor {
 
         // Harita dışına çıkmayı engelle (Sınırlar)
         const minX = 0;
-        const maxX = Math.max(0, this.game.level.width - visibleW);
+        
+        // Editör paneli açıksa ve gizlenmemişse sağ tarafa 320px ek boşluk hakkı tanı
+        const panelWidth = (!this.panel || this.panel.classList.contains('collapsed')) ? 0 : 320;
+        const maxX = Math.max(0, this.game.level.width - visibleW + (panelWidth / zoom));
+        
         const minY = -350; // Üst boşluk toleransı (Artırıldı)
         const maxY = Math.max(0, this.game.level.height - visibleH + 350);
 
