@@ -1,6 +1,6 @@
-import { audio } from './audio.js?v=v148';
-import { ViscosityList } from './viscosity.js?v=v148';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v148';
+import { audio } from './audio.js?v=v150';
+import { ViscosityList } from './viscosity.js?v=v150';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v150';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -1562,13 +1562,13 @@ export class UIManager {
                 console.warn("Haritaları yükleme hatası:", err);
                 listEl.innerHTML = `
                     <div class="no-maps" style="text-align: center; padding: 30px 10px;">
-                        <p style="margin-bottom: 12px; color: #ff5555; font-weight: bold; font-size: 18px;">⚠️ Bağlantı Başarısız</p>
+                        <p style="margin-bottom: 12px; color: #ff5555; font-weight: bold; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 6px;"><svg class="icon-svg" style="color: #ff5555; width: 18px; height: 18px; margin: 0;"><use href="#icon-warning"></use></svg> Bağlantı Başarısız</p>
                         <p style="font-size: 14px; color: #ccc; margin-bottom: 20px; line-height: 1.5;">
                             Sunucu uyandırılıyor olabilir (ilk bağlantı 30-50 saniye sürebilir).<br>
                             Lütfen biraz bekleyip tekrar deneyin.
                         </p>
-                        <button id="btn-retry-community" class="menu-btn" style="padding: 10px 20px; font-size: 14px; margin: 0 auto; display: block; background: linear-gradient(135deg, #ff007f, #7f00ff); border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);">
-                            🔄 Yeniden Dene
+                        <button id="btn-retry-community" class="menu-btn" style="padding: 10px 20px; font-size: 14px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(135deg, #ff007f, #7f00ff); border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);">
+                            <svg class="icon-svg" style="width: 14px; height: 14px; margin: 0;"><use href="#icon-time"></use></svg> Yeniden Dene
                         </button>
                     </div>
                 `;

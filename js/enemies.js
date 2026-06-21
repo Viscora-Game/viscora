@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v148';
+import { audio } from './audio.js?v=v150';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -870,6 +870,7 @@ export class TractorUFO {
         this.pulseTime = Math.random() * 100;
         this.activeBeam = false;
         this.beamHeight = 400;
+        this.beamDamageCooldown = 0;
     }
 
     die(level = null, player = null) {
@@ -892,6 +893,9 @@ export class TractorUFO {
         if (this.isDead) return;
 
         this.pulseTime += 0.05;
+        if (this.beamDamageCooldown > 0) {
+            this.beamDamageCooldown -= 1 / 60;
+        }
 
         if (this.activeBeam) {
             this.vx = 0;
@@ -908,6 +912,12 @@ export class TractorUFO {
                 }
                 
                 player.vy = pullForce;
+
+                // Deal periodic damage while in the tractor beam (every 1.5 seconds)
+                if (this.beamDamageCooldown <= 0) {
+                    player.takeDamage(1);
+                    this.beamDamageCooldown = 1.5; // 1.5 seconds cooldown
+                }
                 
                 if (Math.random() < 0.35 && emitParticles) {
                     emitParticles(player.x + (Math.random() - 0.5) * 20, player.y + 10, 'custom', '#00f0ff', 2, {
@@ -919,6 +929,7 @@ export class TractorUFO {
                 }
             } else {
                 this.activeBeam = false;
+                this.beamDamageCooldown = 0; // Reset cooldown so re-entering triggers damage immediately
             }
         } else {
             this.x += this.vx;
@@ -1111,14 +1122,37 @@ export class SweeperUFO {
             this.trackTimer -= 1 / 60;
 
             this.lastLaserTime += 1 / 60;
-            if (this.lastLaserTime >= 0.6) {
+            const cycleDuration = 1.5;
+            const activeDuration = 0.4;
+
+            if (this.lastLaserTime >= cycleDuration) {
                 this.lastLaserTime = 0;
-                this.laserActive = true;
-                this.laserX = this.x;
                 try { audio.playLaser(); } catch(e){}
+            }
+
+            this.laserActive = (this.lastLaserTime < activeDuration);
+            if (this.laserActive) {
+                this.laserX = this.x;
                 
-                if (emitParticles) {
-                    emitParticles(this.x, this.y + this.beamHeight, 'custom', '#ff0055', 8, {
+                if (!this.laserDamageCooldown) {
+                    this.laserDamageCooldown = 0;
+                }
+                if (this.laserDamageCooldown > 0) {
+                    this.laserDamageCooldown -= 1 / 60;
+                }
+
+                const laserHalfWidth = 8;
+                const hitPlayer = player.x + player.radius > this.laserX - laserHalfWidth && 
+                                  player.x - player.radius < this.laserX + laserHalfWidth && 
+                                  player.y + player.radius > this.y + 10 && 
+                                  player.y - player.radius < this.y + this.beamHeight;
+                if (hitPlayer && this.laserDamageCooldown <= 0) {
+                    player.takeDamage(1);
+                    this.laserDamageCooldown = 0.5; // Cooldown between ticks of this laser
+                }
+
+                if (emitParticles && Math.random() < 0.25) {
+                    emitParticles(this.laserX, this.y + this.beamHeight, 'custom', '#ff0055', 4, {
                         vx: (Math.random() - 0.5) * 6,
                         vy: -0.5 - Math.random() * 1.5,
                         life: 15 + Math.random() * 10,
@@ -1126,18 +1160,7 @@ export class SweeperUFO {
                     });
                 }
             } else {
-                this.laserActive = false;
-            }
-
-            if (this.laserActive) {
-                const laserHalfWidth = 8;
-                const hitPlayer = player.x + player.radius > this.laserX - laserHalfWidth && 
-                                  player.x - player.radius < this.laserX + laserHalfWidth && 
-                                  player.y + player.radius > this.y + 10 && 
-                                  player.y - player.radius < this.y + this.beamHeight;
-                if (hitPlayer) {
-                    player.takeDamage(1);
-                }
+                this.laserDamageCooldown = 0;
             }
 
             if (this.trackTimer <= 0) {

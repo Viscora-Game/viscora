@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v148';
-import { Level } from './level.js?v=v148';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v148';
-import { UIManager } from './ui.js?v=v148';
-import { audio } from './audio.js?v=v148';
-import { LevelEditor } from './editor.js?v=v148';
-import { Boss, CyberBoss } from './boss.js?v=v148';
+import { Player } from './player.js?v=v150';
+import { Level } from './level.js?v=v150';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v150';
+import { UIManager } from './ui.js?v=v150';
+import { audio } from './audio.js?v=v150';
+import { LevelEditor } from './editor.js?v=v150';
+import { Boss, CyberBoss } from './boss.js?v=v150';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -32,16 +32,16 @@ const LEVEL_NAMES = [
 
 // Bölüm bazlı bağlamsal ipuçları — ilk kez tanıtılan mekanikler için kısa yardım metinleri
 const LEVEL_HINTS = {
-    0:  '🎮 E ile Form Değiştir!',
-    1:  '🧲 Pembe Formda Duvara Yapış!',
-    3:  '🧡 Bantlara Dikkat, Pembe Sızar!',
-    5:  '⚠️ Bazı Zeminler Çöker!',
-    6:  '📦 Kutuları İt, Plakalara Bas!',
-    9:  '🔥 Pembe Form Alevlere Dayanır!',
-    10: '👹 Kutuları Boss\'a Düşür!',
+    0:  '⚡ E ile Form Değiştir!',
+    1:  '⚡ Pembe Formda Duvara Yapış!',
+    3:  '⚠ Bantlara Dikkat, Pembe Sızar!',
+    5:  '⚠ Bazı Zeminler Çöker!',
+    6:  '◆ Kutuları İt, Plakalara Bas!',
+    9:  '⚠ Pembe Form Alevlere Dayanır!',
+    10: '☠ Kutuları Boss\'a Düşür!',
     16: '⚡ Lazerleri Aynalarla Yönlendir!',
-    17: '🏹 Oklara Dikkat Et!',
-    20: '🤖 Fazlarını Öğren, Vuruşları Sav!'
+    17: '⚠ Oklara Dikkat Et!',
+    20: '☠ Fazlarını Öğren, Vuruşları Sav!'
 };
 
 export class GameManager {

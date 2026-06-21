@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v148';
-import { audio } from './audio.js?v=v148';
-import { LevelGenerator } from './generator.js?v=v148';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v150';
+import { audio } from './audio.js?v=v150';
+import { LevelGenerator } from './generator.js?v=v150';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -721,18 +721,18 @@ export class LevelEditor {
             <div class="editor-section">
                 <div class="section-lbl">Sistem</div>
                 <div class="tools-grid">
-                    <button class="editor-btn primary" id="editor-playtest-btn">▶ PLAY TEST (P)</button>
-                    <button class="editor-btn" id="editor-export-btn">💾 KAYDET</button>
-                    <button class="editor-btn" id="editor-share-btn" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee; border-color: rgba(6, 182, 212, 0.35); grid-column: span 2;">📤 PAYLAŞ</button>
-                    <button class="editor-btn danger" id="editor-clear-btn" style="grid-column: span 2;">⚠️ CLEAR LEVEL</button>
-                    <button class="editor-btn danger" id="editor-exit-btn" style="grid-column: span 2; margin-top: 5px; background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.35);">🏠 EXIT TO MENU</button>
+                    <button class="editor-btn primary" id="editor-playtest-btn" style="display: flex; align-items: center; justify-content: center; gap: 4px;"><svg class="icon-svg" style="width: 12px; height: 12px; margin: 0;"><use href="#icon-play"></use></svg> PLAY TEST (P)</button>
+                    <button class="editor-btn" id="editor-export-btn" style="display: flex; align-items: center; justify-content: center; gap: 4px;"><svg class="icon-svg" style="width: 12px; height: 12px; margin: 0;"><use href="#icon-book"></use></svg> KAYDET</button>
+                    <button class="editor-btn" id="editor-share-btn" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee; border-color: rgba(6, 182, 212, 0.35); grid-column: span 2; display: flex; align-items: center; justify-content: center; gap: 4px;"><svg class="icon-svg" style="width: 12px; height: 12px; margin: 0;"><use href="#icon-portal"></use></svg> PAYLAŞ</button>
+                    <button class="editor-btn danger" id="editor-clear-btn" style="grid-column: span 2; display: flex; align-items: center; justify-content: center; gap: 4px;"><svg class="icon-svg" style="width: 12px; height: 12px; margin: 0;"><use href="#icon-warning"></use></svg> CLEAR LEVEL</button>
+                    <button class="editor-btn danger" id="editor-exit-btn" style="grid-column: span 2; margin-top: 5px; background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.35); display: flex; align-items: center; justify-content: center; gap: 4px;"><svg class="icon-svg" style="width: 12px; height: 12px; margin: 0;"><use href="#icon-home"></use></svg> EXIT TO MENU</button>
                 </div>
             </div>
 
             <!-- Rastgele Bölüm Üretici -->
             <div class="editor-section" style="border-bottom: 1px solid rgba(217, 70, 239, 0.2); padding-bottom: 15px;">
                 <div class="section-lbl" style="color: #d946ef; display: flex; align-items: center; gap: 5px;">
-                    ⚡ RASTGELE BÖLÜM ÜRETİCİ
+                    <svg class="icon-svg" style="width: 12px; height: 12px; margin: 0;"><use href="#icon-bolt"></use></svg> RASTGELE BÖLÜM ÜRETİCİ
                 </div>
                 <div class="editor-input-group" style="margin-top: 8px;">
                     <label style="width: 75px;">Seed (Tohum)</label>
@@ -747,8 +747,8 @@ export class LevelEditor {
                         <option value="hard">Zor</option>
                     </select>
                 </div>
-                <button class="editor-btn" id="editor-generate-btn" style="width: 100%; margin-top: 10px; background: linear-gradient(135deg, #d946ef 0%, #a855f7 100%); color: #fff; border: none; font-weight: 800; font-size: 13px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); box-shadow: 0 0 15px rgba(217, 70, 239, 0.2); transition: all 0.3s ease;">
-                    ⚡ BÖLÜMÜ BASTAN YARAT
+                <button class="editor-btn" id="editor-generate-btn" style="width: 100%; margin-top: 10px; background: linear-gradient(135deg, #d946ef 0%, #a855f7 100%); color: #fff; border: none; font-weight: 800; font-size: 13px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); box-shadow: 0 0 15px rgba(217, 70, 239, 0.2); transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <svg class="icon-svg" style="width: 12px; height: 12px; margin: 0;"><use href="#icon-bolt"></use></svg> BÖLÜMÜ BASTAN YARAT
                 </button>
             </div>
 
@@ -4604,8 +4604,7 @@ export class LevelEditor {
                 ctx.fillStyle = '#94a3b8';
                 ctx.font = '14px Outfit';
                 ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                const dirEmoji = a.dir === 'right' ? '➡' : a.dir === 'left' ? '⬅' : a.dir === 'up' ? '⬆' : a.dir === 'down' ? '⬇' : '🎯';
+                const dirEmoji = a.dir === 'right' ? '→' : a.dir === 'left' ? '←' : a.dir === 'up' ? '↑' : a.dir === 'down' ? '↓' : '⊙';
                 ctx.fillText(dirEmoji, cx, cy + a.h * 0.55);
                 ctx.restore();
 

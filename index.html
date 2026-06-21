@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v148">
+    <link rel="stylesheet" href="index.css?v=v150">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -40,7 +40,7 @@
             modal.className = 'viscora-modal';
             
             modal.innerHTML = `
-                <div class="viscora-modal-title">⚡ BİLGİLENDİRME</div>
+                <div class="viscora-modal-title"><svg class="icon-svg" style="color: #00f0ff; width: 18px; height: 18px; vertical-align: text-bottom; margin-right: 6px;"><use href="#icon-bolt"></use></svg> BİLGİLENDİRME</div>
                 <div class="viscora-modal-message">${msg}</div>
                 <div class="viscora-modal-actions">
                     <button class="viscora-modal-btn primary">TAMAM</button>
@@ -68,7 +68,7 @@
             modal.className = 'viscora-modal';
             
             modal.innerHTML = `
-                <div class="viscora-modal-title">❓ ONAY</div>
+                <div class="viscora-modal-title"><svg class="icon-svg" style="color: #f59e0b; width: 18px; height: 18px; vertical-align: text-bottom; margin-right: 6px;"><use href="#icon-warning"></use></svg> ONAY</div>
                 <div class="viscora-modal-message">${msg}</div>
                 <div class="viscora-modal-actions">
                     <button class="viscora-modal-btn secondary" id="viscora-confirm-no">İPTAL</button>
@@ -108,11 +108,11 @@
             modal.style.maxWidth = '90vw';
             
             modal.innerHTML = `
-                <div class="viscora-modal-title">📤 BÖLÜMÜ PAYLAŞ</div>
+                <div class="viscora-modal-title"><svg class="icon-svg" style="color: #10b981; width: 18px; height: 18px; vertical-align: text-bottom; margin-right: 6px;"><use href="#icon-portal"></use></svg> BÖLÜMÜ PAYLAŞ</div>
                 <div class="viscora-modal-message" style="margin-bottom: 22px;">${msg}</div>
                 <div class="viscora-modal-actions" style="flex-direction: column; gap: 10px; align-items: stretch;">
-                    <button class="viscora-modal-btn primary" id="viscora-share-update" style="padding: 10px 16px; font-size: 0.85rem; width: 100%;">🔄 MEVCUT BÖLÜMÜ GÜNCELLE</button>
-                    <button class="viscora-modal-btn" id="viscora-share-new" style="padding: 10px 16px; font-size: 0.85rem; width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">✨ YENİ BÖLÜM OLARAK YAYINLA</button>
+                    <button class="viscora-modal-btn primary" id="viscora-share-update" style="padding: 10px 16px; font-size: 0.85rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;"><svg class="icon-svg" style="width: 14px; height: 14px; margin: 0;"><use href="#icon-time"></use></svg> MEVCUT BÖLÜMÜ GÜNCELLE</button>
+                    <button class="viscora-modal-btn" id="viscora-share-new" style="padding: 10px 16px; font-size: 0.85rem; width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; gap: 6px;"><svg class="icon-svg" style="width: 14px; height: 14px; margin: 0;"><use href="#icon-star"></use></svg> YENİ BÖLÜM OLARAK YAYINLA</button>
                     <button class="viscora-modal-btn secondary" id="viscora-share-cancel" style="padding: 8px 16px; font-size: 0.85rem; width: 100%;">İPTAL</button>
                 </div>
             `;
@@ -216,7 +216,7 @@
                 div.appendChild(closeBtn);
                 
                 var title = document.createElement('h3');
-                title.innerText = '⚠️ OYUN HATASI TESPİT EDİLDİ';
+                title.innerHTML = '<svg class="icon-svg" style="color: #ff4a4a; width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;"><use href="#icon-warning"></use></svg> OYUN HATASI TESPİT EDİLDİ';
                 title.style.margin = '0 0 10px 0';
                 title.style.color = '#ff4a4a';
                 div.appendChild(title);
@@ -447,6 +447,18 @@
             <path d="M2 10h20"/>
             <path d="m10 10 2 4 1-5 2 3"/>
             <path d="M12 13v6"/>
+        </symbol>
+        <symbol id="icon-boss" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Horns -->
+            <path d="M4 10c-1-3-2-4-2-7 2 1 3 3 4 5"/>
+            <path d="M20 10c1-3 2-4 2-7-2 1-3 3-4 5"/>
+            <!-- Head outline -->
+            <path d="M5 9a7 7 0 0 1 14 0v6a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V9z"/>
+            <!-- Visor -->
+            <rect x="6" y="10" width="12" height="4" rx="1"/>
+            <line x1="6" y1="12" x2="18" y2="12"/>
+            <!-- Mouth/Grill -->
+            <path d="M9 18v2M12 18v2M15 18v2"/>
         </symbol>
         <symbol id="icon-spike" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M2 20h20 M2 20l2.5-12L7 20l2.5-12L12 20l2.5-12L17 20l2.5-12L22 20"/>
@@ -989,14 +1001,14 @@
                             </div>
                         </div>
                         <div class="codex-row">
-                            <div class="codex-icon"><svg class="icon-svg"><use href="#icon-skull"></use></svg></div>
+                            <div class="codex-icon"><svg class="icon-svg"><use href="#icon-boss"></use></svg></div>
                             <div class="codex-info">
                                 <h3>Viscoruptor (BÖLÜM 10 BOSS'U)</h3>
                                 <p>Yere basarak geniş fuchsia şok dalgaları yayan ve yapıştığınız duvarlardan sizi düşüren ilk büyük boss. Kafasına itilebilir enerji kutuları düşürerek hasar verebilirsiniz.</p>
                             </div>
                         </div>
                         <div class="codex-row">
-                            <div class="codex-icon"><svg class="icon-svg"><use href="#icon-skull"></use></svg></div>
+                            <div class="codex-icon"><svg class="icon-svg"><use href="#icon-boss"></use></svg></div>
                             <div class="codex-info">
                                 <h3>CyberBoss (BÖLÜM 20 BOSS'U)</h3>
                                 <p>20. Bölümün sonundaki devasa sibernetik boss. Farklı fazlarda ölümcül lazerler ateşler, zemin sarsan vuruşlar yapar ve oyuncuyu ezmeye çalışır. Öldürüldüğünde açılan portal ile kaçışı sağlar.</p>
@@ -1144,8 +1156,8 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v148"></script>
-    <script type="module" src="js/main.js?v=v148"></script>
+    <script src="js/controls_customizer.js?v=v150"></script>
+    <script type="module" src="js/main.js?v=v150"></script>
 </body>
 </html>
 
