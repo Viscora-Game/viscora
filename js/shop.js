@@ -309,3 +309,4 @@ export const shopManager = new ShopManager();
 // Expose to window for access from non-module scripts or rendering context
 window.shopManager = shopManager;
 window.SHOP_ITEMS = SHOP_ITEMS;
+

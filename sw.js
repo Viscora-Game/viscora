@@ -1,20 +1,20 @@
-const CACHE_NAME = 'viscora-cache-v136';
+const CACHE_NAME = 'viscora-cache-v137';
 const ASSETS = [
   './',
   './index.html',
-  './index.css?v=v136',
+  './index.css?v=v137',
   './manifest.json',
-  './js/main.js?v=v136',
-  './js/game.js?v=v136',
-  './js/audio.js?v=v136',
-  './js/ui.js?v=v136',
-  './js/level.js?v=v136',
-  './js/player.js?v=v136',
-  './js/enemies.js?v=v136',
-  './js/viscosity.js?v=v136',
-  './js/boss.js?v=v136',
-  './js/editor.js?v=v136',
-  './js/controls_customizer.js?v=v136',
+  './js/main.js?v=v137',
+  './js/game.js?v=v137',
+  './js/audio.js?v=v137',
+  './js/ui.js?v=v137',
+  './js/level.js?v=v137',
+  './js/player.js?v=v137',
+  './js/enemies.js?v=v137',
+  './js/viscosity.js?v=v137',
+  './js/boss.js?v=v137',
+  './js/editor.js?v=v137',
+  './js/controls_customizer.js?v=v137',
   './assets/dragon_head.png'
 ];
 
@@ -61,3 +61,4 @@ self.addEventListener('fetch', (e) => {
     })
   );
 });
+

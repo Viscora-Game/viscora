@@ -518,3 +518,4 @@ class ControlsCustomizer {
 window.addEventListener('DOMContentLoaded', () => {
     window.controlsCustomizer = new ControlsCustomizer();
 });
+

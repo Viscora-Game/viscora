@@ -3339,3 +3339,89 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     }
 }
 
+/* Custom SVG Icon system to replace Emojis */
+.icon-svg {
+    width: 1.1em;
+    height: 1.1em;
+    stroke: currentColor;
+    fill: none;
+    vertical-align: middle;
+    display: inline-block;
+    position: relative;
+    top: -1px;
+    margin-right: 6px;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+/* Button hover transitions for SVG icons */
+button:hover .icon-svg,
+.menu-btn:hover .icon-svg,
+.codex-tab-btn:hover .icon-svg,
+.community-tab-btn:hover .icon-svg,
+.tag-filter-btn:hover .icon-svg {
+    transform: scale(1.1);
+}
+
+/* Special styling for Crystal Gem Icon */
+.icon-gem {
+    color: #00f2fe;
+    filter: drop-shadow(0 0 4px rgba(0, 242, 254, 0.6));
+    animation: gemPulse 2s infinite ease-in-out;
+}
+
+@keyframes gemPulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 4px rgba(0, 242, 254, 0.6));
+    }
+    50% {
+        transform: scale(1.12);
+        filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.9));
+    }
+}
+
+/* Styled neon dots for difficulty and list markers */
+.dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+    box-shadow: 0 0 8px currentColor;
+}
+.dot-easy {
+    background-color: #10b981;
+    color: #10b981;
+}
+.dot-normal {
+    background-color: #00f2fe;
+    color: #00f2fe;
+}
+.dot-hard {
+    background-color: #ffb700;
+    color: #ffb700;
+}
+.dot-hardcore {
+    background-color: #ef4444;
+    color: #ef4444;
+}
+
+/* Specific alignments for close buttons containing SVG X icons */
+.close-btn .icon-svg {
+    margin-right: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Specific alignment for search box SVG icon positioning */
+.search-box-container .search-icon-svg {
+    transition: color 0.3s ease;
+}
+.search-box-container:focus-within .search-icon-svg {
+    color: #00f2fe !important;
+}
+
+

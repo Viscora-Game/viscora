@@ -1,6 +1,6 @@
-import { audio } from './audio.js?v=v136';
-import { ViscosityList } from './viscosity.js?v=v136';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v136';
+import { audio } from './audio.js?v=v137';
+import { ViscosityList } from './viscosity.js?v=v137';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v137';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -273,16 +273,16 @@ export class UIManager {
 
         // Group metadata
         const groups = [
-            { id: 1, title: "🚀 İLK ADIMLAR", start: 1, end: 10, class: "group-1" },
-            { id: 2, title: "🧪 TOKSİK HÜCRE", start: 11, end: 20, class: "group-2" },
-            { id: 3, title: "🌌 KOZMİK ÇEKİRDEK", start: 21, end: 30, class: "group-3" }
+            { id: 1, title: '<svg class="icon-svg"><use href="#icon-run"></use></svg> İLK ADIMLAR', start: 1, end: 10, class: "group-1" },
+            { id: 2, title: '<svg class="icon-svg"><use href="#icon-flask"></use></svg> TOKSİK HÜCRE', start: 11, end: 20, class: "group-2" },
+            { id: 3, title: '<svg class="icon-svg"><use href="#icon-portal"></use></svg> KOZMİK ÇEKİRDEK', start: 21, end: 30, class: "group-3" }
         ];
 
         groups.forEach(g => {
             const isCollapsed = g.id !== activeGroupIndex;
             const collapseClass = isCollapsed ? 'collapsed' : '';
             const isGroupUnlocked = g.id === 1 || this.devMode || this.game.unlockedLevel >= g.start;
-            const statusText = isGroupUnlocked ? `Bölüm ${g.start}-${g.end}` : 'Kilitli 🔒';
+            const statusText = isGroupUnlocked ? `Bölüm ${g.start}-${g.end}` : 'Kilitli <svg class="icon-svg" style="width: 12px; height: 12px; margin-left: 4px; margin-right: 0; vertical-align: middle;"><use href="#icon-lock"></use></svg>';
             const unlockedClass = isGroupUnlocked ? 'unlocked' : 'locked';
             const disabledAttr = isGroupUnlocked ? '' : 'disabled';
 
@@ -295,7 +295,7 @@ export class UIManager {
             const maxStars = (g.end - g.start + 1) * 3; // 10 levels * 3 = 30
             const badgeGolden = chapterStars >= 24 ? 'golden' : '';
             const starBadgeHtml = isGroupUnlocked
-                ? `<span id="chapter-badge-${g.id}" class="chapter-star-badge ${badgeGolden}">⭐ ${chapterStars}/${maxStars}</span>`
+                ? `<span id="chapter-badge-${g.id}" class="chapter-star-badge ${badgeGolden}"><svg class="icon-svg icon-star" style="width: 12px; height: 12px; margin-right: 4px; vertical-align: middle;"><use href="#icon-star"></use></svg> ${chapterStars}/${maxStars}</span>`
                 : '';
 
             html += `
@@ -315,7 +315,7 @@ export class UIManager {
                 html += `<button id="btn-level-0" class="level-btn"></button>`;
             }
             for (let i = g.start; i <= g.end; i++) {
-                html += `<button id="btn-level-${i}" class="level-btn locked" ${disabledAttr}><span class="btn-num">${i}</span><span style="font-size:0.6rem;">🔒</span></button>`;
+                html += `<button id="btn-level-${i}" class="level-btn locked" ${disabledAttr}><span class="btn-num">${i}</span><span style="font-size:0.6rem; display: flex; align-items: center; justify-content: center;"><svg class="icon-svg" style="width: 10px; height: 10px; margin-right: 0;"><use href="#icon-lock"></use></svg></span></button>`;
             }
 
             html += `
@@ -505,13 +505,15 @@ export class UIManager {
             if (textMenuMusic) textMenuMusic.textContent = `${displayVal}%`;
             if (textPauseMusic) textPauseMusic.textContent = `${displayVal}%`;
 
-            const icon = isMuted ? '🔇' : '🎵';
+            const iconHtml = isMuted 
+                ? '<svg class="icon-svg" style="width: 16px; height: 16px; margin: 0;"><use href="#icon-mute"></use></svg>' 
+                : '<svg class="icon-svg" style="width: 16px; height: 16px; margin: 0;"><use href="#icon-music"></use></svg>';
             if (btnMenuMusic) {
-                btnMenuMusic.textContent = icon;
+                btnMenuMusic.innerHTML = iconHtml;
                 btnMenuMusic.classList.toggle('muted', isMuted);
             }
             if (btnPauseMusic) {
-                btnPauseMusic.textContent = icon;
+                btnPauseMusic.innerHTML = iconHtml;
                 btnPauseMusic.classList.toggle('muted', isMuted);
             }
         };
@@ -531,13 +533,15 @@ export class UIManager {
             if (textMenuSfx) textMenuSfx.textContent = `${displayVal}%`;
             if (textPauseSfx) textPauseSfx.textContent = `${displayVal}%`;
 
-            const icon = isMuted ? '🔇' : '🔊';
+            const iconHtml = isMuted 
+                ? '<svg class="icon-svg" style="width: 16px; height: 16px; margin: 0;"><use href="#icon-mute"></use></svg>' 
+                : '<svg class="icon-svg" style="width: 16px; height: 16px; margin: 0;"><use href="#icon-volume"></use></svg>';
             if (btnMenuSfx) {
-                btnMenuSfx.textContent = icon;
+                btnMenuSfx.innerHTML = iconHtml;
                 btnMenuSfx.classList.toggle('muted', isMuted);
             }
             if (btnPauseSfx) {
-                btnPauseSfx.textContent = icon;
+                btnPauseSfx.innerHTML = iconHtml;
                 btnPauseSfx.classList.toggle('muted', isMuted);
             }
         };
@@ -1404,12 +1408,12 @@ export class UIManager {
                 let tagsHtml = '';
                 if (tags.length > 0) {
                     tagsHtml = `<div class="map-tags-row">` + tags.map(t => {
-                        let emoji = '🧩';
-                        if (t === 'Aksiyon') emoji = '⚔️';
-                        else if (t === 'Kolay') emoji = '🟢';
-                        else if (t === 'Zor') emoji = '🔴';
-                        else if (t === 'Kısa') emoji = '⚡';
-                        return `<span class="map-tag-badge">${emoji} ${t}</span>`;
+                        let iconHtml = '<svg class="icon-svg"><use href="#icon-puzzle"></use></svg>';
+                        if (t === 'Aksiyon') iconHtml = '<svg class="icon-svg"><use href="#icon-sword"></use></svg>';
+                        else if (t === 'Kolay') iconHtml = '<span class="dot dot-easy"></span>';
+                        else if (t === 'Zor') iconHtml = '<span class="dot dot-hardcore"></span>';
+                        else if (t === 'Kısa') iconHtml = '<svg class="icon-svg"><use href="#icon-bolt"></use></svg>';
+                        return `<span class="map-tag-badge">${iconHtml} ${t}</span>`;
                     }).join('') + `</div>`;
                 }
 
@@ -1419,18 +1423,18 @@ export class UIManager {
                         <div class="map-author">Tasarımcı: <span>${level.author}</span></div>
                         ${tagsHtml}
                         <div class="map-expiry ${expiryClass}" id="expiry-${level.id}" data-played-at="${playedTimeStr}" data-likes="${level.likes}">
-                            ⏳ <span class="expiry-timer">${formatRemainingTime(remainingSeconds)}</span>
+                            <svg class="icon-svg" style="margin-right: 4px;"><use href="#icon-time"></use></svg> <span class="expiry-timer">${formatRemainingTime(remainingSeconds)}</span>
                         </div>
                     </div>
                     <div class="map-actions">
                         <div class="map-likes">
-                            <span>👍</span>
+                            <svg class="icon-svg" style="margin-right: 4px; fill: none; stroke: currentColor;"><use href="#icon-like"></use></svg>
                             <span class="like-count" id="likes-${level.id}">${level.likes}</span>
                         </div>
                         <button class="btn-like ${isLiked ? 'liked' : ''}" data-id="${level.id}" ${isLiked ? 'disabled' : ''}>
                             ${isLiked ? 'Beğenildi' : 'Beğen'}
                         </button>
-                        <button class="btn-play-map" data-id="${level.id}">▶️ Oyna</button>
+                        <button class="btn-play-map" data-id="${level.id}"><svg class="icon-svg" style="fill: currentColor; stroke: none; margin-right: 4px;"><use href="#icon-play"></use></svg> Oyna</button>
                     </div>
                 `;
 
@@ -2042,3 +2046,4 @@ export class UIManager {
     }
 }
 export default UIManager;
+

@@ -1421,3 +1421,4 @@ if (typeof window !== 'undefined') {
     window.addEventListener('touchend', globalUnlock, { capture: true, passive: true });
     window.addEventListener('click', globalUnlock, { capture: true });
 }
+

@@ -58,3 +58,4 @@ export const ViscosityList = [
     ViscosityStates.LOW,
     ViscosityStates.HIGH
 ];
+
