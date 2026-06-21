@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v143';
+import { audio } from './audio.js?v=v144';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -33,6 +33,22 @@ export class Enemy {
         if (color === '#d946ef') return '#b55fe6';
         if (color === '#eab308') return '#ca8a04';
         return '#e11d48';
+    }
+
+    die(level = null, player = null) {
+        if (this.isDead) return;
+        this.isDead = true;
+        
+        const activeLevel = level || (player && player.game ? player.game.level : null) || (window.gameInstance ? window.gameInstance.level : null);
+        if (activeLevel && activeLevel.collectibles) {
+            activeLevel.collectibles.push({
+                x: this.x,
+                y: this.y,
+                collected: false,
+                enemyDropped: true,
+                color: '#eab308'
+            });
+        }
     }
 
     /**
@@ -73,7 +89,7 @@ export class Enemy {
                     // Blok ezme kontrolü (yukarıdan düşen blok)
                     const isFallenOn = block.vy > 1.0 && block.y + block.h - block.vy <= this.y - this.radius + 12;
                     if (isFallenOn) {
-                        this.isDead = true;
+                        this.die(level);
                         try { audio.playDamage(); } catch(e){}
                         if (window.gameInstance && window.gameInstance.emitParticles) {
                             window.gameInstance.emitParticles(this.x, this.y, 'enemy_pop', this.color, 22);
@@ -178,10 +194,7 @@ export class Enemy {
         this.pulseTime += 0.08;
     }
 
-    /**
-     * Oyuncu ile temas çarpışma kontrolleri
-     */
-    checkCollision(player, emitParticles, onStomp) {
+    checkCollision(player, emitParticles, onStomp, level = null) {
         if (this.isDead || player.isDead) return;
 
         const dx = player.x - this.x;
@@ -196,7 +209,7 @@ export class Enemy {
             const isSteppingOn = stompVy > 0 && player.y + player.radius - stompVy <= this.y - this.radius + 10;
             
             if (isSteppingOn) {
-                this.isDead = true;
+                this.die(level, player);
                 
                 // Oyuncuyu yukarı fırlat
                 let bounceForce = 7.5;
@@ -379,7 +392,7 @@ export class GelChaser extends Enemy {
 
         // Ölüm çukuru tespiti (Lava/Asit nehrine temas)
         if (this.y + this.radius >= level.height - 25) {
-            this.explode(player, emitParticles);
+            this.explode(player, emitParticles, level);
             return;
         }
 
@@ -404,7 +417,7 @@ export class GelChaser extends Enemy {
                     // Blok ezme kontrolü (yukarıdan düşen blok)
                     const isFallenOn = block.vy > 1.0 && block.y + block.h - block.vy <= this.y - this.radius + 12;
                     if (isFallenOn) {
-                        this.isDead = true;
+                        this.die(level);
                         try { audio.playDamage(); } catch(e){}
                         if (emitParticles) {
                             emitParticles(this.x, this.y, 'enemy_pop', this.color, 22);
@@ -575,7 +588,7 @@ export class GelChaser extends Enemy {
             }
 
             if (this.chaseTimer <= 0) {
-                this.explode(player, emitParticles);
+                this.explode(player, emitParticles, level);
             }
         }
 
@@ -585,9 +598,21 @@ export class GelChaser extends Enemy {
     /**
      * Düşmanın alan hasarlı patlaması
      */
-    explode(player, emitParticles) {
+     explode(player, emitParticles, level = null) {
+        if (this.isDead) return;
         this.isDead = true;
         this.isExploded = true;
+
+        const activeLevel = level || (player && player.game ? player.game.level : null) || (window.gameInstance ? window.gameInstance.level : null);
+        if (activeLevel && activeLevel.collectibles) {
+            activeLevel.collectibles.push({
+                x: this.x,
+                y: this.y,
+                collected: false,
+                enemyDropped: true,
+                color: '#eab308'
+            });
+        }
 
         // Patlama ses efekti tetikleme denemesi
         if (player && player.game && player.game.audio) {
@@ -620,7 +645,7 @@ export class GelChaser extends Enemy {
     /**
      * Oyuncu ile temas/çarpışma kontrolleri (Kovalarken anında patlar)
      */
-    checkCollision(player, emitParticles, onStomp) {
+    checkCollision(player, emitParticles, onStomp, level = null) {
         if (this.isDead || player.isDead) return;
 
         const dx = player.x - this.x;
@@ -636,12 +661,12 @@ export class GelChaser extends Enemy {
                 // Kovalama modunda patlama zamanlayıcısı kontrolü
                 if (this.chaseTimer < 1.0) {
                     // Son 1 saniyede (aşırı kararsız flaş modu) her türlü temas anında patlatır!
-                    this.explode(player, emitParticles);
+                    this.explode(player, emitParticles, level);
                     if (onStomp) onStomp();
                 } else {
                     // İlk 1.5 saniyede (şişme aşaması) tam üstüne basarak chaser'ı güvenle defuse edebiliriz!
                     if (isSteppingOn) {
-                        this.isDead = true;
+                        this.die(level, player);
                         
                         let bounceForce = 7.5;
                         if (player.viscosity.id === 'LOW') bounceForce = 8.2;
@@ -661,14 +686,14 @@ export class GelChaser extends Enemy {
                         }
                     } else {
                         // Yanına çarparsa patlar
-                        this.explode(player, emitParticles);
+                        this.explode(player, emitParticles, level);
                         if (onStomp) onStomp();
                     }
                 }
             } else {
                 // Diğer durumlarda (devriye, algılama, uyarı) standart ezme/ezilme davranışları
                 if (isSteppingOn) {
-                    this.isDead = true;
+                    this.die(level, player);
                     
                     let bounceForce = 7.5;
                     if (player.viscosity.id === 'LOW') bounceForce = 8.2;

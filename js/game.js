@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v143';
-import { Level } from './level.js?v=v143';
-import { Enemy, GelChaser } from './enemies.js?v=v143';
-import { UIManager } from './ui.js?v=v143';
-import { audio } from './audio.js?v=v143';
-import { LevelEditor } from './editor.js?v=v143';
-import { Boss, CyberBoss } from './boss.js?v=v143';
+import { Player } from './player.js?v=v144';
+import { Level } from './level.js?v=v144';
+import { Enemy, GelChaser } from './enemies.js?v=v144';
+import { UIManager } from './ui.js?v=v144';
+import { audio } from './audio.js?v=v144';
+import { LevelEditor } from './editor.js?v=v144';
+import { Boss, CyberBoss } from './boss.js?v=v144';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1202,7 +1202,7 @@ export class GameManager {
                 this.shakeCamera(7, 10);
                 this.triggerHitStop(4); // 70ms donma efekti
                 audio.playStomp();
-            });
+            }, this.level);
         });
 
         // Temizleme: Ölü düşmanları sil (In-place filtreleme)
@@ -1337,8 +1337,8 @@ export class GameManager {
             }
 
             // Kristal İstatistiklerini Hesapla ve Göster
-            const totalCrystals = (this.level.collectibles || []).length;
-            const collectedCrystals = (this.level.collectibles || []).filter(c => c.collected).length;
+            const totalCrystals = (this.level.collectibles || []).filter(c => !c.enemyDropped).length;
+            const collectedCrystals = (this.level.collectibles || []).filter(c => c.collected && !c.enemyDropped).length;
             const crystalContainer = document.getElementById('win-crystals-container');
             const crystalText = document.getElementById('win-crystals');
             const crystalPerfect = document.getElementById('win-crystals-perfect');
@@ -2220,30 +2220,27 @@ export class GameManager {
             this.ctx.clip();
 
             // Draw bottom lava layer (thin line + soft glow gradient to keep it level-focused rather than dominating)
-            const lavaYVal = 570;
-            if (this.level.height > lavaYVal) {
-                const lavaY = lavaYVal * scaleY;
-                
-                // Determine color based on theme
-                let lavaColor = '#f97316';
-                if (this.level.theme && this.level.theme.id) {
-                    const themeId = this.level.theme.id;
-                    if (themeId === 'neon_sewer') lavaColor = '#10b981';
-                    else if (themeId === 'toxic_lab') lavaColor = '#eab308';
-                    else if (themeId === 'gravity_chasm') lavaColor = '#d946ef';
-                }
-                
-                // Soft gradient below the surface line
-                const lavaGrad = this.ctx.createLinearGradient(mapX, mapY + lavaY, mapX, mapY + mapH);
-                lavaGrad.addColorStop(0, lavaColor + '66'); // 40% opacity neon at the surface
-                lavaGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                this.ctx.fillStyle = lavaGrad;
-                this.ctx.fillRect(mapX, mapY + lavaY, mapW, mapH - lavaY);
-
-                // Thin neon surface line
-                this.ctx.fillStyle = lavaColor;
-                this.ctx.fillRect(mapX, mapY + lavaY, mapW, 2);
+            const lavaY = (this.level.height - 25) * scaleY;
+            
+            // Determine color based on theme
+            let lavaColor = '#f97316';
+            if (this.level.theme && this.level.theme.id) {
+                const themeId = this.level.theme.id;
+                if (themeId === 'neon_sewer') lavaColor = '#10b981';
+                else if (themeId === 'toxic_lab') lavaColor = '#eab308';
+                else if (themeId === 'gravity_chasm') lavaColor = '#d946ef';
             }
+            
+            // Soft gradient below the surface line
+            const lavaGrad = this.ctx.createLinearGradient(mapX, mapY + lavaY, mapX, mapY + mapH);
+            lavaGrad.addColorStop(0, lavaColor + '66'); // 40% opacity neon at the surface
+            lavaGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            this.ctx.fillStyle = lavaGrad;
+            this.ctx.fillRect(mapX, mapY + lavaY, mapW, mapH - lavaY);
+
+            // Thin neon surface line
+            this.ctx.fillStyle = lavaColor;
+            this.ctx.fillRect(mapX, mapY + lavaY, mapW, 2);
 
 
             // Draw hazards (spikes, acid pools)

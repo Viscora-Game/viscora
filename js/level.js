@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v143';
-import { THEMES } from './generator.js?v=v143';
+import { audio } from './audio.js?v=v144';
+import { THEMES } from './generator.js?v=v144';
 
 /**
  * Viscora Level Design & Manager
@@ -6090,77 +6090,160 @@ export class Level {
             });
         }
 
-        // --- EN ALTTAKİ LAVA/SIVI TABAKASI (İnce tek çizgi — bölüm ağırlıklı) ---
+        // --- EN ALTTAKİ LAVA/SIVI TABAKASI (Gelişmiş Çok Katmanlı Organik Akış & Köpürme) ---
         {
             ctx.save();
-            const lavaY = 580;
+            const lavaY = this.height - 25; // Sınırla senkronize dinamik yükseklik
             
             // Dinamik renk belirleme (Tema bazlı)
             let surfaceColor = '#f97316';
             let glowColor = '#f97316';
+            let deepColor = '#7c2d12'; // Koyu kırmızı/turuncu (deep orange)
             
             const themeId = (this.theme && this.theme.id) ? this.theme.id : null;
             if (themeId) {
                 if (themeId === 'neon_sewer') {
                     surfaceColor = '#10b981';
                     glowColor = '#10b981';
+                    deepColor = '#064e3b'; // Koyu yeşil
                 } else if (themeId === 'toxic_lab') {
                     surfaceColor = '#eab308';
                     glowColor = '#eab308';
+                    deepColor = '#713f12'; // Koyu sarı/kahve
                 } else if (themeId === 'gravity_chasm') {
                     surfaceColor = '#d946ef';
                     glowColor = '#d946ef';
+                    deepColor = '#701a75'; // Koyu mor
                 }
             } else {
                 const hasAcidPools = this.hazards && this.hazards.some(h => h.type === 'acid');
                 if (hasAcidPools) {
                     surfaceColor = '#10b981';
                     glowColor = '#10b981';
+                    deepColor = '#064e3b';
                 }
             }
 
-            // Dalgalı lav/sıvı dolgusu (globalAlpha = 0.85 ile içi dolgun ve opak)
+            const segmentW = 40;
+            const segments = Math.ceil(this.width / segmentW);
+
+            // --- KATMAN 1: ARKA / DERİN DALGA (Daha Yavaş ve Yarı Saydam) ---
             ctx.beginPath();
-            const lavaSegmentW = 30;
-            const lavaSegments = Math.ceil(this.width / lavaSegmentW);
+            ctx.moveTo(0, this.height);
             
-            // Sağ alt köşeden başla
-            ctx.moveTo(this.width, this.height);
-            // Sol alt köşeye git
-            ctx.lineTo(0, this.height);
+            let lastX = 0;
+            let lastY = lavaY + Math.sin(this.time * 0.8) * 5;
+            ctx.lineTo(lastX, lastY);
             
-            // Dalga çizgisini takip et
-            for (let i = 0; i <= lavaSegments; i++) {
-                const lx = i * lavaSegmentW;
-                const ly = lavaY + Math.sin(this.time * 1.5 + (i * 0.7)) * 3;
-                if (i === 0) ctx.lineTo(lx, ly);
-                else ctx.lineTo(lx, ly);
+            for (let i = 1; i <= segments; i++) {
+                const nextX = i * segmentW;
+                const nextY = lavaY + Math.sin(this.time * 0.8 + (i * 0.5)) * 5;
+                const ctrlX = (lastX + nextX) / 2;
+                ctx.quadraticCurveTo(lastX, lastY, ctrlX, (lastY + nextY) / 2);
+                lastX = nextX;
+                lastY = nextY;
             }
+            ctx.lineTo(this.width, lastY);
+            ctx.lineTo(this.width, this.height);
             ctx.closePath();
             
-            const fillGrad = ctx.createLinearGradient(0, lavaY, 0, this.height);
-            fillGrad.addColorStop(0, surfaceColor);
-            fillGrad.addColorStop(1, '#000000'); // Derine indikçe siyaha doğru söner
-            
-            ctx.fillStyle = fillGrad;
-            ctx.globalAlpha = 0.85; // Arkadaki öğeleri kapatacak şekilde yüksek opaklık
+            ctx.fillStyle = deepColor;
+            ctx.globalAlpha = 0.45;
             ctx.fill();
 
-            // Üst kısımdaki parlak neon yüzey çizgisi
+            // --- KATMAN 2: ÖN / ANA PARLAK DALGA (Daha Hızlı ve Opak) ---
             ctx.beginPath();
-            for (let i = 0; i <= lavaSegments; i++) {
-                const lx = i * lavaSegmentW;
-                const ly = lavaY + Math.sin(this.time * 1.5 + (i * 0.7)) * 3;
-                if (i === 0) ctx.moveTo(lx, ly);
-                else ctx.lineTo(lx, ly);
+            ctx.moveTo(0, this.height);
+            
+            lastX = 0;
+            lastY = lavaY + Math.sin(this.time * 1.6) * 4;
+            ctx.lineTo(lastX, lastY);
+            
+            for (let i = 1; i <= segments; i++) {
+                const nextX = i * segmentW;
+                const nextY = lavaY + Math.sin(this.time * 1.6 + (i * 0.9)) * 4;
+                const ctrlX = (lastX + nextX) / 2;
+                ctx.quadraticCurveTo(lastX, lastY, ctrlX, (lastY + nextY) / 2);
+                lastX = nextX;
+                lastY = nextY;
             }
+            ctx.lineTo(this.width, lastY);
+            ctx.lineTo(this.width, this.height);
+            ctx.closePath();
+            
+            const fillGrad = ctx.createLinearGradient(0, lavaY - 5, 0, this.height);
+            fillGrad.addColorStop(0, surfaceColor);
+            fillGrad.addColorStop(0.3, deepColor);
+            fillGrad.addColorStop(1, '#050508'); // Koyu taban
+            
+            ctx.fillStyle = fillGrad;
+            ctx.globalAlpha = 0.85;
+            ctx.fill();
+
+            // --- ÜST KISIMDA PARLAK YÜZEY ÇİZGİSİ VE GLOW ---
+            ctx.beginPath();
+            lastX = 0;
+            lastY = lavaY + Math.sin(this.time * 1.6) * 4;
+            ctx.moveTo(lastX, lastY);
+            
+            for (let i = 1; i <= segments; i++) {
+                const nextX = i * segmentW;
+                const nextY = lavaY + Math.sin(this.time * 1.6 + (i * 0.9)) * 4;
+                const ctrlX = (lastX + nextX) / 2;
+                ctx.quadraticCurveTo(lastX, lastY, ctrlX, (lastY + nextY) / 2);
+                lastX = nextX;
+                lastY = nextY;
+            }
+            
             ctx.strokeStyle = surfaceColor;
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 3.5;
             ctx.shadowColor = glowColor;
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 12;
             ctx.globalAlpha = 1.0;
             ctx.stroke();
+            
+            ctx.restore();
 
+            // --- KÖPÜREN LAVA BALONCUKLARININ GÜNCELLEMESİ VE ÇİZİMİ ---
+            if (!this.lavaBubbles) {
+                this.lavaBubbles = [];
+            }
+            
+            const maxBubbles = Math.min(30, Math.floor(this.width / 50));
+            while (this.lavaBubbles.length < maxBubbles) {
+                this.lavaBubbles.push({
+                    x: Math.random() * this.width,
+                    y: lavaY + Math.random() * 20,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: -(0.2 + Math.random() * 0.6),
+                    radius: 1.0 + Math.random() * 2.5,
+                    life: 30 + Math.random() * 50,
+                    maxLife: 80
+                });
+            }
+            
+            ctx.save();
+            ctx.fillStyle = surfaceColor;
+            ctx.shadowColor = glowColor;
+            ctx.shadowBlur = 5;
+            
+            for (let i = this.lavaBubbles.length - 1; i >= 0; i--) {
+                const b = this.lavaBubbles[i];
+                b.x += b.vx + Math.sin(this.time * 0.05 + b.y * 0.1) * 0.1;
+                b.y += b.vy;
+                b.life--;
+                
+                const alpha = Math.max(0, b.life / b.maxLife);
+                ctx.globalAlpha = alpha * 0.8;
+                
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius * (0.3 + 0.7 * alpha), 0, Math.PI * 2);
+                ctx.fill();
+                
+                if (b.life <= 0 || b.y < lavaY - 100) {
+                    this.lavaBubbles.splice(i, 1);
+                }
+            }
             ctx.restore();
         }
 
@@ -7239,6 +7322,7 @@ export class Level {
         }
 
         if (this.collectibles) {
+            this.collectibles = this.collectibles.filter(c => !c.enemyDropped);
             this.collectibles.forEach(c => {
                 // Collectibles shouldn't reset on checkpoint spawn if already collected
                 if (!isCheckpointRespawn) {
