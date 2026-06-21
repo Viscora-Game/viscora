@@ -38,7 +38,8 @@
 #community-screen, #community-screen *,
 #pause-screen, #pause-screen *,
 #win-screen, #win-screen *,
-#gameover-screen, #gameover-screen * {
+#gameover-screen, #gameover-screen *,
+#shop-screen, #shop-screen * {
     touch-action: pan-y !important;
 }
 
@@ -809,8 +810,16 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     pointer-events: auto !important;
 }
 
+/* Responsive button texts default styles */
+.short-text {
+    display: none;
+}
+.full-text {
+    display: inline;
+}
+
 /* Kaydırılabilir alanlar için mobil dokunma/kaydırma kilidini aç */
-.screen.scrollable, #codex-screen, #community-screen, .codex-content-container, .community-content-container, .map-grid, .codex-tab-content {
+.screen.scrollable, #codex-screen, #community-screen, #shop-screen, .codex-content-container, .community-content-container, .shop-content-scroll, .map-grid, .codex-tab-content {
     touch-action: pan-y !important;
     pointer-events: auto !important;
 }
@@ -2058,16 +2067,17 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     
     #start-screen .menu-card {
         width: 98% !important;
-        max-width: 900px !important; /* Enlarged from 840px */
-        padding: 1.2rem 1.8rem !important; /* Enlarged from 0.8rem 1.4rem */
-        border-radius: 20px !important; /* Slightly rounder, more premium */
+        max-width: 900px !important;
+        padding: 1.2rem 1.8rem !important;
+        border-radius: 20px !important;
         display: grid !important;
         grid-template-columns: 1.15fr 1.25fr !important;
         grid-template-rows: auto auto auto !important;
-        column-gap: 2rem !important; /* Enlarged from 1.8rem */
-        row-gap: 0.6rem !important; /* Enlarged from 0.4rem */
+        column-gap: 2rem !important;
+        row-gap: 0.6rem !important;
         align-items: center !important;
         box-sizing: border-box !important;
+        overflow-x: hidden !important;
     }
     
     /* Sol Sütun: Brand - Row 1 */
@@ -2184,33 +2194,51 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         width: 100% !important;
         max-width: none !important;
         margin: 0 !important;
+        overflow: hidden !important;
+    }
+
+    /* Landscape modda kısa metinleri göster */
+    #start-screen .menu-actions-wrapper .full-text {
+        display: none !important;
+    }
+    #start-screen .menu-actions-wrapper .short-text {
+        display: inline !important;
     }
     
     #start-screen #btn-play {
-        flex: 1.2 !important;
+        flex: 1 !important;
         margin: 0 !important;
         font-size: 0.82rem !important;
-        padding: 0.5rem 0.4rem !important;
+        padding: 0.5rem 0.3rem !important;
         border-radius: 10px !important;
         white-space: nowrap !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
     
     #start-screen #btn-community {
-        flex: 1.8 !important;
+        flex: 1.4 !important;
         margin: 0 !important;
-        font-size: 0.76rem !important;
-        padding: 0.5rem 0.4rem !important;
+        font-size: 0.74rem !important;
+        padding: 0.5rem 0.3rem !important;
         border-radius: 10px !important;
         white-space: nowrap !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
 
     #start-screen #btn-shop {
-        flex: 1.6 !important;
+        flex: 1.2 !important;
         margin: 0 !important;
-        font-size: 0.76rem !important;
-        padding: 0.5rem 0.4rem !important;
+        font-size: 0.74rem !important;
+        padding: 0.5rem 0.3rem !important;
         border-radius: 10px !important;
         white-space: nowrap !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
 }
 
@@ -2929,6 +2957,13 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
    KRİSTAL DÜKKANI (CRYSTAL SHOP) TASARIMI
 -------------------------------------------------- */
 
+.shop-content-scroll {
+    max-height: 380px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
 .shop-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -3091,5 +3126,69 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 
 .shop-toast {
     animation: toast-in-out 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Mobile Landscape Shop Layout Adjustments */
+@media (orientation: landscape) and (max-height: 640px) {
+    #shop-screen {
+        padding: 0.5rem !important;
+        align-items: stretch !important;
+    }
+    #shop-screen .menu-card {
+        padding: 0.6rem 1rem !important;
+        max-width: 92vw !important;
+        max-height: calc(100vh - 1rem) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        margin: auto !important;
+    }
+    #shop-screen .community-header {
+        flex-shrink: 0 !important;
+    }
+    #shop-screen .shop-header-row {
+        margin-bottom: 6px !important;
+        flex-shrink: 0 !important;
+    }
+    #shop-screen .shop-preview-panel {
+        padding: 6px 10px !important;
+        margin-bottom: 8px !important;
+        flex-shrink: 0 !important;
+    }
+    #shop-screen .shop-tabs {
+        margin-bottom: 8px !important;
+        flex-shrink: 0 !important;
+    }
+    #shop-screen .shop-content-scroll {
+        max-height: none !important;
+        flex: 1 1 0 !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: contain !important;
+    }
+}
+
+@media (orientation: landscape) and (max-height: 420px) {
+    #shop-screen .menu-card {
+        padding: 0.4rem 0.8rem !important;
+        max-width: 90vw !important;
+    }
+    #shop-screen .shop-preview-panel {
+        display: none !important; /* Hide preview box to save screen space */
+    }
+    #shop-screen .shop-header-row {
+        margin-bottom: 4px !important;
+    }
+    #shop-screen .shop-tabs {
+        margin-bottom: 6px !important;
+    }
+    #shop-screen .shop-content-scroll {
+        max-height: none !important;
+        flex: 1 1 0 !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
 }
 

@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v130">
+    <link rel="stylesheet" href="index.css?v=v132">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -421,8 +421,14 @@
                 <div id="level-selector-wrapper"></div>
                 <div class="menu-actions-wrapper" style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 320px; margin: 10px auto 0 auto;">
                     <button id="btn-play" class="menu-btn primary-btn" style="margin-top: 0;">OYNA</button>
-                    <button id="btn-community" class="menu-btn secondary-btn" type="button" style="margin-top: 0;">🌐 TOPLULUK SUNUCULARI</button>
-                    <button id="btn-shop" class="menu-btn secondary-btn" type="button" style="margin-top: 0;">🛍️ KRİSTAL DÜKKANI</button>
+                    <button id="btn-community" class="menu-btn secondary-btn" type="button" style="margin-top: 0;">
+                        <span class="full-text">🌐 TOPLULUK SUNUCULARI</span>
+                        <span class="short-text">🌐 TOPLULUK</span>
+                    </button>
+                    <button id="btn-shop" class="menu-btn secondary-btn" type="button" style="margin-top: 0;">
+                        <span class="full-text">🛍️ KRİSTAL DÜKKANI</span>
+                        <span class="short-text">🛍️ DÜKKAN</span>
+                    </button>
                 </div>
             </div>
 
@@ -863,7 +869,7 @@
                 </div>
 
                 <!-- Dükkan İçeriği Listesi -->
-                <div class="community-content-container" style="max-height: 380px; overflow-y: auto;">
+                <div class="community-content-container shop-content-scroll">
                     <div id="shop-item-list" class="shop-grid">
                         <!-- JS ile doldurulacak -->
                     </div>
@@ -915,7 +921,7 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v130"></script>
-    <script type="module" src="js/main.js?v=v130"></script>
+    <script src="js/controls_customizer.js?v=v132"></script>
+    <script type="module" src="js/main.js?v=v132"></script>
 </body>
 </html>
