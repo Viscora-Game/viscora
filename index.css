@@ -3420,10 +3420,27 @@ button:hover .icon-svg,
 }
 
 /* Specific alignments for close buttons containing SVG X icons */
+.close-btn {
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    transition: transform 0.2s ease !important;
+}
+.close-btn:hover {
+    transform: scale(1.15) !important;
+}
 .close-btn .icon-svg {
     margin-right: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
+    width: 18px !important;
+    height: 18px !important;
+    top: 0 !important;
 }
 
 /* Specific alignment for search box SVG icon positioning */
