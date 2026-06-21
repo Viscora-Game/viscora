@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v141';
-import { audio } from './audio.js?v=v141';
-import { LevelGenerator } from './generator.js?v=v141';
+import { Enemy, GelChaser } from './enemies.js?v=v142';
+import { audio } from './audio.js?v=v142';
+import { LevelGenerator } from './generator.js?v=v142';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -201,24 +201,34 @@ export class LevelEditor {
                 z-index: 999999;
                 display: flex;
                 flex-direction: column;
+                padding: 0;
+                box-sizing: border-box;
+                overflow: visible !important;
+                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                touch-action: none !important;
+            }
+            #viscora-editor-panel-scroll {
+                width: 100%;
+                height: 100%;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
                 padding: 15px;
                 box-sizing: border-box;
-                overflow-y: auto;
-                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                 touch-action: pan-y !important;
                 -webkit-overflow-scrolling: touch;
             }
-            #viscora-editor-panel::-webkit-scrollbar {
+            #viscora-editor-panel-scroll::-webkit-scrollbar {
                 width: 6px !important;
             }
-            #viscora-editor-panel::-webkit-scrollbar-track {
+            #viscora-editor-panel-scroll::-webkit-scrollbar-track {
                 background: rgba(15, 23, 42, 0.4) !important;
             }
-            #viscora-editor-panel::-webkit-scrollbar-thumb {
+            #viscora-editor-panel-scroll::-webkit-scrollbar-thumb {
                 background: rgba(217, 70, 239, 0.4) !important;
                 border-radius: 3px !important;
             }
-            #viscora-editor-panel::-webkit-scrollbar-thumb:hover {
+            #viscora-editor-panel-scroll::-webkit-scrollbar-thumb:hover {
                 background: rgba(217, 70, 239, 0.6) !important;
             }
             #viscora-editor-panel * {
@@ -465,6 +475,9 @@ export class LevelEditor {
             @media (max-width: 768px) {
                 #viscora-editor-panel {
                     width: 240px !important;
+                    padding: 0 !important;
+                }
+                #viscora-editor-panel-scroll {
                     padding: 8px !important;
                 }
                 #viscora-editor-panel.collapsed {
@@ -689,6 +702,7 @@ export class LevelEditor {
         const isKisaActive = activeTags.includes('Kısa') ? 'active' : '';
 
         this.panel.innerHTML = `
+            <div id="viscora-editor-panel-scroll">
             <div class="editor-title">VISCORA EDITOR</div>
             <div class="editor-subtitle">BÖLÜM TASARIMCISI</div>
 
@@ -905,6 +919,7 @@ export class LevelEditor {
                 Yön Tuşları: Kamerayı Kaydır<br>
                 Delete / Backspace: Seçiliyi Sil
             </div>
+            </div>
         `;
 
         document.getElementById('game-container').appendChild(this.panel);
@@ -1071,9 +1086,17 @@ export class LevelEditor {
         toggleBtn.title = 'Paneli Kapat / Aç (Tab)';
         this.panel.appendChild(toggleBtn);
 
-        toggleBtn.addEventListener('click', () => {
+        toggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             this.togglePanel();
         });
+
+        toggleBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.togglePanel();
+        }, { passive: false });
     }
 
     updateTagButtonsUI() {
