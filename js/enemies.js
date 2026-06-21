@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v146';
+import { audio } from './audio.js?v=v147';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -845,6 +845,442 @@ export class GelChaser extends Enemy {
             ctx.font = '800 18px Outfit';
             ctx.textAlign = 'center';
             ctx.fillText('💢', this.x, this.y - currentRadius - 10);
+        }
+
+        ctx.restore();
+    }
+}
+
+export class TractorUFO {
+    constructor(x, y, rangeX = 150, speed = 1.0) {
+        this.startX = x;
+        this.startY = y;
+        this.x = x;
+        this.y = y;
+        this.vx = speed;
+        this.vy = 0;
+        this.radius = 20;
+        this.rangeX = rangeX;
+        this.minX = x - rangeX;
+        this.maxX = x + rangeX;
+        this.isDead = false;
+        
+        this.color = '#00f0ff';
+        this.colorSecondary = '#0891b2';
+        this.pulseTime = Math.random() * 100;
+        this.activeBeam = false;
+        this.beamHeight = 400;
+    }
+
+    die(level = null, player = null) {
+        if (this.isDead) return;
+        this.isDead = true;
+        
+        const activeLevel = level || (player && player.game ? player.game.level : null) || (window.gameInstance ? window.gameInstance.level : null);
+        if (activeLevel && activeLevel.collectibles) {
+            activeLevel.collectibles.push({
+                x: this.x,
+                y: this.y,
+                collected: false,
+                enemyDropped: true,
+                color: '#eab308'
+            });
+        }
+    }
+
+    update(level, player, emitParticles) {
+        if (this.isDead) return;
+
+        this.pulseTime += 0.05;
+
+        if (this.activeBeam) {
+            this.vx = 0;
+            const isUnderneath = Math.abs(player.x - this.x) < 50 && player.y > this.y && player.y < this.y + this.beamHeight;
+            if (isUnderneath) {
+                let pullForce = -0.7;
+                if (player.viscosityState) {
+                    const stateId = player.viscosityState.id;
+                    if (stateId === 'LOW') {
+                        pullForce = -1.6;
+                    } else if (stateId === 'HIGH') {
+                        pullForce = -0.22;
+                    }
+                }
+                
+                player.vy = pullForce;
+                
+                if (Math.random() < 0.35 && emitParticles) {
+                    emitParticles(player.x + (Math.random() - 0.5) * 20, player.y + 10, 'custom', '#00f0ff', 2, {
+                        vx: 0,
+                        vy: -2 - Math.random() * 2,
+                        life: 20 + Math.random() * 15,
+                        size: 2 + Math.random() * 2
+                    });
+                }
+            } else {
+                this.activeBeam = false;
+            }
+        } else {
+            this.x += this.vx;
+            if (this.x < this.minX) {
+                this.x = this.minX;
+                this.vx = Math.abs(this.vx);
+            } else if (this.x > this.maxX) {
+                this.x = this.maxX;
+                this.vx = -Math.abs(this.vx);
+            }
+
+            const isUnderneath = Math.abs(player.x - this.x) < 55 && player.y > this.y && player.y < this.y + this.beamHeight;
+            if (isUnderneath) {
+                this.activeBeam = true;
+                try { audio.playLaser(); } catch(e){}
+            }
+        }
+    }
+
+    checkCollision(player, emitParticles, onStomp, level = null) {
+        if (this.isDead) return;
+
+        const dx = player.x - this.x;
+        const dy = player.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < this.radius + 14) {
+            const isStomp = player.vy > 0 && player.y < this.y - 10;
+            if (isStomp) {
+                this.die(level, player);
+                if (onStomp) onStomp();
+                if (emitParticles) {
+                    emitParticles(this.x, this.y, 'enemy_pop', this.color, 20);
+                }
+                player.vy = -6.5;
+            } else {
+                player.takeDamage();
+            }
+        }
+    }
+
+    draw(ctx, camera) {
+        if (this.isDead) return;
+
+        ctx.save();
+        ctx.translate(-camera.x, -camera.y);
+
+        const pulse = Math.sin(this.pulseTime) * 1.5;
+        const w = 48 + pulse;
+        const h = 20 - pulse * 0.5;
+
+        if (this.activeBeam) {
+            ctx.save();
+            const beamGrad = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.beamHeight);
+            beamGrad.addColorStop(0, 'rgba(0, 240, 255, 0.45)');
+            beamGrad.addColorStop(0.5, 'rgba(0, 240, 255, 0.15)');
+            beamGrad.addColorStop(1, 'rgba(0, 240, 255, 0)');
+            ctx.fillStyle = beamGrad;
+            
+            ctx.beginPath();
+            ctx.moveTo(this.x - 15, this.y + 10);
+            ctx.lineTo(this.x + 15, this.y + 10);
+            ctx.lineTo(this.x + 55, this.y + this.beamHeight);
+            ctx.lineTo(this.x - 55, this.y + this.beamHeight);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.6)';
+            ctx.lineWidth = 1.5;
+            for (let i = 0; i < 4; i++) {
+                const ringY = this.y + 20 + ((this.pulseTime * 15 + i * 80) % this.beamHeight);
+                if (ringY < this.y + this.beamHeight) {
+                    const ratio = (ringY - this.y) / this.beamHeight;
+                    const ringW = 30 + ratio * 80;
+                    ctx.beginPath();
+                    ctx.ellipse(this.x, ringY, ringW / 2, 4, 0, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+            ctx.restore();
+        }
+
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 15 + Math.abs(pulse) * 3;
+
+        ctx.fillStyle = 'rgba(0, 240, 255, 0.8)';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y - 4, 12, Math.PI, 0, false);
+        ctx.closePath();
+        ctx.fill();
+
+        const bodyGrad = ctx.createLinearGradient(this.x - w/2, this.y, this.x + w/2, this.y);
+        bodyGrad.addColorStop(0, this.colorSecondary);
+        bodyGrad.addColorStop(0.5, this.color);
+        bodyGrad.addColorStop(1, this.colorSecondary);
+        ctx.fillStyle = bodyGrad;
+        
+        ctx.beginPath();
+        ctx.ellipse(this.x, this.y + 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffffff';
+        const numDots = 3;
+        for (let i = 0; i < numDots; i++) {
+            const dotX = this.x + (i - 1) * (w * 0.23);
+            const dotY = this.y + 2 + Math.abs(i - 1) * 1.5;
+            ctx.beginPath();
+            ctx.arc(dotX, dotY, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.restore();
+    }
+}
+
+export class SweeperUFO {
+    constructor(x, y, rangeX = 150, speed = 1.2) {
+        this.startX = x;
+        this.startY = y;
+        this.x = x;
+        this.y = y;
+        this.vx = speed;
+        this.vy = 0;
+        this.radius = 20;
+        this.rangeX = rangeX;
+        this.minX = x - rangeX;
+        this.maxX = x + rangeX;
+        this.isDead = false;
+
+        this.color = '#ff0055';
+        this.colorSecondary = '#990022';
+        this.pulseTime = Math.random() * 100;
+        
+        this.state = 'patrol';
+        this.trackTimer = 0;
+        this.lastLaserTime = 0;
+        this.beamHeight = 450;
+        this.laserX = 0;
+        this.laserActive = false;
+        this.rotAngle = 0;
+    }
+
+    die(level = null, player = null) {
+        if (this.isDead) return;
+        this.isDead = true;
+        
+        const activeLevel = level || (player && player.game ? player.game.level : null) || (window.gameInstance ? window.gameInstance.level : null);
+        if (activeLevel && activeLevel.collectibles) {
+            activeLevel.collectibles.push({
+                x: this.x,
+                y: this.y,
+                collected: false,
+                enemyDropped: true,
+                color: '#eab308'
+            });
+        }
+    }
+
+    update(level, player, emitParticles) {
+        if (this.isDead) return;
+
+        this.pulseTime += 0.05;
+
+        if (this.state === 'patrol') {
+            this.x += this.vx;
+            if (this.x < this.minX) {
+                this.x = this.minX;
+                this.vx = Math.abs(this.vx);
+            } else if (this.x > this.maxX) {
+                this.x = this.maxX;
+                this.vx = -Math.abs(this.vx);
+            }
+
+            const isUnderneath = Math.abs(player.x - this.x) < 80 && player.y > this.y && player.y < this.y + this.beamHeight;
+            if (isUnderneath) {
+                this.state = 'track';
+                this.trackTimer = 5.0;
+                this.lastLaserTime = 0;
+                try { audio.playLaser(); } catch(e){}
+            }
+        } else if (this.state === 'track') {
+            const targetX = player.x;
+            const dx = targetX - this.x;
+            this.x += Math.sign(dx) * 1.5;
+
+            if (this.x < this.minX) this.x = this.minX;
+            if (this.x > this.maxX) this.x = this.maxX;
+
+            this.trackTimer -= 1 / 60;
+
+            this.lastLaserTime += 1 / 60;
+            if (this.lastLaserTime >= 0.6) {
+                this.lastLaserTime = 0;
+                this.laserActive = true;
+                this.laserX = this.x;
+                try { audio.playLaser(); } catch(e){}
+                
+                if (emitParticles) {
+                    emitParticles(this.x, this.y + this.beamHeight, 'custom', '#ff0055', 8, {
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: -0.5 - Math.random() * 1.5,
+                        life: 15 + Math.random() * 10,
+                        size: 3 + Math.random() * 2
+                    });
+                }
+            } else {
+                this.laserActive = false;
+            }
+
+            if (this.laserActive) {
+                const laserWidth = 16;
+                const hitPlayer = player.x + player.width > this.laserX - laserWidth && 
+                                  player.x - player.width < this.laserX + laserWidth && 
+                                  player.y > this.y && player.y < this.y + this.beamHeight;
+                if (hitPlayer) {
+                    player.takeDamage();
+                }
+            }
+
+            if (this.trackTimer <= 0) {
+                this.state = 'overheat';
+                try { audio.playDamage(); } catch(e){}
+            }
+        } else if (this.state === 'overheat') {
+            this.rotAngle += 0.25;
+            this.vy += 0.35;
+            this.y += this.vy;
+            this.x += (Math.random() - 0.5) * 3;
+
+            if (Math.random() < 0.4 && emitParticles) {
+                emitParticles(this.x, this.y, 'custom', '#ffffff', 2, {
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2,
+                    life: 20,
+                    size: 2
+                });
+            }
+
+            const touchedPlatform = level.platforms.some(plat => {
+                return this.x + this.radius > plat.x && 
+                       this.x - this.radius < plat.x + plat.w && 
+                       this.y + this.radius > plat.y && 
+                       this.y - this.radius < plat.y + plat.h;
+            });
+
+            const touchedGround = this.y + this.radius >= level.height - 25;
+
+            if (touchedPlatform || touchedGround) {
+                this.die(level, player);
+                if (emitParticles) {
+                    emitParticles(this.x, this.y, 'enemy_pop', '#ff0055', 30);
+                    emitParticles(this.x, this.y, 'custom', '#ffffff', 15, {
+                        vx: (Math.random() - 0.5) * 8,
+                        vy: (Math.random() - 0.5) * 8,
+                        life: 30,
+                        size: 4
+                    });
+                }
+                try { audio.playDamage(); } catch(e){}
+            }
+        }
+    }
+
+    checkCollision(player, emitParticles, onStomp, level = null) {
+        if (this.isDead) return;
+
+        const dx = player.x - this.x;
+        const dy = player.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < this.radius + 14) {
+            const isStomp = player.vy > 0 && player.y < this.y - 10;
+            if (isStomp && this.state !== 'overheat') {
+                this.die(level, player);
+                if (onStomp) onStomp();
+                if (emitParticles) {
+                    emitParticles(this.x, this.y, 'enemy_pop', this.color, 20);
+                }
+                player.vy = -6.5;
+            } else {
+                player.takeDamage();
+            }
+        }
+    }
+
+    draw(ctx, camera) {
+        if (this.isDead) return;
+
+        ctx.save();
+        ctx.translate(-camera.x, -camera.y);
+
+        const pulse = Math.sin(this.pulseTime) * 1.5;
+        const w = 48 + pulse;
+        const h = 20 - pulse * 0.5;
+
+        if (this.state === 'track' && this.laserActive) {
+            ctx.save();
+            ctx.shadowColor = '#ff0055';
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = 'rgba(255, 0, 85, 0.8)';
+            ctx.fillRect(this.laserX - 6, this.y + 10, 12, this.beamHeight);
+
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(this.laserX - 2, this.y + 10);
+            ctx.lineTo(this.laserX - 2, this.y + this.beamHeight);
+            ctx.moveTo(this.laserX + 2, this.y + 10);
+            ctx.lineTo(this.laserX + 2, this.y + this.beamHeight);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        ctx.translate(this.x, this.y);
+        if (this.state === 'overheat') {
+            ctx.rotate(this.rotAngle);
+        }
+
+        ctx.shadowColor = this.state === 'overheat' ? (Math.floor(this.pulseTime * 8) % 2 === 0 ? '#ffffff' : '#ff0055') : this.color;
+        ctx.shadowBlur = 15 + Math.abs(pulse) * 3;
+
+        ctx.fillStyle = this.state === 'overheat' ? '#ff3300' : 'rgba(255, 0, 85, 0.8)';
+        ctx.beginPath();
+        ctx.arc(0, -4, 12, Math.PI, 0, false);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-6, -10);
+        ctx.lineTo(-12, -18);
+        ctx.moveTo(6, -10);
+        ctx.lineTo(12, -18);
+        ctx.stroke();
+
+        ctx.fillStyle = '#ff0055';
+        ctx.beginPath();
+        ctx.arc(-12, -18, 3, 0, Math.PI * 2);
+        ctx.arc(12, -18, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        const bodyGrad = ctx.createLinearGradient(-w/2, 0, w/2, 0);
+        bodyGrad.addColorStop(0, this.colorSecondary);
+        bodyGrad.addColorStop(0.5, this.color);
+        bodyGrad.addColorStop(1, this.colorSecondary);
+        ctx.fillStyle = bodyGrad;
+
+        ctx.beginPath();
+        ctx.ellipse(0, 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffffff';
+        const numDots = 3;
+        for (let i = 0; i < numDots; i++) {
+            const dotX = (i - 1) * (w * 0.23);
+            const dotY = 2 + Math.abs(i - 1) * 1.5;
+            ctx.beginPath();
+            ctx.arc(dotX, dotY, 2.5, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         ctx.restore();

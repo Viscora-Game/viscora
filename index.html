@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v146">
+    <link rel="stylesheet" href="index.css?v=v147">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -474,6 +474,22 @@
             <path d="M2 10c3-3 3 3 6 0s3-3 6 0 3 3 6 0 3-3 6 0"/>
             <path d="M2 16c3-3 3 3 6 0s3-3 6 0 3 3 6 0 3-3 6 0"/>
         </symbol>
+        <symbol id="icon-slime-blob" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2C8.5 7.5 4 12 4 15.5c0 4.5 3.5 6.5 8 6.5s8-2 8-6.5C20 12 15.5 7.5 12 2z"/>
+        </symbol>
+        <symbol id="icon-chevrons-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="17 11 12 6 7 11"/>
+            <polyline points="17 18 12 13 7 18"/>
+        </symbol>
+        <symbol id="icon-laser" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12h18"/>
+            <circle cx="3" cy="12" r="2" fill="currentColor"/>
+            <circle cx="21" cy="12" r="2" fill="currentColor"/>
+        </symbol>
+        <symbol id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+        </symbol>
     </svg>
 
     <!-- SVG Gooey Filter Definition -->
@@ -818,23 +834,23 @@
                     <!-- 1. Sekme: Formlar -->
                     <div id="tab-forms" class="codex-tab-content active">
                         <div class="codex-row">
-                            <div class="codex-icon green-icon"><svg class="icon-svg"><use href="#icon-flask"></use></svg></div>
+                            <div class="codex-icon green-icon"><svg class="icon-svg"><use href="#icon-slime-blob"></use></svg></div>
                             <div class="codex-info">
-                                <h3>Normal Form (Yeşil)</h3>
+                                <h3 style="color: #10b981;">Normal Form (Yeşil)</h3>
                                 <p>Dengeli hız ve zıplama gücüne sahiptir. <strong>Aşağı Ok / S tuşuna basarak yuvarlanabilir (küçülebilir) ve dar tünellerden/boşluklardan sızabilir.</strong> Sadece <strong>Yeşil lazer kapılarından</strong> hasar almadan geçebilir.</p>
                             </div>
                         </div>
                         <div class="codex-row">
-                            <div class="codex-icon blue-icon"><svg class="icon-svg"><use href="#icon-flask"></use></svg></div>
+                            <div class="codex-icon blue-icon"><svg class="icon-svg"><use href="#icon-slime-blob"></use></svg></div>
                             <div class="codex-info">
-                                <h3>Sıvı Form (Mavi - Düşük Viskozite)</h3>
+                                <h3 style="color: #06b6d4;">Sıvı Form (Mavi - Düşük Viskozite)</h3>
                                 <p>Zıplama yüksekliği azalır ancak <strong>çift zıplama (double-jump)</strong> yapabilir. <strong>Dar aralıklardan sızamaz.</strong> Sadece <strong>Mavi lazer kapılarından</strong> hasar almadan geçebilir.</p>
                             </div>
                         </div>
                         <div class="codex-row">
-                            <div class="codex-icon pink-icon"><svg class="icon-svg"><use href="#icon-flask"></use></svg></div>
+                            <div class="codex-icon pink-icon"><svg class="icon-svg"><use href="#icon-slime-blob"></use></svg></div>
                             <div class="codex-info">
-                                <h3>Jel Form (Pembe - Yüksek Viskozite)</h3>
+                                <h3 style="color: #d946ef;">Jel Form (Pembe - Yüksek Viskozite)</h3>
                                 <p>Çok yavaştır ancak <strong>yapışkan pembe duvarlara tutunabilir</strong> ve yukarı tırmanabilir. <strong>Ağ kapılarından (Net Gate)</strong> yavaşlayarak da olsa geçebilen tek formdur. Sadece <strong>Pembe lazer kapılarından</strong> hasar almadan geçebilir. Ayrıca <strong>alev makinelerinin ateşine karşı 2 saniye boyunca dayanabilir (kızararak hasarı geciktirir, bu esnada kaynama/cosss sesi çıkarır ve buhar yayar). Alevden çıktıktan sonra ise mavi/beyaz soğuma buharı saçarak ısıyı tahliye eder.</strong> Alev içindeyken form değiştirirse anında hasar alır.</p>
                             </div>
                         </div>
@@ -878,7 +894,7 @@
                             </div>
                         </div>
                         <div class="codex-row">
-                            <div class="codex-icon"><svg class="icon-svg"><use href="#icon-bolt"></use></svg></div>
+                            <div class="codex-icon"><svg class="icon-svg"><use href="#icon-chevrons-up"></use></svg></div>
                             <div class="codex-info">
                                 <h3>Zıplatma Pedi (Bounce Pad)</h3>
                                 <p>Üzerine gelen karakteri yüksek dikey hıza ulaştırarak havaya fırlatır.</p>
@@ -924,7 +940,7 @@
                             </div>
                         </div>
                         <div class="codex-row">
-                            <div class="codex-icon"><svg class="icon-svg"><use href="#icon-sword"></use></svg></div>
+                            <div class="codex-icon"><svg class="icon-svg"><use href="#icon-arrow-right"></use></svg></div>
                             <div class="codex-info">
                                 <h3>Ok Fırlatıcı (Arrow Shooter)</h3>
                                 <p>Düzenli aralıklarla hızlı ok fırlatan savunma sistemi. Oklar oyuncuya hasar verir, ancak aynı zamanda Jel Takipçileri vurmak veya onları tetiklemek için de kullanılabilir.</p>
@@ -973,21 +989,21 @@
                             </div>
                         </div>
                         <div class="codex-row">
-                            <div class="codex-icon"><svg class="icon-svg"><use href="#icon-hat"></use></svg></div>
+                            <div class="codex-icon"><svg class="icon-svg"><use href="#icon-skull"></use></svg></div>
                             <div class="codex-info">
                                 <h3>Viscoruptor (BÖLÜM 10 BOSS'U)</h3>
                                 <p>Yere basarak geniş fuchsia şok dalgaları yayan ve yapıştığınız duvarlardan sizi düşüren ilk büyük boss. Kafasına itilebilir enerji kutuları düşürerek hasar verebilirsiniz.</p>
                             </div>
                         </div>
                         <div class="codex-row">
-                            <div class="codex-icon"><svg class="icon-svg"><use href="#icon-hat"></use></svg></div>
+                            <div class="codex-icon"><svg class="icon-svg"><use href="#icon-skull"></use></svg></div>
                             <div class="codex-info">
                                 <h3>CyberBoss (BÖLÜM 20 BOSS'U)</h3>
                                 <p>20. Bölümün sonundaki devasa sibernetik boss. Farklı fazlarda ölümcül lazerler ateşler, zemin sarsan vuruşlar yapar ve oyuncuyu ezmeye çalışır. Öldürüldüğünde açılan portal ile kaçışı sağlar.</p>
                             </div>
                         </div>
                         <div class="codex-row">
-                            <div class="codex-icon"><svg class="icon-svg"><use href="#icon-bolt"></use></svg></div>
+                            <div class="codex-icon"><svg class="icon-svg"><use href="#icon-laser"></use></svg></div>
                             <div class="codex-info">
                                 <h3>Lazer Verici & Alıcı Sensör</h3>
                                 <p>Sürekli veya kesikli lazer ışını fırlatan vericiler ve bu ışınların ulaşması gereken alıcı sensörler. Lazer ışına alıcıya ulaştığında bağlı kapılar veya sistemler aktif olur. Karakteriniz lazer ışınlarından (rengine uygun formda değilse) hasar alır.</p>
@@ -1128,8 +1144,8 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v146"></script>
-    <script type="module" src="js/main.js?v=v146"></script>
+    <script src="js/controls_customizer.js?v=v147"></script>
+    <script type="module" src="js/main.js?v=v147"></script>
 </body>
 </html>
 

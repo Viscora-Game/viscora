@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v146';
-import { Level } from './level.js?v=v146';
-import { Enemy, GelChaser } from './enemies.js?v=v146';
-import { UIManager } from './ui.js?v=v146';
-import { audio } from './audio.js?v=v146';
-import { LevelEditor } from './editor.js?v=v146';
-import { Boss, CyberBoss } from './boss.js?v=v146';
+import { Player } from './player.js?v=v147';
+import { Level } from './level.js?v=v147';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v147';
+import { UIManager } from './ui.js?v=v147';
+import { audio } from './audio.js?v=v147';
+import { LevelEditor } from './editor.js?v=v147';
+import { Boss, CyberBoss } from './boss.js?v=v147';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -100,6 +100,7 @@ export class GameManager {
         this.boss = null;
         this.splatters = [];
         this.particles = [];
+        this.menuBlobCanvases = null;
 
         // Kamera Ayarları ve Cilaları
         this.camera = {
@@ -346,6 +347,10 @@ export class GameManager {
             this.enemies = this.level.enemies.map(e => {
                 if (e.type === 'chaser') {
                     return new GelChaser(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.0, e.color || '#10b981');
+                } else if (e.type === 'tractor_ufo') {
+                    return new TractorUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.0);
+                } else if (e.type === 'sweeper_ufo') {
+                    return new SweeperUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2);
                 } else {
                     return new Enemy(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, !!e.isVertical, e.color || '#f43f5e');
                 }
@@ -1533,6 +1538,36 @@ export class GameManager {
     }
 
     /**
+     * Pre-renders soft radial gradient menu blobs on offscreen canvases for smooth menu rendering
+     */
+    preRenderMenuBlobs() {
+        this.menuBlobCanvases = {};
+        const colors = {
+            green: { r: 16, g: 185, b: 129 },
+            cyan: { r: 6, g: 182, b: 212 },
+            pink: { r: 217, g: 70, b: 239 }
+        };
+        for (const [key, rgb] of Object.entries(colors)) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            
+            const radial = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+            radial.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.28)`);
+            radial.addColorStop(0.5, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.08)`);
+            radial.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0)`);
+            
+            ctx.fillStyle = radial;
+            ctx.beginPath();
+            ctx.arc(64, 64, 64, 0, Math.PI * 2);
+            ctx.fill();
+            
+            this.menuBlobCanvases[key] = canvas;
+        }
+    }
+
+    /**
      * Ana menü arka planındaki sıvı parçacıklarının fizik ve mouse tepki hareketlerini günceller
      */
     updateMenuPhysics(dt) {
@@ -1623,29 +1658,27 @@ export class GameManager {
                 this.ctx.stroke();
             }
             
-            // Sıvı Blobları (Metaball stili)
+            // Sıvı Blobları (Metaball stili - Optimize edilmiş drawImage)
             if (this.menuBlobs) {
+                if (!this.menuBlobCanvases) {
+                    this.preRenderMenuBlobs();
+                }
                 this.menuBlobs.forEach(blob => {
-                    this.ctx.save();
                     const pulseR = blob.radius + Math.sin(blob.angle) * 15;
-                    const radial = this.ctx.createRadialGradient(
-                        blob.x, blob.y, 0,
-                        blob.x, blob.y, pulseR
-                    );
+                    let key = 'cyan';
+                    if (blob.color === '#10b981') key = 'green';
+                    else if (blob.color === '#d946ef') key = 'pink';
                     
-                    let r = 6, g = 182, b = 212;
-                    if (blob.color === '#10b981') { r = 16; g = 185; b = 129; }
-                    else if (blob.color === '#d946ef') { r = 217; g = 70; b = 239; }
-                    
-                    radial.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.28)`);
-                    radial.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, 0.08)`);
-                    radial.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
-                    
-                    this.ctx.fillStyle = radial;
-                    this.ctx.beginPath();
-                    this.ctx.arc(blob.x, blob.y, pulseR, 0, Math.PI * 2);
-                    this.ctx.fill();
-                    this.ctx.restore();
+                    const canvas = this.menuBlobCanvases[key];
+                    if (canvas) {
+                        this.ctx.drawImage(
+                            canvas,
+                            blob.x - pulseR,
+                            blob.y - pulseR,
+                            pulseR * 2,
+                            pulseR * 2
+                        );
+                    }
                 });
             }
             

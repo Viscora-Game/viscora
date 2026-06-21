@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v146';
-import { THEMES } from './generator.js?v=v146';
+import { audio } from './audio.js?v=v147';
+import { THEMES } from './generator.js?v=v147';
 
 /**
  * Viscora Level Design & Manager
@@ -3265,6 +3265,63 @@ export class Level {
             ];
             this.portal = { x: 820, y: 180, w: 60, h: 80, angle: 0 };
         }
+
+        if (originalLevelNumber > 20 && originalLevelNumber <= 30) {
+            this.name = `SİBER VERİ AKIŞI: ${this.name}`;
+            
+            if (originalLevelNumber === 21) {
+                this.enemies = [
+                    { x: 800, y: 150, rangeX: 120, speed: 1.2, type: 'tractor_ufo' },
+                    { x: 2000, y: 120, rangeX: 150, speed: 1.0, type: 'tractor_ufo' }
+                ];
+            } else if (originalLevelNumber === 22) {
+                this.enemies = [
+                    { x: 1200, y: 100, rangeX: 200, speed: 1.2, type: 'sweeper_ufo' },
+                    { x: 2200, y: 150, rangeX: 150, speed: 1.0, type: 'tractor_ufo' }
+                ];
+            } else if (originalLevelNumber === 23) {
+                this.enemies = [
+                    { x: 1000, y: 80, rangeX: 150, speed: 1.4, type: 'sweeper_ufo' },
+                    { x: 1800, y: 120, rangeX: 120, speed: 1.0, type: 'tractor_ufo' }
+                ];
+            } else if (originalLevelNumber === 24) {
+                this.enemies = [
+                    { x: 800, y: 120, rangeX: 150, speed: 1.2, type: 'tractor_ufo' },
+                    { x: 1400, y: 100, rangeX: 150, speed: 1.3, type: 'sweeper_ufo' }
+                ];
+            } else if (originalLevelNumber === 25) {
+                this.enemies = [
+                    { x: 1200, y: 80, rangeX: 180, speed: 1.5, type: 'sweeper_ufo' },
+                    { x: 2400, y: 120, rangeX: 150, speed: 1.0, type: 'tractor_ufo' }
+                ];
+            } else if (originalLevelNumber === 26) {
+                this.enemies = [
+                    { x: 1000, y: 120, rangeX: 150, speed: 1.2, type: 'tractor_ufo' },
+                    { x: 1800, y: 100, rangeX: 150, speed: 1.3, type: 'sweeper_ufo' }
+                ];
+            } else if (originalLevelNumber === 27) {
+                this.enemies = [
+                    { x: 1100, y: 150, rangeX: 200, speed: 1.4, type: 'tractor_ufo' },
+                    { x: 2500, y: 80, rangeX: 180, speed: 1.2, type: 'sweeper_ufo' }
+                ];
+            } else if (originalLevelNumber === 28) {
+                this.enemies = [
+                    { x: 900, y: 100, rangeX: 150, speed: 1.3, type: 'sweeper_ufo' },
+                    { x: 1700, y: 120, rangeX: 150, speed: 1.0, type: 'tractor_ufo' }
+                ];
+            } else if (originalLevelNumber === 29) {
+                this.enemies = [
+                    { x: 1000, y: 120, rangeX: 150, speed: 1.2, type: 'tractor_ufo' },
+                    { x: 2000, y: 100, rangeX: 150, speed: 1.4, type: 'sweeper_ufo' }
+                ];
+            } else if (originalLevelNumber === 30) {
+                this.enemies = [
+                    { x: 800, y: 120, rangeX: 150, speed: 1.1, type: 'tractor_ufo' },
+                    { x: 1500, y: 80, rangeX: 180, speed: 1.3, type: 'sweeper_ufo' }
+                ];
+            }
+        }
+
         this.generateCheckpoints();
         this.resetLevelRuntimeState();
         

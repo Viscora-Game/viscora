@@ -531,6 +531,8 @@ h2 {
 .codex-icon .icon-svg {
     margin-right: 0 !important;
     top: 0 !important;
+    width: 22px !important;
+    height: 22px !important;
 }
 .codex-icon.green-icon {
     color: #10b981;

@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v146';
-import { audio } from './audio.js?v=v146';
-import { LevelGenerator } from './generator.js?v=v146';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v147';
+import { audio } from './audio.js?v=v147';
+import { LevelGenerator } from './generator.js?v=v147';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -631,6 +631,10 @@ export class LevelEditor {
             this.game.enemies = this.game.level.enemies.map(e => {
                 if (e.type === 'chaser') {
                     return new GelChaser(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.0, e.color || '#10b981');
+                } else if (e.type === 'tractor_ufo') {
+                    return new TractorUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.0);
+                } else if (e.type === 'sweeper_ufo') {
+                    return new SweeperUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2);
                 } else {
                     return new Enemy(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, !!e.isVertical, e.color || '#f43f5e');
                 }
@@ -875,6 +879,8 @@ export class LevelEditor {
                         <button class="editor-btn" data-tool="create_enemy_jumping">🟣 Zıplayan Diken</button>
                         <button class="editor-btn" data-tool="create_enemy_flying">🟡 Uçan Diken</button>
                         <button class="editor-btn" data-tool="create_enemy_chaser" style="grid-column: span 2; background: rgba(16, 185, 129, 0.12); color: #34d399; border-color: rgba(16, 185, 129, 0.35);">🧬 Jel Takipçi (Gel Chaser)</button>
+                        <button class="editor-btn" data-tool="create_enemy_tractor" style="background: rgba(168, 85, 247, 0.12); color: #c084fc; border-color: rgba(168, 85, 247, 0.35);">🛸 Çekim UFO (Tractor)</button>
+                        <button class="editor-btn" data-tool="create_enemy_sweeper" style="background: rgba(6, 182, 212, 0.12); color: #22d3ee; border-color: rgba(6, 182, 212, 0.35);">⚡ Lazer UFO (Sweeper)</button>
                     </div>
                 </details>
 
@@ -1326,12 +1332,17 @@ export class LevelEditor {
             `;
         } else if (type === 'enemy') {
             const isChaser = obj.type === 'chaser';
+            const isTractor = obj.type === 'tractor_ufo';
+            const isSweeper = obj.type === 'sweeper_ufo';
+            const isPatrol = !isChaser && !isTractor && !isSweeper;
             html += `
                 <div class="editor-input-group">
                     <label>Düşman Sınıfı</label>
                     <select id="inspect-enemy-type">
-                        <option value="patrol" ${!isChaser ? 'selected' : ''}>Devriye (Normal)</option>
+                        <option value="patrol" ${isPatrol ? 'selected' : ''}>Devriye (Normal)</option>
                         <option value="chaser" ${isChaser ? 'selected' : ''}>Jel Takipçi (🧬)</option>
+                        <option value="tractor_ufo" ${isTractor ? 'selected' : ''}>Çekim UFO (🛸🧲)</option>
+                        <option value="sweeper_ufo" ${isSweeper ? 'selected' : ''}>Lazer UFO (⚡🛸)</option>
                     </select>
                 </div>
                 <div class="editor-input-group">
@@ -1340,10 +1351,10 @@ export class LevelEditor {
                 </div>
                 <div class="editor-input-group">
                     <label>Devriye Hızı</label>
-                    <input type="number" step="0.1" id="inspect-enemy-speed" value="${obj.speed !== undefined ? obj.speed : (isChaser ? 1.0 : 1.2)}">
+                    <input type="number" step="0.1" id="inspect-enemy-speed" value="${obj.speed !== undefined ? obj.speed : (isChaser ? 1.0 : (isTractor ? 1.0 : 1.2))}">
                 </div>
             `;
-            if (!isChaser) {
+            if (isPatrol) {
                 html += `
                     <div class="editor-checkbox-group">
                         <input type="checkbox" id="inspect-enemy-vertical" ${obj.isVertical ? 'checked' : ''}>
@@ -1359,10 +1370,22 @@ export class LevelEditor {
                         </select>
                     </div>
                 `;
-            } else {
+            } else if (isChaser) {
                 html += `
                     <div style="font-size: 11px; color: #34d399; margin-top: 5px; line-height: 1.3; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 5px;">
                         ℹ️ Jel Takipçi yeşil renkte devriye gezer, oyuncuyu 240px yakınına girdiğinde algılar ve 2.5 saniye şişip kovalayarak patlar!
+                    </div>
+                `;
+            } else if (isTractor) {
+                html += `
+                    <div style="font-size: 11px; color: #c084fc; margin-top: 5px; line-height: 1.3; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 5px;">
+                        ℹ️ Çekim UFO (Tractor UFO) oyuncuyu yavaşça yukarı doğru çeken bir çekim alanına sahiptir!
+                    </div>
+                `;
+            } else if (isSweeper) {
+                html += `
+                    <div style="font-size: 11px; color: #22d3ee; margin-top: 5px; line-height: 1.3; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 5px;">
+                        ℹ️ Lazer UFO (Sweeper UFO) dikey olarak zemine doğru periyodik elektrik lazeri ateşler!
                     </div>
                 `;
             }
@@ -1777,6 +1800,12 @@ export class LevelEditor {
             if (val === 'chaser') {
                 obj.color = '#10b981';
                 obj.isVertical = false;
+            } else if (val === 'tractor_ufo') {
+                obj.color = '#a855f7';
+                obj.isVertical = false;
+            } else if (val === 'sweeper_ufo') {
+                obj.color = '#06b6d4';
+                obj.isVertical = false;
             }
             this.updateInspector();
         });
@@ -2016,6 +2045,10 @@ export class LevelEditor {
             this.game.enemies = this.game.level.enemies.map(e => {
                 if (e.type === 'chaser') {
                     return new GelChaser(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.0, e.color || '#10b981');
+                } else if (e.type === 'tractor_ufo') {
+                    return new TractorUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.0);
+                } else if (e.type === 'sweeper_ufo') {
+                    return new SweeperUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2);
                 } else {
                     return new Enemy(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, !!e.isVertical, e.color || '#f43f5e');
                 }
@@ -3398,6 +3431,26 @@ export class LevelEditor {
                     color: '#10b981',
                     type: 'chaser'
                 });
+            } else if (this.activeTool === 'create_enemy_tractor') {
+                lvl.enemies.push({
+                    x: snapX,
+                    y: snapY,
+                    rangeX: 150,
+                    speed: 1.0,
+                    isVertical: false,
+                    color: '#a855f7',
+                    type: 'tractor_ufo'
+                });
+            } else if (this.activeTool === 'create_enemy_sweeper') {
+                lvl.enemies.push({
+                    x: snapX,
+                    y: snapY,
+                    rangeX: 150,
+                    speed: 1.2,
+                    isVertical: false,
+                    color: '#06b6d4',
+                    type: 'sweeper_ufo'
+                });
             } else if (this.activeTool === 'create_plate') {
                 if (!lvl.pressurePlates) lvl.pressurePlates = [];
                 lvl.pressurePlates.push({
@@ -4584,6 +4637,34 @@ export class LevelEditor {
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText('🧬', e.x, e.y);
+                } else if (e.type === 'tractor_ufo') {
+                    ctx.fillStyle = '#a855f7'; // Purple UFO
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, 16, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '11px Outfit';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('🛸🧲', e.x, e.y);
+                } else if (e.type === 'sweeper_ufo') {
+                    ctx.fillStyle = '#06b6d4'; // Cyan Laser UFO
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, 16, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '11px Outfit';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('🛸⚡', e.x, e.y);
                 } else {
                     ctx.fillStyle = e.color || '#f43f5e';
                     ctx.strokeStyle = '#fff';
