@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v138';
-import { Level } from './level.js?v=v138';
-import { Enemy, GelChaser } from './enemies.js?v=v138';
-import { UIManager } from './ui.js?v=v138';
-import { audio } from './audio.js?v=v138';
-import { LevelEditor } from './editor.js?v=v138';
-import { Boss, CyberBoss } from './boss.js?v=v138';
+import { Player } from './player.js?v=v139';
+import { Level } from './level.js?v=v139';
+import { Enemy, GelChaser } from './enemies.js?v=v139';
+import { UIManager } from './ui.js?v=v139';
+import { audio } from './audio.js?v=v139';
+import { LevelEditor } from './editor.js?v=v139';
+import { Boss, CyberBoss } from './boss.js?v=v139';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1646,14 +1646,12 @@ export class GameManager {
                 });
             }
             
-            // Baloncuklar
+            // Baloncuklar (Optimize edilmiş, shadowBlur kaldırıldı)
             if (this.menuBubbles) {
                 this.menuBubbles.forEach(bubble => {
                     this.ctx.save();
                     this.ctx.globalAlpha = bubble.alpha;
                     this.ctx.fillStyle = bubble.color;
-                    this.ctx.shadowColor = bubble.color;
-                    this.ctx.shadowBlur = 6;
                     this.ctx.beginPath();
                     this.ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
                     this.ctx.fill();

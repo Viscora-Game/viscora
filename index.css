@@ -528,6 +528,10 @@ h2 {
     flex-shrink: 0;
     box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.05);
 }
+.codex-icon .icon-svg {
+    margin-right: 0 !important;
+    top: 0 !important;
+}
 .codex-icon.green-icon {
     color: #10b981;
     box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
@@ -2483,8 +2487,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 }
 
 @keyframes badge-golden-pulse {
-    0%, 100% { box-shadow: 0 0 8px rgba(234,179,8,0.25); }
-    50%       { box-shadow: 0 0 20px rgba(234,179,8,0.6); }
+    0%, 100% { opacity: 0.85; }
+    50%       { opacity: 1; }
 }
 
 /* ===================================================
