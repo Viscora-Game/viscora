@@ -3144,56 +3144,61 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 /* Mobile Landscape Community Screen Adjustments */
 @media (orientation: landscape) and (max-height: 640px) {
     #community-screen {
-        padding: 0.5rem !important;
+        padding: 0 !important;
         align-items: stretch !important;
+        overflow: hidden !important;
     }
     #community-screen .community-card {
-        max-width: 94vw !important;
-        max-height: calc(100vh - 1rem) !important;
-        padding: 0.6rem 1rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        padding: 0.5rem 1rem !important;
         display: flex !important;
         flex-direction: column !important;
         overflow: hidden !important;
-        margin: auto !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
         min-height: 0 !important;
     }
     #community-screen .community-header {
         flex-shrink: 0 !important;
-        padding-bottom: 0.4rem !important;
-        margin-bottom: 0.4rem !important;
+        padding-bottom: 0.3rem !important;
+        margin-bottom: 0.3rem !important;
     }
     #community-screen .community-header h2 {
-        font-size: 1.1rem !important;
+        font-size: 1rem !important;
     }
-    /* Tabs + Tasarla butonunu kompakt yap */
+    /* Tabs + Tasarla butonunu tek satırda tut */
     #community-screen .community-tabs-row {
         flex-shrink: 0 !important;
-        margin-bottom: 6px !important;
+        margin-bottom: 4px !important;
         gap: 6px !important;
+        flex-wrap: nowrap !important;
     }
     #community-screen .community-tab-btn {
-        padding: 5px 10px !important;
-        font-size: 0.72rem !important;
-        min-width: 80px !important;
+        padding: 4px 8px !important;
+        font-size: 0.7rem !important;
+        min-width: 60px !important;
     }
     #community-screen #btn-design-map {
-        padding: 6px 12px !important;
-        font-size: 0.78rem !important;
+        padding: 4px 10px !important;
+        font-size: 0.72rem !important;
+        white-space: nowrap !important;
     }
-    /* Arama/filtre satırını kompakt yap */
+    /* Arama/filtre satırını kompakt yap, etiketleri gizle */
     #community-screen .search-filter-row {
         flex-shrink: 0 !important;
-        margin-bottom: 6px !important;
-        padding-bottom: 6px !important;
-        gap: 6px !important;
+        margin-bottom: 4px !important;
+        padding-bottom: 4px !important;
+        gap: 4px !important;
     }
     #community-screen #community-search-input {
-        padding: 8px 12px !important;
-        font-size: 0.82rem !important;
+        padding: 6px 10px !important;
+        font-size: 0.78rem !important;
     }
-    #community-screen .tag-filter-btn {
-        padding: 3px 8px !important;
-        font-size: 0.7rem !important;
+    #community-screen .tags-filter-container {
+        display: none !important;
     }
     /* Harita listesi kalan alanı doldursun */
     #community-screen .community-content-container {
@@ -3203,66 +3208,70 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         -webkit-overflow-scrolling: touch !important;
         overscroll-behavior: contain !important;
     }
+    /* Harita kartlarını kompakt yap */
+    #community-screen .map-grid {
+        gap: 8px !important;
+    }
 }
 
 @media (orientation: landscape) and (max-height: 420px) {
     #community-screen .community-card {
-        padding: 0.4rem 0.8rem !important;
+        padding: 0.3rem 0.8rem !important;
     }
     #community-screen .community-header {
-        padding-bottom: 0.2rem !important;
-        margin-bottom: 0.2rem !important;
+        padding-bottom: 0.15rem !important;
+        margin-bottom: 0.15rem !important;
     }
     #community-screen .community-header h2 {
-        font-size: 0.95rem !important;
+        font-size: 0.9rem !important;
     }
     #community-screen .community-tabs-row {
-        margin-bottom: 4px !important;
+        margin-bottom: 2px !important;
     }
     #community-screen .search-filter-row {
-        margin-bottom: 4px !important;
-        padding-bottom: 4px !important;
-    }
-    /* Etiketleri gizle, sadece arama kutusu kalsın */
-    #community-screen .tags-filter-container {
-        display: none !important;
+        margin-bottom: 2px !important;
+        padding-bottom: 2px !important;
     }
 }
 
 /* Mobile Landscape Shop Layout Adjustments */
 @media (orientation: landscape) and (max-height: 640px) {
     #shop-screen {
-        padding: 0.5rem !important;
+        padding: 0 !important;
         align-items: stretch !important;
+        overflow: hidden !important;
     }
     #shop-screen .menu-card {
-        padding: 0.6rem 1rem !important;
-        max-width: 92vw !important;
-        max-height: calc(100vh - 1rem) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        padding: 0.5rem 1rem !important;
         display: flex !important;
         flex-direction: column !important;
         overflow: hidden !important;
-        margin: auto !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
     }
     #shop-screen .community-header {
         flex-shrink: 0 !important;
     }
-    /* Bakiye satırı: önizleme avatar'ını yanına al */
+    /* Bakiye satırı */
     #shop-screen .shop-header-row {
         margin-bottom: 4px !important;
         flex-shrink: 0 !important;
         flex-wrap: nowrap !important;
-        position: relative !important;
     }
     /* Önizleme panelini kompakt inline avatar'a dönüştür */
     #shop-screen .shop-preview-panel {
         display: flex !important;
         flex-direction: row !important;
-        padding: 0 !important;
+        padding: 4px 8px !important;
         margin-bottom: 4px !important;
         flex-shrink: 0 !important;
-        background: transparent !important;
-        border: none !important;
+        background: rgba(30, 30, 48, 0.3) !important;
+        border: 1px solid rgba(0, 242, 254, 0.15) !important;
+        border-radius: 10px !important;
         gap: 8px !important;
         align-items: center !important;
         justify-content: flex-end !important;
@@ -3272,17 +3281,17 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     #shop-screen .shop-preview-panel > div:first-child {
         display: none !important;
     }
-    /* Avatar'ı küçült */
+    /* Avatar - yatayda 64px */
     #shop-screen .shop-preview-panel .preview-avatar-container {
-        width: 48px !important;
-        height: 48px !important;
+        width: 64px !important;
+        height: 64px !important;
     }
     #shop-screen .shop-preview-panel .preview-avatar-container canvas {
-        width: 48px !important;
-        height: 48px !important;
+        width: 64px !important;
+        height: 64px !important;
     }
     #shop-screen .shop-tabs {
-        margin-bottom: 6px !important;
+        margin-bottom: 4px !important;
         flex-shrink: 0 !important;
     }
     #shop-screen .shop-content-scroll {
@@ -3297,30 +3306,22 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 
 @media (orientation: landscape) and (max-height: 420px) {
     #shop-screen .menu-card {
-        padding: 0.4rem 0.8rem !important;
-        max-width: 90vw !important;
+        padding: 0.3rem 0.8rem !important;
     }
-    /* Çok küçük ekranlarda da önizleme görünsün, daha da küçük */
+    /* Çok küçük ekranlarda avatar biraz küçültsün */
     #shop-screen .shop-preview-panel .preview-avatar-container {
-        width: 40px !important;
-        height: 40px !important;
+        width: 50px !important;
+        height: 50px !important;
     }
     #shop-screen .shop-preview-panel .preview-avatar-container canvas {
-        width: 40px !important;
-        height: 40px !important;
+        width: 50px !important;
+        height: 50px !important;
     }
     #shop-screen .shop-header-row {
         margin-bottom: 2px !important;
     }
     #shop-screen .shop-tabs {
-        margin-bottom: 4px !important;
-    }
-    #shop-screen .shop-content-scroll {
-        max-height: none !important;
-        flex: 1 1 0 !important;
-        min-height: 0 !important;
-        overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch !important;
+        margin-bottom: 2px !important;
     }
 }
 
