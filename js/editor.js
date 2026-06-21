@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser } from './enemies.js?v=v142';
-import { audio } from './audio.js?v=v142';
-import { LevelGenerator } from './generator.js?v=v142';
+import { Enemy, GelChaser } from './enemies.js?v=v143';
+import { audio } from './audio.js?v=v143';
+import { LevelGenerator } from './generator.js?v=v143';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -671,7 +671,14 @@ export class LevelEditor {
 
         // Set game state and transition to main menu screen
         this.game.state = 'MENU';
-        this.game.ui.showScreen('start');
+        if (this.game.currentLevel === 999) {
+            this.game.ui.showScreen('community');
+            if (this.game.ui.loadCommunityMaps) {
+                this.game.ui.loadCommunityMaps(this.game.ui.currentSort || 'popular');
+            }
+        } else {
+            this.game.ui.showScreen('start');
+        }
         
         // Clean the ?editor=true parameter from URL without reloading
         if (window.location.search.includes('editor=true')) {
@@ -2432,6 +2439,9 @@ export class LevelEditor {
                 // Sunucudan dönen yeni level ID'sini kaydet
                 this.game.level.serverLevelId = data.id;
                 this.saveToLocalStorage();
+                if (this.game.ui.loadCommunityMaps) {
+                    this.game.ui.loadCommunityMaps(this.game.ui.currentSort || 'popular');
+                }
                 alert(`Haritanız "${data.name}" başarıyla yeni bir bölüm olarak topluluk sunucusunda paylaşıldı!`);
             })
             .catch(err => {
@@ -2470,6 +2480,9 @@ export class LevelEditor {
                 return res.json();
             })
             .then(data => {
+                if (this.game.ui.loadCommunityMaps) {
+                    this.game.ui.loadCommunityMaps(this.game.ui.currentSort || 'popular');
+                }
                 alert(`Haritanız "${data.name}" başarıyla güncellendi! Süresi ve beğenileri aynen korunacaktır.`);
             })
             .catch(err => {

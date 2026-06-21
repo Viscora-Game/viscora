@@ -3201,14 +3201,35 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         flex-shrink: 0 !important;
         margin-bottom: 4px !important;
         padding-bottom: 4px !important;
-        gap: 4px !important;
+        gap: 8px !important;
+        flex-direction: row !important;
+        align-items: center !important;
+    }
+    #community-screen .search-box-container {
+        flex: 1 !important;
+        width: auto !important;
     }
     #community-screen #community-search-input {
         padding: 6px 10px !important;
         font-size: 0.78rem !important;
     }
     #community-screen .tags-filter-container {
+        display: flex !important;
+        flex: 1.5 !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-bottom: 2px !important;
+        gap: 6px !important;
+    }
+    #community-screen .tags-filter-container span {
         display: none !important;
+    }
+    #community-screen .tag-filter-btn {
+        padding: 4px 8px !important;
+        font-size: 0.72rem !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
     }
     /* Harita listesi kalan alanı doldursun */
     #community-screen .community-content-container {

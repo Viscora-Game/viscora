@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v142';
-import { Level } from './level.js?v=v142';
-import { Enemy, GelChaser } from './enemies.js?v=v142';
-import { UIManager } from './ui.js?v=v142';
-import { audio } from './audio.js?v=v142';
-import { LevelEditor } from './editor.js?v=v142';
-import { Boss, CyberBoss } from './boss.js?v=v142';
+import { Player } from './player.js?v=v143';
+import { Level } from './level.js?v=v143';
+import { Enemy, GelChaser } from './enemies.js?v=v143';
+import { UIManager } from './ui.js?v=v143';
+import { audio } from './audio.js?v=v143';
+import { LevelEditor } from './editor.js?v=v143';
+import { Boss, CyberBoss } from './boss.js?v=v143';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -894,6 +894,9 @@ export class GameManager {
         if (this.isCommunityPlay) {
             this.isCommunityPlay = false;
             this.ui.showScreen('community');
+            if (this.ui.loadCommunityMaps) {
+                this.ui.loadCommunityMaps(this.ui.currentSort || 'popular');
+            }
         } else {
             this.ui.showScreen('start');
         }

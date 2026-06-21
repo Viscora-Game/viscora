@@ -1,6 +1,6 @@
-import { audio } from './audio.js?v=v142';
-import { ViscosityList } from './viscosity.js?v=v142';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v142';
+import { audio } from './audio.js?v=v143';
+import { ViscosityList } from './viscosity.js?v=v143';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v143';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -1322,6 +1322,7 @@ export class UIManager {
         });
 
 
+
         // --- TOPLULUK SUNUCULARI ÇALIŞMASI ---
         const btnCommunity = document.getElementById('btn-community');
         const btnCloseCommunity = document.getElementById('btn-close-community');
@@ -1329,7 +1330,7 @@ export class UIManager {
         const searchInput = document.getElementById('community-search-input');
         const tagFilterButtons = document.querySelectorAll('.tag-filter-btn');
         
-        let currentSort = 'popular'; // Varsayılan popüler sıralama
+        this.currentSort = 'popular'; // Varsayılan popüler sıralama
         this.fetchedLevels = [];
         this.activeTagFilter = null;
         this.searchQuery = '';
@@ -1578,6 +1579,9 @@ export class UIManager {
             }
         };
 
+        this.loadCommunityMaps = loadCommunityMaps;
+        this.renderFilteredCommunityMaps = renderFilteredCommunityMaps;
+
         if (btnCommunity) {
             this.bindTouchClick(btnCommunity, () => {
                 if (typeof navigator !== 'undefined' && navigator.onLine === false) {
@@ -1596,7 +1600,7 @@ export class UIManager {
                 tagFilterButtons.forEach(b => b.classList.remove('active'));
 
                 this.showScreen('community');
-                loadCommunityMaps(currentSort);
+                loadCommunityMaps(this.currentSort);
             });
         }
 
@@ -1769,10 +1773,10 @@ export class UIManager {
 
         communityTabButtons.forEach(btn => {
             this.bindTouchClick(btn, () => {
-                currentSort = btn.id === 'tab-popular' ? 'popular' : 'new';
+                this.currentSort = btn.id === 'tab-popular' ? 'popular' : 'new';
                 communityTabButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                loadCommunityMaps(currentSort);
+                loadCommunityMaps(this.currentSort);
             });
         });
     }

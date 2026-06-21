@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v142';
-import { THEMES } from './generator.js?v=v142';
+import { audio } from './audio.js?v=v143';
+import { THEMES } from './generator.js?v=v143';
 
 /**
  * Viscora Level Design & Manager
@@ -3482,8 +3482,15 @@ export class Level {
                     player.x + player.radius > c.x - 12 && player.x - player.radius < c.x + 12 &&
                     player.y + player.radius > c.y - 12 && player.y - player.radius < c.y + 12) {
                     
+                    let shouldAddToBalance = true;
+                    if (player.game) {
+                        if (player.game.isCommunityPlay || player.game.currentLevel === 999 || (player.game.editor && player.game.editor.active)) {
+                            shouldAddToBalance = false;
+                        }
+                    }
+
                     c.collected = true;
-                    if (window.shopManager) {
+                    if (window.shopManager && shouldAddToBalance) {
                         window.shopManager.addCrystals(1);
                     }
                     player.heal(1);
