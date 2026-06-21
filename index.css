@@ -1398,7 +1398,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     max-width: 720px;
     height: auto;
     min-height: 300px;
-    max-height: min(540px, 88vh);
+    max-height: min(540px, 94vh);
     display: flex;
     flex-direction: column;
     padding: 1.5rem !important;
@@ -1474,6 +1474,9 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     flex: 1;
     overflow-y: auto;
     padding-right: 6px;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    min-height: 0;
 }
 
 /* Scrollbar - Community (Modern & Geniş) */
@@ -3117,6 +3120,16 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     border-color: rgba(0, 242, 254, 0.4) !important;
 }
 
+/* Dikey modda (portrait) önizleme avatarını büyüt */
+.shop-preview-panel .preview-avatar-container {
+    width: 90px !important;
+    height: 90px !important;
+}
+.shop-preview-panel .preview-avatar-container canvas {
+    width: 90px !important;
+    height: 90px !important;
+}
+
 @keyframes toast-in-out {
     0% { transform: translate(-50%, 20px); opacity: 0; }
     12% { transform: translate(-50%, 0); opacity: 1; }
@@ -3126,6 +3139,94 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 
 .shop-toast {
     animation: toast-in-out 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Mobile Landscape Community Screen Adjustments */
+@media (orientation: landscape) and (max-height: 640px) {
+    #community-screen {
+        padding: 0.5rem !important;
+        align-items: stretch !important;
+    }
+    #community-screen .community-card {
+        max-width: 94vw !important;
+        max-height: calc(100vh - 1rem) !important;
+        padding: 0.6rem 1rem !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        margin: auto !important;
+        min-height: 0 !important;
+    }
+    #community-screen .community-header {
+        flex-shrink: 0 !important;
+        padding-bottom: 0.4rem !important;
+        margin-bottom: 0.4rem !important;
+    }
+    #community-screen .community-header h2 {
+        font-size: 1.1rem !important;
+    }
+    /* Tabs + Tasarla butonunu kompakt yap */
+    #community-screen .community-tabs-row {
+        flex-shrink: 0 !important;
+        margin-bottom: 6px !important;
+        gap: 6px !important;
+    }
+    #community-screen .community-tab-btn {
+        padding: 5px 10px !important;
+        font-size: 0.72rem !important;
+        min-width: 80px !important;
+    }
+    #community-screen #btn-design-map {
+        padding: 6px 12px !important;
+        font-size: 0.78rem !important;
+    }
+    /* Arama/filtre satırını kompakt yap */
+    #community-screen .search-filter-row {
+        flex-shrink: 0 !important;
+        margin-bottom: 6px !important;
+        padding-bottom: 6px !important;
+        gap: 6px !important;
+    }
+    #community-screen #community-search-input {
+        padding: 8px 12px !important;
+        font-size: 0.82rem !important;
+    }
+    #community-screen .tag-filter-btn {
+        padding: 3px 8px !important;
+        font-size: 0.7rem !important;
+    }
+    /* Harita listesi kalan alanı doldursun */
+    #community-screen .community-content-container {
+        flex: 1 1 0 !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: contain !important;
+    }
+}
+
+@media (orientation: landscape) and (max-height: 420px) {
+    #community-screen .community-card {
+        padding: 0.4rem 0.8rem !important;
+    }
+    #community-screen .community-header {
+        padding-bottom: 0.2rem !important;
+        margin-bottom: 0.2rem !important;
+    }
+    #community-screen .community-header h2 {
+        font-size: 0.95rem !important;
+    }
+    #community-screen .community-tabs-row {
+        margin-bottom: 4px !important;
+    }
+    #community-screen .search-filter-row {
+        margin-bottom: 4px !important;
+        padding-bottom: 4px !important;
+    }
+    /* Etiketleri gizle, sadece arama kutusu kalsın */
+    #community-screen .tags-filter-container {
+        display: none !important;
+    }
 }
 
 /* Mobile Landscape Shop Layout Adjustments */
