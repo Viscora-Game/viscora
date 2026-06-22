@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v179';
-import { Level } from './level.js?v=v179';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v179';
-import { UIManager } from './ui.js?v=v179';
-import { audio } from './audio.js?v=v179';
-import { LevelEditor } from './editor.js?v=v179';
-import { Boss, CyberBoss } from './boss.js?v=v179';
+import { Player } from './player.js?v=v180';
+import { Level } from './level.js?v=v180';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v180';
+import { UIManager } from './ui.js?v=v180';
+import { audio } from './audio.js?v=v180';
+import { LevelEditor } from './editor.js?v=v180';
+import { Boss, CyberBoss } from './boss.js?v=v180';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -870,12 +870,24 @@ export class GameManager {
         const isDev = this.ui && this.ui.devMode;
         const maxLvl = 30;
         if (this.currentLevel < maxLvl) {
-            this.currentLevel++;
+            const nextLvl = this.currentLevel + 1;
+            // Bir sonraki bölüm (özellikle Boss seviyesi ise) kilitli mi kontrol et
+            if (isDev || (this.ui && this.ui.isLevelUnlocked(nextLvl))) {
+                this.currentLevel = nextLvl;
+                this.ui.updateLevelButtonsUI();
+                this.start();
+            } else {
+                // Eğer kilitliyse (örneğin yeterli yıldız yoksa) ana menüye dön ve uyarı modalını göster
+                this.goToMenu();
+                if (this.ui && nextLvl % 10 === 0) {
+                    this.ui.showStarGateModal(nextLvl);
+                }
+            }
         } else {
             this.currentLevel = isDev ? 0 : 1;
+            this.ui.updateLevelButtonsUI();
+            this.start();
         }
-        this.ui.updateLevelButtonsUI();
-        this.start();
     }
 
     /**
