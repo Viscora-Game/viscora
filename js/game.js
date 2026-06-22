@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v183';
-import { Level } from './level.js?v=v183';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v183';
-import { UIManager } from './ui.js?v=v183';
-import { audio } from './audio.js?v=v183';
-import { LevelEditor } from './editor.js?v=v183';
-import { Boss, CyberBoss } from './boss.js?v=v183';
+import { Player } from './player.js?v=v184';
+import { Level } from './level.js?v=v184';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v184';
+import { UIManager } from './ui.js?v=v184';
+import { audio } from './audio.js?v=v184';
+import { LevelEditor } from './editor.js?v=v184';
+import { Boss, CyberBoss } from './boss.js?v=v184';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",

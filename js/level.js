@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v183';
-import { THEMES } from './generator.js?v=v183';
+import { audio } from './audio.js?v=v184';
+import { THEMES } from './generator.js?v=v184';
 
 /**
  * Viscora Level Design & Manager
@@ -4686,7 +4686,7 @@ export class Level {
             // İğnelerin uzaktan vurmasını engellemek için daha geniş tolerans (buffer) tanımlanır
             const bufferX = hazard.type === 'spike' ? 13 : 5;
             const bufferY = hazard.type === 'spike' ? 12 : 5;
-            const maxHazardY = hazard.type === 'acid' ? this.height : (hazard.y + hazard.h);
+            const maxHazardY = hazard.y + hazard.h;
             if (player.x + player.radius - bufferX > hazard.x && 
                 player.x - player.radius + bufferX < hazard.x + hazard.w &&
                 player.y + player.radius - bufferY > hazard.y &&
