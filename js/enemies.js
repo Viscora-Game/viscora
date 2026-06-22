@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v154';
+import { audio } from './audio.js?v=v155';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -147,7 +147,7 @@ export class Enemy {
                     if (this.vy > 0) {
                         this.y = plat.y - this.radius;
                         this.vy = -this.vy;
-                    } else if (this.vy < 0) {
+                    } else if (this.vy < 0 && this.y > plat.y + plat.h) {
                         this.y = plat.y + plat.h + this.radius;
                         this.vy = -this.vy;
                     }
@@ -520,7 +520,7 @@ export class GelChaser extends Enemy {
                     this.y = plat.y - this.radius;
                     this.vy = 0;
                     this.onGround = true;
-                } else if (this.vy < 0) {
+                } else if (this.vy < 0 && this.y > plat.y + plat.h) {
                     this.y = plat.y + plat.h + this.radius;
                     this.vy = 0;
                 }
