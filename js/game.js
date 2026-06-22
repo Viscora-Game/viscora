@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v157';
-import { Level } from './level.js?v=v157';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v157';
-import { UIManager } from './ui.js?v=v157';
-import { audio } from './audio.js?v=v157';
-import { LevelEditor } from './editor.js?v=v157';
-import { Boss, CyberBoss } from './boss.js?v=v157';
+import { Player } from './player.js?v=v160';
+import { Level } from './level.js?v=v160';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v160';
+import { UIManager } from './ui.js?v=v160';
+import { audio } from './audio.js?v=v160';
+import { LevelEditor } from './editor.js?v=v160';
+import { Boss, CyberBoss } from './boss.js?v=v160';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1322,6 +1322,45 @@ export class GameManager {
             const stars = this.calculateStars();
             if (this.currentLevel !== 999) {
                 this.saveStarsForLevel(this.currentLevel, stars);
+            } else if (this.isCommunityPlay && this.currentCommunityLevelId) {
+                // Topluluk haritası bitirildiğinde skoru gönder
+                const levelId = this.currentCommunityLevelId;
+                const timeValue = this.gameTime;
+                
+                let username = localStorage.getItem('viscora_author_name');
+                if (!username || username === 'Tasarımcı' || username.trim() === '') {
+                    username = window.prompt("Tebrikler! Liderlik tablosu için adınızı girin:", "Oyuncu");
+                    if (username) {
+                        username = username.trim();
+                        if (username) {
+                            localStorage.setItem('viscora_author_name', username);
+                        }
+                    }
+                }
+                if (!username || username.trim() === '') {
+                    username = 'Anonim';
+                }
+
+                const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                    ? ''
+                    : 'https://viscora.onrender.com';
+                
+                fetch(`${API_BASE}/api/levels/${levelId}/score`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, time: timeValue })
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error("Skor kaydedilemedi.");
+                    return res.json();
+                })
+                .then(updatedLevel => {
+                    console.log("Skor başarıyla kaydedildi:", updatedLevel);
+                    if (this.ui) {
+                        this.ui.updateLevelScores(levelId, updatedLevel.scores);
+                    }
+                })
+                .catch(err => console.error("Skor kaydetme hatası:", err));
             }
             // Eski win-stars elementi varsa güncelle (geriye dönük uyum)
             const winStarsEl = document.getElementById('win-stars');
@@ -1682,17 +1721,17 @@ export class GameManager {
                 });
             }
             
-            // Baloncuklar (Optimize edilmiş, shadowBlur kaldırıldı)
+            // Baloncuklar (Optimize edilmiş, shadowBlur ve save/restore kaldırıldı)
             if (this.menuBubbles) {
+                const prevAlpha = this.ctx.globalAlpha;
                 this.menuBubbles.forEach(bubble => {
-                    this.ctx.save();
                     this.ctx.globalAlpha = bubble.alpha;
                     this.ctx.fillStyle = bubble.color;
                     this.ctx.beginPath();
                     this.ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
                     this.ctx.fill();
-                    this.ctx.restore();
                 });
+                this.ctx.globalAlpha = prevAlpha;
             }
             return; // Ana menüde diğer oyun elemanlarını çizmeyi atla
         }

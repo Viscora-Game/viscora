@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v157';
-import { audio } from './audio.js?v=v157';
-import { LevelGenerator } from './generator.js?v=v157';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v160';
+import { audio } from './audio.js?v=v160';
+import { LevelGenerator } from './generator.js?v=v160';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -92,6 +92,14 @@ export class LevelEditor {
         this.selectedObject = null;
         this.selectedObjectType = ''; // 'platform', 'hazard', 'movingPlatform', 'gate', 'collectible', 'enemy', 'portal', 'spawn'
         this.activeTool = 'select'; // 'select', 'create_platform_normal', ...
+        
+        // Double tap/click delete overlay state
+        this.lastClickTime = 0;
+        this.lastClickObject = null;
+        this.lastClickX = 0;
+        this.lastClickY = 0;
+        this.deleteOverlayObject = null;
+        this.deleteOverlayObjectType = '';
         this.gridSnap = true;
         this.gridSize = 20;
         
@@ -3144,10 +3152,53 @@ export class LevelEditor {
 
         if (e.button !== 0) return; // Sadece sol tık ile obje yönetilir
 
+        // 0. CHECK DELETE OVERLAY
+        if (this.deleteOverlayObject) {
+            const center = this.getObjectCenter(this.deleteOverlayObject, this.deleteOverlayObjectType);
+            const distToX = Math.sqrt(Math.pow(mouseX - center.x, 2) + Math.pow(mouseY - center.y, 2));
+            if (distToX < 20) {
+                const objToDelete = this.deleteOverlayObject;
+                const typeToDelete = this.deleteOverlayObjectType;
+                this.deleteOverlayObject = null;
+                this.deleteOverlayObjectType = '';
+                
+                this.selectedObject = objToDelete;
+                this.selectedObjectType = typeToDelete;
+                this.deleteSelected();
+                return;
+            } else {
+                this.deleteOverlayObject = null;
+                this.deleteOverlayObjectType = '';
+            }
+        }
+
         // 1. SEÇİM MODU
         if (this.activeTool === 'select') {
             const hit = this.getObjectAt(mouseX, mouseY);
             if (hit) {
+                // Double click check
+                const now = performance.now();
+                if (now - this.lastClickTime < 300 && this.lastClickObject === hit.obj) {
+                    if (hit.type !== 'spawn' && hit.type !== 'portal') {
+                        this.deleteOverlayObject = hit.obj;
+                        this.deleteOverlayObjectType = hit.type;
+                        this.selectedObject = hit.obj;
+                        this.selectedObjectType = hit.type;
+                        this.updateInspector();
+                        
+                        this.lastClickTime = 0;
+                        this.lastClickObject = null;
+                        this.isDragging = false;
+                        this.isPanning = false;
+                        return;
+                    }
+                } else {
+                    this.lastClickTime = now;
+                    this.lastClickObject = hit.obj;
+                    this.lastClickX = mouseX;
+                    this.lastClickY = mouseY;
+                }
+
                 this.selectedObject = hit.obj;
                 this.selectedObjectType = hit.type;
                 this.isDragging = true;
@@ -4172,9 +4223,52 @@ export class LevelEditor {
             const mouseX = (clientX - halfW) / zoom + this.game.camera.x + halfW;
             const mouseY = (clientY - halfH) / zoom + this.game.camera.y + halfH;
 
+            // 0. CHECK DELETE OVERLAY
+            if (this.deleteOverlayObject) {
+                const center = this.getObjectCenter(this.deleteOverlayObject, this.deleteOverlayObjectType);
+                const distToX = Math.sqrt(Math.pow(mouseX - center.x, 2) + Math.pow(mouseY - center.y, 2));
+                if (distToX < 20) {
+                    const objToDelete = this.deleteOverlayObject;
+                    const typeToDelete = this.deleteOverlayObjectType;
+                    this.deleteOverlayObject = null;
+                    this.deleteOverlayObjectType = '';
+                    
+                    this.selectedObject = objToDelete;
+                    this.selectedObjectType = typeToDelete;
+                    this.deleteSelected();
+                    return;
+                } else {
+                    this.deleteOverlayObject = null;
+                    this.deleteOverlayObjectType = '';
+                }
+            }
+
             if (this.activeTool === 'select') {
                 const hit = this.getObjectAt(mouseX, mouseY);
                 if (hit) {
+                    // Double tap detection
+                    const now = performance.now();
+                    if (now - this.lastClickTime < 300 && this.lastClickObject === hit.obj) {
+                        if (hit.type !== 'spawn' && hit.type !== 'portal') {
+                            this.deleteOverlayObject = hit.obj;
+                            this.deleteOverlayObjectType = hit.type;
+                            this.selectedObject = hit.obj;
+                            this.selectedObjectType = hit.type;
+                            this.updateInspector();
+                            
+                            this.lastClickTime = 0;
+                            this.lastClickObject = null;
+                            this.isDragging = false;
+                            this.isPanning = false;
+                            return;
+                        }
+                    } else {
+                        this.lastClickTime = now;
+                        this.lastClickObject = hit.obj;
+                        this.lastClickX = mouseX;
+                        this.lastClickY = mouseY;
+                    }
+
                     this.selectedObject = hit.obj;
                     this.selectedObjectType = hit.type;
                     this.isDragging = true;
@@ -4406,6 +4500,40 @@ export class LevelEditor {
     }
 
     /**
+     * Objenin merkez koordinatlarını döner
+     */
+    getObjectCenter(obj, type) {
+        if (type === 'spawn') {
+            return { x: this.game.level.spawnX, y: this.game.level.spawnY };
+        }
+        if (type === 'portal') {
+            return { x: obj.x + (obj.w || 40) / 2, y: obj.y + (obj.h || 60) / 2 };
+        }
+        if (type === 'collectible') {
+            return { x: obj.x, y: obj.y };
+        }
+        if (type === 'enemy') {
+            return { x: obj.x, y: obj.y };
+        }
+        if (type === 'teleportPair') {
+            const d1 = Math.pow(this.lastClickX - (obj.x1 + 20), 2) + Math.pow(this.lastClickY - (obj.y1 + 30), 2);
+            const d2 = Math.pow(this.lastClickX - (obj.x2 + 20), 2) + Math.pow(this.lastClickY - (obj.y2 + 30), 2);
+            if (d1 < d2) {
+                return { x: obj.x1 + 20, y: obj.y1 + 30 };
+            } else {
+                return { x: obj.x2 + 20, y: obj.y2 + 30 };
+            }
+        }
+        if (type === 'checkpoint') {
+            return { x: obj.x, y: obj.y };
+        }
+        
+        const w = obj.w !== undefined ? obj.w : 40;
+        const h = obj.h !== undefined ? obj.h : 40;
+        return { x: obj.x + w / 2, y: obj.y + h / 2 };
+    }
+
+    /**
      * Editör Çizim Arayüzü (Grid ve Seçim Alanı)
      */
     draw(ctx) {
@@ -4544,6 +4672,90 @@ export class LevelEditor {
                 ctx.strokeRect(obj.x - 3, obj.y - 3, obj.w + 6, obj.h + 6);
             }
 
+            ctx.restore();
+        }
+
+        // 3.5. Obje Silme (Double Click X Overlay) Gösterimi
+        if (this.deleteOverlayObject) {
+            ctx.save();
+            const obj = this.deleteOverlayObject;
+            const type = this.deleteOverlayObjectType;
+            const center = this.getObjectCenter(obj, type);
+            
+            // Pulsing scale
+            const pulse = 1 + Math.sin(Date.now() / 150) * 0.08;
+            const radius = 16 * pulse;
+            
+            // Draw red glow around the object
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+            ctx.shadowColor = '#ef4444';
+            ctx.shadowBlur = 15;
+            
+            // Highlight the object with a red border
+            if (type === 'spawn') {
+                ctx.beginPath();
+                ctx.arc(this.game.level.spawnX, this.game.level.spawnY, 21, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (type === 'portal') {
+                ctx.strokeRect(obj.x - 4, obj.y - 4, obj.w + 8, obj.h + 8);
+            } else if (type === 'collectible') {
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, 16, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (type === 'enemy') {
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, 22, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (type === 'movingPlatform') {
+                ctx.strokeRect(obj.x - 4, obj.y - 4, obj.w + 8, obj.h + 8);
+            } else if (type === 'teleportPair') {
+                ctx.strokeRect(obj.x1 - 4, obj.y1 - 4, 48, 68);
+                ctx.strokeRect(obj.x2 - 4, obj.y2 - 4, 48, 68);
+            } else if (type === 'checkpoint') {
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, obj.r + 3, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (type === 'decoration') {
+                ctx.save();
+                if (obj.rotation) {
+                    ctx.translate(obj.x + obj.w / 2, obj.y + obj.h / 2);
+                    ctx.rotate(obj.rotation);
+                    ctx.translate(-(obj.x + obj.w / 2), -(obj.y + obj.h / 2));
+                }
+                ctx.strokeRect(obj.x - 3, obj.y - 3, obj.w + 6, obj.h + 6);
+                ctx.restore();
+            } else {
+                const w = obj.w !== undefined ? obj.w : 40;
+                const h = obj.h !== undefined ? obj.h : 40;
+                ctx.strokeRect(obj.x - 3, obj.y - 3, w + 6, h + 6);
+            }
+            
+            // Draw the red delete button
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(239, 68, 68, 0.6)';
+            ctx.fillStyle = '#ef4444';
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2.5;
+            
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Draw 'X' lines inside the circle
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            const size = 6 * pulse;
+            ctx.beginPath();
+            ctx.moveTo(center.x - size, center.y - size);
+            ctx.lineTo(center.x + size, center.y + size);
+            ctx.moveTo(center.x + size, center.y - size);
+            ctx.lineTo(center.x - size, center.y + size);
+            ctx.stroke();
+            
             ctx.restore();
         }
 

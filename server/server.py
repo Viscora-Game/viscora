@@ -401,6 +401,89 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 else:
                     self.send_response(404)
                     self.end_headers()
+
+        # 3.5. Harita derece kaydetme: POST /api/levels/<id>/score
+        elif path.startswith('/api/levels/') and path.endswith('/score'):
+            parts = path.split('/')
+            if len(parts) >= 4:
+                level_id = parts[3]
+                username = body.get('username')
+                score_time = body.get('time')
+
+                if not username or score_time is None:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write('{"error": "Kullanıcı adı ve süre zorunludur."}'.encode('utf-8'))
+                    return
+
+                try:
+                    score_time = float(score_time)
+                except ValueError:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write('{"error": "Geçersiz süre değeri."}'.encode('utf-8'))
+                    return
+
+                if score_time <= 0:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write('{"error": "Süre 0\'dan büyük olmalıdır."}'.encode('utf-8'))
+                    return
+
+                if is_offensive(username):
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write('{"error": "Kullanıcı adı uygunsuz içerik içeremez."}'.encode('utf-8'))
+                    return
+
+                db = read_db()
+                found = None
+                for level in db:
+                    if level['id'] == level_id:
+                        found = level
+                        break
+
+                if found:
+                    if 'scores' not in found:
+                        found['scores'] = []
+
+                    # Aynı kullanıcının eski derecesi varsa kontrol et ve güncelle
+                    existing_score = None
+                    for s in found['scores']:
+                        if s.get('username', '').lower().strip() == username.strip().lower():
+                            existing_score = s
+                            break
+
+                    if existing_score:
+                        if score_time < existing_score['time']:
+                            existing_score['time'] = score_time
+                            existing_score['date'] = datetime.now(timezone.utc).isoformat()
+                    else:
+                        found['scores'].append({
+                            'username': username.strip(),
+                            'time': score_time,
+                            'date': datetime.now(timezone.utc).isoformat()
+                        })
+
+                    # Süreye göre küçükten büyüğe sırala ve en iyi 5 dereceyi tut
+                    found['scores'] = sorted(found['scores'], key=lambda s: s['time'])[:5]
+
+                    if write_db(db):
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'application/json; charset=utf-8')
+                        self.end_headers()
+                        self.wfile.write(json.dumps(found, ensure_ascii=False).encode('utf-8'))
+                    else:
+                        self.send_response(500)
+                        self.end_headers()
+                else:
+                    self.send_response(404)
+                    self.end_headers()
+
         # 4. Harita güncelleme: POST /api/levels/<id>/update
         elif path.startswith('/api/levels/') and path.endswith('/update'):
             parts = path.split('/')

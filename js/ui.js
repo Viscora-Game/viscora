@@ -1,6 +1,6 @@
-import { audio } from './audio.js?v=v156';
-import { ViscosityList } from './viscosity.js?v=v156';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v156';
+import { audio } from './audio.js?v=v158';
+import { ViscosityList } from './viscosity.js?v=v158';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v158';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -1422,7 +1422,12 @@ export class UIManager {
 
                 item.innerHTML = `
                     <div class="map-info">
-                        <h3>${level.name}</h3>
+                        <h3 style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${level.name}</span>
+                            <button class="btn-map-leaderboard" data-id="${level.id}" title="Liderlik Tablosu" style="background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.2); border-radius: 4px; padding: 4px 8px; color: #eab308; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.75rem; font-family: inherit; font-weight: bold; outline: none; transition: all 0.2s; white-space: nowrap; margin-left: auto;">
+                                <svg class="icon-svg" style="width: 12px; height: 12px; margin: 0; fill: currentColor; stroke: none; vertical-align: middle;"><use href="#icon-star"></use></svg> Skorlar
+                            </button>
+                        </h3>
                         <div class="map-author">Tasarımcı: <span>${level.author}</span></div>
                         ${tagsHtml}
                         <div class="map-expiry ${expiryClass}" id="expiry-${level.id}" data-played-at="${playedTimeStr}" data-likes="${level.likes}">
@@ -1498,6 +1503,15 @@ export class UIManager {
                     }
                 });
 
+                // Skorlar / Liderlik Tablosu Olayı
+                const leaderboardBtn = item.querySelector('.btn-map-leaderboard');
+                if (leaderboardBtn) {
+                    leaderboardBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.showMapLeaderboard(level);
+                    });
+                }
+
                 // Oyna Butonu Olayı
                 const playBtn = item.querySelector('.btn-play-map');
                 playBtn.addEventListener('click', () => {
@@ -1514,6 +1528,7 @@ export class UIManager {
                     fetch(`${API_BASE}/api/levels/${level.id}/play?userId=${myUserId}`, { method: 'POST' }).catch(() => {});
                     
                     this.game.isCommunityPlay = true;
+                    this.game.currentCommunityLevelId = level.id;
                     this.game.startCustomLevel(level.data);
                 });
 
@@ -2078,6 +2093,100 @@ export class UIManager {
         }
 
         modal.classList.remove('hidden');
+    }
+
+    /**
+     * Topluluk haritasının skor liderlik tablosunu gösterir (Modal)
+     */
+    showMapLeaderboard(level) {
+        const existing = document.querySelector('.viscora-modal-overlay');
+        if (existing) existing.remove();
+
+        const overlay = document.createElement('div');
+        overlay.className = 'viscora-modal-overlay';
+        overlay.style.zIndex = '999999';
+        
+        const modal = document.createElement('div');
+        modal.className = 'viscora-modal';
+        modal.style.width = '400px';
+        modal.style.maxWidth = '90vw';
+        modal.style.background = '#0d0d12';
+        modal.style.border = '2px solid #00f2fe';
+        modal.style.boxShadow = '0 0 25px rgba(0, 242, 254, 0.25)';
+        
+        const scores = level.scores || [];
+        
+        let scoresHtml = '';
+        if (scores.length === 0) {
+            scoresHtml = `
+                <div style="text-align: center; padding: 25px 0; color: #94a3b8;">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">⏱️</div>
+                    <div style="line-height: 1.5; font-size: 0.9rem;">Henüz bu haritayı tamamlayan olmadı.<br><strong style="color: #00f2fe;">İlk bitiren sen ol!</strong></div>
+                </div>
+            `;
+        } else {
+            scoresHtml = '<div style="display: flex; flex-direction: column; gap: 8px; margin: 15px 0;">';
+            scores.forEach((s, index) => {
+                const badge = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+                
+                // Format time to 00:00.00
+                const sec = parseFloat(s.time) || 0;
+                const m = Math.floor(sec / 60);
+                const rSec = (sec % 60).toFixed(2);
+                const timeStr = `${m.toString().padStart(2, '0')}:${rSec.padStart(5, '0')}`;
+                
+                scoresHtml += `
+                    <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.1rem; width: 24px; text-align: center;">${badge}</span>
+                            <span style="font-weight: 600; color: #f1f5f9;">${s.username}</span>
+                        </div>
+                        <div style="font-family: monospace; font-size: 0.95rem; color: #00f2fe; font-weight: bold;">
+                            ${timeStr}
+                        </div>
+                    </div>
+                `;
+            });
+            scoresHtml += '</div>';
+        }
+
+        modal.innerHTML = `
+            <div class="viscora-modal-title" style="border-bottom: 1px solid rgba(0,242,254,0.2); padding-bottom: 10px; margin-bottom: 12px; color: #00f2fe; display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 1.15rem; font-family: inherit;">
+                <svg class="icon-svg" style="color: #eab308; width: 18px; height: 18px; margin: 0; fill: currentColor;"><use href="#icon-star"></use></svg> 
+                EN İYİ DERECELER
+            </div>
+            <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px;">Harita: <strong style="color: #f1f5f9;">${level.name}</strong></div>
+            <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 15px;">Tasarımcı: <strong style="color: #f1f5f9;">${level.author}</strong></div>
+            
+            ${scoresHtml}
+            
+            <div class="viscora-modal-actions" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                <button class="viscora-modal-btn primary" style="background: linear-gradient(135deg, #00f2fe, #4facfe); border: none; width: 100%; font-weight: bold;" id="btn-close-leaderboard">KAPAT</button>
+            </div>
+        `;
+        
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        const closeBtn = modal.querySelector('#btn-close-leaderboard');
+        if (closeBtn) {
+            closeBtn.focus();
+            closeBtn.addEventListener('click', () => {
+                overlay.remove();
+            });
+        }
+    }
+
+    /**
+     * Bellekteki topluluk haritasının skor tablosunu günceller
+     */
+    updateLevelScores(levelId, scores) {
+        if (this.fetchedLevels) {
+            const found = this.fetchedLevels.find(lvl => lvl.id === levelId);
+            if (found) {
+                found.scores = scores;
+            }
+        }
     }
 }
 export default UIManager;
