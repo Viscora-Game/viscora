@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v171';
-import { THEMES } from './generator.js?v=v171';
+import { audio } from './audio.js?v=v172';
+import { THEMES } from './generator.js?v=v172';
 
 /**
  * Viscora Level Design & Manager
@@ -792,7 +792,7 @@ export class Level {
         }
     ]
 };
-        } } else if (isEditorOrPlaytest) {
+        } else if (isEditorOrPlaytest) {
             // Boss bölümleri (10 ve 20) için lokal kayıtlı özel haritaları yükleme, orijinal boss dövüşünü yükle
             const isBossLvl = (levelNumber === 10 || levelNumber === 20);
             if (!isBossLvl) {
