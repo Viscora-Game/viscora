@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v153';
+import { audio } from './audio.js?v=v154';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -169,7 +169,7 @@ export class Enemy {
             // Platform duvar çarpışma tespiti (Yatay sekme)
             for (const plat of allPlats) {
                 if (plat.passage) continue;
-                if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2, plat)) {
+                if (this.y > plat.y && this.checkAABBIntersection(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2, plat)) {
                     if (this.vx > 0) {
                         this.x = plat.x - this.radius;
                         this.vx = -this.vx;
@@ -485,8 +485,8 @@ export class GelChaser extends Enemy {
         let hitWall = false;
         for (const plat of allPlats) {
             if (plat.passage) continue;
-            // Yatay kontrolü yaparken dikeyde 4px daraltılmış kutu kullanıyoruz ki üzerinde durduğu zemini duvar sanmasın
-            if (this.checkAABBIntersection(this.x - this.radius, this.y - this.radius + 4, this.radius * 2, this.radius * 2 - 8, plat)) {
+            // Sadece düşmanın dikey merkezi platform üst seviyesinin altındaysa yatay duvar kabul et
+            if (this.y > plat.y && this.checkAABBIntersection(this.x - this.radius, this.y - this.radius + 4, this.radius * 2, this.radius * 2 - 8, plat)) {
                 hitWall = true;
                 if (this.vx > 0) {
                     this.x = plat.x - this.radius;
