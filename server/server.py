@@ -113,6 +113,10 @@ def is_offensive(text):
     for k, v in turkish_map.items():
         clean_text = clean_text.replace(k, v)
         
+    # 31 ve 69 numaralı argo/küfür kontrolleri (131 veya 690 gibi diğer sayıların içindekiler hariç)
+    if re.search(r'(?<!\d)(31|69)(?!\d)', clean_text):
+        return True
+
     # Kelimelere ayır
     words = re.findall(r'[a-z0-9]+', clean_text)
     
@@ -124,7 +128,8 @@ def is_offensive(text):
         'yarrak', 'yarak', 'tassak', 'tasak', 'orospu', 'siktir', 'pezevenk', 'kahpe', 
         'amcik', 'amcık', 'meme', 'fuck', 'bitch', 'kaltak', 'erdogan', 'erdoğan', 'pkk', 
         'kilicdaroglu', 'kılıçdaroğlu', 'imamoglu', 'imamoğlu', 'ataturk', 'atatürk',
-        'siken', 'domaltan', 'domalt'
+        'siken', 'domaltan', 'domalt',
+        'otuzbir', 'altmisdokuz', 'altmışdokuz', 'masturbasyon'
     }
     
     for word in words:
@@ -136,6 +141,11 @@ def is_offensive(text):
                 
     # Noktalama işaretlerini ve boşlukları temizleyip kontrol et (Aşma koruması örn. p.k.k veya a.m.k)
     no_punc_text = re.sub(r'[^a-z0-9]', '', clean_text)
+
+    # 31 ve 69 aşma koruması (örn. 3.1 veya 3-1 veya 6_9)
+    if re.search(r'(?<!\d)(31|69)(?!\d)', no_punc_text):
+        return True
+
     for bad in short_bad:
         bad_clean = bad
         for k, v in turkish_map.items():
