@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v162';
-import { Level } from './level.js?v=v162';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v162';
-import { UIManager } from './ui.js?v=v162';
-import { audio } from './audio.js?v=v162';
-import { LevelEditor } from './editor.js?v=v162';
-import { Boss, CyberBoss } from './boss.js?v=v162';
+import { Player } from './player.js?v=v163';
+import { Level } from './level.js?v=v163';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v163';
+import { UIManager } from './ui.js?v=v163';
+import { audio } from './audio.js?v=v163';
+import { LevelEditor } from './editor.js?v=v163';
+import { Boss, CyberBoss } from './boss.js?v=v163';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -2292,7 +2292,7 @@ export class GameManager {
             this.ctx.clip();
 
             // Draw bottom lava layer (thin line + soft glow gradient to keep it level-focused rather than dominating)
-            const lavaY = (this.level.height - 25) * scaleY;
+            const lavaY = (this.level.height - 35) * scaleY;
             
             // Determine color based on theme
             let lavaColor = '#f97316';

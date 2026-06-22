@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v162';
+import { audio } from './audio.js?v=v163';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -58,7 +58,7 @@ export class Enemy {
         if (this.isDead) return;
 
         // Ölüm çukuru tespiti (Lava/Asit nehrine temas)
-        if (this.y + this.radius >= level.height - 25) {
+        if (this.y + this.radius >= level.height - 35) {
             this.isDead = true;
             if (emitParticles) {
                 emitParticles(this.x, this.y, 'enemy_pop', this.color, 15);
@@ -391,7 +391,7 @@ export class GelChaser extends Enemy {
         if (this.isDead) return;
 
         // Ölüm çukuru tespiti (Lava/Asit nehrine temas)
-        if (this.y + this.radius >= level.height - 25) {
+        if (this.y + this.radius >= level.height - 35) {
             this.explode(player, emitParticles, level);
             return;
         }
@@ -898,7 +898,7 @@ export class TractorUFO {
         }
 
         // Dynamically calculate beam height so it stops at the nearest platform below or the ground
-        let targetY = level.height - 25;
+        let targetY = level.height - 35;
         const colliders = [
             ...(level.platforms || []),
             ...(level.staticMirrors || []),
@@ -1105,7 +1105,7 @@ export class SweeperUFO {
         this.pulseTime += 0.05;
 
         // Dynamically calculate beam height so it stops at the nearest platform below or the ground
-        let targetY = level.height - 25;
+        let targetY = level.height - 35;
         const colliders = [
             ...(level.platforms || []),
             ...(level.staticMirrors || []),
@@ -1213,7 +1213,7 @@ export class SweeperUFO {
                        this.y - this.radius < plat.y + plat.h;
             });
 
-            const touchedGround = this.y + this.radius >= level.height - 25;
+            const touchedGround = this.y + this.radius >= level.height - 35;
 
             if (touchedPlatform || touchedGround) {
                 this.die(level, player);

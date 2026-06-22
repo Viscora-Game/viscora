@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v162';
-import { THEMES } from './generator.js?v=v162';
+import { audio } from './audio.js?v=v163';
+import { THEMES } from './generator.js?v=v163';
 
 /**
  * Viscora Level Design & Manager
@@ -6202,7 +6202,7 @@ export class Level {
         // --- EN ALTTAKİ LAVA/SIVI TABAKASI (Gelişmiş Çok Katmanlı Organik Akış & Köpürme) ---
         {
             ctx.save();
-            const lavaY = this.height - 25; // Sınırla senkronize dinamik yükseklik
+            const lavaY = this.height - 35; // Sınırla senkronize dinamik yükseklik
             
             // Dinamik renk belirleme (Tema bazlı)
             let surfaceColor = '#f97316';
@@ -6420,124 +6420,19 @@ export class Level {
                     }
                 }
             } else if (hazard.type === 'acid') {
-                // Helper to modify opacity of theme colors dynamically
-                const getAlphaColor = (colorStr, alpha) => {
-                    if (!colorStr) return `rgba(16, 185, 129, ${alpha})`;
-                    if (colorStr.startsWith('rgba')) {
-                        return colorStr.replace(/([0-9\.]+)\s*\)$/, `${alpha})`);
-                    } else if (colorStr.startsWith('rgb')) {
-                        return colorStr.replace('rgb', 'rgba').replace(')', `, ${alpha})`);
-                    } else if (colorStr.startsWith('#')) {
-                        let hex = colorStr.replace('#', '');
-                        if (hex.length === 3) {
-                            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-                        }
-                        const r = parseInt(hex.substring(0, 2), 16);
-                        const g = parseInt(hex.substring(2, 4), 16);
-                        const b = parseInt(hex.substring(4, 6), 16);
-                        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-                    }
-                    return colorStr;
-                };
-
-                // U-Şeklinde Metal Hazne/Kazan (Tabana kadar uzanır)
-                ctx.save();
-                ctx.fillStyle = 'rgba(15, 23, 42, 0.45)'; // Yarı saydam tank içi metal arka plan
-                ctx.fillRect(hazard.x - 3, hazard.y + 4, hazard.w + 6, this.height - hazard.y);
-
-                ctx.strokeStyle = '#334155'; // Kalın metal kenarlık
-                ctx.lineWidth = 5;
-                ctx.beginPath();
-                ctx.moveTo(hazard.x - 2.5, hazard.y);
-                ctx.lineTo(hazard.x - 2.5, this.height);
-                ctx.moveTo(hazard.x + hazard.w + 2.5, hazard.y);
-                ctx.lineTo(hazard.x + hazard.w + 2.5, this.height);
-                ctx.stroke();
-
-                // Neon Yeşil Hazne Kenar Parlaması
-                ctx.strokeStyle = (this.theme && this.theme.acidGlowColor) ? this.theme.acidGlowColor : 'rgba(16, 185, 129, 0.4)';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-                ctx.restore();
-
-                // 3 Dalgalı Katman (Taban nehriyle birebir uyumlu ama yarı saydam)
-                const riverColors = (this.theme && this.theme.bottomRiverColors) 
-                    ? this.theme.bottomRiverColors 
-                    : ['rgba(16, 185, 129, 0.85)', 'rgba(5, 150, 105, 0.85)', 'rgba(6, 78, 59, 0.85)'];
-                
-                const numLayers = Math.min(3, riverColors.length);
-                const layerAlphas = [0.35, 0.22, 0.12]; // Soft opacities (top layer is slightly clearer, back is faint)
-
-                // Arkadan öne doğru çiziyoruz (layer = numLayers-1 down to 0)
-                for (let layer = numLayers - 1; layer >= 0; layer--) {
+                // Editör modundayken, tehlikenin sınırlarını belirgin kılmak amacıyla hafif kesikli çizgi çizelim
+                if (game && game.state === 'EDITOR') {
                     ctx.save();
-
-                    const baseColor = riverColors[layer];
-                    ctx.fillStyle = getAlphaColor(baseColor, layerAlphas[layer]);
-
-                    // Wave parameters (same frequencies/speeds as bottom river)
-                    const waveFreq = 0.015 - layer * 0.003;
-                    const waveAmp = 5 + layer * 2.5;
-                    const speed = 1.5 + layer * 0.8;
-
-                    ctx.beginPath();
-                    ctx.moveTo(hazard.x, this.height);
-                    ctx.lineTo(hazard.x, hazard.y);
-
-                    // Draw wavy surface
-                    const step = 15;
-                    for (let x = hazard.x; x <= hazard.x + hazard.w; x += step) {
-                        let y = hazard.y + 6 + Math.sin(x * waveFreq + this.time * speed) * waveAmp;
-                        if (x === hazard.x || x >= hazard.x + hazard.w) {
-                            y = hazard.y + 8; // Edge clamping
-                        }
-                        ctx.lineTo(x, y);
-                    }
-                    
-                    ctx.lineTo(hazard.x + hazard.w, hazard.y + 8);
-                    ctx.lineTo(hazard.x + hazard.w, this.height);
-                    ctx.closePath();
-                    ctx.fill();
-
-                    // Sadece en üst katman (layer === 0) için parlayan kenar çizgisini ekleyelim
-                    if (layer === 0) {
-                        ctx.beginPath();
-                        ctx.moveTo(hazard.x, hazard.y + 8);
-                        for (let x = hazard.x; x <= hazard.x + hazard.w; x += step) {
-                            let y = hazard.y + 6 + Math.sin(x * waveFreq + this.time * speed) * waveAmp;
-                            if (x === hazard.x || x >= hazard.x + hazard.w) {
-                                y = hazard.y + 8;
-                            }
-                            ctx.lineTo(x, y);
-                        }
-                        ctx.lineTo(hazard.x + hazard.w, hazard.y + 8);
-
-                        // Glow stroke
-                        ctx.strokeStyle = (this.theme && this.theme.acidGlowColor) ? this.theme.acidGlowColor : 'rgba(16, 185, 129, 0.5)';
-                        ctx.lineWidth = 6;
-                        ctx.stroke();
-
-                        // Sharp stroke
-                        ctx.strokeStyle = getAlphaColor(baseColor, 1.0);
-                        ctx.lineWidth = 2.5;
-                        ctx.stroke();
-                    }
-
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+                    ctx.setLineDash([4, 4]);
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeRect(hazard.x, hazard.y, hazard.w, this.height - hazard.y);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+                    ctx.fillRect(hazard.x, hazard.y, hazard.w, this.height - hazard.y);
                     ctx.restore();
                 }
-
-                // Kabarcıklar (Asit içindeki baloncuklar tabandan yükselir)
-                ctx.save();
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
-                ctx.shadowBlur = 0;
-                for (let b = 0; b < 6; b++) {
-                    const bx = hazard.x + ((this.time * 20 + b * 70) % hazard.w);
-                    const by = this.height - 10 - ((this.time * 15 + b * 20) % (this.height - hazard.y - 10));
-                    ctx.beginPath();
-                    ctx.arc(bx, by, 2 + (b % 3), 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.restore();
+                // Oyun modundayken ayrı bir dolgu çizmiyoruz. Tüm harita boyunca uzanan taban lav/asit nehri 
+                // zaten bu boşluklarda da kesintisiz akarak doğal ve bütünsel bir görünüm sağlamaktadır.
             }
 
             ctx.restore();
@@ -7363,7 +7258,7 @@ export class Level {
             const startX = Math.max(0, camera.x - 50);
             const endX = Math.min(this.width, camera.x + viewW + 50);
             const numLayers = Math.min(3, riverColors.length);
-            const baseHeight = this.height - 25; // River surface baseline
+            const baseHeight = this.height - 35; // River surface baseline
             
             for (let layer = 0; layer < numLayers; layer++) {
                 ctx.save();

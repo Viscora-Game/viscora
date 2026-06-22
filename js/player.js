@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v162';
-import { audio } from './audio.js?v=v162';
+import { ViscosityStates } from './viscosity.js?v=v163';
+import { audio } from './audio.js?v=v163';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -775,10 +775,10 @@ export class Player {
         }
 
         // Ölüm çukuru tespiti (Lava/Asit nehrine temas)
-        if (this.y + this.radius >= level.height - 25) {
+        if (this.y + this.radius >= level.height - 35) {
             if (!this.isDead) {
                 // Snap to surface and stop velocity
-                this.y = level.height - 25 - this.radius;
+                this.y = level.height - 35 - this.radius;
                 this.vx = 0;
                 this.vy = 0;
 
@@ -792,9 +792,9 @@ export class Player {
                     const riverColor = (theme && theme.bottomRiverShadow) ? theme.bottomRiverShadow : '#10b981';
                     
                     // Gri/beyaz duman pufu
-                    this.game.emitParticles(this.x, level.height - 25, 'smoke', '#e2e8f0', 20);
+                    this.game.emitParticles(this.x, level.height - 35, 'smoke', '#e2e8f0', 20);
                     // Renkli nehir buharı pufu
-                    this.game.emitParticles(this.x, level.height - 25, 'steam', riverColor, 20);
+                    this.game.emitParticles(this.x, level.height - 35, 'steam', riverColor, 20);
                 }
             }
         }
