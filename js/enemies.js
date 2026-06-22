@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v151';
+import { audio } from './audio.js?v=v152';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -928,12 +928,6 @@ export class TractorUFO {
                 }
                 
                 player.vy = pullForce;
-
-                // Deal periodic damage while in the tractor beam (every 1.5 seconds)
-                if (this.beamDamageCooldown <= 0) {
-                    player.takeDamage(1);
-                    this.beamDamageCooldown = 1.5; // 1.5 seconds cooldown
-                }
                 
                 if (Math.random() < 0.35 && emitParticles) {
                     emitParticles(player.x + (Math.random() - 0.5) * 20, player.y + 10, 'custom', '#00f0ff', 2, {
@@ -945,7 +939,6 @@ export class TractorUFO {
                 }
             } else {
                 this.activeBeam = false;
-                this.beamDamageCooldown = 0; // Reset cooldown so re-entering triggers damage immediately
             }
         } else {
             this.x += this.vx;
@@ -1158,12 +1151,14 @@ export class SweeperUFO {
 
             // Play laser sound periodically while tracking
             this.lastLaserTime += 1 / 60;
-            if (this.lastLaserTime >= 1.2) {
+            const cycleDuration = 1.6;
+            const activeDuration = 0.6;
+            if (this.lastLaserTime >= cycleDuration) {
                 this.lastLaserTime = 0;
                 try { audio.playLaser(); } catch(e){}
             }
 
-            this.laserActive = true;
+            this.laserActive = (this.lastLaserTime < activeDuration);
             this.laserX = this.x;
             
             if (this.laserDamageCooldown > 0) {
@@ -1171,17 +1166,18 @@ export class SweeperUFO {
             }
 
             const laserHalfWidth = 8;
-            const hitPlayer = player.x + player.radius > this.laserX - laserHalfWidth && 
+            const hitPlayer = this.laserActive &&
+                              player.x + player.radius > this.laserX - laserHalfWidth && 
                               player.x - player.radius < this.laserX + laserHalfWidth && 
                               player.y + player.radius > this.y + 10 && 
                               player.y - player.radius < this.y + this.beamHeight;
 
             if (hitPlayer && this.laserDamageCooldown <= 0) {
                 player.takeDamage(1);
-                this.laserDamageCooldown = 1.5; // Deal damage every 1.5 seconds if staying inside the beam
+                this.laserDamageCooldown = 1.0; // Deal damage at most once per active burst
             }
 
-            if (emitParticles && Math.random() < 0.25) {
+            if (this.laserActive && emitParticles && Math.random() < 0.25) {
                 emitParticles(this.laserX, this.y + this.beamHeight, 'custom', '#ff0055', 4, {
                     vx: (Math.random() - 0.5) * 6,
                     vy: -0.5 - Math.random() * 1.5,
