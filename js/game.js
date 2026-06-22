@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v180';
-import { Level } from './level.js?v=v180';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v180';
-import { UIManager } from './ui.js?v=v180';
-import { audio } from './audio.js?v=v180';
-import { LevelEditor } from './editor.js?v=v180';
-import { Boss, CyberBoss } from './boss.js?v=v180';
+import { Player } from './player.js?v=v181';
+import { Level } from './level.js?v=v181';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v181';
+import { UIManager } from './ui.js?v=v181';
+import { audio } from './audio.js?v=v181';
+import { LevelEditor } from './editor.js?v=v181';
+import { Boss, CyberBoss } from './boss.js?v=v181';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -518,6 +518,15 @@ export class GameManager {
         } else if (this.difficulty === 'hardcore') {
             limit3Stars = 67.5;
             limit2Stars = 90;
+        }
+
+        // Seviye genişliğine göre ek süre ekleme: 3000 px üzerindeki her 1000 px için tüm modlara +12.5 saniye ek süre
+        const levelWidth = this.level ? (this.level.width || 2000) : 2000;
+        if (levelWidth > 3000) {
+            const extraWidth = levelWidth - 3000;
+            const extraTime = (extraWidth / 1000) * 12.5;
+            limit3Stars += extraTime;
+            limit2Stars += extraTime;
         }
 
         // Boss bölümlerinde süre limiti %30 artar

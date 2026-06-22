@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v180';
-import { audio } from './audio.js?v=v180';
+import { ViscosityStates } from './viscosity.js?v=v181';
+import { audio } from './audio.js?v=v181';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -177,7 +177,7 @@ export class Player {
         this.vy = 0;
         this.health = targetHealth !== null ? targetHealth : this.maxHealth;
         this.isDead = false;
-        this.invulnerableFrames = 0;
+        this.invulnerableFrames = 150; // 2.5 saniye doğuş koruması (60 FPS * 2.5 = 150 frames)
         this.viscosity = ViscosityStates.NORMAL;
         this.currentGravity = ViscosityStates.NORMAL.gravity;
         
