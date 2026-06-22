@@ -1,6 +1,6 @@
-import { audio } from './audio.js?v=v177';
-import { ViscosityList } from './viscosity.js?v=v177';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v177';
+import { audio } from './audio.js?v=v178';
+import { ViscosityList } from './viscosity.js?v=v178';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v178';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -281,7 +281,7 @@ export class UIManager {
         groups.forEach(g => {
             const isCollapsed = g.id !== activeGroupIndex;
             const collapseClass = isCollapsed ? 'collapsed' : '';
-            const isGroupUnlocked = g.id === 1 || this.devMode || this.game.unlockedLevel >= g.start;
+            const isGroupUnlocked = g.id === 1 || this.devMode || this.isLevelUnlocked(g.start);
             const statusText = isGroupUnlocked ? `Bölüm ${g.start}-${g.end}` : 'Kilitli <svg class="icon-svg" style="width: 12px; height: 12px; margin-left: 4px; margin-right: 0; vertical-align: middle;"><use href="#icon-lock"></use></svg>';
             const unlockedClass = isGroupUnlocked ? 'unlocked' : 'locked';
             const disabledAttr = isGroupUnlocked ? '' : 'disabled';
@@ -2036,6 +2036,17 @@ export class UIManager {
                 stars += this.game.getStarsForLevel(i);
             }
             if (stars < 24) return false; // Lock boss if less than 24 stars in chapter
+        }
+
+        // Boss seviyesinin (10, 20) açılmış olması (yeterli yıldız + önceki seviyelerin bitirilmesi),
+        // sonraki bölümün ilk seviyesinin (11, 21) de kilidini açar. Böylece Boss'u geçemeyenler sonraki gruba başlayabilir.
+        if (lvlNum === 11 || lvlNum === 21) {
+            const bossLvl = lvlNum - 1;
+            if (this.game.unlockedLevel >= bossLvl) {
+                if (this.isLevelUnlocked(bossLvl)) {
+                    return true;
+                }
+            }
         }
 
         return this.game.unlockedLevel >= lvlNum;
