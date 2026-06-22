@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v150';
+import { audio } from './audio.js?v=v151';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -897,17 +897,33 @@ export class TractorUFO {
             this.beamDamageCooldown -= 1 / 60;
         }
 
+        // Dynamically calculate beam height so it stops at the nearest platform below or the ground
+        let targetY = level.height - 25;
+        const colliders = [
+            ...(level.platforms || []),
+            ...(level.staticMirrors || []),
+            ...(level.pushBlocks || []).filter(b => !b.broken)
+        ];
+        for (const col of colliders) {
+            if (this.x > col.x && this.x < col.x + col.w && col.y > this.y) {
+                if (col.y < targetY) {
+                    targetY = col.y;
+                }
+            }
+        }
+        this.beamHeight = Math.max(50, targetY - this.y);
+
         if (this.activeBeam) {
             this.vx = 0;
             const isUnderneath = Math.abs(player.x - this.x) < 50 && player.y > this.y && player.y < this.y + this.beamHeight;
             if (isUnderneath) {
-                let pullForce = -1.2;
+                let pullForce = -3.2; // Default (NORMAL)
                 if (player.viscosity) {
                     const stateId = player.viscosity.id;
                     if (stateId === 'LOW') {
-                        pullForce = -2.6;
+                        pullForce = -5.0; // Fast pull for Cyan/Liquid form
                     } else if (stateId === 'HIGH') {
-                        pullForce = -0.45;
+                        pullForce = -1.8; // Slow pull for Purple/Jel form
                     }
                 }
                 
@@ -1071,6 +1087,7 @@ export class SweeperUFO {
         this.laserX = 0;
         this.laserActive = false;
         this.rotAngle = 0;
+        this.laserDamageCooldown = 0;
     }
 
     die(level = null, player = null) {
@@ -1094,7 +1111,25 @@ export class SweeperUFO {
 
         this.pulseTime += 0.05;
 
+        // Dynamically calculate beam height so it stops at the nearest platform below or the ground
+        let targetY = level.height - 25;
+        const colliders = [
+            ...(level.platforms || []),
+            ...(level.staticMirrors || []),
+            ...(level.pushBlocks || []).filter(b => !b.broken)
+        ];
+        for (const col of colliders) {
+            if (this.x > col.x && this.x < col.x + col.w && col.y > this.y) {
+                if (col.y < targetY) {
+                    targetY = col.y;
+                }
+            }
+        }
+        this.beamHeight = Math.max(50, targetY - this.y);
+
         if (this.state === 'patrol') {
+            this.laserActive = false;
+            this.laserDamageCooldown = 0;
             this.x += this.vx;
             if (this.x < this.minX) {
                 this.x = this.minX;
@@ -1121,50 +1156,43 @@ export class SweeperUFO {
 
             this.trackTimer -= 1 / 60;
 
+            // Play laser sound periodically while tracking
             this.lastLaserTime += 1 / 60;
-            const cycleDuration = 1.5;
-            const activeDuration = 0.4;
-
-            if (this.lastLaserTime >= cycleDuration) {
+            if (this.lastLaserTime >= 1.2) {
                 this.lastLaserTime = 0;
                 try { audio.playLaser(); } catch(e){}
             }
 
-            this.laserActive = (this.lastLaserTime < activeDuration);
-            if (this.laserActive) {
-                this.laserX = this.x;
-                
-                if (!this.laserDamageCooldown) {
-                    this.laserDamageCooldown = 0;
-                }
-                if (this.laserDamageCooldown > 0) {
-                    this.laserDamageCooldown -= 1 / 60;
-                }
+            this.laserActive = true;
+            this.laserX = this.x;
+            
+            if (this.laserDamageCooldown > 0) {
+                this.laserDamageCooldown -= 1 / 60;
+            }
 
-                const laserHalfWidth = 8;
-                const hitPlayer = player.x + player.radius > this.laserX - laserHalfWidth && 
-                                  player.x - player.radius < this.laserX + laserHalfWidth && 
-                                  player.y + player.radius > this.y + 10 && 
-                                  player.y - player.radius < this.y + this.beamHeight;
-                if (hitPlayer && this.laserDamageCooldown <= 0) {
-                    player.takeDamage(1);
-                    this.laserDamageCooldown = 0.5; // Cooldown between ticks of this laser
-                }
+            const laserHalfWidth = 8;
+            const hitPlayer = player.x + player.radius > this.laserX - laserHalfWidth && 
+                              player.x - player.radius < this.laserX + laserHalfWidth && 
+                              player.y + player.radius > this.y + 10 && 
+                              player.y - player.radius < this.y + this.beamHeight;
 
-                if (emitParticles && Math.random() < 0.25) {
-                    emitParticles(this.laserX, this.y + this.beamHeight, 'custom', '#ff0055', 4, {
-                        vx: (Math.random() - 0.5) * 6,
-                        vy: -0.5 - Math.random() * 1.5,
-                        life: 15 + Math.random() * 10,
-                        size: 3 + Math.random() * 2
-                    });
-                }
-            } else {
-                this.laserDamageCooldown = 0;
+            if (hitPlayer && this.laserDamageCooldown <= 0) {
+                player.takeDamage(1);
+                this.laserDamageCooldown = 1.5; // Deal damage every 1.5 seconds if staying inside the beam
+            }
+
+            if (emitParticles && Math.random() < 0.25) {
+                emitParticles(this.laserX, this.y + this.beamHeight, 'custom', '#ff0055', 4, {
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: -0.5 - Math.random() * 1.5,
+                    life: 15 + Math.random() * 10,
+                    size: 3 + Math.random() * 2
+                });
             }
 
             if (this.trackTimer <= 0) {
                 this.state = 'overheat';
+                this.laserActive = false;
                 try { audio.playDamage(); } catch(e){}
             }
         } else if (this.state === 'overheat') {
