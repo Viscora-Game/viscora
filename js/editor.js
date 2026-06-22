@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v167';
-import { audio } from './audio.js?v=v167';
-import { LevelGenerator } from './generator.js?v=v167';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v168';
+import { audio } from './audio.js?v=v168';
+import { LevelGenerator } from './generator.js?v=v168';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -88,10 +88,10 @@ export class LevelEditor {
         this.active = false;
         this.initialized = false;
         
-        // Editor State
         this.selectedObject = null;
         this.selectedObjectType = ''; // 'platform', 'hazard', 'movingPlatform', 'gate', 'collectible', 'enemy', 'portal', 'spawn'
         this.activeTool = 'select'; // 'select', 'create_platform_normal', ...
+        this.activeSlot = 1; // 1, 2, 3, 4
         
         // Double tap/click delete overlay state
         this.lastClickTime = 0;
@@ -153,7 +153,14 @@ export class LevelEditor {
         // Editörde yön tuşlarını gizle
         const mobileControls = document.getElementById('mobile-controls');
         if (mobileControls) mobileControls.classList.add('hidden');
-        
+
+        // Active slot verilerini yükle ve campaign custom level ile senkronize et
+        this.activeSlot = parseInt(localStorage.getItem('viscora_active_slot') || '1');
+        const activeSlotData = localStorage.getItem('viscora_draft_slot_' + this.activeSlot);
+        if (activeSlotData) {
+            localStorage.setItem('viscora_custom_level_' + this.game.currentLevel, activeSlotData);
+        }
+
         // Load custom level from localStorage if it exists (otherwise loads campaign default)
         this.game.level.loadLevel(this.game.currentLevel, true);
         
@@ -725,6 +732,19 @@ export class LevelEditor {
             <div class="editor-title">VISCORA EDITOR</div>
             <div class="editor-subtitle">BÖLÜM TASARIMCISI</div>
 
+            <!-- Seviye Havuzu (Slotlar) -->
+            <div class="editor-section" style="border-bottom: 1px solid rgba(34, 211, 238, 0.2); padding-bottom: 12px;">
+                <div class="section-lbl" style="color: #22d3ee; display: flex; align-items: center; gap: 5px; margin-bottom: 8px;">
+                    <svg class="icon-svg" style="width: 12px; height: 12px; margin: 0;"><use href="#icon-portal"></use></svg> HARİTA HAVUZU (SLOTLAR)
+                </div>
+                <div class="editor-slots-container" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+                    <button class="editor-btn slot-btn ${this.activeSlot === 1 ? 'active' : ''}" data-slot="1" style="font-weight: bold; padding: 6px 0;">SLOT 1</button>
+                    <button class="editor-btn slot-btn ${this.activeSlot === 2 ? 'active' : ''}" data-slot="2" style="font-weight: bold; padding: 6px 0;">SLOT 2</button>
+                    <button class="editor-btn slot-btn ${this.activeSlot === 3 ? 'active' : ''}" data-slot="3" style="font-weight: bold; padding: 6px 0;">SLOT 3</button>
+                    <button class="editor-btn slot-btn ${this.activeSlot === 4 ? 'active' : ''}" data-slot="4" style="font-weight: bold; padding: 6px 0;">SLOT 4</button>
+                </div>
+            </div>
+
             <!-- Sistem Kontrolleri -->
             <div class="editor-section">
                 <div class="section-lbl">Sistem</div>
@@ -1027,6 +1047,15 @@ export class LevelEditor {
             this.game.level.height = Math.max(600, parseInt(heightInput.value) || 600);
         });
 
+        // Slot Seçim Butonları Dinleyicisi
+        const slotButtons = this.panel.querySelectorAll('.slot-btn');
+        slotButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const selectedSlot = parseInt(btn.getAttribute('data-slot'));
+                this.changeSlot(selectedSlot);
+            });
+        });
+
         // Klavye alanına tıklanınca klavye navigasyonunu durdur
         this.panel.addEventListener('focusin', () => { this.inputFocused = true; });
         this.panel.addEventListener('focusout', () => { this.inputFocused = false; });
@@ -1155,6 +1184,9 @@ export class LevelEditor {
     clearLevel() {
         // Clear saved custom level from localStorage
         localStorage.removeItem('viscora_custom_level_' + this.game.currentLevel);
+        if (this.activeSlot) {
+            localStorage.removeItem('viscora_draft_slot_' + this.activeSlot);
+        }
 
         const lvl = this.game.level;
         lvl.platforms = [{ x: 0, y: 460, w: 400, h: 140, type: 'normal' }]; // En azından bir başlangıç zemini
@@ -1205,6 +1237,75 @@ export class LevelEditor {
         const exportObj = this.getLevelDataObj();
         const jsonStr = JSON.stringify(exportObj, null, 4);
         localStorage.setItem('viscora_custom_level_' + this.game.currentLevel, jsonStr);
+        if (this.activeSlot) {
+            localStorage.setItem('viscora_draft_slot_' + this.activeSlot, jsonStr);
+        }
+    }
+
+    /**
+     * Tasarım slotunu değiştirir, eski slotu kaydeder ve yeni slotu yükler.
+     */
+    changeSlot(newSlot) {
+        if (newSlot === this.activeSlot) return;
+        
+        // Mevcut seviyeyi eski slota kaydet
+        const currentData = this.getLevelDataObj();
+        localStorage.setItem('viscora_draft_slot_' + this.activeSlot, JSON.stringify(currentData));
+        
+        // Aktif slotu güncelle
+        this.activeSlot = newSlot;
+        localStorage.setItem('viscora_active_slot', this.activeSlot);
+        
+        // Yeni slotun verilerini yükle
+        const slotDataStr = localStorage.getItem('viscora_draft_slot_' + this.activeSlot);
+        if (slotDataStr) {
+            try {
+                const data = JSON.parse(slotDataStr);
+                // Haritayı yükle
+                this.game.level.loadLevel(data, true);
+                // Yedek PWA kaydıyla eşitle
+                localStorage.setItem('viscora_custom_level_' + this.game.currentLevel, slotDataStr);
+            } catch (err) {
+                console.error("Error loading slot level:", err);
+                this.clearLevel();
+            }
+        } else {
+            // Yeni ve boş slot ise temizle
+            this.clearLevel();
+            const emptyData = this.getLevelDataObj();
+            const emptyDataStr = JSON.stringify(emptyData);
+            localStorage.setItem('viscora_draft_slot_' + this.activeSlot, emptyDataStr);
+            localStorage.setItem('viscora_custom_level_' + this.game.currentLevel, emptyDataStr);
+        }
+        
+        // UI alanlarını güncelle
+        const nameEl = document.getElementById('editor-level-name');
+        if (nameEl) nameEl.value = this.game.level.name || '';
+        const authorEl = document.getElementById('editor-author-name');
+        if (authorEl) authorEl.value = localStorage.getItem('viscora_author_name') || 'Tasarımcı';
+        
+        const widthEl = document.getElementById('editor-level-width');
+        if (widthEl) widthEl.value = this.game.level.width;
+        const heightEl = document.getElementById('editor-level-height');
+        if (heightEl) heightEl.value = this.game.level.height;
+        
+        this.updateTagButtonsUI();
+        this.selectedObject = null;
+        this.selectedObjectType = '';
+        this.updateInspector();
+        
+        // Slot butonlarındaki aktiflik sınıfını güncelle
+        const slotButtons = this.panel.querySelectorAll('.slot-btn');
+        slotButtons.forEach(btn => {
+            const btnSlot = parseInt(btn.getAttribute('data-slot'));
+            if (btnSlot === this.activeSlot) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        audio.playLanding(); // Sesli geribildirim
     }
 
     /**
