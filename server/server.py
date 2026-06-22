@@ -565,7 +565,46 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
 
+def sanitize_existing_db():
+    db = read_db()
+    modified = False
+    
+    for level in db:
+        name = level.get('name', '')
+        author = level.get('author', '')
+        scores = level.get('scores', [])
+        
+        # Harita adını kontrol et
+        if is_offensive(name):
+            new_name = "".join(random.choices("0123456789", k=8))
+            print(f"Renaming offensive map name '{name}' to '{new_name}'")
+            level['name'] = new_name
+            modified = True
+            
+        # Yapımcı adını kontrol et
+        if is_offensive(author):
+            new_author = "".join(random.choices("0123456789", k=8))
+            print(f"Renaming offensive author '{author}' to '{new_author}'")
+            level['author'] = new_author
+            modified = True
+            
+        # Skorları kontrol et
+        for score in scores:
+            username = score.get('username', '')
+            if is_offensive(username):
+                new_username = "".join(random.choices("0123456789", k=8))
+                print(f"Renaming offensive score username '{username}' to '{new_username}'")
+                score['username'] = new_username
+                modified = True
+                
+    if modified:
+        write_db(db)
+        print("Existing offensive names sanitized in the database successfully.")
+    else:
+        print("No offensive names found in the database.")
+
 def run_server():
+    sanitize_existing_db()
     server_address = ('', PORT)
     httpd = http.server.HTTPServer(server_address, APIRequestHandler)
     print(f"Viscora API Sunucusu {PORT} portunda başarıyla başlatıldı.")
