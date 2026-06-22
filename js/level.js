@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v164';
-import { THEMES } from './generator.js?v=v164';
+import { audio } from './audio.js?v=v166';
+import { THEMES } from './generator.js?v=v166';
 
 /**
  * Viscora Level Design & Manager
@@ -4937,6 +4937,55 @@ export class Level {
 
         // Background panels grid, rivets, and cross lines removed for a clean flat colored background as requested by user.
 
+        // --- GEÇİT VERMEZ SÜREKLİ TABAN NEHRİ (Tüm Harita Boyunca Dalgalı) ---
+        {
+            ctx.save();
+            const riverColors = (this.theme && this.theme.bottomRiverColors) 
+                ? this.theme.bottomRiverColors 
+                : ['rgba(16, 185, 129, 0.85)', 'rgba(5, 150, 105, 0.85)', 'rgba(6, 78, 59, 0.85)'];
+            const shadowColor = (this.theme && this.theme.bottomRiverShadow) ? this.theme.bottomRiverShadow : null;
+            
+            const startX = Math.max(0, camera.x - 50);
+            const endX = Math.min(this.width, camera.x + viewW + 50);
+            const numLayers = Math.min(3, riverColors.length);
+            const baseHeight = this.height - 35; // Ölüm sınırı ile senkronize (565px)
+            
+            for (let layer = 0; layer < numLayers; layer++) {
+                ctx.save();
+                
+                ctx.strokeStyle = riverColors[layer];
+                if (layer === 0 && shadowColor) {
+                    ctx.shadowColor = shadowColor;
+                    ctx.shadowBlur = 12;
+                } else {
+                    ctx.shadowBlur = 0;
+                }
+                
+                const waveFreq = 0.015 - layer * 0.003;
+                const waveAmp = 4 + layer * 1.5;
+                const speed = 1.5 + layer * 0.8;
+                
+                ctx.beginPath();
+                let first = true;
+                
+                for (let x = startX; x <= endX; x += 15) {
+                    const y = baseHeight + Math.sin(x * waveFreq + this.time * speed) * waveAmp;
+                    if (first) {
+                        ctx.moveTo(x, y);
+                        first = false;
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                
+                ctx.lineWidth = layer === 0 ? 3.0 : 1.5;
+                ctx.globalAlpha = layer === 0 ? 1.0 : (layer === 1 ? 0.6 : 0.35); // Arka katmanlar daha saydam
+                ctx.stroke();
+                
+                ctx.restore();
+            }
+            ctx.restore();
+        }
 
         // --- PLATFORM DESTEK SÜTUNLARI VE ASKI KABLOLARI ---
         const getSupportBottomY = (plat) => {
@@ -6199,79 +6248,9 @@ export class Level {
             });
         }
 
-        // --- EN ALTTAKİ LAVA/SIVI TABAKASI (Köpürme Efekti) ---
+        // --- EN ALTTAKİ LAVA/SIVI TABAKASI (Köpürme ve Dolgu Kaldırıldı, Harita boyu çizim engellendi) ---
         {
-            const lavaY = this.height - 20; // Sınırla senkronize dinamik yükseklik
-            
-            // Dinamik renk belirleme (Tema bazlı)
-            let surfaceColor = '#f97316';
-            let glowColor = '#f97316';
-            
-            const themeId = (this.theme && this.theme.id) ? this.theme.id : null;
-            if (themeId) {
-                if (themeId === 'neon_sewer') {
-                    surfaceColor = '#10b981';
-                    glowColor = '#10b981';
-                } else if (themeId === 'toxic_lab') {
-                    surfaceColor = '#eab308';
-                    glowColor = '#eab308';
-                } else if (themeId === 'gravity_chasm') {
-                    surfaceColor = '#d946ef';
-                    glowColor = '#d946ef';
-                }
-            } else {
-                const hasAcidPools = this.hazards && this.hazards.some(h => h.type === 'acid');
-                if (hasAcidPools) {
-                    surfaceColor = '#10b981';
-                    glowColor = '#10b981';
-                }
-            }
-
-            // --- KÖPÜREN LAVA BALONCUKLARININ GÜNCELLEMESİ VE ÇİZİMİ (Performans için sadece görünür alanda) ---
-            if (!this.lavaBubbles) {
-                this.lavaBubbles = [];
-            }
-            
-            const startX = Math.max(0, camera.x - 50);
-            const endX = Math.min(this.width, camera.x + viewW + 50);
-            const maxBubbles = Math.min(30, Math.floor((endX - startX) / 25));
-            
-            // Sadece görünür ekrandaki kabarcıkları doldur/yarat
-            while (this.lavaBubbles.length < maxBubbles) {
-                this.lavaBubbles.push({
-                    x: startX + Math.random() * (endX - startX),
-                    y: lavaY + Math.random() * 20,
-                    vx: (Math.random() - 0.5) * 0.3,
-                    vy: -(0.2 + Math.random() * 0.6),
-                    radius: 1.0 + Math.random() * 2.5,
-                    life: 30 + Math.random() * 50,
-                    maxLife: 80
-                });
-            }
-            
-            ctx.save();
-            ctx.fillStyle = surfaceColor;
-            ctx.shadowColor = glowColor;
-            ctx.shadowBlur = 5;
-            
-            for (let i = this.lavaBubbles.length - 1; i >= 0; i--) {
-                const b = this.lavaBubbles[i];
-                b.x += b.vx + Math.sin(this.time * 0.05 + b.y * 0.1) * 0.1;
-                b.y += b.vy;
-                b.life--;
-                
-                const alpha = Math.max(0, b.life / b.maxLife);
-                ctx.globalAlpha = alpha * 0.8;
-                
-                ctx.beginPath();
-                ctx.arc(b.x, b.y, b.radius * (0.3 + 0.7 * alpha), 0, Math.PI * 2);
-                ctx.fill();
-                
-                if (b.life <= 0 || b.y < lavaY - 100 || b.x < startX - 50 || b.x > endX + 50) {
-                    this.lavaBubbles.splice(i, 1);
-                }
-            }
-            ctx.restore();
+            // Küresel çizimler kaldırıldı; lav/asit çizgileri artık sadece kendi engellerinin (boşlukların) sınırları dahilinde çizilecektir.
         }
 
         // --- TEHLİKELERİ ÇİZ ---
@@ -6338,19 +6317,32 @@ export class Level {
                     }
                 }
             } else if (hazard.type === 'acid') {
-                // Editör modundayken, tehlikenin sınırlarını belirgin kılmak amacıyla hafif kesikli çizgi çizelim
+                const riverColors = (this.theme && this.theme.bottomRiverColors) 
+                    ? this.theme.bottomRiverColors 
+                    : ['rgba(16, 185, 129, 0.85)', 'rgba(5, 150, 105, 0.85)', 'rgba(6, 78, 59, 0.85)'];
+
+                // Kabarcıklar (Sadece bu boşluk aralığında yükselen baloncuklar)
+                ctx.save();
+                ctx.fillStyle = riverColors[0];
+                ctx.globalAlpha = 0.4;
+                for (let b = 0; b < 4; b++) {
+                    const bx = hazard.x + ((this.time * 15 + b * 40) % hazard.w);
+                    const by = this.height - 5 - ((this.time * 12 + b * 15) % (this.height - hazard.y - 5));
+                    ctx.beginPath();
+                    ctx.arc(bx, by, 1 + (b % 2), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+
+                // Editör modundayken sınırları göstermek için hafif kesikli çizgiyi koruyalım
                 if (game && game.state === 'EDITOR') {
                     ctx.save();
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
                     ctx.setLineDash([4, 4]);
-                    ctx.lineWidth = 1.5;
+                    ctx.lineWidth = 1;
                     ctx.strokeRect(hazard.x, hazard.y, hazard.w, this.height - hazard.y);
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
-                    ctx.fillRect(hazard.x, hazard.y, hazard.w, this.height - hazard.y);
                     ctx.restore();
                 }
-                // Oyun modundayken ayrı bir dolgu çizmiyoruz. Tüm harita boyunca uzanan taban lav/asit nehri 
-                // zaten bu boşluklarda da kesintisiz akarak doğal ve bütünsel bir görünüm sağlamaktadır.
             }
 
             ctx.restore();
@@ -7169,53 +7161,7 @@ export class Level {
             });
         }
 
-        // --- DRAW WAVY BOTTOM RIVER ---
-        if (this.theme && this.theme.bottomRiverColors) {
-            const riverColors = this.theme.bottomRiverColors;
-            const shadowColor = this.theme.bottomRiverShadow;
-            const startX = Math.max(0, camera.x - 50);
-            const endX = Math.min(this.width, camera.x + viewW + 50);
-            const numLayers = Math.min(3, riverColors.length);
-            const baseHeight = this.height - 20; // Thin river baseline
-            
-            for (let layer = 0; layer < numLayers; layer++) {
-                ctx.save();
-                
-                // Set stroke properties (no fills)
-                ctx.strokeStyle = riverColors[layer];
-                if (layer === 0 && shadowColor) {
-                    ctx.shadowColor = shadowColor;
-                    ctx.shadowBlur = 12;
-                } else {
-                    ctx.shadowBlur = 0;
-                }
-                
-                // Wave parameters (slightly optimized amp for thin line look)
-                const waveFreq = 0.015 - layer * 0.003;
-                const waveAmp = 4 + layer * 1.5;
-                const speed = 1.5 + layer * 0.8;
-                
-                ctx.beginPath();
-                let first = true;
-                
-                // Draw wavy path
-                for (let x = startX; x <= endX; x += 15) {
-                    const y = baseHeight + Math.sin(x * waveFreq + this.time * speed) * waveAmp;
-                    if (first) {
-                        ctx.moveTo(x, y);
-                        first = false;
-                    } else {
-                        ctx.lineTo(x, y);
-                    }
-                }
-                
-                ctx.lineWidth = layer === 0 ? 3.0 : 1.5;
-                ctx.globalAlpha = layer === 0 ? 1.0 : (layer === 1 ? 0.6 : 0.35); // back layers are faint
-                ctx.stroke();
-                
-                ctx.restore();
-            }
-        }
+        // --- DRAW WAVY BOTTOM RIVER (Kaldırıldı - Artık lav çizgileri tüm harita boyunca çizilmemektedir) ---
 
         ctx.restore();
     }
