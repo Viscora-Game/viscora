@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v157';
-import { THEMES } from './generator.js?v=v157';
+import { audio } from './audio.js?v=v161';
+import { THEMES } from './generator.js?v=v161';
 
 /**
  * Viscora Level Design & Manager
@@ -6420,6 +6420,26 @@ export class Level {
                     }
                 }
             } else if (hazard.type === 'acid') {
+                // Helper to modify opacity of theme colors dynamically
+                const getAlphaColor = (colorStr, alpha) => {
+                    if (!colorStr) return `rgba(16, 185, 129, ${alpha})`;
+                    if (colorStr.startsWith('rgba')) {
+                        return colorStr.replace(/([0-9\.]+)\s*\)$/, `${alpha})`);
+                    } else if (colorStr.startsWith('rgb')) {
+                        return colorStr.replace('rgb', 'rgba').replace(')', `, ${alpha})`);
+                    } else if (colorStr.startsWith('#')) {
+                        let hex = colorStr.replace('#', '');
+                        if (hex.length === 3) {
+                            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+                        }
+                        const r = parseInt(hex.substring(0, 2), 16);
+                        const g = parseInt(hex.substring(2, 4), 16);
+                        const b = parseInt(hex.substring(4, 6), 16);
+                        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                    }
+                    return colorStr;
+                };
+
                 // U-Şeklinde Metal Hazne/Kazan (Tabana kadar uzanır)
                 ctx.save();
                 ctx.fillStyle = 'rgba(15, 23, 42, 0.45)'; // Yarı saydam tank içi metal arka plan
@@ -6442,32 +6462,53 @@ export class Level {
 
                 // Dalgalı Asit Havuzu (Tabana kadar uzanır)
                 ctx.save();
-                ctx.fillStyle = (this.theme && this.theme.acidColor) ? this.theme.acidColor : 'rgba(16, 185, 129, 0.8)'; // Yeşil asit
-                ctx.shadowColor = (this.theme && this.theme.acidColor) ? this.theme.acidColor : 'rgba(16, 185, 129, 0.5)';
-                ctx.shadowBlur = 15;
-
-                ctx.beginPath();
-                ctx.moveTo(hazard.x, this.height);
-                ctx.lineTo(hazard.x, hazard.y);
-
-                // Sinüs dalgalarıyla asit yüzeyi çiz (kenarlar sınırlandırılmış)
+                
+                const baseColorStr = (this.theme && this.theme.acidColor) ? this.theme.acidColor : 'rgba(16, 185, 129, 0.8)';
                 const waveCount = 12;
                 const step = hazard.w / waveCount;
+                const wavePoints = [];
                 for (let i = 0; i <= waveCount; i++) {
                     const wx = hazard.x + i * step;
                     let wy = hazard.y + 6 + Math.sin(this.time + (i * 0.8)) * 4;
                     if (i === 0 || i === waveCount) {
                         wy = hazard.y + 8; // Edge clamping
                     }
-                    ctx.lineTo(wx, wy);
+                    wavePoints.push({ x: wx, y: wy });
                 }
 
+                // 1. Draw glowing surface wave (outer thick glow line)
+                ctx.beginPath();
+                ctx.moveTo(wavePoints[0].x, wavePoints[0].y);
+                for (let i = 1; i < wavePoints.length; i++) {
+                    ctx.lineTo(wavePoints[i].x, wavePoints[i].y);
+                }
+                ctx.strokeStyle = (this.theme && this.theme.acidGlowColor) ? this.theme.acidGlowColor : 'rgba(16, 185, 129, 0.5)';
+                ctx.lineWidth = 6;
+                ctx.stroke();
+
+                // 2. Draw sharp surface wave (inner solid line)
+                ctx.strokeStyle = getAlphaColor(baseColorStr, 1.0);
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+
+                // 3. Draw semi-transparent gradient body fill under the surface
+                ctx.beginPath();
+                ctx.moveTo(hazard.x, this.height);
+                ctx.lineTo(wavePoints[0].x, wavePoints[0].y);
+                for (let i = 1; i < wavePoints.length; i++) {
+                    ctx.lineTo(wavePoints[i].x, wavePoints[i].y);
+                }
                 ctx.lineTo(hazard.x + hazard.w, this.height);
                 ctx.closePath();
+
+                const fillGrad = ctx.createLinearGradient(0, hazard.y, 0, this.height);
+                fillGrad.addColorStop(0, getAlphaColor(baseColorStr, 0.25)); // soft glow color at top
+                fillGrad.addColorStop(1, getAlphaColor(baseColorStr, 0.02)); // fades out almost completely at the bottom
+                ctx.fillStyle = fillGrad;
                 ctx.fill();
 
                 // Kabarcıklar (Asit içindeki baloncuklar tabandan yükselir)
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
                 ctx.shadowBlur = 0;
                 for (let b = 0; b < 6; b++) {
                     const bx = hazard.x + ((this.time * 20 + b * 70) % hazard.w);
