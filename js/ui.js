@@ -1,6 +1,6 @@
-import { audio } from './audio.js?v=v178';
-import { ViscosityList } from './viscosity.js?v=v178';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v178';
+import { audio } from './audio.js?v=v179';
+import { ViscosityList } from './viscosity.js?v=v179';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v179';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -2036,17 +2036,6 @@ export class UIManager {
                 stars += this.game.getStarsForLevel(i);
             }
             if (stars < 24) return false; // Lock boss if less than 24 stars in chapter
-        }
-
-        // Boss seviyesinin (10, 20) açılmış olması (yeterli yıldız + önceki seviyelerin bitirilmesi),
-        // sonraki bölümün ilk seviyesinin (11, 21) de kilidini açar. Böylece Boss'u geçemeyenler sonraki gruba başlayabilir.
-        if (lvlNum === 11 || lvlNum === 21) {
-            const bossLvl = lvlNum - 1;
-            if (this.game.unlockedLevel >= bossLvl) {
-                if (this.isLevelUnlocked(bossLvl)) {
-                    return true;
-                }
-            }
         }
 
         return this.game.unlockedLevel >= lvlNum;

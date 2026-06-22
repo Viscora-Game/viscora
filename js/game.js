@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v178';
-import { Level } from './level.js?v=v178';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v178';
-import { UIManager } from './ui.js?v=v178';
-import { audio } from './audio.js?v=v178';
-import { LevelEditor } from './editor.js?v=v178';
-import { Boss, CyberBoss } from './boss.js?v=v178';
+import { Player } from './player.js?v=v179';
+import { Level } from './level.js?v=v179';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v179';
+import { UIManager } from './ui.js?v=v179';
+import { audio } from './audio.js?v=v179';
+import { LevelEditor } from './editor.js?v=v179';
+import { Boss, CyberBoss } from './boss.js?v=v179';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -91,6 +91,16 @@ export class GameManager {
         // Modül Nesneleri
         const savedLvl = localStorage.getItem('viscora_unlocked_level');
         this.unlockedLevel = savedLvl !== null ? Math.max(1, parseInt(savedLvl)) : 1;
+        
+        // Geçmiş önbellek veya maxLevel sınırından dolayı tamamlanan bölümlerin kilitli kalmasını önle:
+        // Eğer kullanıcı bir bölümü bitirdiyse (yıldız aldıysa), bir sonraki bölümün kilidi en azından açık olmalıdır.
+        for (let i = 1; i <= 30; i++) {
+            if (this.getStarsForLevel(i) > 0) {
+                this.unlockedLevel = Math.max(this.unlockedLevel, i + 1);
+            }
+        }
+        localStorage.setItem('viscora_unlocked_level', this.unlockedLevel.toString());
+
         this.currentLevel = savedLvl !== null ? this.unlockedLevel : 0;
         this.difficulty = localStorage.getItem('viscora_difficulty') || 'normal';
         this.ui = new UIManager(this);
