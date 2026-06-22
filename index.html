@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v168">
+    <link rel="stylesheet" href="index.css?v=v169">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -702,6 +702,41 @@
             </div>
         </div>
 
+        <!-- Tasarım Slot Seçim Modalı -->
+        <div id="slot-selection-modal" class="star-gate-overlay hidden">
+            <div class="star-gate-card sound-settings-card" style="max-width: 450px; width: 100%;">
+                <h2 class="star-gate-title"><svg class="icon-svg"><use href="#icon-portal"></use></svg> TASARIM SLOTU SEÇİN</h2>
+                <div style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 20px; text-align: center; font-family: inherit;">
+                    Çalışmak istediğiniz harita slotunu seçin:
+                </div>
+                
+                <div class="menu-settings" style="display: flex; flex-direction: column; gap: 12px; width: 100%; margin-bottom: 20px;">
+                    <!-- Slot 1 -->
+                    <button class="menu-btn slot-select-btn" data-slot="1">
+                        <span style="font-weight: bold; color: #fff;">SLOT 1</span>
+                        <span class="slot-info" style="font-size: 0.85rem; color: #a1a1aa;">BOŞ YUVA</span>
+                    </button>
+                    <!-- Slot 2 -->
+                    <button class="menu-btn slot-select-btn" data-slot="2">
+                        <span style="font-weight: bold; color: #fff;">SLOT 2</span>
+                        <span class="slot-info" style="font-size: 0.85rem; color: #a1a1aa;">BOŞ YUVA</span>
+                    </button>
+                    <!-- Slot 3 -->
+                    <button class="menu-btn slot-select-btn" data-slot="3">
+                        <span style="font-weight: bold; color: #fff;">SLOT 3</span>
+                        <span class="slot-info" style="font-size: 0.85rem; color: #a1a1aa;">BOŞ YUVA</span>
+                    </button>
+                    <!-- Slot 4 -->
+                    <button class="menu-btn slot-select-btn" data-slot="4">
+                        <span style="font-weight: bold; color: #fff;">SLOT 4</span>
+                        <span class="slot-info" style="font-size: 0.85rem; color: #a1a1aa;">BOŞ YUVA</span>
+                    </button>
+                </div>
+                
+                <button id="btn-slot-select-cancel" class="menu-btn" style="width: 100%; background: #334155; padding: 12px; font-weight: bold; border-radius: 6px; margin-top: 5px;">İPTAL</button>
+            </div>
+        </div>
+
         <!-- Bölüm Tasarla Kurulum Modalı -->
         <div id="design-setup-modal" class="star-gate-overlay hidden">
             <div class="star-gate-card sound-settings-card" style="max-width: 450px;">
@@ -1156,8 +1191,8 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v168"></script>
-    <script type="module" src="js/main.js?v=v168"></script>
+    <script src="js/controls_customizer.js?v=v169"></script>
+    <script type="module" src="js/main.js?v=v169"></script>
 </body>
 </html>
 

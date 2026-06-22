@@ -1,6 +1,6 @@
-import { audio } from './audio.js?v=v168';
-import { ViscosityList } from './viscosity.js?v=v168';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v168';
+import { audio } from './audio.js?v=v169';
+import { ViscosityList } from './viscosity.js?v=v169';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v169';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -1696,36 +1696,97 @@ export class UIManager {
         const txtDesignName = document.getElementById('txt-design-name');
         const selectDesignTheme = document.getElementById('select-design-theme');
 
-        if (btnDesignMap && designSetupModal) {
-            this.bindTouchClick(btnDesignMap, () => {
-                const savedLevelData = localStorage.getItem('viscora_custom_level_999');
-                const txtDesignAuthor = document.getElementById('txt-design-author');
-                if (txtDesignAuthor) {
-                    txtDesignAuthor.value = localStorage.getItem('viscora_author_name') || '';
+        // Slot Seçim Elemanları
+        const slotSelectionModal = document.getElementById('slot-selection-modal');
+        const btnSlotSelectCancel = document.getElementById('btn-slot-select-cancel');
+        const slotSelectButtons = document.querySelectorAll('.slot-select-btn');
+
+        this.selectedSlotForDesign = null;
+
+        const updateSlotSelectionModal = () => {
+            if (!slotSelectionModal) return;
+            slotSelectButtons.forEach(btn => {
+                const slotId = btn.getAttribute('data-slot');
+                const infoEl = btn.querySelector('.slot-info');
+                if (infoEl) {
+                    const slotDataStr = localStorage.getItem('viscora_draft_slot_' + slotId);
+                    if (slotDataStr) {
+                        try {
+                            const data = JSON.parse(slotDataStr);
+                            if (data && data.name) {
+                                infoEl.textContent = data.name;
+                                infoEl.style.color = '#10b981';
+                                infoEl.style.fontWeight = 'bold';
+                            } else {
+                                infoEl.textContent = 'BOŞ YUVA';
+                                infoEl.style.color = '#a1a1aa';
+                                infoEl.style.fontWeight = 'normal';
+                            }
+                        } catch (e) {
+                            infoEl.textContent = 'BOŞ YUVA';
+                            infoEl.style.color = '#a1a1aa';
+                            infoEl.style.fontWeight = 'normal';
+                        }
+                    } else {
+                        infoEl.textContent = 'BOŞ YUVA';
+                        infoEl.style.color = '#a1a1aa';
+                        infoEl.style.fontWeight = 'normal';
+                    }
                 }
-                if (savedLevelData) {
+            });
+        };
+
+        if (btnDesignMap && slotSelectionModal) {
+            this.bindTouchClick(btnDesignMap, () => {
+                updateSlotSelectionModal();
+                slotSelectionModal.classList.remove('hidden');
+            });
+        }
+
+        if (btnSlotSelectCancel && slotSelectionModal) {
+            this.bindTouchClick(btnSlotSelectCancel, () => {
+                slotSelectionModal.classList.add('hidden');
+            });
+        }
+
+        slotSelectButtons.forEach(btn => {
+            this.bindTouchClick(btn, () => {
+                const slotId = parseInt(btn.getAttribute('data-slot'));
+                if (slotSelectionModal) slotSelectionModal.classList.add('hidden');
+                
+                const slotDataStr = localStorage.getItem('viscora_draft_slot_' + slotId);
+                const txtDesignAuthor = document.getElementById('txt-design-author');
+                
+                if (slotDataStr) {
                     showConfirmModal(
                         "Kaldığınız yerden devam etmek ister misiniz? (Hayır derseniz mevcut tasarımınız silinip yeni bölüm oluşturulacaktır)",
                         () => {
+                            localStorage.setItem('viscora_active_slot', slotId);
+                            localStorage.setItem('viscora_custom_level_999', slotDataStr);
                             this.game.currentLevel = 999;
                             this.game.editor.init();
                         },
                         () => {
+                            this.selectedSlotForDesign = slotId;
                             if (txtDesignName) txtDesignName.value = '';
                             if (selectDesignTheme) selectDesignTheme.value = 'neon_sewer';
-                            if (txtDesignAuthor) txtDesignAuthor.value = localStorage.getItem('viscora_author_name') || '';
+                            if (txtDesignAuthor) {
+                                txtDesignAuthor.value = localStorage.getItem('viscora_author_name') || '';
+                            }
                             designSetupModal.classList.remove('hidden');
                         }
                     );
-                    return;
+                } else {
+                    this.selectedSlotForDesign = slotId;
+                    if (txtDesignName) txtDesignName.value = '';
+                    if (selectDesignTheme) selectDesignTheme.value = 'neon_sewer';
+                    if (txtDesignAuthor) {
+                        txtDesignAuthor.value = localStorage.getItem('viscora_author_name') || '';
+                    }
+                    designSetupModal.classList.remove('hidden');
                 }
-
-                if (txtDesignName) txtDesignName.value = '';
-                if (selectDesignTheme) selectDesignTheme.value = 'neon_sewer';
-                if (txtDesignAuthor) txtDesignAuthor.value = localStorage.getItem('viscora_author_name') || '';
-                designSetupModal.classList.remove('hidden');
             });
-        }
+        });
 
         if (btnDesignCancel && designSetupModal) {
             this.bindTouchClick(btnDesignCancel, () => {
@@ -1807,7 +1868,11 @@ export class UIManager {
                     ]
                 };
 
-                localStorage.setItem('viscora_custom_level_999', JSON.stringify(blankLevel));
+                const targetSlot = this.selectedSlotForDesign || 1;
+                const blankLevelStr = JSON.stringify(blankLevel);
+                localStorage.setItem('viscora_active_slot', targetSlot);
+                localStorage.setItem('viscora_draft_slot_' + targetSlot, blankLevelStr);
+                localStorage.setItem('viscora_custom_level_999', blankLevelStr);
                 this.game.currentLevel = 999;
                 
                 designHistory.count++;
