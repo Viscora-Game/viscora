@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v161';
-import { THEMES } from './generator.js?v=v161';
+import { audio } from './audio.js?v=v162';
+import { THEMES } from './generator.js?v=v162';
 
 /**
  * Viscora Level Design & Manager
@@ -6460,54 +6460,74 @@ export class Level {
                 ctx.stroke();
                 ctx.restore();
 
-                // Dalgalı Asit Havuzu (Tabana kadar uzanır)
-                ctx.save();
+                // 3 Dalgalı Katman (Taban nehriyle birebir uyumlu ama yarı saydam)
+                const riverColors = (this.theme && this.theme.bottomRiverColors) 
+                    ? this.theme.bottomRiverColors 
+                    : ['rgba(16, 185, 129, 0.85)', 'rgba(5, 150, 105, 0.85)', 'rgba(6, 78, 59, 0.85)'];
                 
-                const baseColorStr = (this.theme && this.theme.acidColor) ? this.theme.acidColor : 'rgba(16, 185, 129, 0.8)';
-                const waveCount = 12;
-                const step = hazard.w / waveCount;
-                const wavePoints = [];
-                for (let i = 0; i <= waveCount; i++) {
-                    const wx = hazard.x + i * step;
-                    let wy = hazard.y + 6 + Math.sin(this.time + (i * 0.8)) * 4;
-                    if (i === 0 || i === waveCount) {
-                        wy = hazard.y + 8; // Edge clamping
+                const numLayers = Math.min(3, riverColors.length);
+                const layerAlphas = [0.35, 0.22, 0.12]; // Soft opacities (top layer is slightly clearer, back is faint)
+
+                // Arkadan öne doğru çiziyoruz (layer = numLayers-1 down to 0)
+                for (let layer = numLayers - 1; layer >= 0; layer--) {
+                    ctx.save();
+
+                    const baseColor = riverColors[layer];
+                    ctx.fillStyle = getAlphaColor(baseColor, layerAlphas[layer]);
+
+                    // Wave parameters (same frequencies/speeds as bottom river)
+                    const waveFreq = 0.015 - layer * 0.003;
+                    const waveAmp = 5 + layer * 2.5;
+                    const speed = 1.5 + layer * 0.8;
+
+                    ctx.beginPath();
+                    ctx.moveTo(hazard.x, this.height);
+                    ctx.lineTo(hazard.x, hazard.y);
+
+                    // Draw wavy surface
+                    const step = 15;
+                    for (let x = hazard.x; x <= hazard.x + hazard.w; x += step) {
+                        let y = hazard.y + 6 + Math.sin(x * waveFreq + this.time * speed) * waveAmp;
+                        if (x === hazard.x || x >= hazard.x + hazard.w) {
+                            y = hazard.y + 8; // Edge clamping
+                        }
+                        ctx.lineTo(x, y);
                     }
-                    wavePoints.push({ x: wx, y: wy });
+                    
+                    ctx.lineTo(hazard.x + hazard.w, hazard.y + 8);
+                    ctx.lineTo(hazard.x + hazard.w, this.height);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Sadece en üst katman (layer === 0) için parlayan kenar çizgisini ekleyelim
+                    if (layer === 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(hazard.x, hazard.y + 8);
+                        for (let x = hazard.x; x <= hazard.x + hazard.w; x += step) {
+                            let y = hazard.y + 6 + Math.sin(x * waveFreq + this.time * speed) * waveAmp;
+                            if (x === hazard.x || x >= hazard.x + hazard.w) {
+                                y = hazard.y + 8;
+                            }
+                            ctx.lineTo(x, y);
+                        }
+                        ctx.lineTo(hazard.x + hazard.w, hazard.y + 8);
+
+                        // Glow stroke
+                        ctx.strokeStyle = (this.theme && this.theme.acidGlowColor) ? this.theme.acidGlowColor : 'rgba(16, 185, 129, 0.5)';
+                        ctx.lineWidth = 6;
+                        ctx.stroke();
+
+                        // Sharp stroke
+                        ctx.strokeStyle = getAlphaColor(baseColor, 1.0);
+                        ctx.lineWidth = 2.5;
+                        ctx.stroke();
+                    }
+
+                    ctx.restore();
                 }
-
-                // 1. Draw glowing surface wave (outer thick glow line)
-                ctx.beginPath();
-                ctx.moveTo(wavePoints[0].x, wavePoints[0].y);
-                for (let i = 1; i < wavePoints.length; i++) {
-                    ctx.lineTo(wavePoints[i].x, wavePoints[i].y);
-                }
-                ctx.strokeStyle = (this.theme && this.theme.acidGlowColor) ? this.theme.acidGlowColor : 'rgba(16, 185, 129, 0.5)';
-                ctx.lineWidth = 6;
-                ctx.stroke();
-
-                // 2. Draw sharp surface wave (inner solid line)
-                ctx.strokeStyle = getAlphaColor(baseColorStr, 1.0);
-                ctx.lineWidth = 2.5;
-                ctx.stroke();
-
-                // 3. Draw semi-transparent gradient body fill under the surface
-                ctx.beginPath();
-                ctx.moveTo(hazard.x, this.height);
-                ctx.lineTo(wavePoints[0].x, wavePoints[0].y);
-                for (let i = 1; i < wavePoints.length; i++) {
-                    ctx.lineTo(wavePoints[i].x, wavePoints[i].y);
-                }
-                ctx.lineTo(hazard.x + hazard.w, this.height);
-                ctx.closePath();
-
-                const fillGrad = ctx.createLinearGradient(0, hazard.y, 0, this.height);
-                fillGrad.addColorStop(0, getAlphaColor(baseColorStr, 0.25)); // soft glow color at top
-                fillGrad.addColorStop(1, getAlphaColor(baseColorStr, 0.02)); // fades out almost completely at the bottom
-                ctx.fillStyle = fillGrad;
-                ctx.fill();
 
                 // Kabarcıklar (Asit içindeki baloncuklar tabandan yükselir)
+                ctx.save();
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
                 ctx.shadowBlur = 0;
                 for (let b = 0; b < 6; b++) {
