@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v169';
-import { THEMES } from './generator.js?v=v169';
+import { audio } from './audio.js?v=v170';
+import { THEMES } from './generator.js?v=v170';
 
 /**
  * Viscora Level Design & Manager
@@ -58,6 +58,740 @@ export class Level {
         let data = null;
         if (typeof levelNumber === 'object' && levelNumber !== null) {
             data = levelNumber;
+        } else if (originalLevelNumber === 21 && !data) {
+            data = {
+    "serverLevelId": null,
+    "name": "Özel Seviye",
+    "tags": [],
+    "themeId": "neon_sewer",
+    "levelWidth": 4000,
+    "levelHeight": 600,
+    "spawn": {
+        "x": 100,
+        "y": 380
+    },
+    "portal": {
+        "x": 3920,
+        "y": 260
+    },
+    "platforms": [
+        {
+            "x": 0,
+            "y": 460,
+            "w": 400,
+            "h": 140,
+            "type": "normal"
+        },
+        {
+            "x": 550,
+            "y": 460,
+            "w": 120,
+            "h": 140,
+            "type": "normal"
+        },
+        {
+            "x": 920,
+            "y": 380,
+            "w": 350,
+            "h": 220,
+            "type": "normal"
+        },
+        {
+            "x": 1360,
+            "y": 460,
+            "w": 350,
+            "h": 140,
+            "type": "normal"
+        },
+        {
+            "x": 1540,
+            "y": -20,
+            "w": 50,
+            "h": 420,
+            "type": "sticky"
+        },
+        {
+            "x": 1600,
+            "y": 320,
+            "w": 250,
+            "h": 280,
+            "type": "normal"
+        },
+        {
+            "x": 1840,
+            "y": 460,
+            "w": 400,
+            "h": 140,
+            "type": "normal"
+        },
+        {
+            "x": 1960,
+            "y": -90,
+            "w": 200,
+            "h": 520,
+            "type": "normal"
+        },
+        {
+            "x": 2240,
+            "y": 380,
+            "w": 950,
+            "h": 220,
+            "type": "normal"
+        },
+        {
+            "x": 1040,
+            "y": 40,
+            "w": 140,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 1460,
+            "y": -120,
+            "w": 220,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 2360,
+            "y": 60,
+            "w": 100,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 3300,
+            "y": 380,
+            "w": 600,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 3440,
+            "y": 140,
+            "w": 60,
+            "h": 20,
+            "type": "normal"
+        },
+        {
+            "x": 3760,
+            "y": 140,
+            "w": 60,
+            "h": 20,
+            "type": "normal"
+        },
+        {
+            "x": 160,
+            "y": 300,
+            "w": 60,
+            "h": 20,
+            "type": "normal"
+        },
+        {
+            "x": 40,
+            "y": 160,
+            "w": 60,
+            "h": 20,
+            "type": "normal"
+        },
+        {
+            "x": 220,
+            "y": 0,
+            "w": 60,
+            "h": 20,
+            "type": "normal"
+        },
+        {
+            "x": 40,
+            "y": -140,
+            "w": 240,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 3500,
+            "y": 20,
+            "w": 40,
+            "h": 120,
+            "type": "normal"
+        }
+    ],
+    "spikes": [
+        {
+            "x": 220,
+            "y": 440,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 1640,
+            "y": 300,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 1020,
+            "y": 360,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 1140,
+            "y": 360,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 1080,
+            "y": 360,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 320,
+            "y": 440,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 1940,
+            "y": -100,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 2000,
+            "y": -100,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 2120,
+            "y": -100,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 2060,
+            "y": -100,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 1860,
+            "y": 440,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 1540,
+            "y": 440,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 1360,
+            "y": 440,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 1080,
+            "y": 80,
+            "w": 60,
+            "h": 20,
+            "direction": "down"
+        },
+        {
+            "x": 1940,
+            "y": 180,
+            "w": 20,
+            "h": 60,
+            "direction": "left"
+        },
+        {
+            "x": 2160,
+            "y": 240,
+            "w": 20,
+            "h": 60,
+            "direction": "right"
+        },
+        {
+            "x": 2380,
+            "y": 360,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 1040,
+            "y": 20,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 1120,
+            "y": 20,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 2380,
+            "y": 40,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 2500,
+            "y": 360,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 2840,
+            "y": 360,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 3100,
+            "y": 360,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        }
+    ],
+    "acidPools": [
+        {
+            "x": 400,
+            "y": 480,
+            "w": 150,
+            "h": 70
+        },
+        {
+            "x": 675,
+            "y": 480,
+            "w": 241,
+            "h": 70
+        }
+    ],
+    "lasers": [
+        {
+            "x": 1100,
+            "y": 120,
+            "w": 20,
+            "h": 220,
+            "type": "laser",
+            "id": 101
+        },
+        {
+            "x": 2400,
+            "y": 100,
+            "w": 20,
+            "h": 260,
+            "type": "laser",
+            "id": 102
+        },
+        {
+            "x": 3240,
+            "y": -40,
+            "w": 20,
+            "h": 420,
+            "type": "yellowLaser",
+            "id": 10
+        }
+    ],
+    "netGates": [],
+    "movingPlatforms": [
+        {
+            "startX": 660,
+            "startY": 360,
+            "targetX": 815,
+            "targetY": 360,
+            "w": 100,
+            "h": 25,
+            "speed": 0.015
+        }
+    ],
+    "crystals": [
+        {
+            "x": 1180,
+            "y": 200,
+            "color": "#eab308"
+        },
+        {
+            "x": 740,
+            "y": 160,
+            "color": "#eab308"
+        },
+        {
+            "x": 2820,
+            "y": 180,
+            "color": "#f43f5e"
+        },
+        {
+            "x": 1740,
+            "y": 140,
+            "color": "#06b6d4"
+        }
+    ],
+    "enemies": [
+        {
+            "x": 2340,
+            "y": 360,
+            "rangeX": 120,
+            "speed": 1.2,
+            "isVertical": false,
+            "color": "#f43f5e",
+            "type": "patrol"
+        },
+        {
+            "x": 940,
+            "y": 120,
+            "rangeX": 120,
+            "speed": 1.2,
+            "isVertical": false,
+            "color": "#f43f5e",
+            "type": "patrol"
+        },
+        {
+            "x": 880,
+            "y": 280,
+            "rangeX": 120,
+            "speed": 1.2,
+            "isVertical": true,
+            "color": "#06b6d4",
+            "type": "patrol"
+        },
+        {
+            "x": 620,
+            "y": 80,
+            "rangeX": 120,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 1100,
+            "y": -20,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 800,
+            "y": 40,
+            "rangeX": 150,
+            "speed": 1.2,
+            "isVertical": false,
+            "color": "#06b6d4",
+            "type": "sweeper_ufo"
+        },
+        {
+            "x": 1300,
+            "y": -100,
+            "rangeX": 150,
+            "speed": 1.2,
+            "isVertical": false,
+            "color": "#06b6d4",
+            "type": "sweeper_ufo"
+        },
+        {
+            "x": 1800,
+            "y": -140,
+            "rangeX": 150,
+            "speed": 1.2,
+            "isVertical": false,
+            "color": "#06b6d4",
+            "type": "sweeper_ufo"
+        },
+        {
+            "x": 3020,
+            "y": 340,
+            "rangeX": 150,
+            "speed": 1,
+            "isVertical": false,
+            "color": "#10b981",
+            "type": "chaser"
+        },
+        {
+            "x": 2720,
+            "y": 340,
+            "rangeX": 150,
+            "speed": 1,
+            "isVertical": false,
+            "color": "#10b981",
+            "type": "chaser"
+        },
+        {
+            "x": 3460,
+            "y": 340,
+            "rangeX": 150,
+            "speed": 1,
+            "isVertical": false,
+            "color": "#10b981",
+            "type": "chaser"
+        },
+        {
+            "x": 3740,
+            "y": 340,
+            "rangeX": 150,
+            "speed": 1,
+            "isVertical": false,
+            "color": "#10b981",
+            "type": "chaser"
+        },
+        {
+            "x": 3600,
+            "y": 280,
+            "rangeX": 120,
+            "speed": 1.5,
+            "isVertical": true,
+            "color": "#d946ef",
+            "type": "patrol"
+        },
+        {
+            "x": 1560,
+            "y": -160,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 580,
+            "y": 180,
+            "rangeX": 150,
+            "speed": 1,
+            "isVertical": false,
+            "color": "#a855f7",
+            "type": "tractor_ufo"
+        },
+        {
+            "x": 400,
+            "y": -60,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        }
+    ],
+    "pressurePlates": [],
+    "pushBlocks": [],
+    "conveyors": [],
+    "teleportPairs": [],
+    "bouncePads": [],
+    "buttons": [],
+    "levers": [
+        {
+            "x": 80,
+            "y": -160,
+            "w": 32,
+            "h": 32,
+            "linkedGateId": 10
+        },
+        {
+            "x": 580,
+            "y": 440,
+            "w": 32,
+            "h": 32,
+            "linkedGateId": 95
+        }
+    ],
+    "flamethrowers": [
+        {
+            "id": 9301,
+            "startX": 360,
+            "startY": 180,
+            "x": 360,
+            "y": 180,
+            "w": 32,
+            "h": 32,
+            "dir": "left",
+            "range": 200,
+            "moving": true,
+            "moveRange": 100,
+            "moveSpeed": 1.5,
+            "moveAxis": "y",
+            "disabled": false,
+            "active": true
+        },
+        {
+            "id": 95,
+            "startX": 40,
+            "startY": -40,
+            "x": 40,
+            "y": -40,
+            "w": 32,
+            "h": 32,
+            "dir": "right",
+            "range": 200,
+            "moving": true,
+            "moveRange": 100,
+            "moveSpeed": 1.5,
+            "moveAxis": "y",
+            "disabled": false,
+            "active": true
+        }
+    ],
+    "fallingPlatforms": [],
+    "breakablePlatforms": [],
+    "hiddenPassages": [],
+    "fallingBlockTraps": [
+        {
+            "startX": 2580,
+            "startY": 80,
+            "x": 2580,
+            "y": 80,
+            "w": 60,
+            "h": 60,
+            "state": "idle",
+            "vy": 0,
+            "timer": 0
+        },
+        {
+            "startX": 1420,
+            "startY": 80,
+            "x": 1420,
+            "y": 80,
+            "w": 60,
+            "h": 60,
+            "state": "idle",
+            "vy": 0,
+            "timer": 0
+        },
+        {
+            "startX": 140,
+            "startY": -360,
+            "x": 140,
+            "y": -360,
+            "w": 60,
+            "h": 60,
+            "state": "idle",
+            "vy": 0,
+            "timer": 0
+        }
+    ],
+    "vantuzPoints": [],
+    "decorations": [
+        {
+            "x": 40,
+            "y": 420,
+            "w": 40,
+            "h": 40,
+            "type": "box",
+            "rotation": 0,
+            "state": 0,
+            "text": "",
+            "color": ""
+        },
+        {
+            "x": 80,
+            "y": 420,
+            "w": 40,
+            "h": 40,
+            "type": "box",
+            "rotation": 0,
+            "state": 0,
+            "text": "",
+            "color": ""
+        },
+        {
+            "x": 40,
+            "y": 380,
+            "w": 40,
+            "h": 40,
+            "type": "box",
+            "rotation": 0,
+            "state": 0,
+            "text": "",
+            "color": ""
+        },
+        {
+            "x": 120,
+            "y": 420,
+            "w": 40,
+            "h": 40,
+            "type": "fan",
+            "rotation": 281.39999999999884,
+            "state": 0,
+            "text": "",
+            "color": ""
+        },
+        {
+            "x": 20,
+            "y": 300,
+            "w": 20,
+            "h": 80,
+            "type": "neon_light",
+            "rotation": 0,
+            "state": 0,
+            "text": "",
+            "color": ""
+        },
+        {
+            "x": 20,
+            "y": 380,
+            "w": 20,
+            "h": 80,
+            "type": "neon_light",
+            "rotation": 0,
+            "state": 0,
+            "text": "",
+            "color": ""
+        }
+    ],
+    "laserEmitters": [],
+    "laserReceivers": [],
+    "staticMirrors": [],
+    "arrowShooters": [
+        {
+            "x": 1900,
+            "y": 0,
+            "w": 48,
+            "h": 48,
+            "dir": "target",
+            "detectionRadius": 400,
+            "fireInterval": 1,
+            "arrowSpeed": 9,
+            "arrowRange": 400
+        },
+        {
+            "x": 3580,
+            "y": 20,
+            "w": 48,
+            "h": 48,
+            "dir": "target",
+            "detectionRadius": 400,
+            "fireInterval": 1,
+            "arrowSpeed": 7.5,
+            "arrowRange": 400
+        }
+    ]
+};
         } else if (isEditorOrPlaytest) {
             // Boss bölümleri (10 ve 20) için lokal kayıtlı özel haritaları yükleme, orijinal boss dövüşünü yükle
             const isBossLvl = (levelNumber === 10 || levelNumber === 20);
@@ -3269,7 +4003,7 @@ export class Level {
         if (originalLevelNumber > 20 && originalLevelNumber <= 30) {
             this.name = `SİBER VERİ AKIŞI: ${this.name}`;
             
-            if (originalLevelNumber === 21) {
+            if (originalLevelNumber === 21 && !data) {
                 this.enemies = [
                     { x: 800, y: 150, rangeX: 120, speed: 1.2, type: 'tractor_ufo' },
                     { x: 2000, y: 120, rangeX: 150, speed: 1.0, type: 'tractor_ufo' }
