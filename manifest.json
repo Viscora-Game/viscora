@@ -3,7 +3,7 @@
   "short_name": "Viscora",
   "start_url": "./index.html",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#0d0d12",
   "theme_color": "#0d0d12",
   "orientation": "landscape",
