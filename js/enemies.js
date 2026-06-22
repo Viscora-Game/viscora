@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v182';
+import { audio } from './audio.js?v=v183';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -1056,7 +1056,7 @@ export class TractorUFO {
 }
 
 export class SweeperUFO {
-    constructor(x, y, rangeX = 150, speed = 1.2) {
+    constructor(x, y, rangeX = 150, speed = 1.2, laserType = null) {
         this.startX = x;
         this.startY = y;
         this.x = x;
@@ -1069,8 +1069,21 @@ export class SweeperUFO {
         this.maxX = x + rangeX;
         this.isDead = false;
 
-        this.color = '#ff0055';
-        this.colorSecondary = '#990022';
+        // Lazer rengi/türü (cyan, pink, green)
+        const types = ['cyan', 'pink', 'green'];
+        this.laserType = laserType && types.includes(laserType) ? laserType : types[Math.floor(Math.random() * types.length)];
+
+        if (this.laserType === 'pink') {
+            this.color = '#d946ef';
+            this.colorSecondary = '#c084fc';
+        } else if (this.laserType === 'green') {
+            this.color = '#10b981';
+            this.colorSecondary = '#059669';
+        } else { // cyan
+            this.color = '#06b6d4';
+            this.colorSecondary = '#0891b2';
+        }
+
         this.pulseTime = Math.random() * 100;
         
         this.state = 'patrol';
@@ -1122,7 +1135,7 @@ export class SweeperUFO {
 
         if (this.state === 'patrol' || this.state === 'track') {
             this.lastLaserTime += 1 / 60;
-            const cycleDuration = 4.5;
+            const cycleDuration = 5.0; // Inactive time increased from 1.5s to 2.0s (3.0s active + 2.0s inactive)
             const activeDuration = 3.0;
             if (this.lastLaserTime >= cycleDuration) {
                 this.lastLaserTime = 0;
@@ -1144,8 +1157,20 @@ export class SweeperUFO {
                               player.y - player.radius < this.y + this.beamHeight;
 
             if (hitPlayer && this.laserDamageCooldown <= 0) {
-                player.takeDamage(1);
-                this.laserDamageCooldown = 5.0; // İlk çarpmadan sonra 5 saniye bekleme süresi
+                // Renge göre doğru formdaysak hasar almayalım
+                let isSafe = false;
+                if (this.laserType === 'cyan' && player.viscosity.id === 'LOW') {
+                    isSafe = true;
+                } else if (this.laserType === 'pink' && player.viscosity.id === 'HIGH') {
+                    isSafe = true;
+                } else if (this.laserType === 'green' && player.viscosity.id === 'NORMAL') {
+                    isSafe = true;
+                }
+
+                if (!isSafe) {
+                    player.takeDamage(1);
+                    this.laserDamageCooldown = 5.0; // İlk çarpmadan sonra 5 saniye bekleme süresi
+                }
             }
 
             // Parçacık Fırlatma
@@ -1263,14 +1288,19 @@ export class SweeperUFO {
 
         if ((this.state === 'track' || this.state === 'patrol') && this.laserActive) {
             ctx.save();
+            
+            let laserColor = '#06b6d4';
+            if (this.laserType === 'pink') laserColor = '#d946ef';
+            else if (this.laserType === 'green') laserColor = '#10b981';
+
             // 1. Dış Parlama (Outer neon glow)
-            ctx.shadowColor = '#ff0055';
+            ctx.shadowColor = laserColor;
             ctx.shadowBlur = 25;
-            ctx.fillStyle = 'rgba(255, 0, 85, 0.3)';
+            ctx.fillStyle = this.laserType === 'pink' ? 'rgba(217, 70, 239, 0.3)' : (this.laserType === 'green' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(6, 182, 212, 0.3)');
             ctx.fillRect(this.laserX - 12, this.y + 10, 24, this.beamHeight);
 
-            // 2. Canlı Kırmızı Hüzme (Vibrant middle beam)
-            ctx.fillStyle = 'rgba(255, 0, 85, 0.8)';
+            // 2. Canlı Lazer Hüzmesi (Vibrant middle beam)
+            ctx.fillStyle = this.laserType === 'pink' ? 'rgba(217, 70, 239, 0.8)' : (this.laserType === 'green' ? 'rgba(16, 185, 129, 0.8)' : 'rgba(6, 182, 212, 0.8)');
             ctx.fillRect(this.laserX - 6, this.y + 10, 12, this.beamHeight);
 
             // 3. Parlak Beyaz Çekirdek (Bright white core)

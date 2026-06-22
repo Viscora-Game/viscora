@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v182';
-import { audio } from './audio.js?v=v182';
-import { LevelGenerator } from './generator.js?v=v182';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v183';
+import { audio } from './audio.js?v=v183';
+import { LevelGenerator } from './generator.js?v=v183';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -649,7 +649,7 @@ export class LevelEditor {
                 } else if (e.type === 'tractor_ufo') {
                     return new TractorUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.0);
                 } else if (e.type === 'sweeper_ufo') {
-                    return new SweeperUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2);
+                    return new SweeperUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, e.laserType);
                 } else {
                     return new Enemy(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, !!e.isVertical, e.color || '#f43f5e');
                 }
@@ -1479,6 +1479,20 @@ export class LevelEditor {
                         </select>
                     </div>
                 `;
+            } else if (isSweeper) {
+                html += `
+                    <div class="editor-input-group">
+                        <label>Lazer Türü</label>
+                        <select id="inspect-enemy-laser-type">
+                            <option value="cyan" ${obj.laserType === 'cyan' || !obj.laserType ? 'selected' : ''}>Mavi Lazer (Mavi Form)</option>
+                            <option value="pink" ${obj.laserType === 'pink' ? 'selected' : ''}>Pembe Lazer (Pembe Form)</option>
+                            <option value="green" ${obj.laserType === 'green' ? 'selected' : ''}>Yeşil Lazer (Yeşil Form)</option>
+                        </select>
+                    </div>
+                    <div style="font-size: 11px; color: #ff0055; margin-top: 5px; line-height: 1.3; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 5px;">
+                        ℹ️ Lazer UFO 3 saniye lazer verir, 2 saniye beklemede kalır. Lazer rengiyle aynı viscosity formundaysanız hasar almazsınız!
+                    </div>
+                `;
             } else if (isChaser) {
                 html += `
                     <div style="font-size: 11px; color: #34d399; margin-top: 5px; line-height: 1.3; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 5px;">
@@ -1930,6 +1944,7 @@ export class LevelEditor {
             });
         }
         addUpdateEvent('inspect-enemy-color', (val) => { obj.color = val; return val; });
+        addUpdateEvent('inspect-enemy-laser-type', (val) => { obj.laserType = val; });
         addUpdateEvent('inspect-collectible-color', (val) => { obj.color = val; return val; });
         addUpdateEvent('inspect-conveyor-dir', (val) => { obj.direction = parseInt(val) || 1; return obj.direction; });
         addUpdateEvent('inspect-conveyor-speed', (val) => { obj.speed = Math.max(0.1, Math.min(parseFloat(val) || 1.5, 15.0)); return obj.speed; });
@@ -2157,7 +2172,7 @@ export class LevelEditor {
                 } else if (e.type === 'tractor_ufo') {
                     return new TractorUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.0);
                 } else if (e.type === 'sweeper_ufo') {
-                    return new SweeperUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2);
+                    return new SweeperUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, e.laserType);
                 } else {
                     return new Enemy(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, !!e.isVertical, e.color || '#f43f5e');
                 }

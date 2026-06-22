@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v182';
-import { Level } from './level.js?v=v182';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v182';
-import { UIManager } from './ui.js?v=v182';
-import { audio } from './audio.js?v=v182';
-import { LevelEditor } from './editor.js?v=v182';
-import { Boss, CyberBoss } from './boss.js?v=v182';
+import { Player } from './player.js?v=v183';
+import { Level } from './level.js?v=v183';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v183';
+import { UIManager } from './ui.js?v=v183';
+import { audio } from './audio.js?v=v183';
+import { LevelEditor } from './editor.js?v=v183';
+import { Boss, CyberBoss } from './boss.js?v=v183';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -360,7 +360,7 @@ export class GameManager {
                 } else if (e.type === 'tractor_ufo') {
                     return new TractorUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.0);
                 } else if (e.type === 'sweeper_ufo') {
-                    return new SweeperUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2);
+                    return new SweeperUFO(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, e.laserType);
                 } else {
                     return new Enemy(e.x, e.y, e.rangeX !== undefined ? e.rangeX : 150, e.speed !== undefined ? e.speed : 1.2, !!e.isVertical, e.color || '#f43f5e');
                 }

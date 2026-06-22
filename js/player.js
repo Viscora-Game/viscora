@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v182';
-import { audio } from './audio.js?v=v182';
+import { ViscosityStates } from './viscosity.js?v=v183';
+import { audio } from './audio.js?v=v183';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -777,24 +777,44 @@ export class Player {
         // Ölüm çukuru tespiti (Lava/Asit nehrine temas)
         if (this.y + this.radius >= level.height - 35) {
             if (!this.isDead) {
-                // Snap to surface and stop velocity
-                this.y = level.height - 35 - this.radius;
-                this.vx = 0;
-                this.vy = 0;
+                // Alt kısımda katı bir platform üzerinde durup durmadığımızı kontrol et
+                let standingOnPlatform = false;
+                const colliders = [
+                    ...(level.platforms || []),
+                    ...(level.movingPlatforms || []),
+                    ...(level.fallingPlatforms || []),
+                    ...(level.breakablePlatforms || []),
+                    ...(level.pushBlocks || []).filter(b => !b.broken)
+                ];
+                for (const col of colliders) {
+                    if (this.x + this.radius - 4 > col.x && this.x - this.radius + 4 < col.x + col.w) {
+                        if (this.y + this.radius >= col.y - 5 && this.y - this.radius <= col.y + col.h + 5) {
+                            standingOnPlatform = true;
+                            break;
+                        }
+                    }
+                }
 
-                // Hasar alma (melt tipi ile anında erime ölüm animasyonu başlatılır)
-                this.takeDamage(this.health, 'melt');
+                if (!standingOnPlatform) {
+                    // Snap to surface and stop velocity
+                    this.y = level.height - 35 - this.radius;
+                    this.vx = 0;
+                    this.vy = 0;
 
-                // Kamerayı sars ve duman/buhar pufu çıkar
-                if (this.game) {
-                    this.game.shakeCamera(8, 15);
-                    const theme = (this.game.level && this.game.level.theme) ? this.game.level.theme : null;
-                    const riverColor = (theme && theme.bottomRiverShadow) ? theme.bottomRiverShadow : '#10b981';
-                    
-                    // Gri/beyaz duman pufu
-                    this.game.emitParticles(this.x, level.height - 35, 'smoke', '#e2e8f0', 20);
-                    // Renkli nehir buharı pufu
-                    this.game.emitParticles(this.x, level.height - 35, 'steam', riverColor, 20);
+                    // Hasar alma (melt tipi ile anında erime ölüm animasyonu başlatılır)
+                    this.takeDamage(this.health, 'melt');
+
+                    // Kamerayı sars ve duman/buhar pufu çıkar
+                    if (this.game) {
+                        this.game.shakeCamera(8, 15);
+                        const theme = (this.game.level && this.game.level.theme) ? this.game.level.theme : null;
+                        const riverColor = (theme && theme.bottomRiverShadow) ? theme.bottomRiverShadow : '#10b981';
+                        
+                        // Gri/beyaz duman pufu
+                        this.game.emitParticles(this.x, level.height - 35, 'smoke', '#e2e8f0', 20);
+                        // Renkli nehir buharı pufu
+                        this.game.emitParticles(this.x, level.height - 35, 'steam', riverColor, 20);
+                    }
                 }
             }
         }
