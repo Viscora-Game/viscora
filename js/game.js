@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v181';
-import { Level } from './level.js?v=v181';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v181';
-import { UIManager } from './ui.js?v=v181';
-import { audio } from './audio.js?v=v181';
-import { LevelEditor } from './editor.js?v=v181';
-import { Boss, CyberBoss } from './boss.js?v=v181';
+import { Player } from './player.js?v=v182';
+import { Level } from './level.js?v=v182';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v182';
+import { UIManager } from './ui.js?v=v182';
+import { audio } from './audio.js?v=v182';
+import { LevelEditor } from './editor.js?v=v182';
+import { Boss, CyberBoss } from './boss.js?v=v182';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -506,18 +506,35 @@ export class GameManager {
         let limit3Stars = 40;
         let limit2Stars = 50;
 
-        if (this.difficulty === 'easy') {
-            limit3Stars = 45;
-            limit2Stars = 55;
-        } else if (this.difficulty === 'normal') {
-            limit3Stars = 40;
-            limit2Stars = 50;
-        } else if (this.difficulty === 'hard') {
-            limit3Stars = 52.5;
-            limit2Stars = 67.5;
-        } else if (this.difficulty === 'hardcore') {
-            limit3Stars = 67.5;
-            limit2Stars = 90;
+        const isChapter3 = (this.currentLevel >= 21 && this.currentLevel <= 30);
+        if (isChapter3) {
+            if (this.difficulty === 'easy') {
+                limit3Stars = 60;
+                limit2Stars = 75;
+            } else if (this.difficulty === 'normal') {
+                limit3Stars = 75;
+                limit2Stars = 95;
+            } else if (this.difficulty === 'hard') {
+                limit3Stars = 90;
+                limit2Stars = 115;
+            } else if (this.difficulty === 'hardcore') {
+                limit3Stars = 120;
+                limit2Stars = 150;
+            }
+        } else {
+            if (this.difficulty === 'easy') {
+                limit3Stars = 45;
+                limit2Stars = 55;
+            } else if (this.difficulty === 'normal') {
+                limit3Stars = 40;
+                limit2Stars = 50;
+            } else if (this.difficulty === 'hard') {
+                limit3Stars = 52.5;
+                limit2Stars = 67.5;
+            } else if (this.difficulty === 'hardcore') {
+                limit3Stars = 67.5;
+                limit2Stars = 90;
+            }
         }
 
         // Seviye genişliğine göre ek süre ekleme: 3000 px üzerindeki her 1000 px için tüm modlara +12.5 saniye ek süre

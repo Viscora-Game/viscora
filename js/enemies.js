@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v181';
+import { audio } from './audio.js?v=v182';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -1261,21 +1261,21 @@ export class SweeperUFO {
         const w = 48 + pulse;
         const h = 20 - pulse * 0.5;
 
-        if (this.state === 'track' && this.laserActive) {
+        if ((this.state === 'track' || this.state === 'patrol') && this.laserActive) {
             ctx.save();
+            // 1. Dış Parlama (Outer neon glow)
             ctx.shadowColor = '#ff0055';
-            ctx.shadowBlur = 20;
+            ctx.shadowBlur = 25;
+            ctx.fillStyle = 'rgba(255, 0, 85, 0.3)';
+            ctx.fillRect(this.laserX - 12, this.y + 10, 24, this.beamHeight);
+
+            // 2. Canlı Kırmızı Hüzme (Vibrant middle beam)
             ctx.fillStyle = 'rgba(255, 0, 85, 0.8)';
             ctx.fillRect(this.laserX - 6, this.y + 10, 12, this.beamHeight);
 
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(this.laserX - 2, this.y + 10);
-            ctx.lineTo(this.laserX - 2, this.y + this.beamHeight);
-            ctx.moveTo(this.laserX + 2, this.y + 10);
-            ctx.lineTo(this.laserX + 2, this.y + this.beamHeight);
-            ctx.stroke();
+            // 3. Parlak Beyaz Çekirdek (Bright white core)
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(this.laserX - 2, this.y + 10, 4, this.beamHeight);
             ctx.restore();
         }
 
