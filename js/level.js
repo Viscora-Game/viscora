@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v173';
-import { THEMES } from './generator.js?v=v173';
+import { audio } from './audio.js?v=v174';
+import { THEMES } from './generator.js?v=v174';
 
 /**
  * Viscora Level Design & Manager
@@ -104,8 +104,8 @@ export class Level {
             "type": "normal"
         },
         {
-            "x": 1540,
-            "y": -20,
+            "x": 1550,
+            "y": 0,
             "w": 50,
             "h": 420,
             "type": "sticky"
@@ -147,7 +147,7 @@ export class Level {
         },
         {
             "x": 1460,
-            "y": -120,
+            "y": -140,
             "w": 220,
             "h": 40,
             "type": "normal"
@@ -181,14 +181,14 @@ export class Level {
             "type": "normal"
         },
         {
-            "x": 160,
+            "x": 180,
             "y": 320,
             "w": 60,
             "h": 20,
             "type": "normal"
         },
         {
-            "x": 40,
+            "x": 60,
             "y": 160,
             "w": 60,
             "h": 20,
@@ -218,7 +218,7 @@ export class Level {
     ],
     "spikes": [
         {
-            "x": 220,
+            "x": 200,
             "y": 440,
             "w": 60,
             "h": 20,
@@ -253,7 +253,7 @@ export class Level {
             "direction": "up"
         },
         {
-            "x": 320,
+            "x": 300,
             "y": 440,
             "w": 60,
             "h": 20,
@@ -482,8 +482,8 @@ export class Level {
             "type": "patrol"
         },
         {
-            "x": 620,
-            "y": 80,
+            "x": 680,
+            "y": 60,
             "rangeX": 120,
             "speed": 2,
             "isVertical": false,
@@ -519,7 +519,7 @@ export class Level {
         },
         {
             "x": 1800,
-            "y": -140,
+            "y": -160,
             "rangeX": 150,
             "speed": 1.2,
             "isVertical": false,
@@ -581,8 +581,8 @@ export class Level {
             "type": "patrol"
         },
         {
-            "x": 580,
-            "y": 180,
+            "x": 480,
+            "y": 140,
             "rangeX": 150,
             "speed": 1,
             "isVertical": false,
@@ -623,28 +623,11 @@ export class Level {
     ],
     "flamethrowers": [
         {
-            "id": 9301,
-            "startX": 420,
-            "startY": 160,
-            "x": 420,
-            "y": 160,
-            "w": 32,
-            "h": 58,
-            "dir": "left",
-            "range": 200,
-            "moving": true,
-            "moveRange": 100,
-            "moveSpeed": 1.5,
-            "moveAxis": "y",
-            "disabled": false,
-            "active": true
-        },
-        {
             "id": 95,
             "startX": 40,
-            "startY": -40,
+            "startY": -20,
             "x": 40,
-            "y": -40,
+            "y": -20,
             "w": 32,
             "h": 58,
             "dir": "right",
@@ -684,9 +667,9 @@ export class Level {
             "timer": 0
         },
         {
-            "startX": 140,
+            "startX": 160,
             "startY": -360,
-            "x": 140,
+            "x": 160,
             "y": -360,
             "w": 60,
             "h": 60,
@@ -776,7 +759,7 @@ export class Level {
             "dir": "target",
             "detectionRadius": 400,
             "fireInterval": 1,
-            "arrowSpeed": 9,
+            "arrowSpeed": 7,
             "arrowRange": 400
         },
         {
@@ -792,7 +775,7 @@ export class Level {
         }
     ]
 };
-        } else if (isEditorOrPlaytest) {
+        } } else if (isEditorOrPlaytest) {
             // Boss bölümleri (10 ve 20) için lokal kayıtlı özel haritaları yükleme, orijinal boss dövüşünü yükle
             const isBossLvl = (levelNumber === 10 || levelNumber === 20);
             if (!isBossLvl) {
