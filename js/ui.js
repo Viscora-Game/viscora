@@ -1398,7 +1398,9 @@ export class UIManager {
                 const remainingSeconds = Math.max(0, allowedSeconds - ageSeconds);
 
                 let expiryClass = '';
-                if (remainingSeconds < 6 * 3600) {
+                if (level.likes >= 50) {
+                    expiryClass = 'immortal';
+                } else if (remainingSeconds < 6 * 3600) {
                     expiryClass = 'danger';
                 } else if (remainingSeconds < 12 * 3600) {
                     expiryClass = 'warning';
@@ -1424,7 +1426,7 @@ export class UIManager {
                         <div class="map-author">Tasarımcı: <span>${level.author}</span></div>
                         ${tagsHtml}
                         <div class="map-expiry ${expiryClass}" id="expiry-${level.id}" data-played-at="${playedTimeStr}" data-likes="${level.likes}">
-                            <svg class="icon-svg" style="margin-right: 4px;"><use href="#icon-time"></use></svg> <span class="expiry-timer">${formatRemainingTime(remainingSeconds)}</span>
+                            <svg class="icon-svg" style="margin-right: 4px;"><use href="${level.likes >= 50 ? '#icon-star' : '#icon-time'}"></use></svg> <span class="expiry-timer">${level.likes >= 50 ? 'Kalıcı Bölüm' : formatRemainingTime(remainingSeconds)}</span>
                         </div>
                     </div>
                     <div class="map-actions">
@@ -1458,20 +1460,29 @@ export class UIManager {
                             const expiryEl = item.querySelector(`#expiry-${level.id}`);
                             if (expiryEl) {
                                 expiryEl.setAttribute('data-likes', updated.likes);
-                                const pTimeStr = expiryEl.getAttribute('data-played-at');
-                                const pTime = new Date(pTimeStr).getTime();
-                                const ageSecs = (Date.now() - pTime) / 1000;
-                                const allowedSecs = 24 * 3600 + (updated.likes * 12 * 3600);
-                                const remSecs = Math.max(0, allowedSecs - ageSecs);
-                                
                                 const timerSpan = expiryEl.querySelector('.expiry-timer');
-                                if (timerSpan) timerSpan.textContent = formatRemainingTime(remSecs);
+                                const useEl = expiryEl.querySelector('use');
+                                if (updated.likes >= 50) {
+                                    expiryEl.classList.remove('warning', 'danger');
+                                    expiryEl.classList.add('immortal');
+                                    if (timerSpan) timerSpan.textContent = 'Kalıcı Bölüm';
+                                    if (useEl) useEl.setAttribute('href', '#icon-star');
+                                } else {
+                                    const pTimeStr = expiryEl.getAttribute('data-played-at');
+                                    const pTime = new Date(pTimeStr).getTime();
+                                    const ageSecs = (Date.now() - pTime) / 1000;
+                                    const allowedSecs = 24 * 3600 + (updated.likes * 12 * 3600);
+                                    const remSecs = Math.max(0, allowedSecs - ageSecs);
+                                    
+                                    if (timerSpan) timerSpan.textContent = formatRemainingTime(remSecs);
+                                    if (useEl) useEl.setAttribute('href', '#icon-time');
 
-                                expiryEl.classList.remove('warning', 'danger');
-                                if (remSecs < 6 * 3600) {
-                                    expiryEl.classList.add('danger');
-                                } else if (remSecs < 12 * 3600) {
-                                    expiryEl.classList.add('warning');
+                                    expiryEl.classList.remove('warning', 'danger', 'immortal');
+                                    if (remSecs < 6 * 3600) {
+                                        expiryEl.classList.add('danger');
+                                    } else if (remSecs < 12 * 3600) {
+                                        expiryEl.classList.add('warning');
+                                    }
                                 }
                             }
                             
@@ -1499,7 +1510,8 @@ export class UIManager {
                     audio.init();
                     audio.startMusic();
                     
-                    fetch(`${API_BASE}/api/levels/${level.id}/play`, { method: 'POST' }).catch(() => {});
+                    const myUserId = localStorage.getItem('viscora_user_id') || 'anonymous';
+                    fetch(`${API_BASE}/api/levels/${level.id}/play?userId=${myUserId}`, { method: 'POST' }).catch(() => {});
                     
                     this.game.isCommunityPlay = true;
                     this.game.startCustomLevel(level.data);
@@ -1511,8 +1523,23 @@ export class UIManager {
             this.communityInterval = setInterval(() => {
                 const timerEls = listEl.querySelectorAll('.map-expiry');
                 timerEls.forEach(el => {
-                    const pTimeStr = el.getAttribute('data-played-at');
                     const likes = parseInt(el.getAttribute('data-likes')) || 0;
+                    if (likes >= 50) {
+                        const timerSpan = el.querySelector('.expiry-timer');
+                        if (timerSpan && timerSpan.textContent !== 'Kalıcı Bölüm') {
+                            timerSpan.textContent = 'Kalıcı Bölüm';
+                        }
+                        const useEl = el.querySelector('use');
+                        if (useEl && useEl.getAttribute('href') !== '#icon-star') {
+                            useEl.setAttribute('href', '#icon-star');
+                        }
+                        el.classList.remove('warning', 'danger');
+                        if (!el.classList.contains('immortal')) {
+                            el.classList.add('immortal');
+                        }
+                        return;
+                    }
+                    const pTimeStr = el.getAttribute('data-played-at');
                     const pTime = new Date(pTimeStr).getTime();
                     const ageSecs = (Date.now() - pTime) / 1000;
                     const allowedSecs = 24 * 3600 + (likes * 12 * 3600);
@@ -1522,8 +1549,12 @@ export class UIManager {
                     if (timerSpan) {
                         timerSpan.textContent = formatRemainingTime(remSecs);
                     }
+                    const useEl = el.querySelector('use');
+                    if (useEl && useEl.getAttribute('href') !== '#icon-time') {
+                        useEl.setAttribute('href', '#icon-time');
+                    }
                     
-                    el.classList.remove('warning', 'danger');
+                    el.classList.remove('warning', 'danger', 'immortal');
                     if (remSecs < 6 * 3600) {
                         el.classList.add('danger');
                     } else if (remSecs < 12 * 3600) {

@@ -1610,6 +1610,13 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     box-shadow: 0 0 5px rgba(239, 68, 68, 0.05);
 }
 
+.map-expiry.immortal {
+    color: #eab308;
+    background: rgba(234, 179, 8, 0.08);
+    border-color: rgba(234, 179, 8, 0.3);
+    box-shadow: 0 0 8px rgba(234, 179, 8, 0.15);
+}
+
 .btn-like {
     background: rgba(217, 70, 239, 0.15);
     border: 1px solid rgba(217, 70, 239, 0.3);

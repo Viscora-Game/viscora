@@ -204,16 +204,17 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 creator_id = level.get('creatorId', '')
                 likes = level.get('likes', 0)
                 allowed_age_seconds = 86400 + (likes * 12 * 3600)
+                is_immortal = likes >= 50
 
-                # Kalıcı Silme: Son oynanıştan itibaren 30 gün geçmişse db'den tamamen kaldır (Sahibi dahil)
-                if age_seconds > allowed_age_seconds + (30 * 86400):
+                # Kalıcı Silme: 50 beğeni altındaysa ve son oynanıştan itibaren 30 gün geçmişse db'den tamamen kaldır (Sahibi dahil)
+                if not is_immortal and age_seconds > allowed_age_seconds + (30 * 86400):
                     db_changed = True
                     continue # db_maps.json'a dahil etme
 
                 cleaned_db.append(level)
 
-                # Yanıt Filtreleme: Süre dolmadıysa VEYA istek atan kişi bölümün yaratıcısıysa göster
-                if age_seconds <= allowed_age_seconds or creator_id == user_id:
+                # Yanıt Filtreleme: Süre dolmadıysa, ebediyse VEYA istek atan kişi bölümün yaratıcısıysa göster
+                if is_immortal or age_seconds <= allowed_age_seconds or creator_id == user_id:
                     response_db.append(level)
 
             if db_changed:
@@ -269,6 +270,7 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         parsed_url = urllib.parse.urlparse(self.path)
         path = parsed_url.path
+        query = urllib.parse.parse_qs(parsed_url.query)
 
         # Content length oku
         content_length = int(self.headers.get('Content-Length', 0))
@@ -376,11 +378,14 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
             parts = path.split('/')
             if len(parts) >= 4:
                 level_id = parts[3]
+                user_id = query.get('userId', [''])[0]
                 db = read_db()
                 found = None
                 for level in db:
                     if level['id'] == level_id:
-                        level['lastPlayedAt'] = datetime.now(timezone.utc).isoformat()
+                        # Kendi haritasını oynarken süreyi sıfırlayamasın/uzatamasın
+                        if level.get('creatorId') != user_id:
+                            level['lastPlayedAt'] = datetime.now(timezone.utc).isoformat()
                         found = level
                         break
 
