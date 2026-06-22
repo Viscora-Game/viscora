@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v152';
+import { audio } from './audio.js?v=v153';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -975,7 +975,7 @@ export class TractorUFO {
                 }
                 player.vy = -6.5;
             } else {
-                player.takeDamage(1);
+                // Tractor UFO deals no damage on contact, it only pulls
             }
         }
     }
@@ -1151,8 +1151,8 @@ export class SweeperUFO {
 
             // Play laser sound periodically while tracking
             this.lastLaserTime += 1 / 60;
-            const cycleDuration = 1.6;
-            const activeDuration = 0.6;
+            const cycleDuration = 2.2;
+            const activeDuration = 1.0;
             if (this.lastLaserTime >= cycleDuration) {
                 this.lastLaserTime = 0;
                 try { audio.playLaser(); } catch(e){}
