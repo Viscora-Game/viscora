@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v170';
-import { THEMES } from './generator.js?v=v170';
+import { audio } from './audio.js?v=v171';
+import { THEMES } from './generator.js?v=v171';
 
 /**
  * Viscora Level Design & Manager
@@ -58,9 +58,9 @@ export class Level {
         let data = null;
         if (typeof levelNumber === 'object' && levelNumber !== null) {
             data = levelNumber;
-        } else if (originalLevelNumber === 21 && !data) {
+        } else if (originalLevelNumber === 21) {
             data = {
-    "serverLevelId": null,
+    "serverLevelId": "map_1782162169371_168",
     "name": "Özel Seviye",
     "tags": [],
     "themeId": "neon_sewer",
@@ -182,7 +182,7 @@ export class Level {
         },
         {
             "x": 160,
-            "y": 300,
+            "y": 320,
             "w": 60,
             "h": 20,
             "type": "normal"
@@ -445,12 +445,12 @@ export class Level {
         {
             "x": 2820,
             "y": 180,
-            "color": "#f43f5e"
+            "color": "#eab308"
         },
         {
             "x": 1740,
             "y": 140,
-            "color": "#06b6d4"
+            "color": "#eab308"
         }
     ],
     "enemies": [
@@ -500,8 +500,8 @@ export class Level {
             "type": "patrol"
         },
         {
-            "x": 800,
-            "y": 40,
+            "x": 2240,
+            "y": -240,
             "rangeX": 150,
             "speed": 1.2,
             "isVertical": false,
@@ -624,12 +624,12 @@ export class Level {
     "flamethrowers": [
         {
             "id": 9301,
-            "startX": 360,
-            "startY": 180,
-            "x": 360,
-            "y": 180,
+            "startX": 420,
+            "startY": 160,
+            "x": 420,
+            "y": 160,
             "w": 32,
-            "h": 32,
+            "h": 58,
             "dir": "left",
             "range": 200,
             "moving": true,
@@ -646,7 +646,7 @@ export class Level {
             "x": 40,
             "y": -40,
             "w": 32,
-            "h": 32,
+            "h": 58,
             "dir": "right",
             "range": 200,
             "moving": true,
@@ -792,7 +792,7 @@ export class Level {
         }
     ]
 };
-        } else if (isEditorOrPlaytest) {
+        } } else if (isEditorOrPlaytest) {
             // Boss bölümleri (10 ve 20) için lokal kayıtlı özel haritaları yükleme, orijinal boss dövüşünü yükle
             const isBossLvl = (levelNumber === 10 || levelNumber === 20);
             if (!isBossLvl) {
