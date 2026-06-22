@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v172';
+import { audio } from './audio.js?v=v173';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -1120,9 +1120,46 @@ export class SweeperUFO {
         }
         this.beamHeight = Math.max(50, targetY - this.y);
 
+        if (this.state === 'patrol' || this.state === 'track') {
+            this.lastLaserTime += 1 / 60;
+            const cycleDuration = 4.5;
+            const activeDuration = 3.0;
+            if (this.lastLaserTime >= cycleDuration) {
+                this.lastLaserTime = 0;
+                try { audio.playLaser(); } catch(e){}
+            }
+            this.laserActive = (this.lastLaserTime < activeDuration);
+            this.laserX = this.x;
+
+            if (this.laserDamageCooldown > 0) {
+                this.laserDamageCooldown -= 1 / 60;
+            }
+
+            // Hasar Kontrolü
+            const laserHalfWidth = 8;
+            const hitPlayer = this.laserActive &&
+                              player.x + player.radius > this.laserX - laserHalfWidth && 
+                              player.x - player.radius < this.laserX + laserHalfWidth && 
+                              player.y + player.radius > this.y + 10 && 
+                              player.y - player.radius < this.y + this.beamHeight;
+
+            if (hitPlayer && this.laserDamageCooldown <= 0) {
+                player.takeDamage(1);
+                this.laserDamageCooldown = 5.0; // İlk çarpmadan sonra 5 saniye bekleme süresi
+            }
+
+            // Parçacık Fırlatma
+            if (this.laserActive && emitParticles && Math.random() < 0.25) {
+                emitParticles(this.laserX, this.y + this.beamHeight, 'custom', '#ff0055', 4, {
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: -0.5 - Math.random() * 1.5,
+                    life: 15 + Math.random() * 10,
+                    size: 3 + Math.random() * 2
+                });
+            }
+        }
+
         if (this.state === 'patrol') {
-            this.laserActive = false;
-            this.laserDamageCooldown = 0;
             this.x += this.vx;
             if (this.x < this.minX) {
                 this.x = this.minX;
@@ -1136,8 +1173,6 @@ export class SweeperUFO {
             if (isUnderneath) {
                 this.state = 'track';
                 this.trackTimer = 5.0;
-                this.lastLaserTime = 0;
-                try { audio.playLaser(); } catch(e){}
             }
         } else if (this.state === 'track') {
             const targetX = player.x;
@@ -1148,43 +1183,6 @@ export class SweeperUFO {
             if (this.x > this.maxX) this.x = this.maxX;
 
             this.trackTimer -= 1 / 60;
-
-            // Play laser sound periodically while tracking
-            this.lastLaserTime += 1 / 60;
-            const cycleDuration = 2.2;
-            const activeDuration = 1.0;
-            if (this.lastLaserTime >= cycleDuration) {
-                this.lastLaserTime = 0;
-                try { audio.playLaser(); } catch(e){}
-            }
-
-            this.laserActive = (this.lastLaserTime < activeDuration);
-            this.laserX = this.x;
-            
-            if (this.laserDamageCooldown > 0) {
-                this.laserDamageCooldown -= 1 / 60;
-            }
-
-            const laserHalfWidth = 8;
-            const hitPlayer = this.laserActive &&
-                              player.x + player.radius > this.laserX - laserHalfWidth && 
-                              player.x - player.radius < this.laserX + laserHalfWidth && 
-                              player.y + player.radius > this.y + 10 && 
-                              player.y - player.radius < this.y + this.beamHeight;
-
-            if (hitPlayer && this.laserDamageCooldown <= 0) {
-                player.takeDamage(1);
-                this.laserDamageCooldown = 1.0; // Deal damage at most once per active burst
-            }
-
-            if (this.laserActive && emitParticles && Math.random() < 0.25) {
-                emitParticles(this.laserX, this.y + this.beamHeight, 'custom', '#ff0055', 4, {
-                    vx: (Math.random() - 0.5) * 6,
-                    vy: -0.5 - Math.random() * 1.5,
-                    life: 15 + Math.random() * 10,
-                    size: 3 + Math.random() * 2
-                });
-            }
 
             if (this.trackTimer <= 0) {
                 this.state = 'overheat';
