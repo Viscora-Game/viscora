@@ -3212,7 +3212,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         width: auto !important;
     }
     #community-screen #community-search-input {
-        padding: 6px 10px !important;
+        padding: 6px 10px 6px 36px !important;
         font-size: 0.78rem !important;
     }
     #community-screen .tags-filter-container {
