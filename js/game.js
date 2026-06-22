@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v184';
-import { Level } from './level.js?v=v184';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v184';
-import { UIManager } from './ui.js?v=v184';
-import { audio } from './audio.js?v=v184';
-import { LevelEditor } from './editor.js?v=v184';
-import { Boss, CyberBoss } from './boss.js?v=v184';
+import { Player } from './player.js?v=v185';
+import { Level } from './level.js?v=v185';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v185';
+import { UIManager } from './ui.js?v=v185';
+import { audio } from './audio.js?v=v185';
+import { LevelEditor } from './editor.js?v=v185';
+import { Boss, CyberBoss } from './boss.js?v=v185';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -19,7 +19,7 @@ const LEVEL_NAMES = [
     "KİMYASAL REAKTÖR",
     "KOZMİK ÇEKİRDEK",
     "ÖLÜMCÜL BASINÇ ODASI",
-    "MEKANİK HAVALANDIRMA",
+    "SİBER VERİ AKIŞI",
     "TOKSİK PORTAL AĞI",
     "HAVALANDIRMA ŞAFTI",
     "ASİT KANALLARI",
