@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v188';
-import { Enemy, GelChaser } from './enemies.js?v=v188';
+import { audio } from './audio.js?v=v189';
+import { Enemy, GelChaser } from './enemies.js?v=v189';
 
 export class Boss {
     constructor(x, y) {
@@ -1721,7 +1721,7 @@ export class UfoBoss extends Boss {
         this.maxHealth = 5;
 
         // Custom state machine
-        this.state = 'HOVERING'; // 'HOVERING', 'SPAWNING', 'GRID_ATTACK', 'LASER_SWEEP', 'VULNERABLE'
+        this.state = 'PATROLLING'; // 'PATROLLING', 'HOVERING', 'SPAWNING', 'GRID_ATTACK', 'LASER_SWEEP', 'VULNERABLE'
         this.stateTimer = 0;
         
         // Timers
@@ -1748,6 +1748,10 @@ export class UfoBoss extends Boss {
         this.tractorBeamAlpha = 0;
 
         this.sparks = [];
+
+        // Patrol & Detection
+        this.detectionRadius = 500;
+        this.patrolDir = 1;
     }
 
     update(level, player) {
@@ -1803,8 +1807,35 @@ export class UfoBoss extends Boss {
             this.vy = 0;
         }
 
+        // Transition between PATROLLING and HOVERING/active states based on player distance
+        const distToPlayer = Math.hypot(player.x - this.x, player.y - this.y);
+        const playerDetected = distToPlayer < this.detectionRadius;
+
+        if (this.health > 1 && this.state !== 'VULNERABLE') {
+            if (!playerDetected) {
+                // If player went out of range, go back to patrolling once current attack finishes
+                if (this.state === 'HOVERING') {
+                    this.state = 'PATROLLING';
+                    this.stateTimer = 0;
+                    this.vx = 0;
+                }
+            } else {
+                // If player detected while patrolling, trigger alert and start chasing/attacking
+                if (this.state === 'PATROLLING') {
+                    this.state = 'HOVERING';
+                    this.stateTimer = 0;
+                    this.spawnTimer = 0;
+                    this.gridTimer = 0;
+                    this.laserSweepTimer = 0;
+                }
+            }
+        }
+
         // State Machine
         switch (this.state) {
+            case 'PATROLLING':
+                this.updatePatrolling(level, player);
+                break;
             case 'HOVERING':
                 this.updateHovering(level, player);
                 break;
@@ -1830,6 +1861,52 @@ export class UfoBoss extends Boss {
             this.x = level.width - this.radius;
             this.vx = 0;
         }
+    }
+
+    updatePatrolling(level, player) {
+        this.stateTimer++;
+
+        // Set target X based on direction
+        const targetX = this.startX + this.patrolDir * 350;
+
+        // Smooth movement towards target X
+        this.vx += (targetX - this.x) * 0.008;
+        this.vx *= 0.95;
+        this.x += this.vx;
+
+        // Change direction if we get close to the target or screen bounds
+        if (Math.abs(this.x - targetX) < 60 || this.x <= this.radius + 10 || this.x >= level.width - this.radius - 10) {
+            this.patrolDir *= -1;
+        }
+
+        // Hover up and down slightly using sine wave (float y around 145)
+        this.y = 145 + Math.sin(this.pulseTime * 1.5) * 12;
+
+        // Keep attack timers reset during patrol
+        this.spawnTimer = 0;
+        this.gridTimer = 0;
+        this.laserSweepTimer = 0;
+    }
+
+    getLaserYLimit(level, laserX, startY) {
+        let limitY = level.height;
+        if (!level || !level.platforms) return limitY;
+
+        const allPlats = [
+            ...level.platforms,
+            ...(level.movingPlatforms || []),
+            ...(level.fallingPlatforms ? level.fallingPlatforms.filter(p => !p.fallen) : []),
+            ...(level.breakablePlatforms ? level.breakablePlatforms.filter(p => !p.broken) : [])
+        ];
+
+        for (const plat of allPlats) {
+            if (laserX >= plat.x && laserX <= plat.x + plat.w) {
+                if (plat.y > startY && plat.y < limitY) {
+                    limitY = plat.y;
+                }
+            }
+        }
+        return limitY;
     }
 
     updateHovering(level, player) {
@@ -2045,8 +2122,9 @@ export class UfoBoss extends Boss {
             const xDiff = Math.abs(player.x - this.sweepLaserX);
             const isIntersectX = xDiff < (player.radius + beamW / 2);
             
-            // Laser fires down to floor, player y is below boss
-            const isIntersectY = player.y > this.y;
+            // Laser Y limit based on platform block intersection
+            const laserEndY = this.getLaserYLimit(level, this.sweepLaserX, this.y);
+            const isIntersectY = player.y > this.y && player.y < laserEndY;
 
             if (isIntersectX && isIntersectY) {
                 const isSafe = (player.viscosity.id === this.sweepViscId) || this.isPlayerShielded(level, player);
@@ -2214,9 +2292,10 @@ export class UfoBoss extends Boss {
                     ctx.stroke();
                 });
                 gridX.forEach(x => {
+                    const limitY = this.getLaserYLimit(activeLevel, x, 0);
                     ctx.beginPath();
                     ctx.moveTo(x, 0);
-                    ctx.lineTo(x, activeLevel.height);
+                    ctx.lineTo(x, limitY);
                     ctx.stroke();
                 });
             } else {
@@ -2234,9 +2313,10 @@ export class UfoBoss extends Boss {
                         ctx.stroke();
                     });
                     gridX.forEach(x => {
+                        const limitY = this.getLaserYLimit(activeLevel, x, 0);
                         ctx.beginPath();
                         ctx.moveTo(x, 0);
-                        ctx.lineTo(x, activeLevel.height);
+                        ctx.lineTo(x, limitY);
                         ctx.stroke();
                     });
                 };
@@ -2258,8 +2338,8 @@ export class UfoBoss extends Boss {
             ctx.save();
             ctx.translate(-camera.x, -camera.y);
 
-            const floorY = activeLevel.height;
             const lx = this.sweepLaserX;
+            const laserEndY = this.getLaserYLimit(activeLevel, lx, this.y);
 
             // Glow backing
             ctx.strokeStyle = this.sweepColor;
@@ -2267,7 +2347,7 @@ export class UfoBoss extends Boss {
             ctx.globalAlpha = 0.35;
             ctx.beginPath();
             ctx.moveTo(lx, this.y + 15);
-            ctx.lineTo(lx, floorY);
+            ctx.lineTo(lx, laserEndY);
             ctx.stroke();
 
             // Inner laser core
@@ -2278,14 +2358,14 @@ export class UfoBoss extends Boss {
             ctx.shadowBlur = 16;
             ctx.beginPath();
             ctx.moveTo(lx, this.y + 15);
-            ctx.lineTo(lx, floorY);
+            ctx.lineTo(lx, laserEndY);
             ctx.stroke();
 
-            // Draw laser landing spark/explosion on the floor
+            // Draw laser landing spark/explosion on the floor/platform block
             ctx.fillStyle = this.sweepColor;
             ctx.shadowBlur = 12;
             ctx.beginPath();
-            ctx.arc(lx, floorY - 5, 20 + Math.sin(this.pulseTime * 15) * 5, 0, Math.PI * 2);
+            ctx.arc(lx, laserEndY - 5, 20 + Math.sin(this.pulseTime * 15) * 5, 0, Math.PI * 2);
             ctx.fill();
 
             ctx.restore();
