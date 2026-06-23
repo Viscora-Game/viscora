@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v190';
-import { Enemy, GelChaser } from './enemies.js?v=v190';
+import { audio } from './audio.js?v=v191';
+import { Enemy, GelChaser } from './enemies.js?v=v191';
 
 export class Boss {
     constructor(x, y) {
@@ -1915,10 +1915,12 @@ export class UfoBoss extends Boss {
         this.gridTimer++;
         this.laserSweepTimer++;
 
-        // Smoothly hover to stay near player.x
+        // Smoothly hover to stay near player.x (slowed down and capped)
         const targetX = player.x;
-        this.vx += (targetX - this.x) * 0.015;
-        this.vx *= 0.95; // apply friction
+        this.vx += (targetX - this.x) * 0.006;
+        this.vx *= 0.94; // apply friction
+        const maxChaseSpeed = 1.6;
+        this.vx = Math.max(-maxChaseSpeed, Math.min(maxChaseSpeed, this.vx));
         this.x += this.vx;
 
         // Hover up and down slightly using sine wave (float y around 140)
@@ -2113,10 +2115,12 @@ export class UfoBoss extends Boss {
             }
         } 
         else if (this.stateTimer >= 45 && this.stateTimer < 135) {
-            // Fire phase: Move slowly towards player and sweep
+            // Fire phase: Move slowly towards player and sweep (slowed down and capped)
             const targetX = player.x;
-            this.vx += (targetX - this.x) * 0.01;
+            this.vx += (targetX - this.x) * 0.003;
             this.vx *= 0.9;
+            const maxSweepSpeed = 0.9;
+            this.vx = Math.max(-maxSweepSpeed, Math.min(maxSweepSpeed, this.vx));
             this.x += this.vx;
             this.y = 145 + Math.sin(this.pulseTime * 1.5) * 4;
 
