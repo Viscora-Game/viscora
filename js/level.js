@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v196';
-import { THEMES } from './generator.js?v=v196';
+import { audio } from './audio.js?v=v197';
+import { THEMES } from './generator.js?v=v197';
 
 /**
  * Viscora Level Design & Manager
@@ -1384,7 +1384,7 @@ export class Level {
         } else if (originalLevelNumber === 30) {
             data = {
                 "serverLevelId": null,
-                "name": "SİBER VERİ AKIŞI: SİBER VERİ AKIŞI: undefined",
+                "name": "SİBER VERİ AKIŞI: ENDBRINGER",
                 "tags": [],
                 "themeId": "magma_core",
                 "levelWidth": 3500,
@@ -1795,7 +1795,15 @@ export class Level {
                 "pushBlocks": [],
                 "conveyors": [],
                 "teleportPairs": [],
-                "bouncePads": [],
+                "bouncePads": [
+                    {
+                        "x": 1350,
+                        "y": 440,
+                        "w": 50,
+                        "h": 20,
+                        "force": 12
+                    }
+                ],
                 "buttons": [],
                 "levers": [],
                 "flamethrowers": [],

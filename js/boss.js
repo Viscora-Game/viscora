@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v196';
-import { Enemy, GelChaser } from './enemies.js?v=v196';
+import { audio } from './audio.js?v=v197';
+import { Enemy, GelChaser } from './enemies.js?v=v197';
 
 export class Boss {
     constructor(x, y) {
@@ -1750,7 +1750,7 @@ export class UfoBoss extends Boss {
         this.sparks = [];
 
         // Patrol & Detection
-        this.detectionRadius = 400;
+        this.detectionRadius = 500;
         this.patrolDir = 1;
     }
 
@@ -1942,7 +1942,7 @@ export class UfoBoss extends Boss {
         const targetX = player.x;
         this.vx += (targetX - this.x) * 0.007;
         this.vx *= 0.94; // apply friction
-        const maxChaseSpeed = 2.0;
+        const maxChaseSpeed = 2.5;
         this.vx = Math.max(-maxChaseSpeed, Math.min(maxChaseSpeed, this.vx));
         this.x += this.vx;
 
@@ -1950,16 +1950,16 @@ export class UfoBoss extends Boss {
         const targetY = Math.max(110, Math.min(320, player.y - 180)) + Math.sin(this.pulseTime * 1.5) * 8;
         this.vy += (targetY - this.y) * 0.006;
         this.vy *= 0.92;
-        const maxChaseYSpeed = 1.2;
+        const maxChaseYSpeed = 1.5;
         this.vy = Math.max(-maxChaseYSpeed, Math.min(maxChaseYSpeed, this.vy));
         this.y += this.vy;
 
         // Check state transitions (Priority: Grid Attack > Spawn > Laser Sweep)
-        let gridThreshold = 600;
-        if (this.health === 5) gridThreshold = 600;
-        else if (this.health === 4) gridThreshold = 480;
-        else if (this.health === 3) gridThreshold = 360;
-        else if (this.health === 2) gridThreshold = 240;
+        let gridThreshold = 480;
+        if (this.health === 5) gridThreshold = 480;
+        else if (this.health === 4) gridThreshold = 384;
+        else if (this.health === 3) gridThreshold = 288;
+        else if (this.health === 2) gridThreshold = 192;
 
         if (this.gridTimer >= gridThreshold) {
             this.state = 'GRID_ATTACK';
@@ -1983,7 +1983,7 @@ export class UfoBoss extends Boss {
             this.gridLaserDuration = 0;
             audio.playShift('HIGH');
         } 
-        else if (this.spawnTimer >= 450) { // 7.5 seconds
+        else if (this.spawnTimer >= 360) { // 6 seconds
             this.state = 'SPAWNING';
             this.stateTimer = 0;
             this.spawnTimer = 0;
@@ -1991,7 +1991,7 @@ export class UfoBoss extends Boss {
             this.tractorBeamAlpha = 0;
             audio.playShift('LOW');
         } 
-        else if (this.laserSweepTimer >= 240) { // 4 seconds
+        else if (this.laserSweepTimer >= 192) { // 3.2 seconds
             this.state = 'LASER_SWEEP';
             this.stateTimer = 0;
             this.laserSweepTimer = 0;
@@ -2156,7 +2156,7 @@ export class UfoBoss extends Boss {
             const targetX = player.x;
             this.vx += (targetX - this.x) * 0.004;
             this.vx *= 0.88;
-            const maxSweepSpeed = 1.3;
+            const maxSweepSpeed = 1.62;
             this.vx = Math.max(-maxSweepSpeed, Math.min(maxSweepSpeed, this.vx));
             this.x += this.vx;
 
@@ -2164,7 +2164,7 @@ export class UfoBoss extends Boss {
             const targetY = Math.max(110, Math.min(320, player.y - 180)) + Math.sin(this.pulseTime * 1.5) * 4;
             this.vy += (targetY - this.y) * 0.005;
             this.vy *= 0.9;
-            const maxSweepYSpeed = 0.9;
+            const maxSweepYSpeed = 1.12;
             this.vy = Math.max(-maxSweepYSpeed, Math.min(maxSweepYSpeed, this.vy));
             this.y += this.vy;
 
@@ -2201,8 +2201,17 @@ export class UfoBoss extends Boss {
     updateVulnerable(level, player) {
         this.stateTimer++;
 
-        // Hover slightly lower (y=180) to be reachable, drift slowly
-        const targetY = 180;
+        // Track player Y to hover near the ground the player is on
+        if (!this.stablePlayerY) {
+            this.stablePlayerY = player.y;
+        }
+        if (player.onGround) {
+            // Smoothly track player's ground Y
+            this.stablePlayerY += (player.y - this.stablePlayerY) * 0.1;
+        }
+
+        // Target Y: Approach player's ground level minus 80 (perfect stomping height), clamped safely
+        const targetY = Math.max(80, Math.min(level.height - 120, (this.stablePlayerY || player.y) - 80));
         this.y += (targetY - this.y) * 0.05;
 
         // Slow horizontal movement
@@ -2295,7 +2304,8 @@ export class UfoBoss extends Boss {
                 // If boss is vulnerable, check if player is jumping on head to deal damage
                 // Boss deals no damage to player
                 const stompVy = player.vy > 0 ? player.vy : (player.prevVy > 0 ? player.prevVy : 0);
-                const isSteppingOn = stompVy >= 0 && player.y + player.radius - stompVy <= this.y - this.radius + 20;
+                // Lenient check for vulnerable state: player is moving down/neutral and player center is above boss center - 15
+                const isSteppingOn = stompVy >= -2 && player.y <= this.y - 15;
 
                 if (isSteppingOn) {
                     player.vy = -7.5;
@@ -2488,8 +2498,11 @@ export class UfoBoss extends Boss {
             primaryColor = this.sweepColor;
             secondaryColor = this.sweepColor === '#10b981' ? '#047857' : (this.sweepColor === '#06b6d4' ? '#0891b2' : '#a21caf');
         } else if (this.state === 'VULNERABLE') {
-            primaryColor = '#64748b'; // flashing gray / error state
-            secondaryColor = '#334155';
+            // Rapidly cycle/blink through random vibrant colors
+            const glitchColors = ['#ef4444', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#d946ef', '#ec4899', '#ffffff'];
+            const colorIndex = Math.floor(this.stateTimer / 4) % glitchColors.length;
+            primaryColor = glitchColors[colorIndex];
+            secondaryColor = glitchColors[(colorIndex + 2) % glitchColors.length];
         }
 
         // Handle blinking if invulnerable
@@ -2528,7 +2541,7 @@ export class UfoBoss extends Boss {
         ctx.stroke();
 
         // Dome / Cockpit (Cyan glass top)
-        ctx.fillStyle = isError ? 'rgba(100, 116, 139, 0.6)' : 'rgba(34, 211, 238, 0.7)';
+        ctx.fillStyle = isError ? (Math.floor(this.pulseTime * 6) % 2 === 0 ? 'rgba(239, 68, 68, 0.5)' : 'rgba(239, 68, 68, 0.1)') : 'rgba(34, 211, 238, 0.7)';
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -2542,7 +2555,7 @@ export class UfoBoss extends Boss {
         ctx.arc(0, -this.radius * 0.2, 8, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = isError ? '#ef4444' : '#22c55e'; // green or red glowing eye
+        ctx.fillStyle = isError ? (Math.floor(this.pulseTime * 8) % 2 === 0 ? '#ef4444' : '#eab308') : '#22c55e'; // green or red/yellow blinking glowing eye
         ctx.beginPath();
         ctx.arc(0, -this.radius * 0.2, 3, 0, Math.PI * 2);
         ctx.fill();
