@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v189';
-import { Enemy, GelChaser } from './enemies.js?v=v189';
+import { audio } from './audio.js?v=v190';
+import { Enemy, GelChaser } from './enemies.js?v=v190';
 
 export class Boss {
     constructor(x, y) {
@@ -1925,7 +1925,13 @@ export class UfoBoss extends Boss {
         this.y = 145 + Math.sin(this.pulseTime * 1.5) * 12;
 
         // Check state transitions (Priority: Grid Attack > Spawn > Laser Sweep)
-        if (this.gridTimer >= 600) { // 10 seconds
+        let gridThreshold = 600;
+        if (this.health === 5) gridThreshold = 600;
+        else if (this.health === 4) gridThreshold = 480;
+        else if (this.health === 3) gridThreshold = 360;
+        else if (this.health === 2) gridThreshold = 240;
+
+        if (this.gridTimer >= gridThreshold) {
             this.state = 'GRID_ATTACK';
             this.stateTimer = 0;
             this.gridTimer = 0;
@@ -2211,6 +2217,45 @@ export class UfoBoss extends Boss {
 
         if (this.health <= 0) {
             this.die(player);
+        } else if (this.health === 1) {
+            // Cancel any active attacks and go to vulnerable state immediately!
+            this.state = 'VULNERABLE';
+            this.stateTimer = 0;
+            this.vx = 0;
+            this.vy = 0;
+            this.tractorBeamAlpha = 0;
+            this.gridWarning = false;
+        }
+    }
+
+    checkPlayerCollision(player) {
+        if (this.isDead || player.isDead) return;
+
+        const dx = player.x - this.x;
+        const dy = player.y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Circular overlap check
+        if (dist < player.radius + this.radius - 4) {
+            if (this.state === 'VULNERABLE' || this.health === 1) {
+                // If boss is vulnerable, check if player is jumping on head to deal damage
+                // Boss deals no damage to player
+                const stompVy = player.vy > 0 ? player.vy : (player.prevVy > 0 ? player.prevVy : 0);
+                const isSteppingOn = stompVy >= 0 && player.y + player.radius - stompVy <= this.y - this.radius + 20;
+
+                if (isSteppingOn) {
+                    player.vy = -7.5;
+                    player.onGround = false;
+                    player.applySquish(-0.4, 0.45);
+                    this.takeDamage(1, player);
+                }
+                return;
+            }
+
+            // Normal state: Boss inflicts damage to player (only if boss is not invulnerable)
+            if (this.invulnFrames === 0 && this.state !== 'PATROLLING') {
+                player.takeDamage(1);
+            }
         }
     }
 
