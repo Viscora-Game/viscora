@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v197';
-import { Enemy, GelChaser } from './enemies.js?v=v197';
+import { audio } from './audio.js?v=v198';
+import { Enemy, GelChaser } from './enemies.js?v=v198';
 
 export class Boss {
     constructor(x, y) {
@@ -1750,7 +1750,7 @@ export class UfoBoss extends Boss {
         this.sparks = [];
 
         // Patrol & Detection
-        this.detectionRadius = 500;
+        this.detectionRadius = 600;
         this.patrolDir = 1;
     }
 
@@ -1782,10 +1782,7 @@ export class UfoBoss extends Boss {
                 }
             }
 
-            // Spawn explosion sparks
-            if (Math.random() < 0.15 && player.game) {
-                player.game.emitParticles(this.x + (Math.random() * 80 - 40), this.y + (Math.random() * 40 - 20), 'enemy_pop', '#ef4444', 5);
-            }
+            // Spawn explosion sparks (removed to prevent lag)
             return;
         }
 
@@ -1942,7 +1939,7 @@ export class UfoBoss extends Boss {
         const targetX = player.x;
         this.vx += (targetX - this.x) * 0.007;
         this.vx *= 0.94; // apply friction
-        const maxChaseSpeed = 2.5;
+        const maxChaseSpeed = 3.0;
         this.vx = Math.max(-maxChaseSpeed, Math.min(maxChaseSpeed, this.vx));
         this.x += this.vx;
 
@@ -1950,16 +1947,16 @@ export class UfoBoss extends Boss {
         const targetY = Math.max(110, Math.min(320, player.y - 180)) + Math.sin(this.pulseTime * 1.5) * 8;
         this.vy += (targetY - this.y) * 0.006;
         this.vy *= 0.92;
-        const maxChaseYSpeed = 1.5;
+        const maxChaseYSpeed = 1.8;
         this.vy = Math.max(-maxChaseYSpeed, Math.min(maxChaseYSpeed, this.vy));
         this.y += this.vy;
 
         // Check state transitions (Priority: Grid Attack > Spawn > Laser Sweep)
-        let gridThreshold = 480;
-        if (this.health === 5) gridThreshold = 480;
-        else if (this.health === 4) gridThreshold = 384;
-        else if (this.health === 3) gridThreshold = 288;
-        else if (this.health === 2) gridThreshold = 192;
+        let gridThreshold = 384;
+        if (this.health === 5) gridThreshold = 384;
+        else if (this.health === 4) gridThreshold = 300;
+        else if (this.health === 3) gridThreshold = 230;
+        else if (this.health === 2) gridThreshold = 150;
 
         if (this.gridTimer >= gridThreshold) {
             this.state = 'GRID_ATTACK';
@@ -1983,7 +1980,7 @@ export class UfoBoss extends Boss {
             this.gridLaserDuration = 0;
             audio.playShift('HIGH');
         } 
-        else if (this.spawnTimer >= 360) { // 6 seconds
+        else if (this.spawnTimer >= 288) { // 4.8 seconds
             this.state = 'SPAWNING';
             this.stateTimer = 0;
             this.spawnTimer = 0;
@@ -1991,7 +1988,7 @@ export class UfoBoss extends Boss {
             this.tractorBeamAlpha = 0;
             audio.playShift('LOW');
         } 
-        else if (this.laserSweepTimer >= 192) { // 3.2 seconds
+        else if (this.laserSweepTimer >= 150) { // 2.5 seconds
             this.state = 'LASER_SWEEP';
             this.stateTimer = 0;
             this.laserSweepTimer = 0;
@@ -2156,7 +2153,7 @@ export class UfoBoss extends Boss {
             const targetX = player.x;
             this.vx += (targetX - this.x) * 0.004;
             this.vx *= 0.88;
-            const maxSweepSpeed = 1.62;
+            const maxSweepSpeed = 1.95;
             this.vx = Math.max(-maxSweepSpeed, Math.min(maxSweepSpeed, this.vx));
             this.x += this.vx;
 
@@ -2164,7 +2161,7 @@ export class UfoBoss extends Boss {
             const targetY = Math.max(110, Math.min(320, player.y - 180)) + Math.sin(this.pulseTime * 1.5) * 4;
             this.vy += (targetY - this.y) * 0.005;
             this.vy *= 0.9;
-            const maxSweepYSpeed = 1.12;
+            const maxSweepYSpeed = 1.35;
             this.vy = Math.max(-maxSweepYSpeed, Math.min(maxSweepYSpeed, this.vy));
             this.y += this.vy;
 
@@ -2324,12 +2321,21 @@ export class UfoBoss extends Boss {
     }
 
     die(player) {
-        super.die(player);
+        this.isDead = true;
         this.vx = 0;
         this.vy = 2.0; // fall down to earth
         this.squishX = 0;
         this.squishY = 0;
         this.deadAngle = 0;
+        this.shockwaves = [];
+        audio.playWin();
+
+        if (player && player.game) {
+            player.game.shakeCamera(18, 30);
+            // Extremely lightweight particle emission to prevent lag
+            player.game.emitParticles(this.x, this.y, 'enemy_pop', '#ffffff', 8);
+            player.game.emitParticles(this.x, this.y, 'enemy_pop', '#eab308', 4);
+        }
     }
 
     draw(ctx, camera, level) {
