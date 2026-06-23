@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v198';
-import { Enemy, GelChaser } from './enemies.js?v=v198';
+import { audio } from './audio.js?v=v199';
+import { Enemy, GelChaser } from './enemies.js?v=v199';
 
 export class Boss {
     constructor(x, y) {
@@ -2392,7 +2392,7 @@ export class UfoBoss extends Boss {
             ctx.save();
             ctx.translate(-camera.x, -camera.y);
 
-            const gridY = [120, 240, 360, 480];
+            const gridY = [120, 240, 360, 440];
             const gridX = [200, 500, 800, 1100, 1400, 1700, 2000, 2300];
 
             // Use stateTimer threshold (120 frames) for gridWarning drawing check
