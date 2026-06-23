@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v191';
-import { Enemy, GelChaser } from './enemies.js?v=v191';
+import { audio } from './audio.js?v=v192';
+import { Enemy, GelChaser } from './enemies.js?v=v192';
 
 export class Boss {
     constructor(x, y) {
@@ -1750,7 +1750,7 @@ export class UfoBoss extends Boss {
         this.sparks = [];
 
         // Patrol & Detection
-        this.detectionRadius = 500;
+        this.detectionRadius = 400;
         this.patrolDir = 1;
     }
 
@@ -1870,8 +1870,10 @@ export class UfoBoss extends Boss {
         const targetX = this.startX + this.patrolDir * 350;
 
         // Smooth movement towards target X
-        this.vx += (targetX - this.x) * 0.008;
-        this.vx *= 0.95;
+        this.vx += (targetX - this.x) * 0.002;
+        this.vx *= 0.92;
+        const maxPatrolSpeed = 1.2;
+        this.vx = Math.max(-maxPatrolSpeed, Math.min(maxPatrolSpeed, this.vx));
         this.x += this.vx;
 
         // Change direction if we get close to the target or screen bounds
@@ -1917,9 +1919,9 @@ export class UfoBoss extends Boss {
 
         // Smoothly hover to stay near player.x (slowed down and capped)
         const targetX = player.x;
-        this.vx += (targetX - this.x) * 0.006;
+        this.vx += (targetX - this.x) * 0.004;
         this.vx *= 0.94; // apply friction
-        const maxChaseSpeed = 1.6;
+        const maxChaseSpeed = 1.2;
         this.vx = Math.max(-maxChaseSpeed, Math.min(maxChaseSpeed, this.vx));
         this.x += this.vx;
 
@@ -2074,14 +2076,14 @@ export class UfoBoss extends Boss {
         this.vx = 0;
         this.y = 145 + Math.sin(this.pulseTime * 1.5) * 3;
 
-        if (this.stateTimer < 90) {
+        if (this.stateTimer < 120) {
             // Warning lines blinking
             this.gridWarning = true;
             if (this.stateTimer % 20 === 0) {
                 audio.playJump(); // minor warning beep
             }
         } 
-        else if (this.stateTimer >= 90 && this.stateTimer < 150) {
+        else if (this.stateTimer >= 120 && this.stateTimer < 180) {
             // Lasers active!
             this.gridWarning = false;
             
@@ -2091,7 +2093,7 @@ export class UfoBoss extends Boss {
                 player.takeDamage(1);
             }
 
-            if (this.stateTimer === 90 && player.game) {
+            if (this.stateTimer === 120 && player.game) {
                 player.game.shakeCamera(15, 20);
                 audio.playStomp();
             }
@@ -2106,7 +2108,7 @@ export class UfoBoss extends Boss {
     updateLaserSweep(level, player) {
         this.stateTimer++;
 
-        if (this.stateTimer < 45) {
+        if (this.stateTimer < 75) {
             // Charging phase
             this.vx = 0;
             this.y = 145 + Math.sin(this.pulseTime * 1.5) * 5;
@@ -2114,12 +2116,12 @@ export class UfoBoss extends Boss {
                 audio.playJump();
             }
         } 
-        else if (this.stateTimer >= 45 && this.stateTimer < 135) {
+        else if (this.stateTimer >= 75 && this.stateTimer < 165) {
             // Fire phase: Move slowly towards player and sweep (slowed down and capped)
             const targetX = player.x;
-            this.vx += (targetX - this.x) * 0.003;
-            this.vx *= 0.9;
-            const maxSweepSpeed = 0.9;
+            this.vx += (targetX - this.x) * 0.002;
+            this.vx *= 0.88;
+            const maxSweepSpeed = 0.7;
             this.vx = Math.max(-maxSweepSpeed, Math.min(maxSweepSpeed, this.vx));
             this.x += this.vx;
             this.y = 145 + Math.sin(this.pulseTime * 1.5) * 4;
@@ -2163,8 +2165,10 @@ export class UfoBoss extends Boss {
 
         // Slow horizontal movement
         const targetX = level.width / 2 + Math.sin(this.stateTimer * 0.02) * 300;
-        this.vx += (targetX - this.x) * 0.005;
-        this.vx *= 0.95;
+        this.vx += (targetX - this.x) * 0.004;
+        this.vx *= 0.93;
+        const maxVulnerableSpeed = 0.8;
+        this.vx = Math.max(-maxVulnerableSpeed, Math.min(maxVulnerableSpeed, this.vx));
         this.x += this.vx;
     }
 
@@ -2237,10 +2241,14 @@ export class UfoBoss extends Boss {
 
         const dx = player.x - this.x;
         const dy = player.y - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
 
-        // Circular overlap check
-        if (dist < player.radius + this.radius - 4) {
+        // Elliptical overlap check (since UFO is flat: rx = 64, ry = 25.6)
+        // We add some leniency (-6 and -4) to make it visually accurate and fair
+        const rx = this.radius + player.radius - 6;
+        const ry = (this.radius * 0.45) + player.radius - 4;
+        const isColliding = (dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) < 1.0;
+
+        if (isColliding) {
             if (this.state === 'VULNERABLE' || this.health === 1) {
                 // If boss is vulnerable, check if player is jumping on head to deal damage
                 // Boss deals no damage to player
@@ -2326,7 +2334,8 @@ export class UfoBoss extends Boss {
             const gridY = [120, 240, 360, 480];
             const gridX = [200, 500, 800, 1100, 1400, 1700, 2000, 2300];
 
-            if (this.gridWarning) {
+            // Use stateTimer threshold (120 frames) for gridWarning drawing check
+            if (this.gridWarning && this.stateTimer < 120) {
                 // Dashed warning lines
                 const alpha = (Math.sin(this.pulseTime * 20) + 1) / 2 * 0.7 + 0.3;
                 ctx.strokeStyle = this.activeGridColor;
@@ -2382,7 +2391,7 @@ export class UfoBoss extends Boss {
             }
             ctx.restore();
         } 
-        else if (this.state === 'LASER_SWEEP' && this.stateTimer >= 45) {
+        else if (this.state === 'LASER_SWEEP' && this.stateTimer >= 75) {
             // Draw sweeping vertical laser beam
             ctx.save();
             ctx.translate(-camera.x, -camera.y);
@@ -2525,8 +2534,8 @@ export class UfoBoss extends Boss {
         }
 
         // Laser charge glowing orb (if in charging sweep)
-        if (this.state === 'LASER_SWEEP' && this.stateTimer < 45) {
-            const ratio = this.stateTimer / 45;
+        if (this.state === 'LASER_SWEEP' && this.stateTimer < 75) {
+            const ratio = this.stateTimer / 75;
             ctx.fillStyle = primaryColor;
             ctx.shadowColor = primaryColor;
             ctx.shadowBlur = 15;
