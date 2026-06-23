@@ -1,6 +1,6 @@
-import { audio } from './audio.js?v=v194';
-import { ViscosityList } from './viscosity.js?v=v194';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v194';
+import { audio } from './audio.js?v=v195';
+import { ViscosityList } from './viscosity.js?v=v195';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v195';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -123,6 +123,19 @@ export class UIManager {
                        window.location.hostname === '127.0.0.1' || 
                        searchLower.includes('sudenazkarkin') || 
                        searchLower.includes('sudenazkarkın');
+
+        // Video Editör Modu (Bypass locks) Kontrolü
+        if (searchLower.includes('editor=true') || searchLower.includes('unlock_all=true') || searchLower.includes('edit=true')) {
+            localStorage.setItem('viscora_bypass_locks', 'true');
+            setTimeout(() => {
+                this.showGlobalToast("Editör Modu Aktif! Tüm bölümler açıldı.", true);
+            }, 1000);
+        } else if (searchLower.includes('editor=false') || searchLower.includes('lock_all=true')) {
+            localStorage.removeItem('viscora_bypass_locks');
+            setTimeout(() => {
+                this.showGlobalToast("Editör Modu Kapatıldı.", false);
+            }, 1000);
+        }
 
         // Build the level selection UI
         this.buildLevelSelectionUI();
@@ -2026,6 +2039,11 @@ export class UIManager {
     isLevelUnlocked(lvlNum) {
         if (this.devMode) return true;
         if (lvlNum === 0) return true; // Eğitim her zaman açık
+        
+        // Video Editör Modu (Bypass locks)
+        if (localStorage.getItem('viscora_bypass_locks') === 'true') {
+            return true;
+        }
 
         // Boss level kontrolü (10, 20, 30...)
         if (lvlNum > 0 && lvlNum % 10 === 0) {
@@ -2252,6 +2270,52 @@ export class UIManager {
                 found.scores = scores;
             }
         }
+    }
+
+    /**
+     * Küresel bildirim (toast) mesajı görüntüler
+     */
+    showGlobalToast(message, isSuccess = true) {
+        // Eski bildirimleri temizle
+        const oldToasts = document.querySelectorAll('.global-toast');
+        oldToasts.forEach(t => t.remove());
+
+        const toast = document.createElement('div');
+        toast.className = 'global-toast';
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95);
+            border: 1.5px solid ${isSuccess ? '#10b981' : '#ef4444'};
+            box-shadow: 0 0 15px ${isSuccess ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'};
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            z-index: 10000;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        `;
+        toast.innerHTML = `${isSuccess ? '🎉' : '❌'} ${message}`;
+        document.body.appendChild(toast);
+
+        // Fade in
+        setTimeout(() => {
+            toast.style.opacity = '1';
+        }, 10);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 350);
+        }, 3000);
     }
 }
 export default UIManager;
