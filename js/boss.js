@@ -1,4 +1,5 @@
-import { audio } from './audio.js?v=v186';
+import { audio } from './audio.js?v=v188';
+import { Enemy, GelChaser } from './enemies.js?v=v188';
 
 export class Boss {
     constructor(x, y) {
@@ -1708,6 +1709,746 @@ export class CyberBoss extends Boss {
             this.drawRoundedRectHelper(ctx, barX + 2, barY + 2, (barW - 4) * healthPercent, barH - 4, 2);
             ctx.fill();
         }
+        ctx.restore();
+    }
+}
+
+export class UfoBoss extends Boss {
+    constructor(x, y) {
+        super(x, y);
+        this.radius = 64; // Devasa UFO!
+        this.health = 5;
+        this.maxHealth = 5;
+
+        // Custom state machine
+        this.state = 'HOVERING'; // 'HOVERING', 'SPAWNING', 'GRID_ATTACK', 'LASER_SWEEP', 'VULNERABLE'
+        this.stateTimer = 0;
+        
+        // Timers
+        this.spawnTimer = 0;
+        this.gridTimer = 0;
+        this.laserSweepTimer = 0;
+
+        // Action progress/state
+        this.defeatedEnemiesInPhase = 0;
+        
+        // Specific attack fields
+        this.activeGridColor = '#10b981'; // normal/green default
+        this.activeGridViscId = 'NORMAL';
+        this.gridWarning = true;
+        this.gridLaserDuration = 0;
+
+        this.sweepColor = '#10b981';
+        this.sweepViscId = 'NORMAL';
+        this.sweepAngle = 0;
+        this.sweepLaserX = x;
+        this.sweepDuration = 0;
+        this.sweepTargetX = x;
+
+        this.tractorBeamAlpha = 0;
+
+        this.sparks = [];
+    }
+
+    update(level, player) {
+        if (this.isDead) {
+            // Drop to the ground if dead
+            this.vy += 0.32;
+            this.x += this.vx;
+            this.y += this.vy;
+            this.resolveCollisions(level);
+            // Spawn explosion sparks
+            if (Math.random() < 0.15 && player.game) {
+                player.game.emitParticles(this.x + (Math.random() * 80 - 40), this.y + (Math.random() * 40 - 20), 'enemy_pop', '#ef4444', 5);
+            }
+            return;
+        }
+
+        this.levelRef = level;
+        this.playerRef = player;
+        this.pulseTime += 0.05;
+
+        if (this.invulnFrames > 0) this.invulnFrames--;
+
+        // Decelerate squish
+        this.squishX *= 0.85;
+        this.squishY *= 0.85;
+
+        // Update sparks
+        if (this.health === 1 || this.state === 'VULNERABLE') {
+            if (Math.random() < 0.1) {
+                this.sparks.push({
+                    x: this.x + (Math.random() * 80 - 40),
+                    y: this.y + (Math.random() * 40 - 20),
+                    vx: Math.random() * 4 - 2,
+                    vy: Math.random() * 4 - 2,
+                    alpha: 1.0,
+                    color: Math.random() < 0.5 ? '#38bdf8' : '#eab308'
+                });
+            }
+        }
+        for (let i = this.sparks.length - 1; i >= 0; i--) {
+            const s = this.sparks[i];
+            s.x += s.vx;
+            s.y += s.vy;
+            s.alpha -= 0.03;
+            if (s.alpha <= 0) this.sparks.splice(i, 1);
+        }
+
+        // Check if 1 HP -> switch to VULNERABLE
+        if (this.health === 1 && this.state !== 'VULNERABLE') {
+            this.state = 'VULNERABLE';
+            this.stateTimer = 0;
+            this.vx = 0;
+            this.vy = 0;
+        }
+
+        // State Machine
+        switch (this.state) {
+            case 'HOVERING':
+                this.updateHovering(level, player);
+                break;
+            case 'SPAWNING':
+                this.updateSpawning(level, player);
+                break;
+            case 'GRID_ATTACK':
+                this.updateGridAttack(level, player);
+                break;
+            case 'LASER_SWEEP':
+                this.updateLaserSweep(level, player);
+                break;
+            case 'VULNERABLE':
+                this.updateVulnerable(level, player);
+                break;
+        }
+
+        // Screen boundary checks for X
+        if (this.x < this.radius) {
+            this.x = this.radius;
+            this.vx = 0;
+        } else if (this.x > level.width - this.radius) {
+            this.x = level.width - this.radius;
+            this.vx = 0;
+        }
+    }
+
+    updateHovering(level, player) {
+        this.stateTimer++;
+        this.spawnTimer++;
+        this.gridTimer++;
+        this.laserSweepTimer++;
+
+        // Smoothly hover to stay near player.x
+        const targetX = player.x;
+        this.vx += (targetX - this.x) * 0.015;
+        this.vx *= 0.95; // apply friction
+        this.x += this.vx;
+
+        // Hover up and down slightly using sine wave (float y around 140)
+        this.y = 145 + Math.sin(this.pulseTime * 1.5) * 12;
+
+        // Check state transitions (Priority: Grid Attack > Spawn > Laser Sweep)
+        if (this.gridTimer >= 600) { // 10 seconds
+            this.state = 'GRID_ATTACK';
+            this.stateTimer = 0;
+            this.gridTimer = 0;
+            this.vx = 0;
+            
+            // Choose random color for grid laser
+            const r = Math.random();
+            if (r < 0.33) {
+                this.activeGridColor = '#10b981'; // Green
+                this.activeGridViscId = 'NORMAL';
+            } else if (r < 0.66) {
+                this.activeGridColor = '#06b6d4'; // Cyan
+                this.activeGridViscId = 'LOW';
+            } else {
+                this.activeGridColor = '#d946ef'; // Pink
+                this.activeGridViscId = 'HIGH';
+            }
+            this.gridWarning = true;
+            this.gridLaserDuration = 0;
+            audio.playShift('HIGH');
+        } 
+        else if (this.spawnTimer >= 450) { // 7.5 seconds
+            this.state = 'SPAWNING';
+            this.stateTimer = 0;
+            this.spawnTimer = 0;
+            this.vx = 0;
+            this.tractorBeamAlpha = 0;
+            audio.playShift('LOW');
+        } 
+        else if (this.laserSweepTimer >= 240) { // 4 seconds
+            this.state = 'LASER_SWEEP';
+            this.stateTimer = 0;
+            this.laserSweepTimer = 0;
+            this.vx = 0;
+            
+            // Choose random color for sweep laser
+            const r = Math.random();
+            if (r < 0.33) {
+                this.sweepColor = '#10b981'; // Green
+                this.sweepViscId = 'NORMAL';
+            } else if (r < 0.66) {
+                this.sweepColor = '#06b6d4'; // Cyan
+                this.sweepViscId = 'LOW';
+            } else {
+                this.sweepColor = '#d946ef'; // Pink
+                this.sweepViscId = 'HIGH';
+            }
+            this.sweepLaserX = this.x;
+            this.sweepTargetX = player.x;
+            this.sweepDuration = 0;
+        }
+    }
+
+    updateSpawning(level, player) {
+        this.stateTimer++;
+
+        // Stay in place
+        this.vx = 0;
+        this.y = 145 + Math.sin(this.pulseTime * 1.5) * 5;
+
+        if (this.stateTimer < 60) {
+            // Fade in tractor beam
+            this.tractorBeamAlpha = Math.min(1.0, this.stateTimer / 60);
+        } else if (this.stateTimer === 60) {
+            // Spawn enemies!
+            if (player.game) {
+                let spawnCount = 2;
+                if (this.health === 5) spawnCount = 2;
+                else if (this.health === 4) spawnCount = 3;
+                else if (this.health === 3) spawnCount = 4;
+                else if (this.health === 2) spawnCount = 5;
+
+                this.spawnEnemies(player.game, spawnCount);
+            }
+            audio.playStomp();
+        } else if (this.stateTimer > 60 && this.stateTimer < 120) {
+            // Fade out tractor beam
+            this.tractorBeamAlpha = Math.max(0, 1.0 - (this.stateTimer - 60) / 60);
+        } else if (this.stateTimer >= 120) {
+            // Go back to hovering
+            this.state = 'HOVERING';
+            this.stateTimer = 0;
+            this.tractorBeamAlpha = 0;
+        }
+    }
+
+    spawnEnemies(game, count) {
+        const player = game.player;
+        const level = game.level;
+
+        for (let i = 0; i < count; i++) {
+            // Spawn offset horizontally from player x
+            const offset = (i - (count - 1) / 2) * 120 + (Math.random() * 40 - 20);
+            const spawnX = Math.max(100, Math.min(level.width - 100, player.x + offset));
+            
+            // Find floor platform at spawnX
+            let spawnY = 400; // default fallback
+            const allPlats = [
+                ...level.platforms,
+                ...(level.movingPlatforms || []),
+                ...(level.fallingPlatforms ? level.fallingPlatforms.filter(p => !p.fallen) : []),
+                ...(level.breakablePlatforms ? level.breakablePlatforms.filter(p => !p.broken) : [])
+            ];
+            let lowestY = level.height;
+            for (const plat of allPlats) {
+                if (spawnX >= plat.x && spawnX <= plat.x + plat.w) {
+                    if (plat.y > 200 && plat.y < lowestY) {
+                        lowestY = plat.y;
+                    }
+                }
+            }
+            spawnY = lowestY - 18; // slightly above platform floor (enemy radius is 16)
+
+            // Spawn patrol enemy or GelChaser
+            let enemy;
+            if (Math.random() < 0.5) {
+                // GelChaser (Green)
+                enemy = new GelChaser(spawnX, spawnY, 120, 1.0, '#10b981', 'chaser');
+            } else {
+                // Normal Enemy with random viscosity color
+                const colors = ['#f43f5e', '#06b6d4', '#d946ef']; // Green/Cyan/Pink
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                enemy = new Enemy(spawnX, spawnY, 120, 1.2, false, randomColor);
+            }
+
+            enemy.isSpawnedByBoss = true;
+            game.enemies.push(enemy);
+
+            // Spawn effect
+            game.emitParticles(spawnX, spawnY, 'land', enemy.color, 15);
+        }
+    }
+
+    updateGridAttack(level, player) {
+        this.stateTimer++;
+
+        // Stay in place
+        this.vx = 0;
+        this.y = 145 + Math.sin(this.pulseTime * 1.5) * 3;
+
+        if (this.stateTimer < 90) {
+            // Warning lines blinking
+            this.gridWarning = true;
+            if (this.stateTimer % 20 === 0) {
+                audio.playJump(); // minor warning beep
+            }
+        } 
+        else if (this.stateTimer >= 90 && this.stateTimer < 150) {
+            // Lasers active!
+            this.gridWarning = false;
+            
+            // Check damage
+            const isSafe = (player.viscosity.id === this.activeGridViscId) || this.isPlayerShielded(level, player);
+            if (!isSafe && !player.isDead) {
+                player.takeDamage(1);
+            }
+
+            if (this.stateTimer === 90 && player.game) {
+                player.game.shakeCamera(15, 20);
+                audio.playStomp();
+            }
+        } 
+        else {
+            // Done
+            this.state = 'HOVERING';
+            this.stateTimer = 0;
+        }
+    }
+
+    updateLaserSweep(level, player) {
+        this.stateTimer++;
+
+        if (this.stateTimer < 45) {
+            // Charging phase
+            this.vx = 0;
+            this.y = 145 + Math.sin(this.pulseTime * 1.5) * 5;
+            if (this.stateTimer === 1) {
+                audio.playJump();
+            }
+        } 
+        else if (this.stateTimer >= 45 && this.stateTimer < 135) {
+            // Fire phase: Move slowly towards player and sweep
+            const targetX = player.x;
+            this.vx += (targetX - this.x) * 0.01;
+            this.vx *= 0.9;
+            this.x += this.vx;
+            this.y = 145 + Math.sin(this.pulseTime * 1.5) * 4;
+
+            // Update laser beam X
+            this.sweepLaserX = this.x;
+
+            // Damage player if inside the vertical laser beam
+            const beamW = 28;
+            const xDiff = Math.abs(player.x - this.sweepLaserX);
+            const isIntersectX = xDiff < (player.radius + beamW / 2);
+            
+            // Laser fires down to floor, player y is below boss
+            const isIntersectY = player.y > this.y;
+
+            if (isIntersectX && isIntersectY) {
+                const isSafe = (player.viscosity.id === this.sweepViscId) || this.isPlayerShielded(level, player);
+                if (!isSafe && !player.isDead) {
+                    player.takeDamage(1);
+                }
+            }
+
+            if (this.stateTimer % 20 === 0 && player.game) {
+                player.game.shakeCamera(4, 5);
+            }
+        } 
+        else {
+            // Done
+            this.state = 'HOVERING';
+            this.stateTimer = 0;
+        }
+    }
+
+    updateVulnerable(level, player) {
+        this.stateTimer++;
+
+        // Hover slightly lower (y=180) to be reachable, drift slowly
+        const targetY = 180;
+        this.y += (targetY - this.y) * 0.05;
+
+        // Slow horizontal movement
+        const targetX = level.width / 2 + Math.sin(this.stateTimer * 0.02) * 300;
+        this.vx += (targetX - this.x) * 0.005;
+        this.vx *= 0.95;
+        this.x += this.vx;
+    }
+
+    isPlayerShielded(level, player) {
+        if (!level || !level.platforms) return false;
+        const allPlats = [
+            ...level.platforms,
+            ...(level.movingPlatforms || []),
+            ...(level.fallingPlatforms ? level.fallingPlatforms.filter(p => !p.fallen) : []),
+            ...(level.breakablePlatforms ? level.breakablePlatforms.filter(p => !p.broken) : [])
+        ];
+        for (const plat of allPlats) {
+            if (player.x >= plat.x - 5 && player.x <= plat.x + plat.w + 5) {
+                if (plat.y < player.y) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    onSpawnedEnemyDefeated(enemy) {
+        if (this.isDead || this.health <= 1) return;
+
+        if (enemy.isSpawnedByBoss) {
+            this.defeatedEnemiesInPhase++;
+
+            let needed = 2;
+            if (this.health === 5) needed = 2;
+            else if (this.health === 4) needed = 3;
+            else if (this.health === 3) needed = 4;
+            else if (this.health === 2) needed = 5;
+
+            if (this.defeatedEnemiesInPhase >= needed) {
+                this.takeDamage(1, this.playerRef);
+                this.defeatedEnemiesInPhase = 0;
+            }
+        }
+    }
+
+    takeDamage(amount, player) {
+        if (this.isDead || this.invulnFrames > 0) return;
+
+        this.health -= amount;
+        this.invulnFrames = 50; // 0.8s invuln
+        this.squishX = 0.4;
+        this.squishY = -0.4;
+        audio.playDamage();
+
+        if (player && player.game) {
+            player.game.shakeCamera(15, 25);
+            player.game.emitParticles(this.x, this.y, 'enemy_pop', '#ef4444', 35);
+        }
+
+        if (this.health <= 0) {
+            this.die(player);
+        }
+    }
+
+    die(player) {
+        super.die(player);
+        this.vx = 0;
+        this.vy = 2.0; // fall down to earth
+    }
+
+    draw(ctx, camera, level) {
+        if (this.isDead) {
+            // Draw falling/crashed UFO
+            this.drawUfoSpaceship(ctx, camera, '#64748b', '#334155', false);
+            return;
+        }
+
+        const activeLevel = level || this.levelRef;
+
+        // 1. Draw Sparks (if in vulnerable state)
+        this.sparks.forEach(s => {
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
+            ctx.fillStyle = s.color;
+            ctx.globalAlpha = s.alpha;
+            ctx.fillRect(s.x, s.y, 4, 4);
+            ctx.restore();
+        });
+
+        // 2. Draw active attacks
+        if (this.state === 'SPAWNING' && this.tractorBeamAlpha > 0) {
+            // Draw tractor beam cone down to the floor
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
+            const grad = ctx.createLinearGradient(this.x, this.y + 20, this.x, activeLevel.height);
+            grad.addColorStop(0, `rgba(168, 85, 247, ${this.tractorBeamAlpha * 0.65})`);
+            grad.addColorStop(1, `rgba(168, 85, 247, 0)`);
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.moveTo(this.x - 30, this.y + 15);
+            ctx.lineTo(this.x + 30, this.y + 15);
+            ctx.lineTo(this.x + 250, activeLevel.height);
+            ctx.lineTo(this.x - 250, activeLevel.height);
+            ctx.closePath();
+            ctx.fill();
+
+            // Draw glowing rings on the floor
+            const numRings = 3;
+            for (let i = 0; i < numRings; i++) {
+                const ringRadius = ((this.pulseTime * 40 + i * 50) % 200);
+                const alpha = Math.max(0, (1 - ringRadius / 200) * this.tractorBeamAlpha);
+                ctx.strokeStyle = `rgba(168, 85, 247, ${alpha})`;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.ellipse(this.x, activeLevel.height - 20, ringRadius, ringRadius * 0.15, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.restore();
+        } 
+        else if (this.state === 'GRID_ATTACK') {
+            // Draw yatay ve dikey grid lazerler
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
+
+            const gridY = [120, 240, 360, 480];
+            const gridX = [200, 500, 800, 1100, 1400, 1700, 2000, 2300];
+
+            if (this.gridWarning) {
+                // Dashed warning lines
+                const alpha = (Math.sin(this.pulseTime * 20) + 1) / 2 * 0.7 + 0.3;
+                ctx.strokeStyle = this.activeGridColor;
+                ctx.globalAlpha = alpha;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([12, 12]);
+
+                gridY.forEach(y => {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(activeLevel.width, y);
+                    ctx.stroke();
+                });
+                gridX.forEach(x => {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, activeLevel.height);
+                    ctx.stroke();
+                });
+            } else {
+                // Solid lasers firing!
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 14;
+                ctx.shadowColor = this.activeGridColor;
+                ctx.shadowBlur = 18;
+
+                const drawLasers = () => {
+                    gridY.forEach(y => {
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(activeLevel.width, y);
+                        ctx.stroke();
+                    });
+                    gridX.forEach(x => {
+                        ctx.beginPath();
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(x, activeLevel.height);
+                        ctx.stroke();
+                    });
+                };
+                
+                // Draw inner solid white core
+                drawLasers();
+
+                // Draw outer glowing neon cover
+                ctx.strokeStyle = this.activeGridColor;
+                ctx.lineWidth = 26;
+                ctx.globalAlpha = 0.45;
+                ctx.shadowBlur = 0;
+                drawLasers();
+            }
+            ctx.restore();
+        } 
+        else if (this.state === 'LASER_SWEEP' && this.stateTimer >= 45) {
+            // Draw sweeping vertical laser beam
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
+
+            const floorY = activeLevel.height;
+            const lx = this.sweepLaserX;
+
+            // Glow backing
+            ctx.strokeStyle = this.sweepColor;
+            ctx.lineWidth = 32;
+            ctx.globalAlpha = 0.35;
+            ctx.beginPath();
+            ctx.moveTo(lx, this.y + 15);
+            ctx.lineTo(lx, floorY);
+            ctx.stroke();
+
+            // Inner laser core
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 12;
+            ctx.globalAlpha = 1.0;
+            ctx.shadowColor = this.sweepColor;
+            ctx.shadowBlur = 16;
+            ctx.beginPath();
+            ctx.moveTo(lx, this.y + 15);
+            ctx.lineTo(lx, floorY);
+            ctx.stroke();
+
+            // Draw laser landing spark/explosion on the floor
+            ctx.fillStyle = this.sweepColor;
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.arc(lx, floorY - 5, 20 + Math.sin(this.pulseTime * 15) * 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // 3. Draw UFO Spaceship itself
+        let primaryColor = '#06b6d4'; // default cyan
+        let secondaryColor = '#0891b2';
+        
+        if (this.state === 'SPAWNING') {
+            primaryColor = '#a855f7'; // purple for spawning/tractor beam
+            secondaryColor = '#7e22ce';
+        } else if (this.state === 'GRID_ATTACK') {
+            primaryColor = this.activeGridColor;
+            secondaryColor = this.activeGridColor === '#10b981' ? '#047857' : (this.activeGridColor === '#06b6d4' ? '#0891b2' : '#a21caf');
+        } else if (this.state === 'LASER_SWEEP') {
+            primaryColor = this.sweepColor;
+            secondaryColor = this.sweepColor === '#10b981' ? '#047857' : (this.sweepColor === '#06b6d4' ? '#0891b2' : '#a21caf');
+        } else if (this.state === 'VULNERABLE') {
+            primaryColor = '#64748b'; // flashing gray / error state
+            secondaryColor = '#334155';
+        }
+
+        // Handle blinking if invulnerable
+        if (this.invulnFrames === 0 || Math.floor(this.invulnFrames / 4) % 2 === 0) {
+            this.drawUfoSpaceship(ctx, camera, primaryColor, secondaryColor, this.state === 'VULNERABLE');
+        }
+
+        // 4. Draw HUD HP Bar at top center
+        this.drawUfoHealthBar(ctx, primaryColor);
+    }
+
+    drawUfoSpaceship(ctx, camera, primaryColor, secondaryColor, isError) {
+        ctx.save();
+        ctx.translate(-camera.x, -camera.y);
+        ctx.translate(this.x, this.y);
+
+        // Apply scaling for squash/stretch
+        ctx.scale(1 + this.squishX, 1 + this.squishY);
+
+        // Neon Glow around spaceship
+        ctx.shadowColor = primaryColor;
+        ctx.shadowBlur = this.isDead ? 0 : 25 + Math.abs(Math.sin(this.pulseTime * 2) * 8);
+
+        // Base metallic saucer shape (ellipsoid)
+        ctx.fillStyle = '#1e293b'; // slate dark metal
+        ctx.strokeStyle = secondaryColor;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, this.radius, this.radius * 0.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Dome / Cockpit (Cyan glass top)
+        ctx.fillStyle = isError ? 'rgba(100, 116, 139, 0.6)' : 'rgba(34, 211, 238, 0.7)';
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(0, -this.radius * 0.15, this.radius * 0.5, this.radius * 0.35, 0, Math.PI, 0);
+        ctx.fill();
+        ctx.stroke();
+
+        // Draw alien pilot/eye inside dome
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(0, -this.radius * 0.2, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = isError ? '#ef4444' : '#22c55e'; // green or red glowing eye
+        ctx.beginPath();
+        ctx.arc(0, -this.radius * 0.2, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Bottom thruster node
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(-15, this.radius * 0.3, 30, 8);
+
+        // Thruster flame particles
+        if (!this.isDead && !isError) {
+            const flameH = 15 + Math.sin(this.pulseTime * 25) * 6;
+            const flameGrad = ctx.createLinearGradient(0, this.radius * 0.35, 0, this.radius * 0.35 + flameH);
+            flameGrad.addColorStop(0, primaryColor);
+            flameGrad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = flameGrad;
+            ctx.beginPath();
+            ctx.moveTo(-10, this.radius * 0.35);
+            ctx.lineTo(10, this.radius * 0.35);
+            ctx.lineTo(0, this.radius * 0.35 + flameH);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Draw neon nodes/lights around spaceship edge
+        ctx.shadowBlur = 0;
+        const numNodes = 7;
+        for (let i = 0; i < numNodes; i++) {
+            const fraction = i / (numNodes - 1);
+            const angle = Math.PI + fraction * Math.PI; // bottom half semicircle
+            const nodeX = Math.cos(angle) * (this.radius - 6);
+            const nodeY = Math.sin(angle) * (this.radius * 0.4 - 3);
+
+            // Blinking pattern
+            const isLit = isError ? (Math.floor(this.pulseTime * 6) % 2 === 0) : ((Math.floor(this.pulseTime * 6) + i) % 3 !== 0);
+            ctx.fillStyle = isLit ? primaryColor : '#475569';
+            ctx.beginPath();
+            ctx.arc(nodeX, nodeY, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Laser charge glowing orb (if in charging sweep)
+        if (this.state === 'LASER_SWEEP' && this.stateTimer < 45) {
+            const ratio = this.stateTimer / 45;
+            ctx.fillStyle = primaryColor;
+            ctx.shadowColor = primaryColor;
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.arc(0, this.radius * 0.3, ratio * 15, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.restore();
+    }
+
+    drawUfoHealthBar(ctx, color) {
+        ctx.save();
+        const cssWidth = ctx.canvas.clientWidth || window.innerWidth;
+        const dpr = ctx.canvas.width / cssWidth;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const barW = 340;
+        const barH = 14;
+        const barX = (cssWidth - barW) / 2;
+        const barY = 28;
+
+        // Container background
+        ctx.fillStyle = '#070a13';
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 2.5;
+        this.drawRoundedRectHelper(ctx, barX, barY, barW, barH, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        // Label
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 11px Courier New, monospace';
+        ctx.textAlign = 'center';
+        
+        let labelText = 'ENDBRINGER - COMMAND UFO';
+        if (this.state === 'VULNERABLE') {
+            labelText = '⚠️ WARNING: ENDBRINGER SYSTEM FAILURE - STOMP NOW! ⚠️';
+        }
+        ctx.fillText(labelText, barX + barW / 2, barY - 8);
+
+        // Fill bar based on HP segments
+        const healthPercent = Math.max(0, this.health / this.maxHealth);
+        if (healthPercent > 0) {
+            ctx.fillStyle = color;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 8;
+            this.drawRoundedRectHelper(ctx, barX + 2.5, barY + 2.5, (barW - 5) * healthPercent, barH - 5, 2);
+            ctx.fill();
+        }
+
         ctx.restore();
     }
 }

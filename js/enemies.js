@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v186';
+import { audio } from './audio.js?v=v188';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -48,6 +48,10 @@ export class Enemy {
                 enemyDropped: true,
                 color: '#eab308'
             });
+        }
+
+        if (this.isSpawnedByBoss && window.gameInstance && window.gameInstance.boss && typeof window.gameInstance.boss.onSpawnedEnemyDefeated === 'function') {
+            window.gameInstance.boss.onSpawnedEnemyDefeated(this);
         }
     }
 

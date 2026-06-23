@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v186';
-import { THEMES } from './generator.js?v=v186';
+import { audio } from './audio.js?v=v188';
+import { THEMES } from './generator.js?v=v188';
 
 /**
  * Viscora Level Design & Manager
@@ -4638,10 +4638,7 @@ export class Level {
                     { x: 2000, y: 100, rangeX: 150, speed: 1.4, type: 'sweeper_ufo' }
                 ];
             } else if (originalLevelNumber === 30) {
-                this.enemies = [
-                    { x: 800, y: 120, rangeX: 150, speed: 1.1, type: 'tractor_ufo' },
-                    { x: 1500, y: 80, rangeX: 180, speed: 1.3, type: 'sweeper_ufo' }
-                ];
+                this.enemies = [];
             }
         }
 

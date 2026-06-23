@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v186';
-import { Level } from './level.js?v=v186';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v186';
-import { UIManager } from './ui.js?v=v186';
-import { audio } from './audio.js?v=v186';
-import { LevelEditor } from './editor.js?v=v186';
-import { Boss, CyberBoss } from './boss.js?v=v186';
+import { Player } from './player.js?v=v188';
+import { Level } from './level.js?v=v188';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v188';
+import { UIManager } from './ui.js?v=v188';
+import { audio } from './audio.js?v=v188';
+import { LevelEditor } from './editor.js?v=v188';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v188';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -578,7 +578,9 @@ export class GameManager {
         this.initBackgroundCells(); // Refresh theme-specific decoration layout for this level
         this.initEnemies(this.currentLevel);
         const mappedLvl = this.getMappedLevel();
-        if (mappedLvl === 10) {
+        if (this.currentLevel === 30) {
+            this.boss = new UfoBoss(1200, 150); // UfoBoss spawn at x: 1200, y: 150
+        } else if (mappedLvl === 10) {
             this.boss = new Boss(1200, 300); // Boss spawn at x: 1200, y: 300
         } else if (mappedLvl === 20) {
             this.boss = new CyberBoss(1200, 300); // CyberBoss spawn at x: 1200, y: 300
@@ -657,7 +659,9 @@ export class GameManager {
             this.initEnemies(this.currentLevel);
             this.bossRespawnsUsed = 0;
             const mappedLvl = this.getMappedLevel();
-            if (mappedLvl === 10) {
+            if (this.currentLevel === 30) {
+                this.boss = new UfoBoss(1200, 150);
+            } else if (mappedLvl === 10) {
                 this.boss = new Boss(1200, 300);
             } else if (mappedLvl === 20) {
                 this.boss = new CyberBoss(1200, 300);
@@ -760,7 +764,9 @@ export class GameManager {
         this.initEnemies(this.currentLevel);
         this.bossRespawnsUsed = 0;
         const mappedLvl = this.getMappedLevel();
-        if (mappedLvl === 10) {
+        if (this.currentLevel === 30) {
+            this.boss = new UfoBoss(1200, 150);
+        } else if (mappedLvl === 10) {
             this.boss = new Boss(1200, 300);
         } else if (mappedLvl === 20) {
             this.boss = new CyberBoss(1200, 300);
@@ -1547,7 +1553,11 @@ export class GameManager {
                             this.boss.y = this.boss.startY;
                             this.boss.vx = 0;
                             this.boss.vy = 0;
-                            this.boss.state = (this.currentLevel === 20) ? 'GREEN_ATTACK' : 'GREEN_ROLL';
+                            if (this.currentLevel === 30) {
+                                this.boss.state = 'HOVERING';
+                            } else {
+                                this.boss.state = (this.currentLevel === 20) ? 'GREEN_ATTACK' : 'GREEN_ROLL';
+                            }
                             this.boss.stateTimer = 0;
                             if (savedBossHealth !== null) {
                                 this.boss.health = savedBossHealth;
