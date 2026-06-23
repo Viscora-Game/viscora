@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v192';
-import { Enemy, GelChaser } from './enemies.js?v=v192';
+import { audio } from './audio.js?v=v193';
+import { Enemy, GelChaser } from './enemies.js?v=v193';
 
 export class Boss {
     constructor(x, y) {
@@ -1760,7 +1760,28 @@ export class UfoBoss extends Boss {
             this.vy += 0.32;
             this.x += this.vx;
             this.y += this.vy;
+            
+            const wasOnGround = this.onGround;
             this.resolveCollisions(level);
+            
+            // Decelerate squish even when dead to let it return to normal shape smoothly
+            this.squishX *= 0.85;
+            this.squishY *= 0.85;
+
+            // Spin while falling
+            if (!this.onGround) {
+                this.deadAngle = (this.deadAngle || 0) + 0.05;
+            } else if (!wasOnGround) {
+                // Slam/squish on hitting the ground
+                this.squishX = 0.25;
+                this.squishY = -0.25;
+                audio.playLand(10);
+                if (player.game) {
+                    player.game.shakeCamera(12, 18);
+                    player.game.emitParticles(this.x, this.y + this.radius * 0.4, 'land', '#64748b', 20);
+                }
+            }
+
             // Spawn explosion sparks
             if (Math.random() < 0.15 && player.game) {
                 player.game.emitParticles(this.x + (Math.random() * 80 - 40), this.y + (Math.random() * 40 - 20), 'enemy_pop', '#ef4444', 5);
@@ -2275,6 +2296,9 @@ export class UfoBoss extends Boss {
         super.die(player);
         this.vx = 0;
         this.vy = 2.0; // fall down to earth
+        this.squishX = 0;
+        this.squishY = 0;
+        this.deadAngle = 0;
     }
 
     draw(ctx, camera, level) {
@@ -2463,6 +2487,11 @@ export class UfoBoss extends Boss {
 
         // Apply scaling for squash/stretch
         ctx.scale(1 + this.squishX, 1 + this.squishY);
+
+        // Apply rotation if dead (crashing spinning effect)
+        if (this.isDead && this.deadAngle) {
+            ctx.rotate(this.deadAngle);
+        }
 
         // Neon Glow around spaceship
         ctx.shadowColor = primaryColor;
