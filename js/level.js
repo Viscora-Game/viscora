@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v195';
-import { THEMES } from './generator.js?v=v195';
+import { audio } from './audio.js?v=v196';
+import { THEMES } from './generator.js?v=v196';
 
 /**
  * Viscora Level Design & Manager
@@ -1377,6 +1377,458 @@ export class Level {
                         "detectionRadius": 500,
                         "fireInterval": 2,
                         "arrowSpeed": 5.5,
+                        "arrowRange": 500
+                    }
+                ]
+            };
+        } else if (originalLevelNumber === 30) {
+            data = {
+                "serverLevelId": null,
+                "name": "SİBER VERİ AKIŞI: SİBER VERİ AKIŞI: undefined",
+                "tags": [],
+                "themeId": "magma_core",
+                "levelWidth": 3500,
+                "levelHeight": 600,
+                "spawn": {
+                    "x": 40,
+                    "y": 400
+                },
+                "portal": {
+                    "x": 20,
+                    "y": 280
+                },
+                "platforms": [
+                    {
+                        "x": 480,
+                        "y": 460,
+                        "w": 3000,
+                        "h": 140,
+                        "type": "normal"
+                    },
+                    {
+                        "x": 0,
+                        "y": 460,
+                        "w": 360,
+                        "h": 80,
+                        "type": "normal"
+                    },
+                    {
+                        "x": 320,
+                        "y": 160,
+                        "w": 240,
+                        "h": 40,
+                        "type": "normal"
+                    },
+                    {
+                        "x": 1300,
+                        "y": 140,
+                        "w": 240,
+                        "h": 40,
+                        "type": "normal"
+                    },
+                    {
+                        "x": 2260,
+                        "y": 140,
+                        "w": 240,
+                        "h": 40,
+                        "type": "normal"
+                    },
+                    {
+                        "x": 840,
+                        "y": -60,
+                        "w": 240,
+                        "h": 40,
+                        "type": "normal"
+                    },
+                    {
+                        "x": 1820,
+                        "y": -80,
+                        "w": 240,
+                        "h": 40,
+                        "type": "normal"
+                    }
+                ],
+                "spikes": [
+                    {
+                        "x": 320,
+                        "y": 200,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 380,
+                        "y": 200,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 440,
+                        "y": 200,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 500,
+                        "y": 200,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 900,
+                        "y": -20,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 1020,
+                        "y": -20,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 840,
+                        "y": -20,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 960,
+                        "y": -20,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 1360,
+                        "y": 180,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 1480,
+                        "y": 180,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 1420,
+                        "y": 180,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 1300,
+                        "y": 180,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 1940,
+                        "y": -40,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 1880,
+                        "y": -40,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 1820,
+                        "y": -40,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 2000,
+                        "y": -40,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 2440,
+                        "y": 180,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 2380,
+                        "y": 180,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 2320,
+                        "y": 180,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 2260,
+                        "y": 180,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "down"
+                    },
+                    {
+                        "x": 1120,
+                        "y": 440,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "up"
+                    },
+                    {
+                        "x": 680,
+                        "y": 440,
+                        "w": 60,
+                        "h": 20,
+                        "direction": "up"
+                    }
+                ],
+                "acidPools": [],
+                "lasers": [],
+                "netGates": [],
+                "movingPlatforms": [],
+                "crystals": [
+                    {
+                        "x": 780,
+                        "y": 240,
+                        "color": "#eab308"
+                    },
+                    {
+                        "x": 1180,
+                        "y": 180,
+                        "color": "#eab308"
+                    },
+                    {
+                        "x": 640,
+                        "y": -40,
+                        "color": "#10b981"
+                    },
+                    {
+                        "x": 2100,
+                        "y": 140,
+                        "color": "#10b981"
+                    },
+                    {
+                        "x": 1700,
+                        "y": 80,
+                        "color": "#10b981"
+                    },
+                    {
+                        "x": 2800,
+                        "y": 220,
+                        "color": "#f43f5e"
+                    },
+                    {
+                        "x": 2380,
+                        "y": 320,
+                        "color": "#06b6d4"
+                    }
+                ],
+                "enemies": [
+                    {
+                        "x": 2380,
+                        "y": 120,
+                        "rangeX": 120,
+                        "speed": 1.2,
+                        "isVertical": false,
+                        "color": "#f43f5e",
+                        "type": "patrol"
+                    },
+                    {
+                        "x": 1940,
+                        "y": -100,
+                        "rangeX": 120,
+                        "speed": 1.2,
+                        "isVertical": false,
+                        "color": "#f43f5e",
+                        "type": "patrol"
+                    },
+                    {
+                        "x": 1420,
+                        "y": 120,
+                        "rangeX": 120,
+                        "speed": 1.2,
+                        "isVertical": false,
+                        "color": "#f43f5e",
+                        "type": "patrol"
+                    },
+                    {
+                        "x": 960,
+                        "y": -80,
+                        "rangeX": 120,
+                        "speed": 1.2,
+                        "isVertical": false,
+                        "color": "#f43f5e",
+                        "type": "patrol"
+                    },
+                    {
+                        "x": 1660,
+                        "y": -40,
+                        "rangeX": 150,
+                        "speed": 1,
+                        "isVertical": false,
+                        "color": "#a855f7",
+                        "type": "tractor_ufo"
+                    },
+                    {
+                        "x": 1240,
+                        "y": -40,
+                        "rangeX": 150,
+                        "speed": 1.2,
+                        "isVertical": false,
+                        "color": "#06b6d4",
+                        "type": "sweeper_ufo"
+                    },
+                    {
+                        "x": 2660,
+                        "y": 0,
+                        "rangeX": 150,
+                        "speed": 1,
+                        "isVertical": false,
+                        "color": "#a855f7",
+                        "type": "tractor_ufo"
+                    },
+                    {
+                        "x": 2180,
+                        "y": 20,
+                        "rangeX": 180,
+                        "speed": 2,
+                        "isVertical": false,
+                        "color": "#eab308",
+                        "type": "patrol"
+                    },
+                    {
+                        "x": 1420,
+                        "y": 440,
+                        "rangeX": 120,
+                        "speed": 1.2,
+                        "isVertical": false,
+                        "color": "#f43f5e",
+                        "type": "patrol"
+                    },
+                    {
+                        "x": 2440,
+                        "y": 440,
+                        "rangeX": 120,
+                        "speed": 1.2,
+                        "isVertical": false,
+                        "color": "#f43f5e",
+                        "type": "patrol"
+                    },
+                    {
+                        "x": 1780,
+                        "y": 440,
+                        "rangeX": 120,
+                        "speed": 1.2,
+                        "isVertical": false,
+                        "color": "#f43f5e",
+                        "type": "patrol"
+                    },
+                    {
+                        "x": 440,
+                        "y": 120,
+                        "rangeX": 180,
+                        "speed": 2,
+                        "isVertical": false,
+                        "color": "#eab308",
+                        "type": "patrol"
+                    },
+                    {
+                        "x": 920,
+                        "y": 440,
+                        "rangeX": 150,
+                        "speed": 1,
+                        "isVertical": false,
+                        "color": "#10b981",
+                        "type": "chaser"
+                    },
+                    {
+                        "x": 3180,
+                        "y": 440,
+                        "rangeX": 150,
+                        "speed": 1,
+                        "isVertical": false,
+                        "color": "#10b981",
+                        "type": "chaser"
+                    },
+                    {
+                        "x": 2840,
+                        "y": 440,
+                        "rangeX": 150,
+                        "speed": 1,
+                        "isVertical": false,
+                        "color": "#10b981",
+                        "type": "chaser"
+                    },
+                    {
+                        "x": 1840,
+                        "y": 220,
+                        "rangeX": 180,
+                        "speed": 2,
+                        "isVertical": false,
+                        "color": "#eab308",
+                        "type": "patrol"
+                    }
+                ],
+                "pressurePlates": [],
+                "pushBlocks": [],
+                "conveyors": [],
+                "teleportPairs": [],
+                "bouncePads": [],
+                "buttons": [],
+                "levers": [],
+                "flamethrowers": [],
+                "fallingPlatforms": [],
+                "breakablePlatforms": [
+                    {
+                        "x": 360,
+                        "y": 460,
+                        "w": 120,
+                        "h": 40,
+                        "type": "platform",
+                        "broken": false,
+                        "timer": 0,
+                        "triggered": false
+                    }
+                ],
+                "hiddenPassages": [],
+                "fallingBlockTraps": [],
+                "vantuzPoints": [],
+                "decorations": [],
+                "laserEmitters": [],
+                "laserReceivers": [],
+                "staticMirrors": [],
+                "arrowShooters": [
+                    {
+                        "x": 3160,
+                        "y": 60,
+                        "w": 48,
+                        "h": 48,
+                        "dir": "target",
+                        "detectionRadius": 500,
+                        "fireInterval": 2.5,
+                        "arrowSpeed": 15,
                         "arrowRange": 500
                     }
                 ]
