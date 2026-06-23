@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v193';
-import { Enemy, GelChaser } from './enemies.js?v=v193';
+import { audio } from './audio.js?v=v194';
+import { Enemy, GelChaser } from './enemies.js?v=v194';
 
 export class Boss {
     constructor(x, y) {
@@ -1938,16 +1938,21 @@ export class UfoBoss extends Boss {
         this.gridTimer++;
         this.laserSweepTimer++;
 
-        // Smoothly hover to stay near player.x (slowed down and capped)
+        // Smoothly hover to stay near player.x (chase speed increased as requested)
         const targetX = player.x;
-        this.vx += (targetX - this.x) * 0.004;
+        this.vx += (targetX - this.x) * 0.007;
         this.vx *= 0.94; // apply friction
-        const maxChaseSpeed = 1.2;
+        const maxChaseSpeed = 2.0;
         this.vx = Math.max(-maxChaseSpeed, Math.min(maxChaseSpeed, this.vx));
         this.x += this.vx;
 
-        // Hover up and down slightly using sine wave (float y around 140)
-        this.y = 145 + Math.sin(this.pulseTime * 1.5) * 12;
+        // Hover vertically to match player.y dynamically (capped within bounds to prevent crash or flyaway)
+        const targetY = Math.max(110, Math.min(320, player.y - 180)) + Math.sin(this.pulseTime * 1.5) * 8;
+        this.vy += (targetY - this.y) * 0.006;
+        this.vy *= 0.92;
+        const maxChaseYSpeed = 1.2;
+        this.vy = Math.max(-maxChaseYSpeed, Math.min(maxChaseYSpeed, this.vy));
+        this.y += this.vy;
 
         // Check state transitions (Priority: Grid Attack > Spawn > Laser Sweep)
         let gridThreshold = 600;
@@ -2013,9 +2018,12 @@ export class UfoBoss extends Boss {
     updateSpawning(level, player) {
         this.stateTimer++;
 
-        // Stay in place
+        // Slowly track height while spawning
         this.vx = 0;
-        this.y = 145 + Math.sin(this.pulseTime * 1.5) * 5;
+        const targetY = Math.max(110, Math.min(320, player.y - 180)) + Math.sin(this.pulseTime * 1.5) * 5;
+        this.vy += (targetY - this.y) * 0.004;
+        this.vy *= 0.9;
+        this.y += this.vy;
 
         if (this.stateTimer < 60) {
             // Fade in tractor beam
@@ -2093,9 +2101,12 @@ export class UfoBoss extends Boss {
     updateGridAttack(level, player) {
         this.stateTimer++;
 
-        // Stay in place
+        // Slowly track height during grid attack
         this.vx = 0;
-        this.y = 145 + Math.sin(this.pulseTime * 1.5) * 3;
+        const targetY = Math.max(110, Math.min(320, player.y - 180)) + Math.sin(this.pulseTime * 1.5) * 3;
+        this.vy += (targetY - this.y) * 0.004;
+        this.vy *= 0.9;
+        this.y += this.vy;
 
         if (this.stateTimer < 120) {
             // Warning lines blinking
@@ -2132,20 +2143,30 @@ export class UfoBoss extends Boss {
         if (this.stateTimer < 75) {
             // Charging phase
             this.vx = 0;
-            this.y = 145 + Math.sin(this.pulseTime * 1.5) * 5;
+            const targetY = Math.max(110, Math.min(320, player.y - 180)) + Math.sin(this.pulseTime * 1.5) * 5;
+            this.vy += (targetY - this.y) * 0.004;
+            this.vy *= 0.9;
+            this.y += this.vy;
             if (this.stateTimer === 1) {
                 audio.playJump();
             }
         } 
         else if (this.stateTimer >= 75 && this.stateTimer < 165) {
-            // Fire phase: Move slowly towards player and sweep (slowed down and capped)
+            // Fire phase: Move towards player and sweep (increased sweep speed as requested)
             const targetX = player.x;
-            this.vx += (targetX - this.x) * 0.002;
+            this.vx += (targetX - this.x) * 0.004;
             this.vx *= 0.88;
-            const maxSweepSpeed = 0.7;
+            const maxSweepSpeed = 1.3;
             this.vx = Math.max(-maxSweepSpeed, Math.min(maxSweepSpeed, this.vx));
             this.x += this.vx;
-            this.y = 145 + Math.sin(this.pulseTime * 1.5) * 4;
+
+            // Track height during sweep
+            const targetY = Math.max(110, Math.min(320, player.y - 180)) + Math.sin(this.pulseTime * 1.5) * 4;
+            this.vy += (targetY - this.y) * 0.005;
+            this.vy *= 0.9;
+            const maxSweepYSpeed = 0.9;
+            this.vy = Math.max(-maxSweepYSpeed, Math.min(maxSweepYSpeed, this.vy));
+            this.y += this.vy;
 
             // Update laser beam X
             this.sweepLaserX = this.x;
