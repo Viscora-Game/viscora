@@ -129,6 +129,8 @@ def is_offensive(text):
         'amcik', 'amcık', 'meme', 'fuck', 'bitch', 'kaltak', 'erdogan', 'erdoğan', 'pkk', 
         'kilicdaroglu', 'kılıçdaroğlu', 'imamoglu', 'imamoğlu', 'ataturk', 'atatürk',
         'siken', 'domaltan', 'domalt',
+        'sikim', 'sikime', 'sikiş', 'sikis', 'sikti', 'sike', 'sikip', 'siksen', 'sikem', 'siker', 'siktim', 'sikcem', 'sikicem', 'sikik',
+        'sikisler', 'sikişler', 'soktum', 'sokar',
         'otuzbir', 'altmisdokuz', 'altmışdokuz', 'masturbasyon'
     }
     
@@ -163,8 +165,58 @@ def is_offensive(text):
     for bad in long_bad:
         if bad in clean_text:
             return True
-            
+    
     return False
+
+def validate_level_limits(level_data):
+    if not isinstance(level_data, dict):
+        return "Geçersiz harita verisi."
+        
+    width = level_data.get('levelWidth', level_data.get('width', 2000))
+    height = level_data.get('levelHeight', level_data.get('height', 600))
+    
+    if not (800 <= width <= 5000):
+        return f"Harita genişliği 800px ile 5000px arasında olmalıdır. (Girilen: {width}px)"
+    if not (600 <= height <= 1500):
+        return f"Harita yüksekliği 600px ile 1500px arasında olmalıdır. (Girilen: {height}px)"
+        
+    platforms = level_data.get('platforms', [])
+    falling_platforms = level_data.get('fallingPlatforms', [])
+    breakable_platforms = level_data.get('breakablePlatforms', [])
+    moving_platforms = level_data.get('movingPlatforms', [])
+    conveyors = level_data.get('conveyors', [])
+    platform_count = len(platforms) + len(falling_platforms) + len(breakable_platforms) + len(moving_platforms) + len(conveyors)
+    if platform_count > 200:
+        return f"En fazla 200 adet zemin yerleştirilebilir. (Girilen: {platform_count})"
+        
+    spikes = level_data.get('spikes', [])
+    acid_pools = level_data.get('acidPools', [])
+    flamethrowers = level_data.get('flamethrowers', [])
+    falling_traps = level_data.get('fallingBlockTraps', [])
+    shooters = level_data.get('arrowShooters', [])
+    hazard_count = len(spikes) + len(acid_pools) + len(flamethrowers) + len(falling_traps) + len(shooters)
+    if hazard_count > 100:
+        return f"En fazla 100 adet engel/tuzak yerleştirilebilir. (Girilen: {hazard_count})"
+        
+    gates = level_data.get('lasers', level_data.get('gates', []))
+    laser_gates = [g for g in gates if g.get('type') in ('laser', 'pinkLaser', 'greenLaser', 'yellowLaser')]
+    emitters = level_data.get('laserEmitters', [])
+    receivers = level_data.get('laserReceivers', [])
+    laser_count = len(laser_gates) + len(emitters) + len(receivers)
+    if laser_count > 40:
+        return f"En fazla 40 adet lazer elemanı yerleştirilebilir. (Girilen: {laser_count})"
+        
+    push_blocks = level_data.get('pushBlocks', [])
+    static_mirrors = level_data.get('staticMirrors', [])
+    mirror_count = len(push_blocks) + len(static_mirrors)
+    if mirror_count > 45:
+        return f"En fazla 45 adet itilebilir blok/ayna yerleştirilebilir. (Girilen: {mirror_count})"
+        
+    enemies = level_data.get('enemies', [])
+    if len(enemies) > 40:
+        return f"En fazla 40 adet düşman yerleştirilebilir. (Girilen: {len(enemies)})"
+        
+    return None
 
 class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -308,6 +360,14 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(400)
                 self.end_headers()
                 self.wfile.write('{"error": "Harita adı, yapımcı ve harita verileri zorunludur."}'.encode('utf-8'))
+                return
+
+            validation_error = validate_level_limits(data)
+            if validation_error:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': validation_error}, ensure_ascii=False).encode('utf-8'))
                 return
 
             if is_offensive(name) or is_offensive(author):
@@ -509,6 +569,14 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.wfile.write('{"error": "Güncellenecek veri bulunamadı."}'.encode('utf-8'))
                     return
                     
+                validation_error = validate_level_limits(new_data)
+                if validation_error:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({'error': validation_error}, ensure_ascii=False).encode('utf-8'))
+                    return
+                    
                 db = read_db()
                 found = None
                 for level in db:
@@ -567,7 +635,13 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 def sanitize_existing_db():
     db = read_db()
-    modified = False
+    original_len = len(db)
+    
+    # Belirli uygunsuz haritayı sil
+    db = [level for level in db if level.get('id') != 'map_1782506417393_451']
+    modified = len(db) < original_len
+    if modified:
+        print("Inappropriate map 'map_1782506417393_451' successfully deleted.")
     
     for level in db:
         name = level.get('name', '')

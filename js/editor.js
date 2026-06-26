@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v203';
-import { audio } from './audio.js?v=v203';
-import { LevelGenerator } from './generator.js?v=v203';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v204';
+import { audio } from './audio.js?v=v204';
+import { LevelGenerator } from './generator.js?v=v204';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -23,6 +23,11 @@ function isOffensive(text) {
         cleanText = cleanText.split(k).join(v);
     }
     
+    // 31 ve 69 numaralı argo/küfür kontrolleri (131 veya 690 gibi diğer sayıların içindekiler hariç)
+    if (/(?<!\d)(31|69)(?!\d)/.test(cleanText)) {
+        return true;
+    }
+    
     const words = cleanText.match(/[a-z0-9]+/g) || [];
     
     const shortBad = new Set(['amk', 'aq', 'sik', 'am', 'got', 'göt', 'pic', 'piç', 'oc', 'pust', 'puşt', 'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto', 'fetö']);
@@ -30,7 +35,10 @@ function isOffensive(text) {
         'yarrak', 'yarak', 'tassak', 'tasak', 'orospu', 'siktir', 'pezevenk', 'kahpe', 
         'amcik', 'amcık', 'meme', 'fuck', 'bitch', 'kaltak', 'erdogan', 'erdoğan', 'pkk', 
         'kilicdaroglu', 'kılıçdaroğlu', 'imamoglu', 'imamoğlu', 'ataturk', 'atatürk',
-        'siken', 'domaltan', 'domalt'
+        'siken', 'domaltan', 'domalt',
+        'sikim', 'sikime', 'sikiş', 'sikis', 'sikti', 'sike', 'sikip', 'siksen', 'sikem', 'siker', 'siktim', 'sikcem', 'sikicem', 'sikik',
+        'sikisler', 'sikişler', 'soktum', 'sokar',
+        'otuzbir', 'altmisdokuz', 'altmışdokuz', 'masturbasyon'
     ]);
     
     const normalizedShortBad = Array.from(shortBad).map(word => {
@@ -62,6 +70,9 @@ function isOffensive(text) {
 
     // Noktalama işaretlerini ve boşlukları temizleyip kontrol et (Aşma koruması örn. p.k.k veya a.m.k)
     const noPuncText = cleanText.replace(/[^a-z0-9]/g, '');
+    if (/(?<!\d)(31|69)(?!\d)/.test(noPuncText)) {
+        return true;
+    }
     for (const bad of normalizedShortBad) {
         if (noPuncText === bad) {
             return true;
@@ -805,11 +816,36 @@ export class LevelEditor {
                 </div>
                 <div class="editor-input-group">
                     <label>Harita Genişlik</label>
-                    <input type="number" id="editor-level-width" value="${this.game.level.width}">
+                    <input type="number" id="editor-level-width" value="${this.game.level.width}" min="800" max="5000">
                 </div>
                 <div class="editor-input-group">
                     <label>Harita Yükseklik</label>
-                    <input type="number" id="editor-level-height" value="${this.game.level.height}">
+                    <input type="number" id="editor-level-height" value="${this.game.level.height}" min="600" max="1500">
+                </div>
+                <div class="editor-capacity-section" style="grid-column: span 2; margin-top: 10px; border: 1px solid rgba(168, 85, 247, 0.2); padding: 10px; border-radius: 6px; background: rgba(15, 23, 42, 0.6); box-shadow: 0 0 10px rgba(168, 85, 247, 0.05); display: flex; flex-direction: column; gap: 6px;">
+                    <div style="font-size: 11px; font-weight: 800; color: #a855f7; display: flex; align-items: center; gap: 4px; border-bottom: 1px solid rgba(168, 85, 247, 0.15); padding-bottom: 4px; margin-bottom: 2px;">
+                        <svg class="icon-svg" style="width: 10px; height: 10px; margin: 0;"><use href="#icon-warning"></use></svg> HARİTA KAPASİTESİ (NESNE SINIRLARI)
+                    </div>
+                    <div style="font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #94a3b8;">Zeminler (Maks 200):</span>
+                        <span id="capacity-platforms" style="font-family: monospace; font-weight: bold; color: #10b981;">0/200</span>
+                    </div>
+                    <div style="font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #94a3b8;">Engeller (Maks 100):</span>
+                        <span id="capacity-hazards" style="font-family: monospace; font-weight: bold; color: #10b981;">0/100</span>
+                    </div>
+                    <div style="font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #94a3b8;">Lazer Elemanları (Maks 40):</span>
+                        <span id="capacity-lasers" style="font-family: monospace; font-weight: bold; color: #10b981;">0/40</span>
+                    </div>
+                    <div style="font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #94a3b8;">Kutular & Aynalar (Maks 45):</span>
+                        <span id="capacity-mirrors" style="font-family: monospace; font-weight: bold; color: #10b981;">0/45</span>
+                    </div>
+                    <div style="font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #94a3b8;">Düşmanlar (Maks 40):</span>
+                        <span id="capacity-enemies" style="font-family: monospace; font-weight: bold; color: #10b981;">0/40</span>
+                    </div>
                 </div>
                 <div class="editor-input-group" style="grid-column: span 2; margin-top: 8px; flex-direction: column; align-items: flex-start;">
                     <label style="display: block; margin-bottom: 6px; width: 100%;">Etiketler (En Fazla 2 Adet)</label>
@@ -1040,11 +1076,13 @@ export class LevelEditor {
 
         const widthInput = document.getElementById('editor-level-width');
         widthInput.addEventListener('change', (e) => {
-            this.game.level.width = Math.max(800, parseInt(widthInput.value) || 2000);
+            this.game.level.width = Math.min(5000, Math.max(800, parseInt(widthInput.value) || 2000));
+            widthInput.value = this.game.level.width;
         });
         const heightInput = document.getElementById('editor-level-height');
         heightInput.addEventListener('change', (e) => {
-            this.game.level.height = Math.max(600, parseInt(heightInput.value) || 600);
+            this.game.level.height = Math.min(1500, Math.max(600, parseInt(heightInput.value) || 600));
+            heightInput.value = this.game.level.height;
         });
 
         // Slot Seçim Butonları Dinleyicisi
@@ -1240,6 +1278,7 @@ export class LevelEditor {
         if (this.activeSlot) {
             localStorage.setItem('viscora_draft_slot_' + this.activeSlot, jsonStr);
         }
+        this.updateCapacityUI();
     }
 
     /**
@@ -2007,6 +2046,67 @@ export class LevelEditor {
         }
         addUpdateEvent('inspect-block-mirror-type', (val) => { obj.mirrorType = val; });
         addUpdateEvent('inspect-static-mirror-type', (val) => { obj.mirrorType = val; });
+        this.updateCapacityUI();
+    }
+
+    updateCapacityUI() {
+        const lvl = this.game.level;
+        if (!lvl) return;
+
+        // Platforms: platforms, fallingPlatforms, breakablePlatforms, movingPlatforms, conveyors
+        const platformCount = (lvl.platforms ? lvl.platforms.length : 0) +
+                              (lvl.fallingPlatforms ? lvl.fallingPlatforms.length : 0) +
+                              (lvl.breakablePlatforms ? lvl.breakablePlatforms.length : 0) +
+                              (lvl.movingPlatforms ? lvl.movingPlatforms.length : 0) +
+                              (lvl.conveyors ? lvl.conveyors.length : 0);
+
+        // Hazards: spikes/hazards (except acid), acidPools, flamethrowers, fallingBlockTraps, arrowShooters
+        const spikeCount = lvl.hazards ? lvl.hazards.filter(h => h.type === 'spike').length : 0;
+        const acidCount = lvl.hazards ? lvl.hazards.filter(h => h.type === 'acid').length : 0;
+        const flameCount = lvl.flamethrowers ? lvl.flamethrowers.length : 0;
+        const fallingTrapCount = lvl.fallingBlockTraps ? lvl.fallingBlockTraps.length : 0;
+        const shooterCount = lvl.arrowShooters ? lvl.arrowShooters.length : 0;
+        const hazardCount = spikeCount + acidCount + flameCount + fallingTrapCount + shooterCount;
+
+        // Lasers: laser gates, laserEmitters, laserReceivers
+        const laserGateCount = lvl.gates ? lvl.gates.filter(g => g.type === 'laser' || g.type === 'pinkLaser' || g.type === 'greenLaser' || g.type === 'yellowLaser').length : 0;
+        const laserEmitterCount = lvl.laserEmitters ? lvl.laserEmitters.length : 0;
+        const laserReceiverCount = lvl.laserReceivers ? lvl.laserReceivers.length : 0;
+        const laserCount = laserGateCount + laserEmitterCount + laserReceiverCount;
+
+        // Mirrors: pushBlocks, staticMirrors
+        const mirrorCount = (lvl.pushBlocks ? lvl.pushBlocks.length : 0) +
+                            (lvl.staticMirrors ? lvl.staticMirrors.length : 0);
+
+        // Enemies
+        const enemyCount = lvl.enemies ? lvl.enemies.length : 0;
+
+        const elPlatforms = document.getElementById('capacity-platforms');
+        const elHazards = document.getElementById('capacity-hazards');
+        const elLasers = document.getElementById('capacity-lasers');
+        const elMirrors = document.getElementById('capacity-mirrors');
+        const elEnemies = document.getElementById('capacity-enemies');
+
+        if (elPlatforms) {
+            elPlatforms.textContent = `${platformCount}/200`;
+            elPlatforms.style.color = platformCount > 200 ? '#ef4444' : (platformCount > 160 ? '#eab308' : '#10b981');
+        }
+        if (elHazards) {
+            elHazards.textContent = `${hazardCount}/100`;
+            elHazards.style.color = hazardCount > 100 ? '#ef4444' : (hazardCount > 80 ? '#eab308' : '#10b981');
+        }
+        if (elLasers) {
+            elLasers.textContent = `${laserCount}/40`;
+            elLasers.style.color = laserCount > 40 ? '#ef4444' : (laserCount > 32 ? '#eab308' : '#10b981');
+        }
+        if (elMirrors) {
+            elMirrors.textContent = `${mirrorCount}/45`;
+            elMirrors.style.color = mirrorCount > 45 ? '#ef4444' : (mirrorCount > 36 ? '#eab308' : '#10b981');
+        }
+        if (elEnemies) {
+            elEnemies.textContent = `${enemyCount}/40`;
+            elEnemies.style.color = enemyCount > 40 ? '#ef4444' : (enemyCount > 32 ? '#eab308' : '#10b981');
+        }
     }
 
     /**
@@ -2559,6 +2659,55 @@ export class LevelEditor {
             return;
         }
 
+        const lvl = this.game.level;
+        const platformCount = (lvl.platforms ? lvl.platforms.length : 0) +
+                              (lvl.fallingPlatforms ? lvl.fallingPlatforms.length : 0) +
+                              (lvl.breakablePlatforms ? lvl.breakablePlatforms.length : 0) +
+                              (lvl.movingPlatforms ? lvl.movingPlatforms.length : 0) +
+                              (lvl.conveyors ? lvl.conveyors.length : 0);
+
+        const spikeCount = lvl.hazards ? lvl.hazards.filter(h => h.type === 'spike').length : 0;
+        const acidCount = lvl.hazards ? lvl.hazards.filter(h => h.type === 'acid').length : 0;
+        const flameCount = lvl.flamethrowers ? lvl.flamethrowers.length : 0;
+        const fallingTrapCount = lvl.fallingBlockTraps ? lvl.fallingBlockTraps.length : 0;
+        const shooterCount = lvl.arrowShooters ? lvl.arrowShooters.length : 0;
+        const hazardCount = spikeCount + acidCount + flameCount + fallingTrapCount + shooterCount;
+
+        const laserGateCount = lvl.gates ? lvl.gates.filter(g => g.type === 'laser' || g.type === 'pinkLaser' || g.type === 'greenLaser' || g.type === 'yellowLaser').length : 0;
+        const laserEmitterCount = lvl.laserEmitters ? lvl.laserEmitters.length : 0;
+        const laserReceiverCount = lvl.laserReceivers ? lvl.laserReceivers.length : 0;
+        const laserCount = laserGateCount + laserEmitterCount + laserReceiverCount;
+
+        const mirrorCount = (lvl.pushBlocks ? lvl.pushBlocks.length : 0) +
+                            (lvl.staticMirrors ? lvl.staticMirrors.length : 0);
+
+        const enemyCount = lvl.enemies ? lvl.enemies.length : 0;
+
+        if (lvl.width > 5000 || lvl.height > 1500) {
+            alert(`Harita boyut sınırları aşıldı! Maksimum boyutlar 5000px genişlik ve 1500px yükseklik olmalıdır. (Mevcut: ${lvl.width}x${lvl.height}px)`);
+            return;
+        }
+        if (platformCount > 200) {
+            alert(`Harita zemin sınırı aşıldı! En fazla 200 adet zemin yerleştirebilirsiniz. (Mevcut: ${platformCount})`);
+            return;
+        }
+        if (hazardCount > 100) {
+            alert(`Harita engel sınırı aşıldı! En fazla 100 adet engel/tuzak yerleştirebilirsiniz. (Mevcut: ${hazardCount})`);
+            return;
+        }
+        if (laserCount > 40) {
+            alert(`Harita lazer sınırı aşıldı! En fazla 40 adet lazer elemanı yerleştirebilirsiniz. (Mevcut: ${laserCount})`);
+            return;
+        }
+        if (mirrorCount > 45) {
+            alert(`Harita ayna/kutu sınırı aşıldı! En fazla 45 adet itilebilir kutu/ayna yerleştirebilirsiniz. (Mevcut: ${mirrorCount})`);
+            return;
+        }
+        if (enemyCount > 40) {
+            alert(`Harita düşman sınırı aşıldı! En fazla 40 adet düşman yerleştirebilirsiniz. (Mevcut: ${enemyCount})`);
+            return;
+        }
+
         const exportObj = this.getLevelDataObj();
         const myUserId = localStorage.getItem('viscora_user_id') || 'anonymous';
         const serverLevelId = this.game.level.serverLevelId;
@@ -2729,8 +2878,8 @@ export class LevelEditor {
                 lvl.staticMirrors = [];
 
                 // Parse dimensions
-                lvl.width = Math.max(800, data.levelWidth || data.width || 2000);
-                lvl.height = Math.max(600, data.levelHeight || data.height || 600);
+                lvl.width = Math.min(5000, Math.max(800, data.levelWidth || data.width || 2000));
+                lvl.height = Math.min(1500, Math.max(600, data.levelHeight || data.height || 600));
 
                 // Parse spawn point
                 if (data.spawn) {

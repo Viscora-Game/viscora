@@ -1,6 +1,6 @@
-import { audio } from './audio.js?v=v203';
-import { ViscosityList } from './viscosity.js?v=v203';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v203';
+import { audio } from './audio.js?v=v204';
+import { ViscosityList } from './viscosity.js?v=v204';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v204';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -18,6 +18,11 @@ function isOffensive(text) {
         cleanText = cleanText.split(k).join(v);
     }
     
+    // 31 ve 69 numaralı argo/küfür kontrolleri (131 veya 690 gibi diğer sayıların içindekiler hariç)
+    if (/(?<!\d)(31|69)(?!\d)/.test(cleanText)) {
+        return true;
+    }
+    
     const words = cleanText.match(/[a-z0-9]+/g) || [];
     
     const shortBad = new Set(['amk', 'aq', 'sik', 'am', 'got', 'göt', 'pic', 'piç', 'oc', 'pust', 'puşt', 'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto', 'fetö']);
@@ -25,7 +30,10 @@ function isOffensive(text) {
         'yarrak', 'yarak', 'tassak', 'tasak', 'orospu', 'siktir', 'pezevenk', 'kahpe', 
         'amcik', 'amcık', 'meme', 'fuck', 'bitch', 'kaltak', 'erdogan', 'erdoğan', 'pkk', 
         'kilicdaroglu', 'kılıçdaroğlu', 'imamoglu', 'imamoğlu', 'ataturk', 'atatürk',
-        'siken', 'domaltan', 'domalt'
+        'siken', 'domaltan', 'domalt',
+        'sikim', 'sikime', 'sikiş', 'sikis', 'sikti', 'sike', 'sikip', 'siksen', 'sikem', 'siker', 'siktim', 'sikcem', 'sikicem', 'sikik',
+        'sikisler', 'sikişler', 'soktum', 'sokar',
+        'otuzbir', 'altmisdokuz', 'altmışdokuz', 'masturbasyon'
     ]);
     
     const normalizedShortBad = Array.from(shortBad).map(word => {
@@ -57,6 +65,9 @@ function isOffensive(text) {
 
     // Noktalama işaretlerini ve boşlukları temizleyip kontrol et (Aşma koruması örn. p.k.k veya a.m.k)
     const noPuncText = cleanText.replace(/[^a-z0-9]/g, '');
+    if (/(?<!\d)(31|69)(?!\d)/.test(noPuncText)) {
+        return true;
+    }
     for (const bad of normalizedShortBad) {
         if (noPuncText === bad) {
             return true;

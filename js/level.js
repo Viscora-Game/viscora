@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v203';
-import { THEMES } from './generator.js?v=v203';
+import { audio } from './audio.js?v=v204';
+import { THEMES } from './generator.js?v=v204';
 
 /**
  * Viscora Level Design & Manager
@@ -3090,8 +3090,8 @@ export class Level {
 
         if (data) {
             try {
-                this.width = Math.max(800, data.levelWidth || data.width || 2000);
-                this.height = Math.max(600, data.levelHeight || data.height || 600);
+                this.width = Math.min(5000, Math.max(800, data.levelWidth || data.width || 2000));
+                this.height = Math.min(1500, Math.max(600, data.levelHeight || data.height || 600));
                 this.name = data.name || "Özel Seviye";
                 this.serverLevelId = data.serverLevelId || null;
                 this.tags = data.tags || [];
