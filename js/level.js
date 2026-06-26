@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v200';
-import { THEMES } from './generator.js?v=v200';
+import { audio } from './audio.js?v=v201';
+import { THEMES } from './generator.js?v=v201';
 
 /**
  * Viscora Level Design & Manager
@@ -61,7 +61,7 @@ export class Level {
         } else if (originalLevelNumber === 21) {
             data = {
                 "serverLevelId": "map_1782162169371_168",
-                "name": "Özel Seviye",
+                "name": "SİBER GİRİŞİ",
                 "tags": [],
                 "themeId": "neon_sewer",
                 "levelWidth": 4000,
@@ -778,7 +778,7 @@ export class Level {
         } else if (originalLevelNumber === 22) {
             data = {
                 "serverLevelId": null,
-                "name": "SİBER VERİ AKIŞI: SİBER VERİ AKIŞI: Özel Seviye",
+                "name": "MİKROÇİP LABİRENTİ",
                 "tags": [],
                 "themeId": "magma_core",
                 "levelWidth": 3700,
@@ -1384,7 +1384,7 @@ export class Level {
         } else if (originalLevelNumber === 23) {
             data = {
     "serverLevelId": "map_1782252999210_418",
-    "name": "BÖLÜM 23",
+    "name": "PORTAL BAĞLANTISI",
     "tags": [],
     "themeId": "neon_sewer",
     "levelWidth": 3300,
@@ -2010,7 +2010,7 @@ export class Level {
         } else if (originalLevelNumber === 30) {
             data = {
                 "serverLevelId": null,
-                "name": "SİBER VERİ AKIŞI: ENDBRINGER",
+                "name": "ENDBRINGER",
                 "tags": [],
                 "themeId": "magma_core",
                 "levelWidth": 3500,
@@ -5676,7 +5676,8 @@ export class Level {
         }
 
         if (originalLevelNumber > 20 && originalLevelNumber <= 30) {
-            this.name = `SİBER VERİ AKIŞI: ${this.name}`;
+            let baseName = this.name.replace(/^SİBER VERİ AKIŞI:\s*/, "");
+            this.name = `SİBER VERİ AKIŞI: ${baseName}`;
             
             if (originalLevelNumber === 21 && !data) {
                 this.enemies = [

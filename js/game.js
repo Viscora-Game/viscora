@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v200';
-import { Level } from './level.js?v=v200';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v200';
-import { UIManager } from './ui.js?v=v200';
-import { audio } from './audio.js?v=v200';
-import { LevelEditor } from './editor.js?v=v200';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v200';
+import { Player } from './player.js?v=v201';
+import { Level } from './level.js?v=v201';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v201';
+import { UIManager } from './ui.js?v=v201';
+import { audio } from './audio.js?v=v201';
+import { LevelEditor } from './editor.js?v=v201';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v201';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -27,7 +27,17 @@ const LEVEL_NAMES = [
     "KONTAMİNASYON ODASI",
     "FİLTRELEME TESİSİ",
     "SİBER KANALİZASYON",
-    "VISCOREX REAKTÖRÜ"
+    "VISCOREX REAKTÖRÜ",
+    "SİBER GİRİŞİ",
+    "MİKROÇİP LABİRENTİ",
+    "PORTAL BAĞLANTISI",
+    "KRONO TETİKLEYİCİ",
+    "YERÇEKİMİ BOŞLUĞU",
+    "KARA DÜŞMAN ALANI",
+    "LAZER KAFESİ",
+    "KOD DEPOSU",
+    "SİBER KANALİZASYON II",
+    "ENDBRINGER"
 ];
 
 // Bölüm bazlı bağlamsal ipuçları — ilk kez tanıtılan mekanikler için kısa yardım metinleri
@@ -2128,7 +2138,7 @@ export class GameManager {
                 this.ctx.stroke();
                 
                 const lvlNum = this.currentLevel;
-                const lvlName = LEVEL_NAMES[lvlNum] || "BİLİNMEYEN ALAN";
+                const lvlName = (this.level && this.level.name) || LEVEL_NAMES[lvlNum] || "BİLİNMEYEN ALAN";
                 
                 this.ctx.textAlign = 'center';
                 this.ctx.textBaseline = 'middle';
