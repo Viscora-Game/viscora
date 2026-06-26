@@ -6,3 +6,4 @@ server/__pycache__/
 .agents/
 *.zip
 *.apk
+server/db_*.json

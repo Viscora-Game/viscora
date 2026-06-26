@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v204">
+    <link rel="stylesheet" href="index.css?v=v208">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -735,6 +735,32 @@
                                 <input type="range" id="slider-menu-sfx" class="volume-slider" min="0" max="100" value="80" style="height: 6px; flex: 1; min-width: 0; width: 100%;">
                                 <span id="menu-sfx-text" class="volume-val-text" style="font-size: 0.85rem; min-width: 35px;">80%</span>
                             </div>
+                    </div>
+                    <!-- Bulut Senkronizasyon Bölümü -->
+                    <div style="border-top: 1px dashed #334155; margin-top: 10px; padding-top: 15px; width: 100%; display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                        <span style="font-size: 0.95rem; color: #38bdf8; font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+                            <svg class="icon-svg" style="width: 16px; height: 16px; fill: currentColor;"><use href="#icon-portal"></use></svg> BULUT SENKRONİZASYONU
+                        </span>
+                        
+                        <!-- Kurtarma Kodu Gösterim Alanı -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; background: #0f172a; border: 1px solid #1e293b; padding: 8px 12px; border-radius: 6px; gap: 10px;">
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <span style="font-size: 0.7rem; color: #a1a1aa;">KURTARMA KODUNUZ</span>
+                                <span id="text-sync-code" style="font-size: 1.1rem; font-weight: bold; color: #f1f5f9; letter-spacing: 1.5px; font-family: monospace;">YÜKLENİYOR...</span>
+                            </div>
+                            <button id="btn-copy-sync-code" class="sound-toggle-mini-btn" type="button" title="Kodu Kopyala" style="width: 36px; height: 36px; background: #1e293b; border-radius: 6px; border: 1px solid #334155; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                                📋
+                            </button>
+                        </div>
+                        
+                        <!-- Kayıt Geri Yükleme Alanı -->
+                        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 5px;">
+                            <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">BAŞKA CİHAZDAN BULUT KAYDI YÜKLE</span>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="input-sync-code" placeholder="KOD GİRİN (Örn: R8F9T2)" maxlength="6" style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 0.9rem; font-family: monospace; text-transform: uppercase; box-sizing: border-box; text-align: center;">
+                                <button id="btn-restore-sync" class="sound-toggle-mini-btn" type="button" style="width: auto; padding: 0 16px; height: 38px; background: #0369a1; border-radius: 6px; border: none; font-weight: bold; font-size: 0.85rem; color: #fff; cursor: pointer; transition: background 0.2s;">GERİ YÜKLE</button>
+                            </div>
+                            <span id="sync-status-message" style="font-size: 0.75rem; color: #a1a1aa; text-align: center; display: block; margin-top: 2px;">Bulut durumu güncel.</span>
                         </div>
                     </div>
                 </div>
@@ -1259,8 +1285,8 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v204"></script>
-    <script type="module" src="js/main.js?v=v204"></script>
+    <script src="js/controls_customizer.js?v=v208"></script>
+    <script type="module" src="js/main.js?v=v208"></script>
 </body>
 </html>
 

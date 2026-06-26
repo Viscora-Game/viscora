@@ -1,10 +1,11 @@
-import { Player } from './player.js?v=v204';
-import { Level } from './level.js?v=v204';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v204';
-import { UIManager } from './ui.js?v=v204';
-import { audio } from './audio.js?v=v204';
-import { LevelEditor } from './editor.js?v=v204';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v204';
+import { Player } from './player.js?v=v208';
+import { Level } from './level.js?v=v208';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v208';
+import { UIManager } from './ui.js?v=v208';
+import { CloudSaveManager } from './cloud_save.js?v=v208';
+import { audio } from './audio.js?v=v208';
+import { LevelEditor } from './editor.js?v=v208';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v208';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -479,6 +480,7 @@ export class GameManager {
             const parsed = JSON.parse(data);
             parsed[lvl] = Math.max(parsed[lvl] || 0, stars);
             localStorage.setItem('viscora_stars', JSON.stringify(parsed));
+            CloudSaveManager.saveProgress();
         } catch(e) {}
     }
 
@@ -1476,6 +1478,7 @@ export class GameManager {
                 const nextLvl = this.currentLevel + 1;
                 this.unlockedLevel = Math.max(this.unlockedLevel, nextLvl);
                 localStorage.setItem('viscora_unlocked_level', this.unlockedLevel.toString());
+                CloudSaveManager.saveProgress();
                 this.ui.updateLevelButtonsUI();
 
                 document.getElementById('win-title').textContent = `BÖLÜM ${this.currentLevel} TAMAMLANDI!`;

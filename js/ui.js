@@ -1,6 +1,7 @@
-import { audio } from './audio.js?v=v204';
-import { ViscosityList } from './viscosity.js?v=v204';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v204';
+import { audio } from './audio.js?v=v208';
+import { ViscosityList } from './viscosity.js?v=v208';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v208';
+import { CloudSaveManager } from './cloud_save.js?v=v208';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -8,83 +9,86 @@ const API_BASE = (window.location.hostname === 'localhost' || window.location.ho
 
 function isOffensive(text) {
     if (!text) return false;
-    let cleanText = text.toLowerCase().trim();
-    
+    let raw = text.toLowerCase().trim();
+
     const turkishMap = {
         'ı': 'i', 'ğ': 'g', 'ü': 'u', 'ş': 's', 'ö': 'o', 'ç': 'c',
         'â': 'a', 'î': 'i', 'û': 'u'
     };
-    for (const [k, v] of Object.entries(turkishMap)) {
-        cleanText = cleanText.split(k).join(v);
-    }
-    
-    // 31 ve 69 numaralı argo/küfür kontrolleri (131 veya 690 gibi diğer sayıların içindekiler hariç)
-    if (/(?<!\d)(31|69)(?!\d)/.test(cleanText)) {
-        return true;
-    }
-    
-    const words = cleanText.match(/[a-z0-9]+/g) || [];
-    
-    const shortBad = new Set(['amk', 'aq', 'sik', 'am', 'got', 'göt', 'pic', 'piç', 'oc', 'pust', 'puşt', 'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto', 'fetö']);
-    const longBad = new Set([
-        'yarrak', 'yarak', 'tassak', 'tasak', 'orospu', 'siktir', 'pezevenk', 'kahpe', 
-        'amcik', 'amcık', 'meme', 'fuck', 'bitch', 'kaltak', 'erdogan', 'erdoğan', 'pkk', 
-        'kilicdaroglu', 'kılıçdaroğlu', 'imamoglu', 'imamoğlu', 'ataturk', 'atatürk',
-        'siken', 'domaltan', 'domalt',
-        'sikim', 'sikime', 'sikiş', 'sikis', 'sikti', 'sike', 'sikip', 'siksen', 'sikem', 'siker', 'siktim', 'sikcem', 'sikicem', 'sikik',
-        'sikisler', 'sikişler', 'soktum', 'sokar',
-        'otuzbir', 'altmisdokuz', 'altmışdokuz', 'masturbasyon'
+    const leetMap = {
+        '0': 'o', '1': 'i', '3': 'e', '4': 'a',
+        '5': 's', '7': 't', '@': 'a', '$': 's', '!': 'i', '|': 'i'
+    };
+
+    let norm = raw;
+    for (const [k, v] of Object.entries(turkishMap)) norm = norm.split(k).join(v);
+
+    if (/(?<!\d)(31|69)(?!\d)/.test(norm)) return true;
+    if (/(?<!\d)(31|69)(?!\d)/.test(norm.replace(/[^a-z0-9]/g, ''))) return true;
+
+    for (const [k, v] of Object.entries(leetMap)) norm = norm.split(k).join(v);
+
+    const shortBad = new Set([
+        'amk', 'aq', 'sik', 'am', 'got', 'pic', 'oc', 'pust',
+        'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto',
+        'bok', 'ibne', 'gavat', 'gavad', 'gerzek', 'angut',
+        'ass', 'shit', 'cunt', 'dick', 'cock', 'slut', 'nigga',
+        'bastard', 'fag', 'boner', 'cum', 'rape',
+        // Sayı bypass’ları (s2m = sikim, 2 = iki anlamında)
+        's2m', 's2k', 's2ks', 'am2', 'g2t'
     ]);
-    
-    const normalizedShortBad = Array.from(shortBad).map(word => {
-        let w = word.toLowerCase();
-        for (const [k, v] of Object.entries(turkishMap)) {
-            w = w.split(k).join(v);
-        }
-        return w;
-    });
 
-    const normalizedLongBad = Array.from(longBad).map(word => {
-        let w = word.toLowerCase();
-        for (const [k, v] of Object.entries(turkishMap)) {
-            w = w.split(k).join(v);
-        }
-        return w;
-    });
+    const longBad = new Set([
+        'yarrak', 'yarak', 'assak', 'tasak', 'tassak', 'dassak', 'dasak', 'orospu', 'siktir', 'pezevenk', 'kahpe',
+        'amcik', 'kaltak', 'erdogan', 'pkk',
+        'kilicdaroglu', 'imamoglu', 'ataturk',
+        'siken', 'domalt', 'domalan', 'domalm',
+        'sikim', 'sikime', 'sikis', 'sikti', 'sike', 'sikip', 'siksen',
+        'sikem', 'siker', 'siktim', 'sikcem', 'sikicem', 'sikik',
+        'sikisler', 'soktum', 'sokar',
+        'otuzbir', 'altmisdokuz', 'masturbasyon',
+        'dalyarak', 'dalyarrak', 'dangalak', 'fahise',
+        'gerizekal', 'gerzekl',
+        'ananin', 'ananisi', 'ananiko',
+        'bacini', 'bacina',
+        'godos', 'godumun', 'atmik',
+        'amina', 'aminako', 'aminakoy',
+        'boklu', 'boktan', 'bokbok', 'bombok',
+        'orosbuc', 'orospuc',
+        'fuck', 'bitch', 'asshole', 'motherfuck', 'nigger', 'faggot',
+        'whore', 'porn', 'dildo', 'fucker', 'fuckin', 'goddamn',
+        'pussy', 'rapist', 'pedophil', 'pedofil', 'meme'
+    ]);
 
-    for (const word of words) {
-        if (normalizedShortBad.includes(word) || normalizedLongBad.includes(word)) {
-            return true;
+    const normSet = w => { let s = w.toLowerCase(); for (const [k,v] of Object.entries(turkishMap)) s = s.split(k).join(v); return s; };
+    const nShort = Array.from(shortBad).map(normSet);
+    const nLong  = Array.from(longBad).map(normSet);
+
+    function _check(t) {
+        const words = t.match(/[a-z]+/g) || [];
+        for (const w of words) {
+            if (nShort.includes(w) || nLong.includes(w)) return true;
+            for (const bad of nLong) if (w.includes(bad)) return true;
         }
-        for (const bad of normalizedLongBad) {
-            if (word.includes(bad)) {
-                return true;
-            }
-        }
+        const noPunc = t.replace(/[^a-z]/g, '');
+        for (const bad of nShort) if (noPunc === bad) return true;
+        for (const bad of nLong)  if (noPunc.includes(bad)) return true;
+        return false;
     }
 
-    // Noktalama işaretlerini ve boşlukları temizleyip kontrol et (Aşma koruması örn. p.k.k veya a.m.k)
-    const noPuncText = cleanText.replace(/[^a-z0-9]/g, '');
-    if (/(?<!\d)(31|69)(?!\d)/.test(noPuncText)) {
-        return true;
+    const collapse = t => t.replace(/(.)\1+/g, '$1');
+
+    const sanitizeBypass = t => {
+        return t.split('s2').join('siki')
+                .split('g2').join('go')
+                .split('am2').join('am');
+    };
+
+    const noSpace = norm.replace(/\s+/g, '');
+    for (const v of [norm, noSpace, collapse(norm), collapse(noSpace)]) {
+        if (_check(sanitizeBypass(v))) return true;
     }
-    for (const bad of normalizedShortBad) {
-        if (noPuncText === bad) {
-            return true;
-        }
-    }
-    for (const bad of normalizedLongBad) {
-        if (noPuncText.includes(bad)) {
-            return true;
-        }
-    }
-    
-    for (const bad of normalizedLongBad) {
-        if (cleanText.includes(bad)) {
-            return true;
-        }
-    }
-    
+
     return false;
 }
 
@@ -683,6 +687,83 @@ export class UIManager {
         if (btnOpenSettings && settingsModal) {
             this.bindTouchClick(btnOpenSettings, () => {
                 settingsModal.classList.remove('hidden');
+                
+                // Bulut kurtarma kodunu güncelle/tetikle
+                const lblSyncCode = document.getElementById('text-sync-code');
+                const savedCode = localStorage.getItem('viscora_sync_code');
+                if (savedCode) {
+                    if (lblSyncCode) lblSyncCode.textContent = savedCode;
+                }
+                
+                // Arka planda bir eşitleme başlat
+                CloudSaveManager.saveProgress().then(res => {
+                    if (res && res.success && res.syncCode) {
+                        if (lblSyncCode) lblSyncCode.textContent = res.syncCode;
+                        const statusMsg = document.getElementById('sync-status-message');
+                        if (statusMsg) {
+                            statusMsg.textContent = 'Bulut durumu güncel.';
+                            statusMsg.style.color = '#10b981'; // green
+                        }
+                    }
+                });
+            });
+        }
+
+        // Bulut Kayıt Kopyalama ve Geri Yükleme Bindings
+        const btnCopySyncCode = document.getElementById('btn-copy-sync-code');
+        const btnRestoreSync = document.getElementById('btn-restore-sync');
+        const inputSyncCode = document.getElementById('input-sync-code');
+        const syncStatusMessage = document.getElementById('sync-status-message');
+
+        if (btnCopySyncCode) {
+            this.bindTouchClick(btnCopySyncCode, () => {
+                const code = localStorage.getItem('viscora_sync_code') || '';
+                if (code) {
+                    navigator.clipboard.writeText(code).then(() => {
+                        btnCopySyncCode.textContent = '✅';
+                        setTimeout(() => { btnCopySyncCode.textContent = '📋'; }, 1500);
+                        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                            navigator.vibrate(15);
+                        }
+                    }).catch(() => {
+                        alert('Kod kopyalanamadı: ' + code);
+                    });
+                }
+            });
+        }
+
+        if (btnRestoreSync && inputSyncCode && syncStatusMessage) {
+            this.bindTouchClick(btnRestoreSync, async () => {
+                const code = inputSyncCode.value.trim().toUpperCase();
+                if (!code || code.length !== 6) {
+                    syncStatusMessage.textContent = 'Lütfen 6 haneli geçerli bir kod girin!';
+                    syncStatusMessage.style.color = '#ef4444'; // red
+                    return;
+                }
+
+                syncStatusMessage.textContent = 'Buluttan veriler çekiliyor...';
+                syncStatusMessage.style.color = '#38bdf8'; // blue
+                btnRestoreSync.disabled = true;
+
+                const res = await CloudSaveManager.restoreProgress(code);
+                btnRestoreSync.disabled = false;
+
+                if (res.success) {
+                    syncStatusMessage.textContent = 'Başarılı! Oyun yeniden başlatılıyor...';
+                    syncStatusMessage.style.color = '#10b981'; // green
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                        navigator.vibrate([80, 40, 80]);
+                    }
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1200);
+                } else {
+                    syncStatusMessage.textContent = res.error || 'Kurtarma başarısız!';
+                    syncStatusMessage.style.color = '#ef4444'; // red
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                        navigator.vibrate(60);
+                    }
+                }
             });
         }
 

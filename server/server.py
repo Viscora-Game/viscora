@@ -16,6 +16,7 @@ if not os.path.exists(DB_FILE):
 # MongoDB Desteği
 MONGO_URI = os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URI')
 mongo_collection = None
+mongo_users_collection = None
 mongo_error = None
 mongo_db_name = None
 
@@ -53,13 +54,102 @@ if MONGO_URI:
         client.admin.command('ping')
         
         mongo_collection = mongo_db['levels']
-        print(f"MongoDB bağlantısı başarılı! Veritabanı: {db_name}, Koleksiyon: levels")
+        mongo_users_collection = mongo_db['users']
+        print(f"MongoDB bağlantısı başarılı! Veritabanı: {db_name}, Koleksiyon: levels & users")
     except Exception as e:
         mongo_error = str(e)
         print("MongoDB bağlantı hatası, yerel JSON dosyasına geçiliyor:", e)
         mongo_collection = None
-else:
-    mongo_error = "MONGODB_URI environment variable is not set."
+        mongo_users_collection = None
+DB_USERS_FILE = os.path.join(os.path.dirname(__file__), 'db_users.json')
+if not os.path.exists(DB_USERS_FILE):
+    with open(DB_USERS_FILE, 'w', encoding='utf-8') as f:
+        json.dump([], f, indent=2)
+
+def read_users_db():
+    if mongo_users_collection is not None:
+        try:
+            return list(mongo_users_collection.find({}, {'_id': False}))
+        except Exception as e:
+            print("MongoDB users okuma hatası, yerel JSON dosyasına geçiliyor:", e)
+
+    try:
+        with open(DB_USERS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        print("Users veritabanı okuma hatası:", e)
+        return []
+
+def write_users_db(data):
+    if mongo_users_collection is not None:
+        try:
+            for user in data:
+                user_id = user.get('userId')
+                if user_id:
+                    mongo_users_collection.update_one({'userId': user_id}, {'$set': user}, upsert=True)
+            return True
+        except Exception as e:
+            print("MongoDB users yazma hatası, yerel JSON dosyasına geçiliyor:", e)
+
+    try:
+        with open(DB_USERS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print("Users veritabanı yazma hatası:", e)
+        return False
+
+def get_user_by_id(user_id):
+    if mongo_users_collection is not None:
+        try:
+            res = mongo_users_collection.find_one({'userId': user_id}, {'_id': False})
+            if res:
+                return res
+        except Exception as e:
+            print("MongoDB find_one by userId error:", e)
+            
+    users = read_users_db()
+    for u in users:
+        if u.get('userId') == user_id:
+            return u
+    return None
+
+def get_user_by_sync_code(code):
+    code = str(code).upper().strip()
+    if mongo_users_collection is not None:
+        try:
+            res = mongo_users_collection.find_one({'syncCode': code}, {'_id': False})
+            if res:
+                return res
+        except Exception as e:
+            print("MongoDB find_one by syncCode error:", e)
+            
+    users = read_users_db()
+    for u in users:
+        if str(u.get('syncCode', '')).upper().strip() == code:
+            return u
+    return None
+
+def save_user(user_data):
+    if mongo_users_collection is not None:
+        try:
+            user_id = user_data.get('userId')
+            if user_id:
+                mongo_users_collection.update_one({'userId': user_id}, {'$set': user_data}, upsert=True)
+                return True
+        except Exception as e:
+            print("MongoDB save_user error:", e)
+            
+    users = read_users_db()
+    updated = False
+    for i, u in enumerate(users):
+        if u.get('userId') == user_data.get('userId'):
+            users[i] = user_data
+            updated = True
+            break
+    if not updated:
+        users.append(user_data)
+    return write_users_db(users)
 
 def read_db():
     if mongo_collection is not None:
@@ -103,70 +193,113 @@ import re
 def is_offensive(text):
     if not text:
         return False
-    clean_text = text.lower().strip()
     
-    # Türkçe karakterleri İngilizce eşleniklerine çevirerek aşma koruması (Fuzzy matching)
+    text = str(text)
+    raw = text.lower().strip()
+    
+    # Türkçe karakter normalizasyonu
     turkish_map = {
         'ı': 'i', 'ğ': 'g', 'ü': 'u', 'ş': 's', 'ö': 'o', 'ç': 'c',
         'â': 'a', 'î': 'i', 'û': 'u'
     }
-    for k, v in turkish_map.items():
-        clean_text = clean_text.replace(k, v)
-        
-    # 31 ve 69 numaralı argo/küfür kontrolleri (131 veya 690 gibi diğer sayıların içindekiler hariç)
-    if re.search(r'(?<!\d)(31|69)(?!\d)', clean_text):
-        return True
-
-    # Kelimelere ayır
-    words = re.findall(r'[a-z0-9]+', clean_text)
-    
-    # Kısa/Özel kelimeler (birebir eşleşmesi gerekenler, örn. "sik" veya "am" tek başına engellenmeli ama "kamu", "sıkıntı" engellenmemeli)
-    short_bad = {'amk', 'aq', 'sik', 'am', 'got', 'göt', 'pic', 'piç', 'oc', 'pust', 'puşt', 'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto', 'fetö'}
-    
-    # Alt kelime olarak eşleşebilecek uzun/genel küfürler ve siyasi hassas kelimeler
-    long_bad = {
-        'yarrak', 'yarak', 'tassak', 'tasak', 'orospu', 'siktir', 'pezevenk', 'kahpe', 
-        'amcik', 'amcık', 'meme', 'fuck', 'bitch', 'kaltak', 'erdogan', 'erdoğan', 'pkk', 
-        'kilicdaroglu', 'kılıçdaroğlu', 'imamoglu', 'imamoğlu', 'ataturk', 'atatürk',
-        'siken', 'domaltan', 'domalt',
-        'sikim', 'sikime', 'sikiş', 'sikis', 'sikti', 'sike', 'sikip', 'siksen', 'sikem', 'siker', 'siktim', 'sikcem', 'sikicem', 'sikik',
-        'sikisler', 'sikişler', 'soktum', 'sokar',
-        'otuzbir', 'altmisdokuz', 'altmışdokuz', 'masturbasyon'
+    # Leet speak / rakam-harf karışımı normalizasyonu (ör: s1k → sik, @m → am)
+    # Not: 2 → 'iki' (Türkçe) kısalmaları özel olarak ele alınıyor
+    leet_map = {
+        '0': 'o', '1': 'i', '3': 'e', '4': 'a',
+        '5': 's', '7': 't', '@': 'a', '$': 's', '!': 'i', '|': 'i'
     }
     
-    for word in words:
-        if word in short_bad or word in long_bad:
-            return True
-        for bad in long_bad:
-            if bad in word:
-                return True
-                
-    # Noktalama işaretlerini ve boşlukları temizleyip kontrol et (Aşma koruması örn. p.k.k veya a.m.k)
-    no_punc_text = re.sub(r'[^a-z0-9]', '', clean_text)
-
-    # 31 ve 69 aşma koruması (örn. 3.1 veya 3-1 veya 6_9)
-    if re.search(r'(?<!\d)(31|69)(?!\d)', no_punc_text):
+    # Türkçe normalize (leet'ten önce — 31/69 kontrolü burada yapılacak)
+    norm = raw
+    for k, v in turkish_map.items():
+        norm = norm.replace(k, v)
+    
+    # 31 ve 69 argo/küfür sayıları (leet'ten ÖNCE kontrol et)
+    if re.search(r'(?<!\d)(31|69)(?!\d)', norm):
+        return True
+    if re.search(r'(?<!\d)(31|69)(?!\d)', re.sub(r'[^a-z0-9]', '', norm)):
         return True
 
-    for bad in short_bad:
-        bad_clean = bad
-        for k, v in turkish_map.items():
-            bad_clean = bad_clean.replace(k, v)
-        if no_punc_text == bad_clean:
+    # Leet normalizasyonu uygula
+    for k, v in leet_map.items():
+        norm = norm.replace(k, v)
+
+    short_bad = {
+        # Türkçe — tek başına engellenmeli
+        'amk', 'aq', 'sik', 'am', 'got', 'pic', 'oc', 'pust',
+        'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto',
+        'bok', 'ibne', 'gavat', 'gavad', 'gerzek', 'angut',
+        # İngilizce — tek başına engellenmeli
+        'ass', 'shit', 'cunt', 'dick', 'cock', 'slut', 'nigga',
+        'bastard', 'fag', 'boner', 'cum', 'rape',
+        # Sayı bypass’ları (s2m = sikim, 2 = iki anlamında)
+        's2m', 's2k', 's2ks', 'am2', 'g2t'
+    }
+
+    long_bad = {
+        # Türkçe — alt kelime olarak da engellenmeli
+        'yarrak', 'yarak', 'assak', 'tasak', 'tassak', 'dassak', 'dasak', 'orospu', 'siktir', 'pezevenk', 'kahpe',
+        'amcik', 'kaltak', 'erdogan', 'pkk',
+        'kilicdaroglu', 'imamoglu', 'ataturk',
+        'siken', 'domalt', 'domalan', 'domalm',
+        'sikim', 'sikime', 'sikis', 'sikti', 'sike', 'sikip', 'siksen',
+        'sikem', 'siker', 'siktim', 'sikcem', 'sikicem', 'sikik',
+        'sikisler', 'soktum', 'sokar',
+        'otuzbir', 'altmisdokuz', 'masturbasyon',
+        # ooguz/turkce-kufur-karaliste kaynağından eklenenler
+        'dalyarak', 'dalyarrak', 'dangalak', 'fahise',
+        'gerizekal', 'gerzekl',
+        'ananin', 'ananisi', 'ananiko',
+        'bacini', 'bacina',
+        'godos', 'godumun', 'atmik',
+        'amina', 'aminako', 'aminakoy',
+        'boklu', 'boktan', 'bokbok', 'bombok',
+        'orosbuc', 'orospuc',
+        # İngilizce — alt kelime olarak da engellenmeli
+        'fuck', 'bitch', 'asshole', 'motherfuck', 'nigger', 'faggot',
+        'whore', 'porn', 'dildo', 'fucker', 'fuckin', 'goddamn',
+        'pussy', 'rapist', 'pedophil', 'pedofil', 'meme'
+    }
+
+
+    def _check(t):
+        """Verilen normalize metni kelime listelerine karşı kontrol eder."""
+        words = re.findall(r'[a-z]+', t)
+        for w in words:
+            if w in short_bad or w in long_bad:
+                return True
+            for bad in long_bad:
+                if bad in w:
+                    return True
+        no_punc = re.sub(r'[^a-z]', '', t)
+        for bad in short_bad:
+            if no_punc == bad:
+                return True
+        for bad in long_bad:
+            if bad in no_punc:
+                return True
+        return False
+
+    def _collapse(t):
+        """Arka arkaya gelen aynı harfleri teke indirir: siikim → sikim."""
+        return re.sub(r'(.)\1+', r'\1', t)
+
+    def _sanitize_bypass(t):
+        """Sayı bypass'larını harf karşılıklarına çevirir (ör: s2m -> sikim, g2t -> got)."""
+        t = t.replace('s2', 'siki')
+        t = t.replace('g2', 'go')
+        t = t.replace('am2', 'am')
+        return t
+
+    # 4 farklı versiyonu kontrol et:
+    # 1) Normal  2) Boşluksuz (s i k → sik)  3) Tekrar temizlenmiş (siikim → sikim)  4) Her ikisi
+    no_space = re.sub(r'\s+', '', norm)
+    for v in [norm, no_space, _collapse(norm), _collapse(no_space)]:
+        if _check(_sanitize_bypass(v)):
             return True
 
-    for bad in long_bad:
-        bad_clean = bad
-        for k, v in turkish_map.items():
-            bad_clean = bad_clean.replace(k, v)
-        if bad_clean in no_punc_text:
-            return True
-
-    for bad in long_bad:
-        if bad in clean_text:
-            return True
-    
     return False
+
 
 def validate_level_limits(level_data):
     if not isinstance(level_data, dict):
@@ -215,7 +348,13 @@ def validate_level_limits(level_data):
     enemies = level_data.get('enemies', [])
     if len(enemies) > 40:
         return f"En fazla 40 adet düşman yerleştirilebilir. (Girilen: {len(enemies)})"
-        
+
+    # Dekorasyon yazı kutularını küfür filtresiyle tara
+    decorations = level_data.get('decorations', [])
+    for deco in decorations:
+        if deco.get('type') == 'textbox' and is_offensive(deco.get('text', '')):
+            return "Haritadaki bir yazı kutusu uygunsuz veya küfürlü içerik içeriyor."
+
     return None
 
 class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -348,6 +487,91 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write('{"error": "Geçersiz JSON verisi."}'.encode('utf-8'))
                 return
 
+
+        # Bulut Kayıt Senkronizasyonu: POST /api/user/sync
+        if path == '/api/user/sync':
+            user_id = body.get('userId')
+            save_data = body.get('saveData')
+            
+            if not user_id or not isinstance(save_data, dict):
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': 'userId ve saveData gereklidir.'}, ensure_ascii=False).encode('utf-8'))
+                return
+                
+            # İsmini/yapımcı adını filtrele (eğer data içinde varsa)
+            author_name = save_data.get('authorName', '')
+            if author_name and is_offensive(author_name):
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': 'Tasarımcı adı uygunsuz içerik içeremez.'}, ensure_ascii=False).encode('utf-8'))
+                return
+                
+            existing_user = get_user_by_id(user_id)
+            if existing_user:
+                # Kullanıcı zaten kayıtlı, saveData'yı güncelle
+                existing_user['saveData'] = save_data
+                existing_user['lastUpdated'] = datetime.now(timezone.utc).isoformat()
+                user_record = existing_user
+            else:
+                # Yeni kullanıcı, 6 haneli syncCode üret (ör: R8F9T2)
+                # Benzersiz olana kadar dene
+                import string
+                chars = string.ascii_uppercase + string.digits
+                sync_code = ''.join(random.choices(chars, k=6))
+                while get_user_by_sync_code(sync_code) is not None:
+                    sync_code = ''.join(random.choices(chars, k=6))
+                    
+                user_record = {
+                    'userId': user_id,
+                    'syncCode': sync_code,
+                    'saveData': save_data,
+                    'lastUpdated': datetime.now(timezone.utc).isoformat()
+                }
+                
+            if save_user(user_record):
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'status': 'success',
+                    'syncCode': user_record['syncCode'],
+                    'lastUpdated': user_record['lastUpdated']
+                }, ensure_ascii=False).encode('utf-8'))
+            else:
+                self.send_response(500)
+                self.end_headers()
+            return
+
+        # Bulut Kayıt Geri Yükleme: POST /api/user/restore
+        if path == '/api/user/restore':
+            sync_code = body.get('syncCode')
+            if not sync_code:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': 'syncCode gereklidir.'}, ensure_ascii=False).encode('utf-8'))
+                return
+                
+            user_record = get_user_by_sync_code(sync_code)
+            if user_record:
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'status': 'success',
+                    'userId': user_record['userId'],
+                    'saveData': user_record['saveData'],
+                    'lastUpdated': user_record['lastUpdated']
+                }, ensure_ascii=False).encode('utf-8'))
+            else:
+                self.send_response(404)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': 'Geçersiz veya bulunamayan kurtarma kodu.'}, ensure_ascii=False).encode('utf-8'))
+            return
 
         # 1. Yeni seviye yayınlama: POST /api/levels
         if path == '/api/levels':

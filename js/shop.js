@@ -1,3 +1,5 @@
+import { CloudSaveManager } from './cloud_save.js?v=v207';
+
 export const SHOP_ITEMS = [
     // Trails
     {
@@ -240,6 +242,9 @@ class ShopManager {
         localStorage.setItem('viscora_active_trail', this.activeTrail);
         localStorage.setItem('viscora_active_accessory', this.activeAccessory);
         localStorage.setItem('viscora_active_eyes', this.activeEyes);
+        
+        // Sunucu ile yedekleme eşitlemesi
+        CloudSaveManager.saveProgress();
     }
 
     getBalance() {

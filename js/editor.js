@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v204';
-import { audio } from './audio.js?v=v204';
-import { LevelGenerator } from './generator.js?v=v204';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v208';
+import { audio } from './audio.js?v=v208';
+import { LevelGenerator } from './generator.js?v=v208';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -13,83 +13,97 @@ const API_BASE = (window.location.hostname === 'localhost' || window.location.ho
 
 function isOffensive(text) {
     if (!text) return false;
-    let cleanText = text.toLowerCase().trim();
-    
+    let raw = text.toLowerCase().trim();
+
     const turkishMap = {
         'ı': 'i', 'ğ': 'g', 'ü': 'u', 'ş': 's', 'ö': 'o', 'ç': 'c',
         'â': 'a', 'î': 'i', 'û': 'u'
     };
-    for (const [k, v] of Object.entries(turkishMap)) {
-        cleanText = cleanText.split(k).join(v);
-    }
-    
-    // 31 ve 69 numaralı argo/küfür kontrolleri (131 veya 690 gibi diğer sayıların içindekiler hariç)
-    if (/(?<!\d)(31|69)(?!\d)/.test(cleanText)) {
-        return true;
-    }
-    
-    const words = cleanText.match(/[a-z0-9]+/g) || [];
-    
-    const shortBad = new Set(['amk', 'aq', 'sik', 'am', 'got', 'göt', 'pic', 'piç', 'oc', 'pust', 'puşt', 'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto', 'fetö']);
-    const longBad = new Set([
-        'yarrak', 'yarak', 'tassak', 'tasak', 'orospu', 'siktir', 'pezevenk', 'kahpe', 
-        'amcik', 'amcık', 'meme', 'fuck', 'bitch', 'kaltak', 'erdogan', 'erdoğan', 'pkk', 
-        'kilicdaroglu', 'kılıçdaroğlu', 'imamoglu', 'imamoğlu', 'ataturk', 'atatürk',
-        'siken', 'domaltan', 'domalt',
-        'sikim', 'sikime', 'sikiş', 'sikis', 'sikti', 'sike', 'sikip', 'siksen', 'sikem', 'siker', 'siktim', 'sikcem', 'sikicem', 'sikik',
-        'sikisler', 'sikişler', 'soktum', 'sokar',
-        'otuzbir', 'altmisdokuz', 'altmışdokuz', 'masturbasyon'
+    // Leet speak / rakam-harf karışımı (ör: s1k → sik, @m → am)
+    const leetMap = {
+        '0': 'o', '1': 'i', '3': 'e', '4': 'a',
+        '5': 's', '7': 't', '@': 'a', '$': 's', '!': 'i', '|': 'i'
+    };
+
+    // Önce Türkçe normalize (31/69 kontrolü leet'ten önce)
+    let norm = raw;
+    for (const [k, v] of Object.entries(turkishMap)) norm = norm.split(k).join(v);
+
+    // 31/69 argo sayı kontrolü (leet öncesi)
+    if (/(?<!\d)(31|69)(?!\d)/.test(norm)) return true;
+    if (/(?<!\d)(31|69)(?!\d)/.test(norm.replace(/[^a-z0-9]/g, ''))) return true;
+
+    // Leet normalizasyonu
+    for (const [k, v] of Object.entries(leetMap)) norm = norm.split(k).join(v);
+
+    const shortBad = new Set([
+        // Türkçe — tek başına
+        'amk', 'aq', 'sik', 'am', 'got', 'pic', 'oc', 'pust',
+        'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto',
+        'bok', 'ibne', 'gavat', 'gavad', 'gerzek', 'angut',
+        // İngilizce — tek başına
+        'ass', 'shit', 'cunt', 'dick', 'cock', 'slut', 'nigga',
+        'bastard', 'fag', 'boner', 'cum', 'rape',
+        // Sayı bypass’ları (s2m = sikim, 2 = iki anlamında)
+        's2m', 's2k', 's2ks', 'am2', 'g2t'
     ]);
-    
-    const normalizedShortBad = Array.from(shortBad).map(word => {
-        let w = word.toLowerCase();
-        for (const [k, v] of Object.entries(turkishMap)) {
-            w = w.split(k).join(v);
-        }
-        return w;
-    });
 
-    const normalizedLongBad = Array.from(longBad).map(word => {
-        let w = word.toLowerCase();
-        for (const [k, v] of Object.entries(turkishMap)) {
-            w = w.split(k).join(v);
-        }
-        return w;
-    });
+    const longBad = new Set([
+        // Türkçe — alt kelime
+        'yarrak', 'yarak', 'assak', 'tasak', 'tassak', 'dassak', 'dasak', 'orospu', 'siktir', 'pezevenk', 'kahpe',
+        'amcik', 'kaltak', 'erdogan', 'pkk',
+        'kilicdaroglu', 'imamoglu', 'ataturk',
+        'siken', 'domalt', 'domalan', 'domalm',
+        'sikim', 'sikime', 'sikis', 'sikti', 'sike', 'sikip', 'siksen',
+        'sikem', 'siker', 'siktim', 'sikcem', 'sikicem', 'sikik',
+        'sikisler', 'soktum', 'sokar',
+        'otuzbir', 'altmisdokuz', 'masturbasyon',
+        'dalyarak', 'dalyarrak', 'dangalak', 'fahise',
+        'gerizekal', 'gerzekl',
+        'ananin', 'ananisi', 'ananiko',
+        'bacini', 'bacina',
+        'godos', 'godumun', 'atmik',
+        'amina', 'aminako', 'aminakoy',
+        'boklu', 'boktan', 'bokbok', 'bombok',
+        'orosbuc', 'orospuc',
+        // İngilizce — alt kelime
+        'fuck', 'bitch', 'asshole', 'motherfuck', 'nigger', 'faggot',
+        'whore', 'porn', 'dildo', 'fucker', 'fuckin', 'goddamn',
+        'pussy', 'rapist', 'pedophil', 'pedofil', 'meme'
+    ]);
 
-    for (const word of words) {
-        if (normalizedShortBad.includes(word) || normalizedLongBad.includes(word)) {
-            return true;
+    // Normalize short/long bad (Türkçe harfleri de dönüştür)
+    const normSet = w => { let s = w.toLowerCase(); for (const [k,v] of Object.entries(turkishMap)) s = s.split(k).join(v); return s; };
+    const nShort = Array.from(shortBad).map(normSet);
+    const nLong  = Array.from(longBad).map(normSet);
+
+    function _check(t) {
+        const words = t.match(/[a-z]+/g) || [];
+        for (const w of words) {
+            if (nShort.includes(w) || nLong.includes(w)) return true;
+            for (const bad of nLong) if (w.includes(bad)) return true;
         }
-        for (const bad of normalizedLongBad) {
-            if (word.includes(bad)) {
-                return true;
-            }
-        }
+        const noPunc = t.replace(/[^a-z]/g, '');
+        for (const bad of nShort) if (noPunc === bad) return true;
+        for (const bad of nLong)  if (noPunc.includes(bad)) return true;
+        return false;
     }
 
-    // Noktalama işaretlerini ve boşlukları temizleyip kontrol et (Aşma koruması örn. p.k.k veya a.m.k)
-    const noPuncText = cleanText.replace(/[^a-z0-9]/g, '');
-    if (/(?<!\d)(31|69)(?!\d)/.test(noPuncText)) {
-        return true;
+    // Harf tekrarı temizle: siikim → sikim
+    const collapse = t => t.replace(/(.)(\1+)/g, '$1');
+
+    const sanitizeBypass = t => {
+        return t.split('s2').join('siki')
+                .split('g2').join('go')
+                .split('am2').join('am');
+    };
+
+    // 4 versiyon kontrol: normal / boşluksuz / tekrar temizlenmiş / her ikisi
+    const noSpace = norm.replace(/\s+/g, '');
+    for (const v of [norm, noSpace, collapse(norm), collapse(noSpace)]) {
+        if (_check(sanitizeBypass(v))) return true;
     }
-    for (const bad of normalizedShortBad) {
-        if (noPuncText === bad) {
-            return true;
-        }
-    }
-    for (const bad of normalizedLongBad) {
-        if (noPuncText.includes(bad)) {
-            return true;
-        }
-    }
-    
-    for (const bad of normalizedLongBad) {
-        if (cleanText.includes(bad)) {
-            return true;
-        }
-    }
-    
+
     return false;
 }
 
@@ -1898,6 +1912,12 @@ export class LevelEditor {
 
         if (type === 'decoration') {
             addUpdateEvent('inspect-deco-text', (val) => {
+                if (isOffensive(val)) {
+                    alert('Yazı kutusu içeriği uygunsuz veya küfürlü içerik içeremez!');
+                    const input = document.getElementById('inspect-deco-text');
+                    if (input) input.value = obj.text || '';
+                    return obj.text || '';
+                }
                 obj.text = val;
                 return val;
             });
@@ -2657,6 +2677,15 @@ export class LevelEditor {
         if (isOffensive(authorName)) {
             alert("Tasarımcı adı uygunsuz, argo veya siyasi içerik içeremez!");
             return;
+        }
+
+        // Dekorasyon yazı kutularını tara
+        const decorations = lvl.decorations || [];
+        for (const deco of decorations) {
+            if (deco.type === 'textbox' && isOffensive(deco.text || '')) {
+                alert('Haritadaki bir yazı kutusu uygunsuz içerik içeriyor. Lütfen kontrol edin!');
+                return;
+            }
         }
 
         const lvl = this.game.level;
