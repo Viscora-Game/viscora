@@ -1,20 +1,20 @@
-const CACHE_NAME = 'viscora-cache-v201';
+const CACHE_NAME = 'viscora-cache-v202';
 const ASSETS = [
   './',
   './index.html',
-  './index.css?v=v201',
+  './index.css?v=v202',
   './manifest.json',
-  './js/main.js?v=v201',
-  './js/game.js?v=v201',
-  './js/audio.js?v=v201',
-  './js/ui.js?v=v201',
-  './js/level.js?v=v201',
-  './js/player.js?v=v201',
-  './js/enemies.js?v=v201',
-  './js/viscosity.js?v=v201',
-  './js/boss.js?v=v201',
-  './js/editor.js?v=v201',
-  './js/controls_customizer.js?v=v201',
+  './js/main.js?v=v202',
+  './js/game.js?v=v202',
+  './js/audio.js?v=v202',
+  './js/ui.js?v=v202',
+  './js/level.js?v=v202',
+  './js/player.js?v=v202',
+  './js/enemies.js?v=v202',
+  './js/viscosity.js?v=v202',
+  './js/boss.js?v=v202',
+  './js/editor.js?v=v202',
+  './js/controls_customizer.js?v=v202',
   './assets/dragon_head.png'
 ];
 

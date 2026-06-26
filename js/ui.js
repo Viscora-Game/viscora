@@ -1,6 +1,6 @@
-import { audio } from './audio.js?v=v201';
-import { ViscosityList } from './viscosity.js?v=v201';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v201';
+import { audio } from './audio.js?v=v202';
+import { ViscosityList } from './viscosity.js?v=v202';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v202';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''

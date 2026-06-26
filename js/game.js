@@ -1,10 +1,10 @@
-import { Player } from './player.js?v=v201';
-import { Level } from './level.js?v=v201';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v201';
-import { UIManager } from './ui.js?v=v201';
-import { audio } from './audio.js?v=v201';
-import { LevelEditor } from './editor.js?v=v201';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v201';
+import { Player } from './player.js?v=v202';
+import { Level } from './level.js?v=v202';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v202';
+import { UIManager } from './ui.js?v=v202';
+import { audio } from './audio.js?v=v202';
+import { LevelEditor } from './editor.js?v=v202';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v202';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -28,16 +28,16 @@ const LEVEL_NAMES = [
     "FİLTRELEME TESİSİ",
     "SİBER KANALİZASYON",
     "VISCOREX REAKTÖRÜ",
-    "SİBER GİRİŞİ",
-    "MİKROÇİP LABİRENTİ",
-    "PORTAL BAĞLANTISI",
-    "KRONO TETİKLEYİCİ",
-    "YERÇEKİMİ BOŞLUĞU",
-    "KARA DÜŞMAN ALANI",
-    "LAZER KAFESİ",
-    "KOD DEPOSU",
-    "SİBER KANALİZASYON II",
-    "ENDBRINGER"
+    "SİBER VERİ AKIŞI: SİBER GİRİŞİ",
+    "SİBER VERİ AKIŞI: MİKROÇİP LABİRENTİ",
+    "SİBER VERİ AKIŞI: PORTAL BAĞLANTISI",
+    "SİBER VERİ AKIŞI: KRONO TETİKLEYİCİ",
+    "SİBER VERİ AKIŞI: YERÇEKİMİ BOŞLUĞU",
+    "SİBER VERİ AKIŞI: KARA DÜŞMAN ALANI",
+    "SİBER VERİ AKIŞI: LAZER KAFESİ",
+    "SİBER VERİ AKIŞI: KOD DEPOSU",
+    "SİBER VERİ AKIŞI: SİBER KANALİZASYON II",
+    "SİBER VERİ AKIŞI: ENDBRINGER"
 ];
 
 // Bölüm bazlı bağlamsal ipuçları — ilk kez tanıtılan mekanikler için kısa yardım metinleri
