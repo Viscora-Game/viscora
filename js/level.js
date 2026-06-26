@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v202';
-import { THEMES } from './generator.js?v=v202';
+import { audio } from './audio.js?v=v203';
+import { THEMES } from './generator.js?v=v203';
 
 /**
  * Viscora Level Design & Manager
@@ -2006,6 +2006,612 @@ export class Level {
             "arrowRange": 400
         }
     ]
+};
+        } else if (originalLevelNumber === 24) {
+            data = {
+    "serverLevelId": "map_1782504984558_865",
+    "name": "KRONO TETİKLEYİCİ",
+    "tags": [],
+    "themeId": "magma_core",
+    "levelWidth": 3000,
+    "levelHeight": 700,
+    "spawn": {
+        "x": 20,
+        "y": 380
+    },
+    "portal": {
+        "x": 2920,
+        "y": 400
+    },
+    "platforms": [
+        {
+            "x": 0,
+            "y": 510,
+            "w": 3000,
+            "h": 140,
+            "type": "normal"
+        },
+        {
+            "x": 0,
+            "y": 240,
+            "w": 240,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 0,
+            "y": 60,
+            "w": 270,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 0,
+            "y": 420,
+            "w": 60,
+            "h": 20,
+            "type": "normal"
+        },
+        {
+            "x": 1390,
+            "y": 210,
+            "w": 130,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 2400,
+            "y": 20,
+            "w": 60,
+            "h": 20,
+            "type": "normal"
+        },
+        {
+            "x": 1300,
+            "y": 360,
+            "w": 60,
+            "h": 20,
+            "type": "normal"
+        },
+        {
+            "x": 0,
+            "y": -80,
+            "w": 370,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 740,
+            "y": -80,
+            "w": 250,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 0,
+            "y": -310,
+            "w": 690,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 1030,
+            "y": -310,
+            "w": 1940,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 1390,
+            "y": 40,
+            "w": 240,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 2070,
+            "y": 40,
+            "w": 240,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 2460,
+            "y": -270,
+            "w": 120,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 1900,
+            "y": -270,
+            "w": 120,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 1080,
+            "y": 30,
+            "w": 120,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 430,
+            "y": -220,
+            "w": 120,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 550,
+            "y": 240,
+            "w": 120,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 1080,
+            "y": 250,
+            "w": 120,
+            "h": 40,
+            "type": "normal"
+        }
+    ],
+    "spikes": [
+        {
+            "x": 1480,
+            "y": 490,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 1110,
+            "y": 290,
+            "w": 60,
+            "h": 20,
+            "direction": "down"
+        },
+        {
+            "x": 1430,
+            "y": 250,
+            "w": 60,
+            "h": 20,
+            "direction": "down"
+        },
+        {
+            "x": 580,
+            "y": 280,
+            "w": 60,
+            "h": 20,
+            "direction": "down"
+        }
+    ],
+    "acidPools": [],
+    "lasers": [
+        {
+            "x": 2880,
+            "y": -90,
+            "w": 20,
+            "h": 600,
+            "type": "yellowLaser",
+            "id": 11
+        }
+    ],
+    "netGates": [],
+    "movingPlatforms": [],
+    "crystals": [],
+    "enemies": [
+        {
+            "x": 610,
+            "y": 80,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 520,
+            "y": -130,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 1220,
+            "y": -160,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 2250,
+            "y": -70,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 1850,
+            "y": -90,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 1500,
+            "y": -50,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 830,
+            "y": 100,
+            "rangeX": 150,
+            "speed": 1,
+            "isVertical": false,
+            "color": "#a855f7",
+            "type": "tractor_ufo"
+        },
+        {
+            "x": 1860,
+            "y": -20,
+            "rangeX": 150,
+            "speed": 1,
+            "isVertical": false,
+            "color": "#a855f7",
+            "type": "tractor_ufo"
+        },
+        {
+            "x": 2680,
+            "y": -20,
+            "rangeX": 150,
+            "speed": 1.2,
+            "isVertical": false,
+            "color": "#06b6d4",
+            "type": "sweeper_ufo"
+        },
+        {
+            "x": 2200,
+            "y": 150,
+            "rangeX": 150,
+            "speed": 1.2,
+            "isVertical": false,
+            "color": "#06b6d4",
+            "type": "sweeper_ufo"
+        },
+        {
+            "x": 630,
+            "y": 480,
+            "rangeX": 120,
+            "speed": 1.2,
+            "isVertical": false,
+            "color": "#f43f5e",
+            "type": "patrol"
+        },
+        {
+            "x": 2000,
+            "y": 480,
+            "rangeX": 250,
+            "speed": 1,
+            "isVertical": false,
+            "color": "#10b981",
+            "type": "chaser"
+        },
+        {
+            "x": 2580,
+            "y": 480,
+            "rangeX": 300,
+            "speed": 1,
+            "isVertical": false,
+            "color": "#10b981",
+            "type": "chaser"
+        },
+        {
+            "x": 390,
+            "y": 150,
+            "rangeX": 120,
+            "speed": 1.2,
+            "isVertical": true,
+            "color": "#06b6d4",
+            "type": "patrol"
+        }
+    ],
+    "pressurePlates": [],
+    "pushBlocks": [
+        {
+            "x": 100,
+            "y": 190,
+            "w": 50,
+            "h": 50,
+            "startX": 100,
+            "startY": 190,
+            "isMirror": true,
+            "mirrorType": "slash"
+        },
+        {
+            "x": 100,
+            "y": 10,
+            "w": 50,
+            "h": 50,
+            "startX": 100,
+            "startY": 10,
+            "isMirror": true,
+            "mirrorType": "backslash"
+        },
+        {
+            "x": 1430,
+            "y": 160,
+            "w": 50,
+            "h": 50,
+            "startX": 1430,
+            "startY": 160,
+            "isMirror": true,
+            "mirrorType": "slash"
+        },
+        {
+            "x": 580,
+            "y": 190,
+            "w": 50,
+            "h": 50,
+            "startX": 580,
+            "startY": 190,
+            "isMirror": true,
+            "mirrorType": "backslash"
+        },
+        {
+            "x": 1110,
+            "y": 200,
+            "w": 50,
+            "h": 50,
+            "startX": 1110,
+            "startY": 200,
+            "isMirror": false,
+            "mirrorType": "slash"
+        },
+        {
+            "x": 1110,
+            "y": -20,
+            "w": 50,
+            "h": 50,
+            "startX": 1110,
+            "startY": -20,
+            "isMirror": true,
+            "mirrorType": "backslash"
+        },
+        {
+            "x": 830,
+            "y": -130,
+            "w": 50,
+            "h": 50,
+            "startX": 830,
+            "startY": -130,
+            "isMirror": true,
+            "mirrorType": "slash"
+        },
+        {
+            "x": 1480,
+            "y": -10,
+            "w": 50,
+            "h": 50,
+            "startX": 1480,
+            "startY": -10,
+            "isMirror": true,
+            "mirrorType": "slash"
+        },
+        {
+            "x": 2170,
+            "y": -10,
+            "w": 50,
+            "h": 50,
+            "startX": 2170,
+            "startY": -10,
+            "isMirror": true,
+            "mirrorType": "backslash"
+        }
+    ],
+    "conveyors": [],
+    "teleportPairs": [],
+    "bouncePads": [
+        {
+            "x": 180,
+            "y": 490,
+            "w": 50,
+            "h": 20,
+            "force": 12
+        }
+    ],
+    "buttons": [],
+    "levers": [],
+    "flamethrowers": [],
+    "fallingPlatforms": [],
+    "breakablePlatforms": [],
+    "hiddenPassages": [],
+    "fallingBlockTraps": [],
+    "vantuzPoints": [],
+    "decorations": [],
+    "laserEmitters": [
+        {
+            "x": 0,
+            "y": 460,
+            "w": 40,
+            "h": 40,
+            "direction": 0,
+            "color": "blue"
+        }
+    ],
+    "laserReceivers": [
+        {
+            "x": 2410,
+            "y": -20,
+            "w": 40,
+            "h": 40,
+            "linkedGateId": 11
+        }
+    ],
+    "staticMirrors": [
+        {
+            "x": 370,
+            "y": -80,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 700,
+            "y": -80,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "bottom-right"
+        },
+        {
+            "x": 690,
+            "y": -310,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 990,
+            "y": -310,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-right"
+        },
+        {
+            "x": 1630,
+            "y": 40,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 2030,
+            "y": 40,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "bottom-right"
+        },
+        {
+            "x": 2020,
+            "y": -270,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 2420,
+            "y": -270,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-right"
+        },
+        {
+            "x": 1200,
+            "y": 30,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 550,
+            "y": -220,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 670,
+            "y": 240,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 510,
+            "y": 240,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-right"
+        },
+        {
+            "x": 1200,
+            "y": 250,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 1040,
+            "y": 250,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-right"
+        },
+        {
+            "x": 1520,
+            "y": 210,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 1350,
+            "y": 210,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-right"
+        },
+        {
+            "x": 1040,
+            "y": 30,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-right"
+        },
+        {
+            "x": 1350,
+            "y": 40,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "bottom-right"
+        },
+        {
+            "x": 2580,
+            "y": -270,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 2310,
+            "y": 40,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 1860,
+            "y": -270,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-right"
+        }
+    ],
+    "arrowShooters": []
 };
         } else if (originalLevelNumber === 30) {
             data = {
@@ -5721,7 +6327,613 @@ export class Level {
                     { x: 1000, y: 120, rangeX: 150, speed: 1.2, type: 'tractor_ufo' },
                     { x: 2000, y: 100, rangeX: 150, speed: 1.4, type: 'sweeper_ufo' }
                 ];
-                    } else if (originalLevelNumber === 30) {
+                    } else if (originalLevelNumber === 24) {
+            data = {
+    "serverLevelId": "map_1782504984558_865",
+    "name": "KRONO TETİKLEYİCİ",
+    "tags": [],
+    "themeId": "magma_core",
+    "levelWidth": 3000,
+    "levelHeight": 700,
+    "spawn": {
+        "x": 20,
+        "y": 380
+    },
+    "portal": {
+        "x": 2920,
+        "y": 400
+    },
+    "platforms": [
+        {
+            "x": 0,
+            "y": 510,
+            "w": 3000,
+            "h": 140,
+            "type": "normal"
+        },
+        {
+            "x": 0,
+            "y": 240,
+            "w": 240,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 0,
+            "y": 60,
+            "w": 270,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 0,
+            "y": 420,
+            "w": 60,
+            "h": 20,
+            "type": "normal"
+        },
+        {
+            "x": 1390,
+            "y": 210,
+            "w": 130,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 2400,
+            "y": 20,
+            "w": 60,
+            "h": 20,
+            "type": "normal"
+        },
+        {
+            "x": 1300,
+            "y": 360,
+            "w": 60,
+            "h": 20,
+            "type": "normal"
+        },
+        {
+            "x": 0,
+            "y": -80,
+            "w": 370,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 740,
+            "y": -80,
+            "w": 250,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 0,
+            "y": -310,
+            "w": 690,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 1030,
+            "y": -310,
+            "w": 1940,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 1390,
+            "y": 40,
+            "w": 240,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 2070,
+            "y": 40,
+            "w": 240,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 2460,
+            "y": -270,
+            "w": 120,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 1900,
+            "y": -270,
+            "w": 120,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 1080,
+            "y": 30,
+            "w": 120,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 430,
+            "y": -220,
+            "w": 120,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 550,
+            "y": 240,
+            "w": 120,
+            "h": 40,
+            "type": "normal"
+        },
+        {
+            "x": 1080,
+            "y": 250,
+            "w": 120,
+            "h": 40,
+            "type": "normal"
+        }
+    ],
+    "spikes": [
+        {
+            "x": 1480,
+            "y": 490,
+            "w": 60,
+            "h": 20,
+            "direction": "up"
+        },
+        {
+            "x": 1110,
+            "y": 290,
+            "w": 60,
+            "h": 20,
+            "direction": "down"
+        },
+        {
+            "x": 1430,
+            "y": 250,
+            "w": 60,
+            "h": 20,
+            "direction": "down"
+        },
+        {
+            "x": 580,
+            "y": 280,
+            "w": 60,
+            "h": 20,
+            "direction": "down"
+        }
+    ],
+    "acidPools": [],
+    "lasers": [
+        {
+            "x": 2880,
+            "y": -90,
+            "w": 20,
+            "h": 600,
+            "type": "yellowLaser",
+            "id": 11
+        }
+    ],
+    "netGates": [],
+    "movingPlatforms": [],
+    "crystals": [],
+    "enemies": [
+        {
+            "x": 610,
+            "y": 80,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 520,
+            "y": -130,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 1220,
+            "y": -160,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 2250,
+            "y": -70,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 1850,
+            "y": -90,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 1500,
+            "y": -50,
+            "rangeX": 180,
+            "speed": 2,
+            "isVertical": false,
+            "color": "#eab308",
+            "type": "patrol"
+        },
+        {
+            "x": 830,
+            "y": 100,
+            "rangeX": 150,
+            "speed": 1,
+            "isVertical": false,
+            "color": "#a855f7",
+            "type": "tractor_ufo"
+        },
+        {
+            "x": 1860,
+            "y": -20,
+            "rangeX": 150,
+            "speed": 1,
+            "isVertical": false,
+            "color": "#a855f7",
+            "type": "tractor_ufo"
+        },
+        {
+            "x": 2680,
+            "y": -20,
+            "rangeX": 150,
+            "speed": 1.2,
+            "isVertical": false,
+            "color": "#06b6d4",
+            "type": "sweeper_ufo"
+        },
+        {
+            "x": 2200,
+            "y": 150,
+            "rangeX": 150,
+            "speed": 1.2,
+            "isVertical": false,
+            "color": "#06b6d4",
+            "type": "sweeper_ufo"
+        },
+        {
+            "x": 630,
+            "y": 480,
+            "rangeX": 120,
+            "speed": 1.2,
+            "isVertical": false,
+            "color": "#f43f5e",
+            "type": "patrol"
+        },
+        {
+            "x": 2000,
+            "y": 480,
+            "rangeX": 250,
+            "speed": 1,
+            "isVertical": false,
+            "color": "#10b981",
+            "type": "chaser"
+        },
+        {
+            "x": 2580,
+            "y": 480,
+            "rangeX": 300,
+            "speed": 1,
+            "isVertical": false,
+            "color": "#10b981",
+            "type": "chaser"
+        },
+        {
+            "x": 390,
+            "y": 150,
+            "rangeX": 120,
+            "speed": 1.2,
+            "isVertical": true,
+            "color": "#06b6d4",
+            "type": "patrol"
+        }
+    ],
+    "pressurePlates": [],
+    "pushBlocks": [
+        {
+            "x": 100,
+            "y": 190,
+            "w": 50,
+            "h": 50,
+            "startX": 100,
+            "startY": 190,
+            "isMirror": true,
+            "mirrorType": "slash"
+        },
+        {
+            "x": 100,
+            "y": 10,
+            "w": 50,
+            "h": 50,
+            "startX": 100,
+            "startY": 10,
+            "isMirror": true,
+            "mirrorType": "backslash"
+        },
+        {
+            "x": 1430,
+            "y": 160,
+            "w": 50,
+            "h": 50,
+            "startX": 1430,
+            "startY": 160,
+            "isMirror": true,
+            "mirrorType": "slash"
+        },
+        {
+            "x": 580,
+            "y": 190,
+            "w": 50,
+            "h": 50,
+            "startX": 580,
+            "startY": 190,
+            "isMirror": true,
+            "mirrorType": "backslash"
+        },
+        {
+            "x": 1110,
+            "y": 200,
+            "w": 50,
+            "h": 50,
+            "startX": 1110,
+            "startY": 200,
+            "isMirror": false,
+            "mirrorType": "slash"
+        },
+        {
+            "x": 1110,
+            "y": -20,
+            "w": 50,
+            "h": 50,
+            "startX": 1110,
+            "startY": -20,
+            "isMirror": true,
+            "mirrorType": "backslash"
+        },
+        {
+            "x": 830,
+            "y": -130,
+            "w": 50,
+            "h": 50,
+            "startX": 830,
+            "startY": -130,
+            "isMirror": true,
+            "mirrorType": "slash"
+        },
+        {
+            "x": 1480,
+            "y": -10,
+            "w": 50,
+            "h": 50,
+            "startX": 1480,
+            "startY": -10,
+            "isMirror": true,
+            "mirrorType": "slash"
+        },
+        {
+            "x": 2170,
+            "y": -10,
+            "w": 50,
+            "h": 50,
+            "startX": 2170,
+            "startY": -10,
+            "isMirror": true,
+            "mirrorType": "backslash"
+        }
+    ],
+    "conveyors": [],
+    "teleportPairs": [],
+    "bouncePads": [
+        {
+            "x": 180,
+            "y": 490,
+            "w": 50,
+            "h": 20,
+            "force": 12
+        }
+    ],
+    "buttons": [],
+    "levers": [],
+    "flamethrowers": [],
+    "fallingPlatforms": [],
+    "breakablePlatforms": [],
+    "hiddenPassages": [],
+    "fallingBlockTraps": [],
+    "vantuzPoints": [],
+    "decorations": [],
+    "laserEmitters": [
+        {
+            "x": 0,
+            "y": 460,
+            "w": 40,
+            "h": 40,
+            "direction": 0,
+            "color": "blue"
+        }
+    ],
+    "laserReceivers": [
+        {
+            "x": 2410,
+            "y": -20,
+            "w": 40,
+            "h": 40,
+            "linkedGateId": 11
+        }
+    ],
+    "staticMirrors": [
+        {
+            "x": 370,
+            "y": -80,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 700,
+            "y": -80,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "bottom-right"
+        },
+        {
+            "x": 690,
+            "y": -310,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 990,
+            "y": -310,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-right"
+        },
+        {
+            "x": 1630,
+            "y": 40,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 2030,
+            "y": 40,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "bottom-right"
+        },
+        {
+            "x": 2020,
+            "y": -270,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 2420,
+            "y": -270,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-right"
+        },
+        {
+            "x": 1200,
+            "y": 30,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 550,
+            "y": -220,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 670,
+            "y": 240,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 510,
+            "y": 240,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-right"
+        },
+        {
+            "x": 1200,
+            "y": 250,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 1040,
+            "y": 250,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-right"
+        },
+        {
+            "x": 1520,
+            "y": 210,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 1350,
+            "y": 210,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-right"
+        },
+        {
+            "x": 1040,
+            "y": 30,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-right"
+        },
+        {
+            "x": 1350,
+            "y": 40,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "bottom-right"
+        },
+        {
+            "x": 2580,
+            "y": -270,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 2310,
+            "y": 40,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-left"
+        },
+        {
+            "x": 1860,
+            "y": -270,
+            "w": 40,
+            "h": 40,
+            "mirrorType": "top-right"
+        }
+    ],
+    "arrowShooters": []
+};
+        } else if (originalLevelNumber === 30) {
                 this.enemies = [];
             }
         }
