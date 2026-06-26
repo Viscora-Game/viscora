@@ -95,7 +95,7 @@ export class CloudSaveManager {
         return { success: false, error: 'Bilinmeyen hata.' };
     }
 
-    static async restoreProgress(syncCode) {
+    static async fetchProgress(syncCode) {
         if (!syncCode || syncCode.trim().length !== 6) {
             return { success: false, error: 'Geçersiz kod formatı. Kod 6 haneli olmalıdır.' };
         }
@@ -113,23 +113,22 @@ export class CloudSaveManager {
 
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({}));
-                console.warn('Cloud restore failed:', errData.error || response.statusText);
+                console.warn('Cloud fetch failed:', errData.error || response.statusText);
                 return { success: false, error: errData.error || 'Geçersiz veya bulunamayan kurtarma kodu.' };
             }
 
             const res = await response.json();
             if (res.status === 'success' && res.saveData) {
-                this.applySaveData(res.saveData);
-                if (res.userId) {
-                    localStorage.setItem('viscora_user_id', res.userId);
-                }
-                localStorage.setItem('viscora_sync_code', syncCode.trim().toUpperCase());
-                console.log('Cloud restore successful.');
-                return { success: true };
+                return { 
+                    success: true, 
+                    userId: res.userId, 
+                    saveData: res.saveData,
+                    lastUpdated: res.lastUpdated
+                };
             }
         } catch (e) {
-            console.warn('Cloud restore network error:', e);
-            return { success: false, error: 'Kurtarma sırasında ağ hatası oluştu.' };
+            console.warn('Cloud fetch network error:', e);
+            return { success: false, error: 'Bulut kaydı sorgulanırken ağ hatası oluştu.' };
         }
         return { success: false, error: 'Bilinmeyen hata.' };
     }

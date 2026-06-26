@@ -745,10 +745,35 @@ export class UIManager {
                 syncStatusMessage.style.color = '#38bdf8'; // blue
                 btnRestoreSync.disabled = true;
 
-                const res = await CloudSaveManager.restoreProgress(code);
+                const res = await CloudSaveManager.fetchProgress(code);
                 btnRestoreSync.disabled = false;
 
-                if (res.success) {
+                if (res.success && res.saveData) {
+                    const sData = res.saveData;
+                    const author = sData.authorName || 'Anonim';
+                    const lvl = sData.unlockedLevel || 1;
+                    const crystals = Math.max(0, (sData.totalCrystals || 0) - (sData.spentCrystals || 0));
+
+                    const confirmMsg = `🔍 BULUT KAYDI BULUNDU:\n\n` +
+                                       `- 👤 Tasarımcı Adı: ${author}\n` +
+                                       `- 🏁 Açık Bölüm: Bölüm ${lvl}\n` +
+                                       `- 💎 Toplam Kristal: ${crystals}\n\n` +
+                                       `⚠️ UYARI: Bu kaydı yüklemek, bu cihazdaki tüm yerel ilerlemenizi (kristaller, seviyeler) SİLECEKTİR ve bu işlem geri alınamaz.\n\n` +
+                                       `Bu kaydı yüklemek istediğinize emin misiniz?`;
+
+                    if (!confirm(confirmMsg)) {
+                        syncStatusMessage.textContent = 'Yükleme iptal edildi.';
+                        syncStatusMessage.style.color = '#a1a1aa'; // gray
+                        return;
+                    }
+
+                    // Apply the data
+                    CloudSaveManager.applySaveData(sData);
+                    if (res.userId) {
+                        localStorage.setItem('viscora_user_id', res.userId);
+                    }
+                    localStorage.setItem('viscora_sync_code', code);
+
                     syncStatusMessage.textContent = 'Başarılı! Oyun yeniden başlatılıyor...';
                     syncStatusMessage.style.color = '#10b981'; // green
                     if (typeof navigator !== 'undefined' && navigator.vibrate) {
