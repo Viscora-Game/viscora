@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v208';
-import { Level } from './level.js?v=v208';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v208';
-import { UIManager } from './ui.js?v=v208';
-import { CloudSaveManager } from './cloud_save.js?v=v208';
-import { audio } from './audio.js?v=v208';
-import { LevelEditor } from './editor.js?v=v208';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v208';
+import { Player } from './player.js?v=v209';
+import { Level } from './level.js?v=v209';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v209';
+import { UIManager } from './ui.js?v=v209';
+import { CloudSaveManager } from './cloud_save.js?v=v209';
+import { audio } from './audio.js?v=v209';
+import { LevelEditor } from './editor.js?v=v209';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v209';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1098,7 +1098,7 @@ export class GameManager {
                 const dt = elapsed / 16.666;
                 this.editor.update(dt);
             }
-        } else if (this.state === 'MENU') {
+        } else if (this.state === 'MENU' || this.state === 'SHOP') {
             const dt = elapsed / 16.666;
             this.updateMenuPhysics(dt);
         }
@@ -1744,7 +1744,7 @@ export class GameManager {
         this.ctx.clearRect(0, 0, this.cssWidth, this.cssHeight);
 
         // --- MENU ARKA PLAN SIMULASYON ÇIZIMI ---
-        if (this.state === 'MENU') {
+        if (this.state === 'MENU' || this.state === 'SHOP') {
             const bgGrad = this.ctx.createLinearGradient(0, 0, 0, this.cssHeight);
             bgGrad.addColorStop(0, '#050508');
             bgGrad.addColorStop(1, '#0e0e15');

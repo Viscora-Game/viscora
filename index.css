@@ -2519,7 +2519,6 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 .star-gate-overlay.hidden {
     display: none;
 }
-
 .star-gate-card {
     background: linear-gradient(145deg, rgba(20,20,40,0.97) 0%, rgba(12,12,24,0.99) 100%);
     border: 1px solid rgba(234,179,8,0.22);
@@ -2530,8 +2529,33 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     text-align: center;
     box-shadow: 0 8px 40px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.04) inset;
     animation: slide-up 0.3s cubic-bezier(.18,.89,.32,1.28);
+    
+    /* Responsive layout enhancements */
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
 }
 
+.star-gate-card .menu-settings {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.star-gate-card .menu-settings::-webkit-scrollbar {
+    width: 4px;
+}
+.star-gate-card .menu-settings::-webkit-scrollbar-track {
+    background: transparent;
+}
+.star-gate-card .menu-settings::-webkit-scrollbar-thumb {
+    background: rgba(6, 182, 212, 0.3);
+    border-radius: 2px;
+}
+.star-gate-card .menu-settings::-webkit-scrollbar-thumb:hover {
+    background: rgba(6, 182, 212, 0.6);
+}
 .sound-settings-card {
     border: 1px solid rgba(6, 182, 212, 0.4) !important;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7), 
@@ -2631,6 +2655,10 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     }
     .win-star {
         font-size: 2.2rem !important;
+    }
+    .star-gate-card {
+        padding: 1.2rem 1.2rem 1rem !important;
+        border-radius: 16px !important;
     }
 }
 
@@ -3507,4 +3535,23 @@ button:hover .icon-svg,
     border-color: rgba(6, 182, 212, 0.8) !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2) !important;
+}
+
+/* Responsive adjustments for Settings Modal */
+#settings-modal .star-gate-card {
+    max-width: 400px;
+}
+
+@media (max-width: 350px) {
+    .restore-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 6px !important;
+    }
+    .restore-row input {
+        width: 100% !important;
+    }
+    .restore-row button {
+        width: 100% !important;
+    }
 }
