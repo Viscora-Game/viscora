@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v212';
-import { audio } from './audio.js?v=v212';
+import { ViscosityStates } from './viscosity.js?v=v213';
+import { audio } from './audio.js?v=v213';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -1384,8 +1384,9 @@ export class Player {
         };
 
         const firstRot = getRotated(this.vertices[0]);
-        let startX = this.x + firstRot.rx;
-        let startY = this.y + firstRot.ry;
+        const lastRot = getRotated(this.vertices[this.numVertices - 1]);
+        let startX = (this.x + firstRot.rx + this.x + lastRot.rx) / 2;
+        let startY = (this.y + firstRot.ry + this.y + lastRot.ry) / 2;
         ctx.moveTo(startX, startY);
 
         for (let i = 0; i < this.numVertices; i++) {

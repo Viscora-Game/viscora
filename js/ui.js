@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v212';
-import { ViscosityList } from './viscosity.js?v=v212';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v212';
-import { CloudSaveManager } from './cloud_save.js?v=v212';
+import { audio } from './audio.js?v=v213';
+import { ViscosityList } from './viscosity.js?v=v213';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v213';
+import { CloudSaveManager } from './cloud_save.js?v=v213';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -476,8 +476,8 @@ export class UIManager {
         
         // Başlangıç Ekranı - Oyna
         this.bindTouchClick(document.getElementById('btn-play'), () => {
-            // Eğer geçerli bölüm seçili değilse (editör veya topluluk seviyesi sonrasındaki 999 durumu)
-            if (this.game.currentLevel === 999 || this.game.currentLevel === null || this.game.currentLevel === undefined) {
+            // Eğer geçerli bölüm seçili değilse veya geçersizse
+            if (this.game.currentLevel === 999 || this.game.currentLevel === null || this.game.currentLevel === undefined || this.game.currentLevel > 30 || this.game.currentLevel < 0) {
                 alert("Lütfen oynamak istediğiniz bölümü seçin!");
                 return;
             }
@@ -1006,20 +1006,31 @@ export class UIManager {
 
             // Draw organic wobbly shape
             const numVerts = 8;
-            ctx.beginPath();
-            for (let i = 0; i <= numVerts; i++) {
+            const vertices = [];
+            for (let i = 0; i < numVerts; i++) {
                 const angle = (i / numVerts) * Math.PI * 2;
                 const wobble = Math.sin(Date.now() / 180 + i * 1.2) * 0.7;
                 const cr = radius + wobble;
-                const x = px + Math.cos(angle) * cr;
-                const y = finalY + Math.sin(angle) * cr;
-                if (i === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
+                vertices.push({
+                    x: px + Math.cos(angle) * cr,
+                    y: finalY + Math.sin(angle) * cr
+                });
             }
-            ctx.closePath();
+
+            const drawBlobPath = () => {
+                ctx.beginPath();
+                const first = vertices[0];
+                const last = vertices[numVerts - 1];
+                ctx.moveTo((first.x + last.x) / 2, (first.y + last.y) / 2);
+                for (let i = 0; i < numVerts; i++) {
+                    const current = vertices[i];
+                    const next = vertices[(i + 1) % numVerts];
+                    ctx.quadraticCurveTo(current.x, current.y, (current.x + next.x) / 2, (current.y + next.y) / 2);
+                }
+                ctx.closePath();
+            };
+
+            drawBlobPath();
 
             // Jelly radial gradient
             const bodyGrad = ctx.createRadialGradient(px - radius*0.3, finalY - radius*0.3, radius*0.1, px, finalY, radius);
@@ -1043,20 +1054,7 @@ export class UIManager {
             // Outline stroke
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
             ctx.lineWidth = 1.2;
-            ctx.beginPath();
-            for (let i = 0; i <= numVerts; i++) {
-                const angle = (i / numVerts) * Math.PI * 2;
-                const wobble = Math.sin(Date.now() / 180 + i * 1.2) * 0.7;
-                const cr = radius + wobble;
-                const x = px + Math.cos(angle) * cr;
-                const y = finalY + Math.sin(angle) * cr;
-                if (i === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            }
-            ctx.closePath();
+            drawBlobPath();
             ctx.stroke();
             
             // 3. Draw Eyes
@@ -1689,21 +1687,31 @@ export class UIManager {
                 ctx.shadowOffsetY = 2;
 
                 const numVerts = 10;
-                ctx.beginPath();
-                for (let i = 0; i <= numVerts; i++) {
+                const vertices = [];
+                for (let i = 0; i < numVerts; i++) {
                     const angle = (i / numVerts) * Math.PI * 2;
-                    // Static wobbly shape using sine of angles so it's a fixed organic blob shape!
                     const wobble = Math.sin(angle * 3) * 0.8 + Math.cos(angle * 2) * 0.4;
                     const cr = radius + wobble;
-                    const x = cx + Math.cos(angle) * cr;
-                    const y = cy + Math.sin(angle) * cr;
-                    if (i === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
-                    }
+                    vertices.push({
+                        x: cx + Math.cos(angle) * cr,
+                        y: cy + Math.sin(angle) * cr
+                    });
                 }
-                ctx.closePath();
+
+                const drawBlobPath = () => {
+                    ctx.beginPath();
+                    const first = vertices[0];
+                    const last = vertices[numVerts - 1];
+                    ctx.moveTo((first.x + last.x) / 2, (first.y + last.y) / 2);
+                    for (let i = 0; i < numVerts; i++) {
+                        const current = vertices[i];
+                        const next = vertices[(i + 1) % numVerts];
+                        ctx.quadraticCurveTo(current.x, current.y, (current.x + next.x) / 2, (current.y + next.y) / 2);
+                    }
+                    ctx.closePath();
+                };
+
+                drawBlobPath();
 
                 const bodyGrad = ctx.createRadialGradient(cx - radius*0.3, cy - radius*0.3, radius*0.1, cx, cy, radius);
                 bodyGrad.addColorStop(0, '#22d3ee');
@@ -1726,20 +1734,7 @@ export class UIManager {
                 // Outline
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
                 ctx.lineWidth = 1.0;
-                ctx.beginPath();
-                for (let i = 0; i <= numVerts; i++) {
-                    const angle = (i / numVerts) * Math.PI * 2;
-                    const wobble = Math.sin(angle * 3) * 0.8 + Math.cos(angle * 2) * 0.4;
-                    const cr = radius + wobble;
-                    const x = cx + Math.cos(angle) * cr;
-                    const y = cy + Math.sin(angle) * cr;
-                    if (i === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
-                    }
-                }
-                ctx.closePath();
+                drawBlobPath();
                 ctx.stroke();
 
                 // 3. Draw Eyes (either special ones or default)

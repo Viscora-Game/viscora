@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v212';
-import { Level } from './level.js?v=v212';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v212';
-import { UIManager } from './ui.js?v=v212';
-import { CloudSaveManager } from './cloud_save.js?v=v212';
-import { audio } from './audio.js?v=v212';
-import { LevelEditor } from './editor.js?v=v212';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v212';
+import { Player } from './player.js?v=v213';
+import { Level } from './level.js?v=v213';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v213';
+import { UIManager } from './ui.js?v=v213';
+import { CloudSaveManager } from './cloud_save.js?v=v213';
+import { audio } from './audio.js?v=v213';
+import { LevelEditor } from './editor.js?v=v213';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v213';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -110,9 +110,13 @@ export class GameManager {
                 this.unlockedLevel = Math.max(this.unlockedLevel, i + 1);
             }
         }
+        this.unlockedLevel = Math.min(this.unlockedLevel, 30);
         localStorage.setItem('viscora_unlocked_level', this.unlockedLevel.toString());
 
         this.currentLevel = savedLvl !== null ? this.unlockedLevel : 0;
+        if (this.currentLevel >= 30 && this.getStarsForLevel(30) > 0) {
+            this.currentLevel = null;
+        }
         this.difficulty = localStorage.getItem('viscora_difficulty') || 'normal';
         this.ui = new UIManager(this);
         this.player = new Player(100, 300, this);
