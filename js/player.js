@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v223';
-import { audio } from './audio.js?v=v223';
+import { ViscosityStates } from './viscosity.js?v=v224';
+import { audio } from './audio.js?v=v224';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -529,7 +529,7 @@ export class Player {
             if (keys.up) dirY = -1;
             if (keys.down) dirY = 1;
 
-            if (keys.jump || dirX !== 0 || dirY !== 0) {
+            if (keys.jump) {
                 if (dirX === 0 && dirY === 0) dirY = -1; // Default launch upwards
                 
                 this.vx = dirX * 7.5;
