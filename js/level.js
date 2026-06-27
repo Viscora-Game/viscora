@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v219';
-import { THEMES } from './generator.js?v=v219';
+import { audio } from './audio.js?v=v220';
+import { THEMES } from './generator.js?v=v220';
 
 /**
  * Viscora Level Design & Manager
@@ -2800,6 +2800,99 @@ export class Level {
                     { "x": 2280, "y": 220 },
                     { "x": 4290, "y": 110 }
                 ]
+            };
+        } else if (originalLevelNumber === 27) {
+            data = {
+                "serverLevelId": "map_1782595731286_755",
+                "name": "LAZER KAFESİ",
+                "tags": [],
+                "themeId": "neon_sewer",
+                "levelWidth": 2200,
+                "levelHeight": 800,
+                "spawn": {
+                    "x": 30,
+                    "y": 0
+                },
+                "portal": {
+                    "x": 2120,
+                    "y": 380
+                },
+                "platforms": [
+                    { "x": -20, "y": 620, "w": 2200, "h": 140, "type": "normal" },
+                    { "x": 2070, "y": 350, "w": 40, "h": 120, "type": "normal" },
+                    { "x": 1010, "y": 370, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 730, "y": 490, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 0, "y": 30, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 280, "y": 200, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 410, "y": 370, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 1150, "y": 310, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 1300, "y": 240, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 1600, "y": 100, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 1720, "y": 330, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 60, "y": -70, "w": 40, "h": 120, "type": "normal" },
+                    { "x": 1880, "y": 410, "w": 60, "h": 20, "type": "normal" }
+                ],
+                "spikes": [],
+                "acidPools": [],
+                "lasers": [],
+                "netGates": [],
+                "movingPlatforms": [
+                    { "startX": 1300, "startY": 410, "targetX": 1450, "targetY": 410, "w": 100, "h": 20, "speed": 0.015 },
+                    { "startX": 970, "startY": 210, "targetX": 1120, "targetY": 210, "w": 100, "h": 20, "speed": 0.015 }
+                ],
+                "crystals": [
+                    { "x": 440, "y": 330, "color": "#eab308" },
+                    { "x": 310, "y": 160, "color": "#eab308" },
+                    { "x": 1030, "y": 330, "color": "#06b6d4" },
+                    { "x": 1170, "y": 270, "color": "#06b6d4" },
+                    { "x": 1010, "y": 170, "color": "#06b6d4" },
+                    { "x": 1350, "y": 380, "color": "#d946ef" },
+                    { "x": 1630, "y": 70, "color": "#10b981" },
+                    { "x": 1750, "y": 290, "color": "#10b981" },
+                    { "x": 1910, "y": 370, "color": "#d946ef" }
+                ],
+                "enemies": [],
+                "pressurePlates": [],
+                "pushBlocks": [],
+                "conveyors": [],
+                "teleportPairs": [],
+                "bouncePads": [],
+                "buttons": [],
+                "levers": [],
+                "flamethrowers": [],
+                "fallingPlatforms": [],
+                "breakablePlatforms": [
+                    { "x": 190, "y": 480, "w": 120, "h": 40, "type": "platform", "broken": false, "timer": 0, "triggered": false }
+                ],
+                "hiddenPassages": [],
+                "fallingBlockTraps": [],
+                "vantuzPoints": [],
+                "decorations": [],
+                "laserEmitters": [
+                    { "x": 0, "y": 540, "w": 40, "h": 40, "direction": 0, "color": "yellow" },
+                    { "x": 0, "y": 400, "w": 40, "h": 40, "direction": 0, "color": "blue" },
+                    { "x": 0, "y": 250, "w": 40, "h": 40, "direction": 0, "color": "green" },
+                    { "x": 0, "y": 110, "w": 40, "h": 40, "direction": 0, "color": "pink" },
+                    { "x": 0, "y": 520, "w": 40, "h": 40, "direction": 0, "color": "yellow" },
+                    { "x": 0, "y": 560, "w": 40, "h": 40, "direction": 0, "color": "yellow" },
+                    { "x": 0, "y": 580, "w": 40, "h": 40, "direction": 0, "color": "yellow" }
+                ],
+                "laserReceivers": [],
+                "staticMirrors": [
+                    { "x": 1090, "y": 110, "w": 40, "h": 40, "mirrorType": "bottom-right" },
+                    { "x": 1520, "y": -50, "w": 40, "h": 40, "mirrorType": "top-right" },
+                    { "x": 1080, "y": -50, "w": 40, "h": 40, "mirrorType": "top-left" },
+                    { "x": 1520, "y": 160, "w": 40, "h": 40, "mirrorType": "bottom-left" },
+                    { "x": 790, "y": 160, "w": 40, "h": 40, "mirrorType": "top-right" },
+                    { "x": 580, "y": 160, "w": 40, "h": 40, "mirrorType": "top-left" },
+                    { "x": 580, "y": 240, "w": 40, "h": 40, "mirrorType": "bottom-right" },
+                    { "x": 790, "y": 250, "w": 40, "h": 40, "mirrorType": "bottom-left" },
+                    { "x": 610, "y": 360, "w": 40, "h": 40, "mirrorType": "top-left" },
+                    { "x": 610, "y": 400, "w": 40, "h": 40, "mirrorType": "bottom-right" },
+                    { "x": 880, "y": 360, "w": 40, "h": 40, "mirrorType": "top-right" },
+                    { "x": 870, "y": 450, "w": 40, "h": 40, "mirrorType": "bottom-left" }
+                ],
+                "arrowShooters": []
             };
         } else if (originalLevelNumber === 30) {
             data = {
@@ -6525,10 +6618,7 @@ export class Level {
                     { "x": 1440, "y": 180, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" }
                 ];
             } else if (originalLevelNumber === 27) {
-                this.enemies = [
-                    { x: 1100, y: 150, rangeX: 200, speed: 1.4, type: 'tractor_ufo' },
-                    { x: 2500, y: 80, rangeX: 180, speed: 1.2, type: 'sweeper_ufo' }
-                ];
+                this.enemies = [];
             } else if (originalLevelNumber === 28) {
                 this.enemies = [
                     { x: 900, y: 100, rangeX: 150, speed: 1.3, type: 'sweeper_ufo' },
