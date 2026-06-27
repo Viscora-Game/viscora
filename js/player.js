@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v232';
-import { audio } from './audio.js?v=v232';
+import { ViscosityStates } from './viscosity.js?v=v233';
+import { audio } from './audio.js?v=v233';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -1294,6 +1294,9 @@ export class Player {
      * Blob'u ekrana çizer
      */
     draw(ctx, camera) {
+        if (this.game && this.game.state === 'WIN') {
+            return;
+        }
         if (this.isDead) {
             if (this.deathType === 'melt' && this.meltTimer > 0) {
                 // Draw melting puddle animation (karakter yere yayılarak sıvılaşır)
@@ -1376,16 +1379,35 @@ export class Player {
 
         if (this.introState === 'materializing') {
             const progress = (45 - this.introTimer) / 45; // 0'dan 1'e
-            currentScaleX = Math.min(1.0, progress * 1.5);
-            currentScaleY = Math.max(0.01, progress);
 
-            // Dijital ışın sütunu
-            ctx.strokeStyle = '#10b981';
-            ctx.lineWidth = 3 * (1 - progress);
-            ctx.shadowColor = '#10b981';
-            ctx.shadowBlur = 12;
+            // Erimiş puddle halinden top haline yumuşak geçiş ve zıplama (squash & stretch)
+            if (progress < 0.7) {
+                const t = progress / 0.7; // 0'dan 1'e
+                currentScaleX = 3.0 - t * 2.2;   // Yerde yayılmış erimiş halden (3.0) daralmaya (0.8)
+                currentScaleY = 0.05 + t * 1.35; // İncecikten (0.05) yukarı doğru uzamaya (1.4)
+            } else {
+                const t = (progress - 0.7) / 0.3; // 0'dan 1'e
+                const bounce = Math.sin(t * Math.PI) * 0.25; // Sönümleme yayı
+                currentScaleX = 0.8 + t * 0.2 + bounce; // 1.0'a otururken esneme
+                currentScaleY = 1.4 - t * 0.4 - bounce; // 1.0'a otururken esneme
+            }
+
+            // Kuvvetli ve geniş dijital tarama/indirici ışın sütunu
+            const beamWidth = 50 * (1 - progress);
+            
+            // Geniş dış neon hare
+            ctx.fillStyle = `rgba(16, 185, 129, ${0.25 * (1 - progress)})`;
             ctx.beginPath();
-            ctx.moveTo(this.x, this.y - 150);
+            ctx.rect(this.x - beamWidth / 2, this.y - 200, beamWidth, 200 + this.radius);
+            ctx.fill();
+
+            // Parlak iç çekirdek çizgisi
+            ctx.strokeStyle = '#34d399';
+            ctx.lineWidth = 5 * (1 - progress);
+            ctx.shadowColor = '#10b981';
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y - 200);
             ctx.lineTo(this.x, this.y + this.radius);
             ctx.stroke();
             ctx.shadowBlur = 0; // gövde çizimi için gölgeyi sıfırla
