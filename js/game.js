@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v235';
-import { Level } from './level.js?v=v235';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v235';
-import { UIManager } from './ui.js?v=v235';
-import { CloudSaveManager } from './cloud_save.js?v=v235';
-import { audio } from './audio.js?v=v235';
-import { LevelEditor } from './editor.js?v=v235';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v235';
+import { Player } from './player.js?v=v236';
+import { Level } from './level.js?v=v236';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v236';
+import { UIManager } from './ui.js?v=v236';
+import { CloudSaveManager } from './cloud_save.js?v=v236';
+import { audio } from './audio.js?v=v236';
+import { LevelEditor } from './editor.js?v=v236';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v236';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -620,7 +620,7 @@ export class GameManager {
         this.lastTime = performance.now(); // Reset delta clock to prevent large frame jumps on initial load
 
         // Hikaye Terminali Tetikleme (Belirtilen bölümlerde ilk girişte)
-        const storyLevels = [1, 5, 10, 11, 16, 20, 21, 26, 29, 30];
+        const storyLevels = [1, 2, 3, 5, 10, 11, 16, 20, 21, 26, 29, 30];
         if (showTitleCard && storyLevels.includes(this.currentLevel)) {
             this.state = 'STORY';
             this.ui.showStoryTerminal(this.currentLevel, () => {
@@ -1141,6 +1141,147 @@ export class GameManager {
     }
 
     /**
+     * Bölüm kazanıldığında win ekranını hazırlar ve gösterir
+     */
+    _showWinScreen() {
+        document.getElementById('win-time').textContent = this.timeString;
+
+        // Yıldızları Hesapla, Kaydet ve Göster (3 yıldız her zaman gösterilir)
+        const stars = this.calculateStars();
+        if (this.currentLevel !== 999) {
+            this.saveStarsForLevel(this.currentLevel, stars);
+        } else if (this.isCommunityPlay && this.currentCommunityLevelId) {
+            // Topluluk haritası bitirildiğinde skoru gönder
+            const levelId = this.currentCommunityLevelId;
+            const timeValue = this.gameTime;
+            
+            let username = localStorage.getItem('viscora_author_name');
+            if (!username || username === 'Tasarımcı' || username.trim() === '') {
+                username = window.prompt("Tebrikler! Liderlik tablosu için adınızı girin:", "Oyuncu");
+                if (username) {
+                    username = username.trim();
+                    if (username) {
+                        localStorage.setItem('viscora_author_name', username);
+                    }
+                }
+            }
+            if (!username || username.trim() === '') {
+                username = 'Anonim';
+            }
+
+            const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                ? ''
+                : 'https://viscora.onrender.com';
+            
+            fetch(`${API_BASE}/api/levels/${levelId}/score`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, time: timeValue })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Skor kaydedilemedi.");
+                return res.json();
+            })
+            .then(updatedLevel => {
+                console.log("Skor başarıyla kaydedildi:", updatedLevel);
+                if (this.ui) {
+                    this.ui.updateLevelScores(levelId, updatedLevel.scores);
+                }
+            })
+            .catch(err => console.error("Skor kaydetme hatası:", err));
+        }
+        // Eski win-stars elementi varsa güncelle (geriye dönük uyum)
+        const winStarsEl = document.getElementById('win-stars');
+        if (winStarsEl) {
+            winStarsEl.textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
+        }
+        // Yeni animasyonlu 3-yıldız gösterimi
+        for (let i = 1; i <= 3; i++) {
+            const starEl = document.getElementById(`win-star-${i}`);
+            if (starEl) {
+                starEl.classList.remove('earned');
+                starEl.textContent = '★';
+                if (i <= stars) {
+                    // Staggered pop-in: 1st star at 0.15s, 2nd at 0.5s, 3rd at 0.85s
+                    setTimeout(() => { starEl.classList.add('earned'); }, (i - 1) * 350 + 150);
+                }
+            }
+        }
+
+        // Kristal İstatistiklerini Hesapla ve Göster
+        const totalCrystals = (this.level.collectibles || []).filter(c => !c.enemyDropped).length;
+        const collectedCrystals = (this.level.collectibles || []).filter(c => c.collected && !c.enemyDropped).length;
+        const crystalContainer = document.getElementById('win-crystals-container');
+        const crystalText = document.getElementById('win-crystals');
+        const crystalPerfect = document.getElementById('win-crystals-perfect');
+
+        if (crystalContainer) {
+            if (totalCrystals > 0) {
+                crystalContainer.style.display = 'block';
+                if (crystalText) {
+                    crystalText.textContent = `${collectedCrystals} / ${totalCrystals}`;
+                }
+                if (crystalPerfect) {
+                    if (collectedCrystals === totalCrystals) {
+                        crystalPerfect.textContent = ' (MÜKEMMEL! 🌟)';
+                    } else {
+                        crystalPerfect.textContent = '';
+                    }
+                }
+            } else {
+                crystalContainer.style.display = 'none';
+            }
+        }
+
+        // Bölüm bazlı başlık ve buton yazısı güncellemesi
+        const isDev = this.ui && this.ui.devMode;
+        const maxLvl = 30;
+        if (this.currentLevel < maxLvl) {
+            const nextLvl = this.currentLevel + 1;
+            this.unlockedLevel = Math.max(this.unlockedLevel, nextLvl);
+            localStorage.setItem('viscora_unlocked_level', this.unlockedLevel.toString());
+            CloudSaveManager.saveProgress();
+            this.ui.updateLevelButtonsUI();
+
+            document.getElementById('win-title').textContent = `BÖLÜM ${this.currentLevel} TAMAMLANDI!`;
+            document.getElementById('btn-next').textContent = "SONRAKİ BÖLÜM";
+        } else {
+            document.getElementById('win-title').textContent = "TEBRİKLER, OYUNU BİTİRDİNİZ!";
+            document.getElementById('btn-next').textContent = "EN BAŞTAN OYNA";
+        }
+        // Esprili ölüm sayacı mesajı
+        const deathEl = document.getElementById('win-deaths-text');
+        if (deathEl) {
+            const d = this.levelDeaths;
+            let deathMsg = '';
+            if (d === 0) {
+                deathMsg = '☠️ 0 Ölüm — Bir damla bile dökülmedi!';
+            } else if (d === 1) {
+                deathMsg = '☠️ 1 Ölüm — Sadece bir kaza, olur böyle şeyler.';
+            } else if (d <= 3) {
+                deathMsg = `☠️ ${d} Ölüm — Hâlâ formdasın!`;
+            } else if (d <= 6) {
+                deathMsg = `☠️ ${d} Ölüm — Bu bölüm seni sevmedi galiba.`;
+            } else if (d <= 10) {
+                deathMsg = `☠️ ${d} Ölüm — Zemin seni tanıyor artık.`;
+            } else if (d <= 20) {
+                deathMsg = `☠️ ${d} Ölüm — İnatçı jel, asla pes etmez!`;
+            } else {
+                deathMsg = `☠️ ${d} Ölüm — Efsanevi direniş! Saygılar.`;
+            }
+            deathEl.textContent = deathMsg;
+        }
+
+        // Dokunsal geri bildirim: Bölüm tamamlandı kutlama hissiyatı
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+            navigator.vibrate([50, 40, 80, 40, 50]);
+        }
+
+        this.ui.showScreen('win');
+        this.ui.resetKeys();
+    }
+
+    /**
      * Gamepad (Kontrolcü) durumunu sorgular ve girdileri eşleştirir
      */
     pollGamepad() {
@@ -1422,142 +1563,21 @@ export class GameManager {
 
         if (this.player.outroState === 'sucking' && this.player.outroTimer <= 0) {
             this.player.outroState = null;
+
+            // Boss bölümlerinde yenilgi terminali göster (10, 20, 30)
+            const bossDefeatLevels = [10, 20, 30];
+            if (bossDefeatLevels.includes(this.currentLevel) && this.boss && this.boss.isDead) {
+                this.state = 'STORY';
+                this.ui.showBossDefeatTerminal(this.currentLevel, () => {
+                    this.state = 'WIN';
+                    this._showWinScreen();
+                });
+                return;
+            }
+
             this.state = 'WIN';
-            document.getElementById('win-time').textContent = this.timeString;
+            this._showWinScreen();
 
-            // Yıldızları Hesapla, Kaydet ve Göster (3 yıldız her zaman gösterilir)
-            const stars = this.calculateStars();
-            if (this.currentLevel !== 999) {
-                this.saveStarsForLevel(this.currentLevel, stars);
-            } else if (this.isCommunityPlay && this.currentCommunityLevelId) {
-                // Topluluk haritası bitirildiğinde skoru gönder
-                const levelId = this.currentCommunityLevelId;
-                const timeValue = this.gameTime;
-                
-                let username = localStorage.getItem('viscora_author_name');
-                if (!username || username === 'Tasarımcı' || username.trim() === '') {
-                    username = window.prompt("Tebrikler! Liderlik tablosu için adınızı girin:", "Oyuncu");
-                    if (username) {
-                        username = username.trim();
-                        if (username) {
-                            localStorage.setItem('viscora_author_name', username);
-                        }
-                    }
-                }
-                if (!username || username.trim() === '') {
-                    username = 'Anonim';
-                }
-
-                const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                    ? ''
-                    : 'https://viscora.onrender.com';
-                
-                fetch(`${API_BASE}/api/levels/${levelId}/score`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: username, time: timeValue })
-                })
-                .then(res => {
-                    if (!res.ok) throw new Error("Skor kaydedilemedi.");
-                    return res.json();
-                })
-                .then(updatedLevel => {
-                    console.log("Skor başarıyla kaydedildi:", updatedLevel);
-                    if (this.ui) {
-                        this.ui.updateLevelScores(levelId, updatedLevel.scores);
-                    }
-                })
-                .catch(err => console.error("Skor kaydetme hatası:", err));
-            }
-            // Eski win-stars elementi varsa güncelle (geriye dönük uyum)
-            const winStarsEl = document.getElementById('win-stars');
-            if (winStarsEl) {
-                winStarsEl.textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
-            }
-            // Yeni animasyonlu 3-yıldız gösterimi
-            for (let i = 1; i <= 3; i++) {
-                const starEl = document.getElementById(`win-star-${i}`);
-                if (starEl) {
-                    starEl.classList.remove('earned');
-                    starEl.textContent = '★';
-                    if (i <= stars) {
-                        // Staggered pop-in: 1st star at 0.15s, 2nd at 0.5s, 3rd at 0.85s
-                        setTimeout(() => { starEl.classList.add('earned'); }, (i - 1) * 350 + 150);
-                    }
-                }
-            }
-
-            // Kristal İstatistiklerini Hesapla ve Göster
-            const totalCrystals = (this.level.collectibles || []).filter(c => !c.enemyDropped).length;
-            const collectedCrystals = (this.level.collectibles || []).filter(c => c.collected && !c.enemyDropped).length;
-            const crystalContainer = document.getElementById('win-crystals-container');
-            const crystalText = document.getElementById('win-crystals');
-            const crystalPerfect = document.getElementById('win-crystals-perfect');
-
-            if (crystalContainer) {
-                if (totalCrystals > 0) {
-                    crystalContainer.style.display = 'block';
-                    if (crystalText) {
-                        crystalText.textContent = `${collectedCrystals} / ${totalCrystals}`;
-                    }
-                    if (crystalPerfect) {
-                        if (collectedCrystals === totalCrystals) {
-                            crystalPerfect.textContent = ' (MÜKEMMEL! 🌟)';
-                        } else {
-                            crystalPerfect.textContent = '';
-                        }
-                    }
-                } else {
-                    crystalContainer.style.display = 'none';
-                }
-            }
-
-            // Bölüm bazlı başlık ve buton yazısı güncellemesi
-            const isDev = this.ui && this.ui.devMode;
-            const maxLvl = 30;
-            if (this.currentLevel < maxLvl) {
-                const nextLvl = this.currentLevel + 1;
-                this.unlockedLevel = Math.max(this.unlockedLevel, nextLvl);
-                localStorage.setItem('viscora_unlocked_level', this.unlockedLevel.toString());
-                CloudSaveManager.saveProgress();
-                this.ui.updateLevelButtonsUI();
-
-                document.getElementById('win-title').textContent = `BÖLÜM ${this.currentLevel} TAMAMLANDI!`;
-                document.getElementById('btn-next').textContent = "SONRAKİ BÖLÜM";
-            } else {
-                document.getElementById('win-title').textContent = "TEBRİKLER, OYUNU BİTİRDİNİZ!";
-                document.getElementById('btn-next').textContent = "EN BAŞTAN OYNA";
-            }
-            // Esprili ölüm sayacı mesajı
-            const deathEl = document.getElementById('win-deaths-text');
-            if (deathEl) {
-                const d = this.levelDeaths;
-                let deathMsg = '';
-                if (d === 0) {
-                    deathMsg = '☠️ 0 Ölüm — Bir damla bile dökülmedi!';
-                } else if (d === 1) {
-                    deathMsg = '☠️ 1 Ölüm — Sadece bir kaza, olur böyle şeyler.';
-                } else if (d <= 3) {
-                    deathMsg = `☠️ ${d} Ölüm — Hâlâ formdasın!`;
-                } else if (d <= 6) {
-                    deathMsg = `☠️ ${d} Ölüm — Bu bölüm seni sevmedi galiba.`;
-                } else if (d <= 10) {
-                    deathMsg = `☠️ ${d} Ölüm — Zemin seni tanıyor artık.`;
-                } else if (d <= 20) {
-                    deathMsg = `☠️ ${d} Ölüm — İnatçı jel, asla pes etmez!`;
-                } else {
-                    deathMsg = `☠️ ${d} Ölüm — Efsanevi direniş! Saygılar.`;
-                }
-                deathEl.textContent = deathMsg;
-            }
-
-            // Dokunsal geri bildirim: Bölüm tamamlandı kutlama hissiyatı
-            if (typeof navigator !== 'undefined' && navigator.vibrate) {
-                navigator.vibrate([50, 40, 80, 40, 50]);
-            }
-
-            this.ui.showScreen('win');
-            this.ui.resetKeys();
         }
 
         // --- OYUN BİTTİ (ÖLÜM) KONTROLÜ ---
