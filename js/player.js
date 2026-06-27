@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v224';
-import { audio } from './audio.js?v=v224';
+import { ViscosityStates } from './viscosity.js?v=v225';
+import { audio } from './audio.js?v=v225';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -532,7 +532,7 @@ export class Player {
             if (keys.jump) {
                 if (dirX === 0 && dirY === 0) dirY = -1; // Default launch upwards
                 
-                this.vx = dirX * 7.5;
+                this.vx = dirX * 9.375;
                 this.vy = dirY * 9.0;
                 this.isClingingToVantuz = false;
                 this.vantuzPoint.cooldown = 45; // ~750ms cooldown
