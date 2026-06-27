@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v227';
-import { THEMES } from './generator.js?v=v227';
+import { audio } from './audio.js?v=v228';
+import { THEMES } from './generator.js?v=v228';
 
 /**
  * Viscora Level Design & Manager
@@ -2921,7 +2921,7 @@ export class Level {
                     { "x": 2670, "y": 540, "w": 80, "h": 40, "type": "normal" },
                     { "x": 1920, "y": -310, "w": 40, "h": 400, "type": "normal" },
                     { "x": 2050, "y": -60, "w": 40, "h": 400, "type": "normal" },
-                    { "x": 1380, "y": 700, "w": 60, "h": 20, "type": "normal" }
+                    { "x": 2440, "y": -220, "w": 60, "h": 20, "type": "normal" }
                 ],
                 "spikes": [
                     { "x": 600, "y": 120, "w": 20, "h": 60, "direction": "left" },
