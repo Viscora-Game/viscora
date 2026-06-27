@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v215';
-import { THEMES } from './generator.js?v=v215';
+import { audio } from './audio.js?v=v216';
+import { THEMES } from './generator.js?v=v216';
 
 /**
  * Viscora Level Design & Manager
@@ -2616,6 +2616,75 @@ export class Level {
     ],
     "arrowShooters": []
 };
+        } else if (originalLevelNumber === 25) {
+            data = {
+                "serverLevelId": "map_1782592093910_575",
+                "name": "YERÇEKİMİ BOŞLUĞU",
+                "tags": [],
+                "themeId": "magma_core",
+                "levelWidth": 3750,
+                "levelHeight": 1500,
+                "spawn": {
+                    "x": 0,
+                    "y": 1250
+                },
+                "portal": {
+                    "x": 140,
+                    "y": 430
+                },
+                "platforms": [
+                    { "x": -40, "y": 1320, "w": 400, "h": 140, "type": "normal" },
+                    { "x": 560, "y": 1290, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 1800, "y": 1080, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 1510, "y": 1170, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 2150, "y": 1060, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 2880, "y": 1180, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 2490, "y": 1180, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 3270, "y": 1100, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 1200, "y": 1220, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 3610, "y": 1030, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 900, "y": 1250, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 3410, "y": 780, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 3680, "y": 840, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 3090, "y": 740, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 2760, "y": 700, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 2380, "y": 620, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 1730, "y": 640, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 1060, "y": 700, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 2100, "y": 560, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 1930, "y": 450, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 1270, "y": 490, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 1480, "y": 550, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 320, "y": 630, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 800, "y": 780, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 560, "y": 720, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 140, "y": 540, "w": 60, "h": 20, "type": "normal" }
+                ],
+                "arrowShooters": [
+                    {
+                        "x": 1430,
+                        "y": 780,
+                        "w": 48,
+                        "h": 48,
+                        "dir": "target",
+                        "detectionRadius": 600,
+                        "fireInterval": 2.5,
+                        "arrowSpeed": 4.5,
+                        "arrowRange": 600
+                    },
+                    {
+                        "x": 2640,
+                        "y": 790,
+                        "w": 48,
+                        "h": 48,
+                        "dir": "target",
+                        "detectionRadius": 600,
+                        "fireInterval": 2.5,
+                        "arrowSpeed": 4.5,
+                        "arrowRange": 600
+                    }
+                ]
+            };
         } else if (originalLevelNumber === 30) {
             data = {
                 "serverLevelId": null,
@@ -6307,8 +6376,15 @@ export class Level {
                 ];
             } else if (originalLevelNumber === 25) {
                 this.enemies = [
-                    { x: 1200, y: 80, rangeX: 180, speed: 1.5, type: 'sweeper_ufo' },
-                    { x: 2400, y: 120, rangeX: 150, speed: 1.0, type: 'tractor_ufo' }
+                    { x: 720, y: 1150, rangeX: 180, speed: 2, isVertical: false, color: "#eab308", type: 'patrol' },
+                    { x: 1550, y: 1040, rangeX: 180, speed: 2, isVertical: false, color: "#eab308", type: 'patrol' },
+                    { x: 790, y: 640, rangeX: 180, speed: 2, isVertical: false, color: "#eab308", type: 'patrol' },
+                    { x: 1660, y: 450, rangeX: 180, speed: 2, isVertical: false, color: "#eab308", type: 'patrol' },
+                    { x: 2690, y: 610, rangeX: 180, speed: 2, isVertical: false, color: "#eab308", type: 'patrol' },
+                    { x: 2710, y: 1090, rangeX: 180, speed: 2, isVertical: false, color: "#eab308", type: 'patrol' },
+                    { x: 2010, y: 960, rangeX: 180, speed: 2, isVertical: false, color: "#eab308", type: 'patrol' },
+                    { x: 920, y: 530, rangeX: 150, speed: 1.2, isVertical: false, color: "#06b6d4", type: 'sweeper_ufo' },
+                    { x: 2960, y: 650, rangeX: 150, speed: 1.2, isVertical: false, color: "#06b6d4", type: 'sweeper_ufo' }
                 ];
             } else if (originalLevelNumber === 26) {
                 this.enemies = [
