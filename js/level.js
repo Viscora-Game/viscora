@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v222';
-import { THEMES } from './generator.js?v=v222';
+import { audio } from './audio.js?v=v223';
+import { THEMES } from './generator.js?v=v223';
 
 /**
  * Viscora Level Design & Manager
@@ -8460,6 +8460,419 @@ export class Level {
             ctx.restore();
         }
 
+
+
+        // --- DEKORASYON OBJELERİNİ ÇİZ ---
+        if (this.decorations) {
+            this.decorations.forEach(d => {
+                ctx.save();
+                
+                // Rotasyon Matrix Uygulaması
+                if (d.rotation) {
+                    ctx.translate(d.x + d.w / 2, d.y + d.h / 2);
+                    ctx.rotate(d.rotation);
+                    ctx.translate(-(d.x + d.w / 2), -(d.y + d.h / 2));
+                }
+                
+                if (d.type === 'neon_light' || d.type === 'neon') {
+                    // Vertical neon tube
+                    ctx.fillStyle = '#0f172a';
+                    ctx.strokeStyle = '#38bdf8';
+                    ctx.lineWidth = 2;
+                    ctx.fillRect(d.x + d.w / 2 - 4, d.y, 8, d.h);
+                    ctx.strokeRect(d.x + d.w / 2 - 4, d.y, 8, d.h);
+
+                    ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)';
+                    ctx.shadowColor = '#38bdf8';
+                    ctx.shadowBlur = 15;
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(d.x + d.w / 2, d.y + 4);
+                    ctx.lineTo(d.x + d.w / 2, d.y + d.h - 4);
+                    ctx.stroke();
+
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                } else if (d.type === 'box') {
+                    // Static wooden box design
+                    ctx.fillStyle = '#3f220f';
+                    ctx.strokeStyle = '#7c2d12';
+                    ctx.lineWidth = 2;
+                    ctx.fillRect(d.x, d.y, d.w, d.h);
+                    ctx.strokeRect(d.x, d.y, d.w, d.h);
+
+                    // Wooden panels details
+                    ctx.strokeStyle = 'rgba(124, 45, 18, 0.4)';
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeRect(d.x + 4, d.y + 4, d.w - 8, d.h - 8);
+                    ctx.beginPath();
+                    ctx.moveTo(d.x + 4, d.y + 4);
+                    ctx.lineTo(d.x + d.w - 4, d.y + d.h - 4);
+                    ctx.moveTo(d.x + d.w - 4, d.y + 4);
+                    ctx.lineTo(d.x + 4, d.y + d.h - 4);
+                    ctx.stroke();
+                } else if (d.type === 'pipe') {
+                    // Metal pipe drawing
+                    ctx.fillStyle = '#1e293b';
+                    ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 2.5;
+                    // Horizontal pipe by default
+                    ctx.fillRect(d.x, d.y + d.h / 2 - 6, d.w, 12);
+                    ctx.strokeRect(d.x, d.y + d.h / 2 - 6, d.w, 12);
+                    // Connection joint flange
+                    ctx.fillStyle = '#334155';
+                    ctx.fillRect(d.x + 4, d.y + d.h / 2 - 10, 8, 20);
+                    ctx.strokeRect(d.x + 4, d.y + d.h / 2 - 10, 8, 20);
+                } else if (d.type === 'cable') {
+                    // Hanging thick cable wire
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(d.x, d.y);
+                    ctx.quadraticCurveTo(d.x + d.w / 2, d.y + d.h + 10, d.x + d.w, d.y);
+                    ctx.stroke();
+                } else if (d.type === 'pano') {
+                    // Tech background console screen
+                    ctx.fillStyle = '#0f172a';
+                    ctx.strokeStyle = '#334155';
+                    ctx.lineWidth = 2;
+                    ctx.fillRect(d.x, d.y, d.w, d.h);
+                    ctx.strokeRect(d.x, d.y, d.w, d.h);
+
+                    // Screen lines
+                    ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+                    ctx.fillRect(d.x + 3, d.y + 3, d.w - 6, d.h - 6);
+
+                    // Sine waves/grid details
+                    ctx.strokeStyle = 'rgba(16, 185, 129, 0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    for (let lx = 4; lx < d.w - 4; lx += 2) {
+                        const ly = d.y + d.h / 2 + Math.sin(this.time * 2 + lx * 0.2) * 5;
+                        if (lx === 4) ctx.moveTo(d.x + lx, ly);
+                        else ctx.lineTo(d.x + lx, ly);
+                    }
+                    ctx.stroke();
+                } else if (d.type === 'fan') {
+                    // Rotating industrial ventilation fan
+                    const cx = d.x + d.w / 2;
+                    const cy = d.y + d.h / 2;
+                    const r = Math.max(2, d.w / 2 - 4);
+
+                    // Outer circular housing frame
+                    ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    // Fan blades rotating
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.rotate(d.rotation || 0);
+                    ctx.fillStyle = '#1e293b';
+                    ctx.strokeStyle = '#64748b';
+                    ctx.lineWidth = 1.5;
+                    for (let b = 0; b < 4; b++) {
+                        ctx.rotate(Math.PI / 2);
+                        ctx.beginPath();
+                        ctx.ellipse(0, -r / 2, 4, Math.max(1, r / 2), 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                } else if (d.type === 'warning_light' || d.type === 'warning') {
+                    // Blinking alarm hazard warning light
+                    ctx.fillStyle = '#1e293b';
+                    ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 2;
+                    // base
+                    ctx.fillRect(d.x + d.w / 4, d.y + d.h - 8, d.w / 2, 8);
+                    ctx.strokeRect(d.x + d.w / 4, d.y + d.h - 8, d.w / 2, 8);
+
+                    // glass cover
+                    const intensity = 0.5 + Math.sin(d.state || 0) * 0.5;
+                    ctx.fillStyle = `rgba(239, 68, 68, ${0.2 + intensity * 0.8})`;
+                    ctx.strokeStyle = '#ef4444';
+                    ctx.lineWidth = 1.5;
+                    ctx.shadowColor = '#ef4444';
+                    ctx.shadowBlur = intensity * 15;
+
+                    ctx.beginPath();
+                    ctx.arc(d.x + d.w / 2, d.y + d.h - 8, 8, Math.PI, 0, false);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                } else if (d.type === 'steam') {
+                    // Simple steam nozzle base decoration
+                    ctx.fillStyle = '#334155';
+                    ctx.strokeStyle = '#1e293b';
+                    ctx.lineWidth = 2;
+                    ctx.fillRect(d.x + d.w / 2 - 6, d.y + d.h - 8, 12, 8);
+                    ctx.strokeRect(d.x + d.w / 2 - 6, d.y + d.h - 8, 12, 8);
+                } else if (d.type === 'pillar') {
+                    // Futuristic Pillar
+                    ctx.save();
+                    // Column gradient body
+                    const colGrad = ctx.createLinearGradient(d.x, d.y, d.x + d.w, d.y);
+                    colGrad.addColorStop(0, '#0f172a');
+                    colGrad.addColorStop(0.3, '#1e293b');
+                    colGrad.addColorStop(0.7, '#334155');
+                    colGrad.addColorStop(1, '#0f172a');
+                    ctx.fillStyle = colGrad;
+                    ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 2;
+                    
+                    this.drawRoundedRect(ctx, d.x, d.y, d.w, d.h, 4);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Neon strips in the middle
+                    ctx.strokeStyle = '#d946ef'; // Fuchsia neon
+                    ctx.shadowColor = '#d946ef';
+                    ctx.shadowBlur = 8;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(d.x + d.w / 2, d.y + 10);
+                    ctx.lineTo(d.x + d.w / 2, d.y + d.h - 10);
+                    ctx.stroke();
+
+                    // Subtle horizontal tech panels
+                    ctx.shadowBlur = 0;
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                    ctx.lineWidth = 1;
+                    for (let py = d.y + 20; py < d.y + d.h - 10; py += 30) {
+                        ctx.beginPath();
+                        ctx.moveTo(d.x + 2, py);
+                        ctx.lineTo(d.x + d.w - 2, py);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                } else if (d.type === 'gear') {
+                    // Rotating Gear
+                    ctx.save();
+                    const cx = d.x + d.w / 2;
+                    const cy = d.y + d.h / 2;
+                    const r = Math.max(2, d.w / 2 - 2);
+
+                    ctx.translate(cx, cy);
+                    ctx.rotate(d.rotation || 0);
+
+                    // Draw gear teeth
+                    ctx.fillStyle = '#334155';
+                    ctx.strokeStyle = '#06b6d4'; // Cyan neon outlines
+                    ctx.lineWidth = 1.5;
+                    ctx.shadowColor = '#06b6d4';
+                    ctx.shadowBlur = 4;
+
+                    const numTeeth = 8;
+                    for (let i = 0; i < numTeeth; i++) {
+                        ctx.rotate((Math.PI * 2) / numTeeth);
+                        ctx.fillRect(-6, -r - 4, 12, 6);
+                        ctx.strokeRect(-6, -r - 4, 12, 6);
+                    }
+
+                    // Main gear wheel body
+                    ctx.beginPath();
+                    ctx.arc(0, 0, r, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Central hole and spokes
+                    ctx.fillStyle = '#0f172a';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, Math.max(1, r - 6), 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Spikes/spokes
+                    ctx.strokeStyle = '#06b6d4';
+                    ctx.lineWidth = 3;
+                    for (let i = 0; i < 4; i++) {
+                        ctx.rotate(Math.PI / 2);
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.lineTo(0, -r + 2);
+                        ctx.stroke();
+                    }
+
+                    // Inner hub center
+                    ctx.fillStyle = '#ffffff';
+                    ctx.shadowBlur = 8;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 4, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.restore();
+                } else if (d.type === 'window_space') {
+                    // Cyber Space Window
+                    ctx.save();
+                    // Border Frame
+                    ctx.fillStyle = '#0f172a';
+                    ctx.strokeStyle = '#06b6d4'; // Cyan glowing frame
+                    ctx.lineWidth = 3;
+                    ctx.shadowColor = '#06b6d4';
+                    ctx.shadowBlur = 10;
+                    this.drawRoundedRect(ctx, d.x, d.y, d.w, d.h, 6);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Inner window screen space
+                    ctx.shadowBlur = 0;
+                    ctx.save();
+                    ctx.beginPath();
+                    this.drawRoundedRect(ctx, d.x + 4, d.y + 4, Math.max(1, d.w - 8), Math.max(1, d.h - 8), 4);
+                    ctx.clip();
+
+                    // Window space background (Deep cosmos purple)
+                    const rEnd = Math.max(2, d.w / 2);
+                    const spaceGrad = ctx.createRadialGradient(d.x + d.w / 2, d.y + d.h / 2, 5, d.x + d.w / 2, d.y + d.h / 2, rEnd);
+                    spaceGrad.addColorStop(0, '#1e1b4b');
+                    spaceGrad.addColorStop(1, '#020617');
+                    ctx.fillStyle = spaceGrad;
+                    ctx.fillRect(d.x, d.y, d.w, d.h);
+
+                    // Digital hologram grids sliding down
+                    ctx.strokeStyle = 'rgba(6, 182, 212, 0.12)';
+                    ctx.lineWidth = 1;
+                    const gridOffset = (this.time * 20) % 20;
+                    for (let gx = d.x; gx < d.x + d.w; gx += 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(gx, d.y);
+                        ctx.lineTo(gx, d.y + d.h);
+                        ctx.stroke();
+                    }
+                    for (let gy = d.y + gridOffset; gy < d.y + d.h; gy += 20) {
+                        ctx.beginPath();
+                        ctx.moveTo(d.x, gy);
+                        ctx.lineTo(d.x + d.w, gy);
+                        ctx.stroke();
+                    }
+
+                    // Cyber Star dots
+                    ctx.fillStyle = '#ffffff';
+                    const moduloW = Math.max(1, d.w - 16);
+                    const moduloH = Math.max(1, d.h - 16);
+                    for (let i = 0; i < 4; i++) {
+                        const sx = d.x + 8 + ((i * 17 + Math.floor(this.time * 0.1)) % moduloW);
+                        const sy = d.y + 8 + ((i * 23) % moduloH);
+                        const size = 1 + (Math.sin(this.time * 3 + i) * 0.5 + 0.5) * 1.5;
+                        ctx.beginPath();
+                        ctx.arc(sx, sy, size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                    ctx.restore();
+                } else if (d.type === 'server_rack') {
+                    // Server Console / Cabinet Rack
+                    ctx.save();
+                    // Rack chassis
+                    const rackGrad = ctx.createLinearGradient(d.x, d.y, d.x + d.w, d.y);
+                    rackGrad.addColorStop(0, '#1e293b');
+                    rackGrad.addColorStop(0.5, '#0f172a');
+                    rackGrad.addColorStop(1, '#1e293b');
+                    ctx.fillStyle = rackGrad;
+                    ctx.strokeStyle = '#334155';
+                    ctx.lineWidth = 2;
+                    this.drawRoundedRect(ctx, d.x, d.y, d.w, d.h, 4);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Server bays/slots inside
+                    ctx.fillStyle = '#020617';
+                    const numBays = 5;
+                    const bayH = (d.h - 12) / numBays;
+                    for (let i = 0; i < numBays; i++) {
+                        const bx = d.x + 4;
+                        const by = d.y + 6 + i * bayH + 1;
+                        const bw = d.w - 8;
+                        const bh = bayH - 2;
+                        ctx.fillRect(bx, by, bw, bh);
+
+                        // Heat vents slots on server face
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(bx + 4, by + bh / 2);
+                        ctx.lineTo(bx + bw - 15, by + bh / 2);
+                        ctx.stroke();
+
+                        // Blinking color LED lights
+                        const led1Active = Math.sin(this.time * 8 + i * 2) > 0;
+                        const led2Active = Math.sin(this.time * 5 + i * 3) > -0.3;
+                        
+                        // LED 1: Cyan/Blue
+                        ctx.fillStyle = led1Active ? '#06b6d4' : '#083344';
+                        ctx.beginPath();
+                        ctx.arc(bx + bw - 10, by + bh / 2, 2, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // LED 2: Green or Pink
+                        const led2Color = i % 2 === 0 ? '#10b981' : '#d946ef';
+                        const led2ColorOff = i % 2 === 0 ? '#064e3b' : '#4a044e';
+                        ctx.fillStyle = led2Active ? led2Color : led2ColorOff;
+                        ctx.beginPath();
+                        ctx.arc(bx + bw - 4, by + bh / 2, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                } else if (d.type === 'textbox') {
+                    // Glassmorphic Info Text Panel
+                    ctx.save();
+                    
+                    const boxColor = d.color || '#06b6d4';
+                    
+                    // Dark glassmorphic background
+                    ctx.fillStyle = 'rgba(11, 15, 25, 0.78)';
+                    ctx.strokeStyle = boxColor;
+                    ctx.lineWidth = 2.5;
+                    ctx.shadowColor = boxColor;
+                    ctx.shadowBlur = 10;
+                    
+                    // Draw panel body
+                    this.drawRoundedRect(ctx, d.x, d.y, d.w, d.h, 8);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // Draw text inside
+                    ctx.shadowBlur = 0;
+                    ctx.shadowColor = 'transparent';
+                    ctx.fillStyle = '#f1f5f9';
+                    ctx.font = "bold 14px 'Outfit', sans-serif";
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'top';
+                    
+                    const padding = 12;
+                    const text = d.text || 'Yeni Bilgi Kutusu';
+                    const lineHeight = 20;
+                    const maxWidth = Math.max(10, d.w - padding * 2);
+                    
+                    // Wrapped text rendering helper
+                    const words = text.split(' ');
+                    let line = '';
+                    let currentY = d.y + padding;
+                    
+                    for (let n = 0; n < words.length; n++) {
+                        let testLine = line + words[n] + ' ';
+                        let metrics = ctx.measureText(testLine);
+                        let testWidth = metrics.width;
+                        if (testWidth > maxWidth && n > 0) {
+                            ctx.fillText(line.trim(), d.x + padding, currentY);
+                            line = words[n] + ' ';
+                            currentY += lineHeight;
+                        } else {
+                            line = testLine;
+                        }
+                    }
+                    ctx.fillText(line.trim(), d.x + padding, currentY);
+                    
+                    ctx.restore();
+                }
+                ctx.restore();
+            });
+        }
+
         // Background panels grid, rivets, and cross lines removed for a clean flat colored background as requested by user.
 
         // --- GEÇİT VERMEZ SÜREKLİ TABAN NEHRİ (Tüm Harita Boyunca Dalgalı) ---
@@ -8514,7 +8927,7 @@ export class Level {
 
         // --- PLATFORM DESTEK SÜTUNLARI VE ASKI KABLOLARI ---
         const getSupportBottomY = (plat) => {
-            let bottomY = 530; // Zemin truss limiti
+            let bottomY = this.height - 70; // Zemin truss limiti
             this.platforms.forEach(other => {
                 if (other !== plat && other.y > plat.y + plat.h) {
                     if (plat.x + 5 < other.x + other.w && plat.x + plat.w - 5 > other.x) {
@@ -8528,7 +8941,7 @@ export class Level {
         };
 
         const getSupportTopY = (plat) => {
-            let topY = 0; // Tavan limiti
+            let topY = -1000; // Tavan limiti
             this.platforms.forEach(other => {
                 if (other !== plat && other.y + other.h < plat.y) {
                     if (plat.x + 5 < other.x + other.w && plat.x + plat.w - 5 > other.x) {
@@ -8543,7 +8956,7 @@ export class Level {
 
         this.platforms.forEach(plat => {
             // Yalnızca havada asılı duran platformlar için destek çiz
-            if (plat.y + plat.h >= 530) return;
+            if (plat.y + plat.h >= this.height - 70) return;
 
             const supports = [];
             if (plat.w >= 100) {
@@ -8554,7 +8967,7 @@ export class Level {
             }
 
             // Platform yüksekse kabloyla as, alçaksa sütunla destekle
-            const useCable = plat.y < 260;
+            const useCable = plat.y < this.height * 0.4;
 
             supports.forEach(sx => {
                 if (useCable) {
@@ -10254,417 +10667,6 @@ export class Level {
                 ctx.arc(v.x, v.y, 3, 0, Math.PI * 2);
                 ctx.fill();
 
-                ctx.restore();
-            });
-        }
-
-        // --- DEKORASYON OBJELERİNİ ÇİZ ---
-        if (this.decorations) {
-            this.decorations.forEach(d => {
-                ctx.save();
-                
-                // Rotasyon Matrix Uygulaması
-                if (d.rotation) {
-                    ctx.translate(d.x + d.w / 2, d.y + d.h / 2);
-                    ctx.rotate(d.rotation);
-                    ctx.translate(-(d.x + d.w / 2), -(d.y + d.h / 2));
-                }
-                
-                if (d.type === 'neon_light' || d.type === 'neon') {
-                    // Vertical neon tube
-                    ctx.fillStyle = '#0f172a';
-                    ctx.strokeStyle = '#38bdf8';
-                    ctx.lineWidth = 2;
-                    ctx.fillRect(d.x + d.w / 2 - 4, d.y, 8, d.h);
-                    ctx.strokeRect(d.x + d.w / 2 - 4, d.y, 8, d.h);
-
-                    ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)';
-                    ctx.shadowColor = '#38bdf8';
-                    ctx.shadowBlur = 15;
-                    ctx.lineWidth = 4;
-                    ctx.beginPath();
-                    ctx.moveTo(d.x + d.w / 2, d.y + 4);
-                    ctx.lineTo(d.x + d.w / 2, d.y + d.h - 4);
-                    ctx.stroke();
-
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
-                } else if (d.type === 'box') {
-                    // Static wooden box design
-                    ctx.fillStyle = '#3f220f';
-                    ctx.strokeStyle = '#7c2d12';
-                    ctx.lineWidth = 2;
-                    ctx.fillRect(d.x, d.y, d.w, d.h);
-                    ctx.strokeRect(d.x, d.y, d.w, d.h);
-
-                    // Wooden panels details
-                    ctx.strokeStyle = 'rgba(124, 45, 18, 0.4)';
-                    ctx.lineWidth = 1.5;
-                    ctx.strokeRect(d.x + 4, d.y + 4, d.w - 8, d.h - 8);
-                    ctx.beginPath();
-                    ctx.moveTo(d.x + 4, d.y + 4);
-                    ctx.lineTo(d.x + d.w - 4, d.y + d.h - 4);
-                    ctx.moveTo(d.x + d.w - 4, d.y + 4);
-                    ctx.lineTo(d.x + 4, d.y + d.h - 4);
-                    ctx.stroke();
-                } else if (d.type === 'pipe') {
-                    // Metal pipe drawing
-                    ctx.fillStyle = '#1e293b';
-                    ctx.strokeStyle = '#475569';
-                    ctx.lineWidth = 2.5;
-                    // Horizontal pipe by default
-                    ctx.fillRect(d.x, d.y + d.h / 2 - 6, d.w, 12);
-                    ctx.strokeRect(d.x, d.y + d.h / 2 - 6, d.w, 12);
-                    // Connection joint flange
-                    ctx.fillStyle = '#334155';
-                    ctx.fillRect(d.x + 4, d.y + d.h / 2 - 10, 8, 20);
-                    ctx.strokeRect(d.x + 4, d.y + d.h / 2 - 10, 8, 20);
-                } else if (d.type === 'cable') {
-                    // Hanging thick cable wire
-                    ctx.strokeStyle = '#0f172a';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(d.x, d.y);
-                    ctx.quadraticCurveTo(d.x + d.w / 2, d.y + d.h + 10, d.x + d.w, d.y);
-                    ctx.stroke();
-                } else if (d.type === 'pano') {
-                    // Tech background console screen
-                    ctx.fillStyle = '#0f172a';
-                    ctx.strokeStyle = '#334155';
-                    ctx.lineWidth = 2;
-                    ctx.fillRect(d.x, d.y, d.w, d.h);
-                    ctx.strokeRect(d.x, d.y, d.w, d.h);
-
-                    // Screen lines
-                    ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
-                    ctx.fillRect(d.x + 3, d.y + 3, d.w - 6, d.h - 6);
-
-                    // Sine waves/grid details
-                    ctx.strokeStyle = 'rgba(16, 185, 129, 0.3)';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    for (let lx = 4; lx < d.w - 4; lx += 2) {
-                        const ly = d.y + d.h / 2 + Math.sin(this.time * 2 + lx * 0.2) * 5;
-                        if (lx === 4) ctx.moveTo(d.x + lx, ly);
-                        else ctx.lineTo(d.x + lx, ly);
-                    }
-                    ctx.stroke();
-                } else if (d.type === 'fan') {
-                    // Rotating industrial ventilation fan
-                    const cx = d.x + d.w / 2;
-                    const cy = d.y + d.h / 2;
-                    const r = Math.max(2, d.w / 2 - 4);
-
-                    // Outer circular housing frame
-                    ctx.strokeStyle = '#475569';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-                    ctx.stroke();
-
-                    // Fan blades rotating
-                    ctx.save();
-                    ctx.translate(cx, cy);
-                    ctx.rotate(d.rotation || 0);
-                    ctx.fillStyle = '#1e293b';
-                    ctx.strokeStyle = '#64748b';
-                    ctx.lineWidth = 1.5;
-                    for (let b = 0; b < 4; b++) {
-                        ctx.rotate(Math.PI / 2);
-                        ctx.beginPath();
-                        ctx.ellipse(0, -r / 2, 4, Math.max(1, r / 2), 0, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.stroke();
-                    }
-                    ctx.restore();
-                } else if (d.type === 'warning_light' || d.type === 'warning') {
-                    // Blinking alarm hazard warning light
-                    ctx.fillStyle = '#1e293b';
-                    ctx.strokeStyle = '#475569';
-                    ctx.lineWidth = 2;
-                    // base
-                    ctx.fillRect(d.x + d.w / 4, d.y + d.h - 8, d.w / 2, 8);
-                    ctx.strokeRect(d.x + d.w / 4, d.y + d.h - 8, d.w / 2, 8);
-
-                    // glass cover
-                    const intensity = 0.5 + Math.sin(d.state || 0) * 0.5;
-                    ctx.fillStyle = `rgba(239, 68, 68, ${0.2 + intensity * 0.8})`;
-                    ctx.strokeStyle = '#ef4444';
-                    ctx.lineWidth = 1.5;
-                    ctx.shadowColor = '#ef4444';
-                    ctx.shadowBlur = intensity * 15;
-
-                    ctx.beginPath();
-                    ctx.arc(d.x + d.w / 2, d.y + d.h - 8, 8, Math.PI, 0, false);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.stroke();
-                } else if (d.type === 'steam') {
-                    // Simple steam nozzle base decoration
-                    ctx.fillStyle = '#334155';
-                    ctx.strokeStyle = '#1e293b';
-                    ctx.lineWidth = 2;
-                    ctx.fillRect(d.x + d.w / 2 - 6, d.y + d.h - 8, 12, 8);
-                    ctx.strokeRect(d.x + d.w / 2 - 6, d.y + d.h - 8, 12, 8);
-                } else if (d.type === 'pillar') {
-                    // Futuristic Pillar
-                    ctx.save();
-                    // Column gradient body
-                    const colGrad = ctx.createLinearGradient(d.x, d.y, d.x + d.w, d.y);
-                    colGrad.addColorStop(0, '#0f172a');
-                    colGrad.addColorStop(0.3, '#1e293b');
-                    colGrad.addColorStop(0.7, '#334155');
-                    colGrad.addColorStop(1, '#0f172a');
-                    ctx.fillStyle = colGrad;
-                    ctx.strokeStyle = '#475569';
-                    ctx.lineWidth = 2;
-                    
-                    this.drawRoundedRect(ctx, d.x, d.y, d.w, d.h, 4);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    // Neon strips in the middle
-                    ctx.strokeStyle = '#d946ef'; // Fuchsia neon
-                    ctx.shadowColor = '#d946ef';
-                    ctx.shadowBlur = 8;
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(d.x + d.w / 2, d.y + 10);
-                    ctx.lineTo(d.x + d.w / 2, d.y + d.h - 10);
-                    ctx.stroke();
-
-                    // Subtle horizontal tech panels
-                    ctx.shadowBlur = 0;
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-                    ctx.lineWidth = 1;
-                    for (let py = d.y + 20; py < d.y + d.h - 10; py += 30) {
-                        ctx.beginPath();
-                        ctx.moveTo(d.x + 2, py);
-                        ctx.lineTo(d.x + d.w - 2, py);
-                        ctx.stroke();
-                    }
-                    ctx.restore();
-                } else if (d.type === 'gear') {
-                    // Rotating Gear
-                    ctx.save();
-                    const cx = d.x + d.w / 2;
-                    const cy = d.y + d.h / 2;
-                    const r = Math.max(2, d.w / 2 - 2);
-
-                    ctx.translate(cx, cy);
-                    ctx.rotate(d.rotation || 0);
-
-                    // Draw gear teeth
-                    ctx.fillStyle = '#334155';
-                    ctx.strokeStyle = '#06b6d4'; // Cyan neon outlines
-                    ctx.lineWidth = 1.5;
-                    ctx.shadowColor = '#06b6d4';
-                    ctx.shadowBlur = 4;
-
-                    const numTeeth = 8;
-                    for (let i = 0; i < numTeeth; i++) {
-                        ctx.rotate((Math.PI * 2) / numTeeth);
-                        ctx.fillRect(-6, -r - 4, 12, 6);
-                        ctx.strokeRect(-6, -r - 4, 12, 6);
-                    }
-
-                    // Main gear wheel body
-                    ctx.beginPath();
-                    ctx.arc(0, 0, r, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    // Central hole and spokes
-                    ctx.fillStyle = '#0f172a';
-                    ctx.beginPath();
-                    ctx.arc(0, 0, Math.max(1, r - 6), 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    // Spikes/spokes
-                    ctx.strokeStyle = '#06b6d4';
-                    ctx.lineWidth = 3;
-                    for (let i = 0; i < 4; i++) {
-                        ctx.rotate(Math.PI / 2);
-                        ctx.beginPath();
-                        ctx.moveTo(0, 0);
-                        ctx.lineTo(0, -r + 2);
-                        ctx.stroke();
-                    }
-
-                    // Inner hub center
-                    ctx.fillStyle = '#ffffff';
-                    ctx.shadowBlur = 8;
-                    ctx.beginPath();
-                    ctx.arc(0, 0, 4, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.restore();
-                } else if (d.type === 'window_space') {
-                    // Cyber Space Window
-                    ctx.save();
-                    // Border Frame
-                    ctx.fillStyle = '#0f172a';
-                    ctx.strokeStyle = '#06b6d4'; // Cyan glowing frame
-                    ctx.lineWidth = 3;
-                    ctx.shadowColor = '#06b6d4';
-                    ctx.shadowBlur = 10;
-                    this.drawRoundedRect(ctx, d.x, d.y, d.w, d.h, 6);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    // Inner window screen space
-                    ctx.shadowBlur = 0;
-                    ctx.save();
-                    ctx.beginPath();
-                    this.drawRoundedRect(ctx, d.x + 4, d.y + 4, Math.max(1, d.w - 8), Math.max(1, d.h - 8), 4);
-                    ctx.clip();
-
-                    // Window space background (Deep cosmos purple)
-                    const rEnd = Math.max(2, d.w / 2);
-                    const spaceGrad = ctx.createRadialGradient(d.x + d.w / 2, d.y + d.h / 2, 5, d.x + d.w / 2, d.y + d.h / 2, rEnd);
-                    spaceGrad.addColorStop(0, '#1e1b4b');
-                    spaceGrad.addColorStop(1, '#020617');
-                    ctx.fillStyle = spaceGrad;
-                    ctx.fillRect(d.x, d.y, d.w, d.h);
-
-                    // Digital hologram grids sliding down
-                    ctx.strokeStyle = 'rgba(6, 182, 212, 0.12)';
-                    ctx.lineWidth = 1;
-                    const gridOffset = (this.time * 20) % 20;
-                    for (let gx = d.x; gx < d.x + d.w; gx += 20) {
-                        ctx.beginPath();
-                        ctx.moveTo(gx, d.y);
-                        ctx.lineTo(gx, d.y + d.h);
-                        ctx.stroke();
-                    }
-                    for (let gy = d.y + gridOffset; gy < d.y + d.h; gy += 20) {
-                        ctx.beginPath();
-                        ctx.moveTo(d.x, gy);
-                        ctx.lineTo(d.x + d.w, gy);
-                        ctx.stroke();
-                    }
-
-                    // Cyber Star dots
-                    ctx.fillStyle = '#ffffff';
-                    const moduloW = Math.max(1, d.w - 16);
-                    const moduloH = Math.max(1, d.h - 16);
-                    for (let i = 0; i < 4; i++) {
-                        const sx = d.x + 8 + ((i * 17 + Math.floor(this.time * 0.1)) % moduloW);
-                        const sy = d.y + 8 + ((i * 23) % moduloH);
-                        const size = 1 + (Math.sin(this.time * 3 + i) * 0.5 + 0.5) * 1.5;
-                        ctx.beginPath();
-                        ctx.arc(sx, sy, size, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                    ctx.restore();
-                    ctx.restore();
-                } else if (d.type === 'server_rack') {
-                    // Server Console / Cabinet Rack
-                    ctx.save();
-                    // Rack chassis
-                    const rackGrad = ctx.createLinearGradient(d.x, d.y, d.x + d.w, d.y);
-                    rackGrad.addColorStop(0, '#1e293b');
-                    rackGrad.addColorStop(0.5, '#0f172a');
-                    rackGrad.addColorStop(1, '#1e293b');
-                    ctx.fillStyle = rackGrad;
-                    ctx.strokeStyle = '#334155';
-                    ctx.lineWidth = 2;
-                    this.drawRoundedRect(ctx, d.x, d.y, d.w, d.h, 4);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    // Server bays/slots inside
-                    ctx.fillStyle = '#020617';
-                    const numBays = 5;
-                    const bayH = (d.h - 12) / numBays;
-                    for (let i = 0; i < numBays; i++) {
-                        const bx = d.x + 4;
-                        const by = d.y + 6 + i * bayH + 1;
-                        const bw = d.w - 8;
-                        const bh = bayH - 2;
-                        ctx.fillRect(bx, by, bw, bh);
-
-                        // Heat vents slots on server face
-                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(bx + 4, by + bh / 2);
-                        ctx.lineTo(bx + bw - 15, by + bh / 2);
-                        ctx.stroke();
-
-                        // Blinking color LED lights
-                        const led1Active = Math.sin(this.time * 8 + i * 2) > 0;
-                        const led2Active = Math.sin(this.time * 5 + i * 3) > -0.3;
-                        
-                        // LED 1: Cyan/Blue
-                        ctx.fillStyle = led1Active ? '#06b6d4' : '#083344';
-                        ctx.beginPath();
-                        ctx.arc(bx + bw - 10, by + bh / 2, 2, 0, Math.PI * 2);
-                        ctx.fill();
-
-                        // LED 2: Green or Pink
-                        const led2Color = i % 2 === 0 ? '#10b981' : '#d946ef';
-                        const led2ColorOff = i % 2 === 0 ? '#064e3b' : '#4a044e';
-                        ctx.fillStyle = led2Active ? led2Color : led2ColorOff;
-                        ctx.beginPath();
-                        ctx.arc(bx + bw - 4, by + bh / 2, 2, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                    ctx.restore();
-                } else if (d.type === 'textbox') {
-                    // Glassmorphic Info Text Panel
-                    ctx.save();
-                    
-                    const boxColor = d.color || '#06b6d4';
-                    
-                    // Dark glassmorphic background
-                    ctx.fillStyle = 'rgba(11, 15, 25, 0.78)';
-                    ctx.strokeStyle = boxColor;
-                    ctx.lineWidth = 2.5;
-                    ctx.shadowColor = boxColor;
-                    ctx.shadowBlur = 10;
-                    
-                    // Draw panel body
-                    this.drawRoundedRect(ctx, d.x, d.y, d.w, d.h, 8);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    // Draw text inside
-                    ctx.shadowBlur = 0;
-                    ctx.shadowColor = 'transparent';
-                    ctx.fillStyle = '#f1f5f9';
-                    ctx.font = "bold 14px 'Outfit', sans-serif";
-                    ctx.textAlign = 'left';
-                    ctx.textBaseline = 'top';
-                    
-                    const padding = 12;
-                    const text = d.text || 'Yeni Bilgi Kutusu';
-                    const lineHeight = 20;
-                    const maxWidth = Math.max(10, d.w - padding * 2);
-                    
-                    // Wrapped text rendering helper
-                    const words = text.split(' ');
-                    let line = '';
-                    let currentY = d.y + padding;
-                    
-                    for (let n = 0; n < words.length; n++) {
-                        let testLine = line + words[n] + ' ';
-                        let metrics = ctx.measureText(testLine);
-                        let testWidth = metrics.width;
-                        if (testWidth > maxWidth && n > 0) {
-                            ctx.fillText(line.trim(), d.x + padding, currentY);
-                            line = words[n] + ' ';
-                            currentY += lineHeight;
-                        } else {
-                            line = testLine;
-                        }
-                    }
-                    ctx.fillText(line.trim(), d.x + padding, currentY);
-                    
-                    ctx.restore();
-                }
                 ctx.restore();
             });
         }
