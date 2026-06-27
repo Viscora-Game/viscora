@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v210';
-import { audio } from './audio.js?v=v210';
+import { ViscosityStates } from './viscosity.js?v=v211';
+import { audio } from './audio.js?v=v211';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -1600,9 +1600,20 @@ export class Player {
             const topY = this.y - this.radius + 3; // Başın üst kenarına hafifçe gömülü dursun
             
             if (activeAccessory === 'cowboy_hat') {
-                // Kovboy Şapkası (Kahverengi)
-                ctx.fillStyle = '#78350f';
-                
+                // Kovboy Şapkası (Premium Deri Degrade + Kontur + Toka)
+                const brimGrad = ctx.createLinearGradient(topX - 15, topY, topX + 15, topY);
+                brimGrad.addColorStop(0, '#7c2d12'); // Sol gölge
+                brimGrad.addColorStop(0.5, '#9a3412'); // Orta aydınlık
+                brimGrad.addColorStop(1, '#431407'); // Sağ gölge
+
+                const crownGrad = ctx.createLinearGradient(topX - 8, topY - 11, topX + 8, topY);
+                crownGrad.addColorStop(0, '#b45309'); // Sol üst ışık
+                crownGrad.addColorStop(0.5, '#78350f'); // Gövde tonu
+                crownGrad.addColorStop(1, '#451a03'); // Sağ alt gölge
+
+                ctx.strokeStyle = '#270701';
+                ctx.lineWidth = 1.2;
+
                 // Şapka siperi (Brim)
                 ctx.beginPath();
                 if (ctx.ellipse) {
@@ -1610,24 +1621,50 @@ export class Player {
                 } else {
                     ctx.arc(topX, topY, 8, 0, Math.PI * 2);
                 }
+                ctx.fillStyle = brimGrad;
                 ctx.fill();
-                
+                ctx.stroke();
+
                 // Şapka gövdesi (Crown)
                 ctx.beginPath();
                 ctx.moveTo(topX - 8, topY - 1);
-                ctx.quadraticCurveTo(topX - 8, topY - 10, topX - 5, topY - 11);
-                ctx.quadraticCurveTo(topX, topY - 8, topX + 5, topY - 11);
+                ctx.quadraticCurveTo(topX - 8, topY - 10, topX - 5, topY - 12);
+                ctx.quadraticCurveTo(topX, topY - 9, topX + 5, topY - 12);
                 ctx.quadraticCurveTo(topX + 8, topY - 1, topX + 8, topY - 1);
                 ctx.closePath();
+                ctx.fillStyle = crownGrad;
                 ctx.fill();
-                
+                ctx.stroke();
+
                 // Şapka şeridi (Siyah band)
-                ctx.fillStyle = '#1e293b';
-                ctx.fillRect(topX - 8, topY - 3, 16, 2);
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(topX - 8, topY - 3.5, 16, 2.5);
+
+                // Altın toka (Gold buckle)
+                ctx.fillStyle = '#fbbf24';
+                ctx.strokeStyle = '#78350f';
+                ctx.lineWidth = 0.5;
+                ctx.fillRect(topX - 2.5, topY - 4, 5, 3.5);
+                ctx.strokeRect(topX - 2.5, topY - 4, 5, 3.5);
+
+                // Tokanın iç siyahlığı
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(topX - 1, topY - 3, 2, 1.5);
             } else if (activeAccessory === 'wizard_hat') {
-                // Büyücü Şapkası (Mor & Altın Yıldızlı) - Daha uzun ve belirgin
-                ctx.fillStyle = '#581c87';
-                
+                // Büyücü Şapkası (Mor Kadife Degrade + Kontur + Parlayan Yıldız)
+                const brimGrad = ctx.createLinearGradient(topX - 14, topY, topX + 14, topY);
+                brimGrad.addColorStop(0, '#581c87'); // Sol
+                brimGrad.addColorStop(0.5, '#7e22ce'); // Orta aydınlık
+                brimGrad.addColorStop(1, '#3b0764'); // Sağ
+
+                const coneGrad = ctx.createLinearGradient(topX - 8, topY - 22, topX + 8, topY);
+                coneGrad.addColorStop(0, '#a855f7'); // Zirve aydınlık
+                coneGrad.addColorStop(0.6, '#581c87'); // Orta mor
+                coneGrad.addColorStop(1, '#2e1065'); // Taban gölge
+
+                ctx.strokeStyle = '#1e053a';
+                ctx.lineWidth = 1.2;
+
                 // Siper
                 ctx.beginPath();
                 if (ctx.ellipse) {
@@ -1635,29 +1672,70 @@ export class Player {
                 } else {
                     ctx.arc(topX, topY, 8, 0, Math.PI * 2);
                 }
+                ctx.fillStyle = brimGrad;
                 ctx.fill();
-                
-                // Koni (Daha yüksek)
+                ctx.stroke();
+
+                // Koni (Daha yüksek ve kıvrık)
                 ctx.beginPath();
                 ctx.moveTo(topX - 8, topY - 1);
                 ctx.lineTo(topX + 8, topY - 1);
                 ctx.quadraticCurveTo(topX + 2, topY - 13, topX - 3, topY - 22);
                 ctx.closePath();
+                ctx.fillStyle = coneGrad;
                 ctx.fill();
-                
-                // Altın şerit
-                ctx.fillStyle = '#fbbf24';
-                ctx.fillRect(topX - 6.5, topY - 3, 13, 2);
-                
-                // Yıldız ucu
-                ctx.fillStyle = '#fbbf24';
-                ctx.beginPath();
-                ctx.arc(topX - 3, topY - 22.5, 1.8, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.stroke();
+
+                // Altın şerit (Gold band)
+                const bandGrad = ctx.createLinearGradient(topX - 6.5, topY - 3, topX + 6.5, topY - 1);
+                bandGrad.addColorStop(0, '#d97706');
+                bandGrad.addColorStop(0.5, '#fef08a');
+                bandGrad.addColorStop(1, '#ca8a04');
+                ctx.fillStyle = bandGrad;
+                ctx.fillRect(topX - 6.5, topY - 3.5, 13, 2.5);
+
+                // Parlayan 5 Köşeli Yıldız
+                ctx.save();
+                ctx.shadowColor = '#facc15';
+                ctx.shadowBlur = 6;
+                ctx.fillStyle = '#fef08a';
+
+                const drawStar = (cx, cy, spikes, outerRadius, innerRadius) => {
+                    let rot = Math.PI / 2 * 3;
+                    let x = cx;
+                    let y = cy;
+                    let step = Math.PI / spikes;
+
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy - outerRadius);
+                    for (let i = 0; i < spikes; i++) {
+                        x = cx + Math.cos(rot) * outerRadius;
+                        y = cy + Math.sin(rot) * outerRadius;
+                        ctx.lineTo(x, y);
+                        rot += step;
+
+                        x = cx + Math.cos(rot) * innerRadius;
+                        y = cy + Math.sin(rot) * innerRadius;
+                        ctx.lineTo(x, y);
+                        rot += step;
+                    }
+                    ctx.lineTo(cx, cy - outerRadius);
+                    ctx.closePath();
+                    ctx.fill();
+                };
+
+                drawStar(topX - 3, topY - 22.5, 5, 3.8, 1.6);
+                ctx.restore();
             } else if (activeAccessory === 'crown') {
-                // Kral Tacı (Altın & Yakut) - Daha görkemli ve geniş
-                ctx.fillStyle = '#f59e0b';
-                
+                // Kral Tacı (Parlak Altın Degrade + 3D Parlayan Mücevherler)
+                const goldGrad = ctx.createLinearGradient(topX - 11, topY - 10, topX + 11, topY);
+                goldGrad.addColorStop(0, '#fef08a'); // Parlak tepe
+                goldGrad.addColorStop(0.4, '#f59e0b'); // Altın tonu
+                goldGrad.addColorStop(1, '#b45309'); // Dip gölge
+
+                ctx.strokeStyle = '#78350f';
+                ctx.lineWidth = 1.2;
+
                 // Gövde ve 3 sivri uç
                 ctx.beginPath();
                 ctx.moveTo(topX - 11, topY);
@@ -1668,60 +1746,88 @@ export class Player {
                 ctx.lineTo(topX + 11, topY - 6);
                 ctx.lineTo(topX + 11, topY);
                 ctx.closePath();
+                ctx.fillStyle = goldGrad;
                 ctx.fill();
-                
-                // Yakut süslemeler (Kırmızı noktalar)
-                ctx.fillStyle = '#ef4444';
-                ctx.beginPath();
-                ctx.arc(topX - 11, topY - 6, 1.5, 0, Math.PI * 2);
-                ctx.arc(topX, topY - 10, 1.5, 0, Math.PI * 2);
-                ctx.arc(topX + 11, topY - 6, 1.5, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Mavi süslemeler (Bandın üzerinde)
-                ctx.fillStyle = '#3b82f6';
-                ctx.beginPath();
-                ctx.arc(topX - 5, topY - 1.5, 1.2, 0, Math.PI * 2);
-                ctx.arc(topX + 5, topY - 1.5, 1.2, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.stroke();
+
+                // Yakut (Kırmızı 3D Mücevherler)
+                const drawGem = (cx, cy, r, colorHex, highlightColorHex) => {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                    ctx.fillStyle = colorHex;
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+
+                    // Işık yansıması (Highlight dot)
+                    ctx.fillStyle = highlightColorHex;
+                    ctx.beginPath();
+                    ctx.arc(cx - r*0.3, cy - r*0.3, r*0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                };
+
+                // Tepe noktalarındaki yakutlar
+                drawGem(topX - 11, topY - 6, 1.8, '#dc2626', '#ffffff');
+                drawGem(topX, topY - 10, 1.8, '#dc2626', '#ffffff');
+                drawGem(topX + 11, topY - 6, 1.8, '#dc2626', '#ffffff');
+
+                // Safir ve Zümrüt (Bandın üzerindeki küçük taşlar)
+                drawGem(topX - 5, topY - 2, 1.3, '#2563eb', '#ffffff'); // Safir (Mavi)
+                drawGem(topX, topY - 2, 1.3, '#16a34a', '#ffffff');    // Zümrüt (Yeşil)
+                drawGem(topX + 5, topY - 2, 1.3, '#2563eb', '#ffffff'); // Safir (Mavi)
             } else if (activeAccessory === 'santa_hat') {
-                // Noel Baba Şapkası (Kırmızı & Beyaz ponpon) - Dolgun, pofuduk ve sarkık tasarım
-                
-                // Beyaz yün siper (Kalın ve pofuduk)
-                ctx.fillStyle = '#f1f5f9';
-                ctx.beginPath();
-                if (ctx.ellipse) {
-                    ctx.ellipse(topX, topY - 1.5, 13, 4.5, 0, 0, Math.PI * 2);
-                } else {
-                    ctx.arc(topX, topY - 1.5, 9, 0, Math.PI * 2);
-                }
-                ctx.fill();
-                
+                // Noel Baba Şapkası (Pofuduk Pamuk & Kırmızı Kadife Degrade)
+                const redGrad = ctx.createLinearGradient(topX - 11, topY - 27, topX + 12, topY - 2);
+                redGrad.addColorStop(0, '#f87171'); // Tepe sol aydınlık
+                redGrad.addColorStop(0.5, '#dc2626'); // Kırmızı kadife
+                redGrad.addColorStop(1, '#7f1d1d'); // Alt gölge
+
+                ctx.strokeStyle = '#4c0505';
+                ctx.lineWidth = 1.0;
+
                 // Kırmızı gövde (Dolu ve kıvrık duran hat)
-                ctx.fillStyle = '#dc2626';
                 ctx.beginPath();
                 ctx.moveTo(topX - 11, topY - 2);
-                
-                // Sol taraftan yukarı yuvarlakça uzanış
                 ctx.quadraticCurveTo(topX - 9, topY - 25, topX - 1, topY - 27);
-                // Tepe kıvrımından sağa doğru bükülüp aşağı sarkış
                 ctx.quadraticCurveTo(topX + 7, topY - 27, topX + 12, topY - 16);
-                // Ponponun bağlanacağı düz uç kısmı
                 ctx.lineTo(topX + 9, topY - 13);
-                // İç kıvrımın dolgunca sol tarafa geçişi
                 ctx.quadraticCurveTo(topX + 3, topY - 19, topX - 2, topY - 19);
-                // Sağ tabana doğru iniş ve birleşim
                 ctx.quadraticCurveTo(topX + 5, topY - 12, topX + 11, topY - 2);
                 ctx.lineTo(topX - 11, topY - 2);
-                
                 ctx.closePath();
+                ctx.fillStyle = redGrad;
                 ctx.fill();
-                
-                // Beyaz ponpon (Ucun ucuna asılı durur)
-                ctx.fillStyle = '#f1f5f9';
-                ctx.beginPath();
-                ctx.arc(topX + 11.5, topY - 14.5, 3.5, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.stroke();
+
+                // Pofuduk pamuk çizim yardımcı fonksiyonu (Bulut stili)
+                const drawFluffyPuff = (cx, cy, rx, ry, baseR) => {
+                    ctx.save();
+                    ctx.fillStyle = '#f8fafc'; // Parlak pamuk beyazı
+                    ctx.beginPath();
+
+                    // Çoklu kabarcıklar çizerek pofuduk görüntüsü oluştur
+                    const bubblesCount = 6;
+                    for (let i = 0; i < bubblesCount; i++) {
+                        const angle = (i / bubblesCount) * Math.PI * 2;
+                        const bx = cx + Math.cos(angle) * (rx * 0.7);
+                        const by = cy + Math.sin(angle) * (ry * 0.7);
+                        ctx.arc(bx, by, baseR + (i % 2 === 0 ? 1 : -0.5), 0, Math.PI * 2);
+                    }
+                    ctx.fill();
+                    ctx.strokeStyle = '#cbd5e1'; // Açık gri kontur
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                    ctx.restore();
+                };
+
+                // Beyaz yün siper (Kalın ve pofuduk pamuk şerit)
+                drawFluffyPuff(topX, topY - 2, 13, 3, 3.5);
+
+                // Beyaz ponpon (Uçta pofuduk pamuk topu)
+                drawFluffyPuff(topX + 11.5, topY - 14.5, 2.5, 2.5, 2.5);
             }
             ctx.restore();
         }
