@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v218';
-import { THEMES } from './generator.js?v=v218';
+import { audio } from './audio.js?v=v219';
+import { THEMES } from './generator.js?v=v219';
 
 /**
  * Viscora Level Design & Manager
@@ -10394,8 +10394,8 @@ export class Level {
                 // Draw procedural branching cracks that grow based on the countdown progress
                 ctx.save();
                 ctx.shadowBlur = 0;
-                ctx.strokeStyle = isTriggered ? 'rgba(239, 68, 68, 0.8)' : 'rgba(56, 189, 248, 0.55)';
-                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = isTriggered ? 'rgba(239, 68, 68, 0.85)' : 'rgba(56, 189, 248, 0.5)';
+                ctx.lineWidth = isTriggered ? 1.8 : 1.2;
                 
                 let seed = (plat.x * 23 + plat.y * 7) % 100;
                 const prng = () => {
@@ -10404,31 +10404,51 @@ export class Level {
                 };
                 
                 const maxTimer = 18;
-                const progress = isTriggered ? Math.max(0.1, Math.min(1.0, (maxTimer - plat.timer) / maxTimer)) : 0.15;
-                const rootsCount = 3 + Math.floor(prng() * 2);
+                // Idle ve triggered durumunda çatlakların ilerleme yüzdesi
+                const progress = isTriggered ? Math.max(0.3, Math.min(1.0, (maxTimer - plat.timer) / maxTimer)) : 0.45;
+                const rootsCount = 4 + Math.floor(prng() * 2);
                 
+                // Çatlakların tam merkezden çıkıp artı (+) oluşturmasını engellemek için hafif dağınık başlangıç noktaları
                 for (let r = 0; r < rootsCount; r++) {
-                    let curX = plat.x + plat.w / 2;
-                    let curY = plat.y + plat.h / 2;
-                    let angle = (r / rootsCount) * Math.PI * 2 + (prng() - 0.5) * 0.4;
+                    let curX = plat.x + plat.w / 2 + (prng() - 0.5) * (plat.w * 0.2);
+                    let curY = plat.y + plat.h / 2 + (prng() - 0.5) * (plat.h * 0.2);
+                    let angle = (r / rootsCount) * Math.PI * 2 + (prng() - 0.5) * 0.5;
                     
-                    const maxSegments = 4;
+                    const maxSegments = 5;
                     const visibleSegments = Math.ceil(progress * maxSegments);
                     
                     ctx.beginPath();
                     ctx.moveTo(curX + shakeX, curY + shakeY);
                     for (let s = 0; s < visibleSegments; s++) {
-                        const length = 5 + prng() * 9;
+                        const length = 4 + prng() * 10;
                         curX += Math.cos(angle) * length;
                         curY += Math.sin(angle) * length;
                         
-                        const margin = 4;
+                        const margin = 3;
                         if (curX > plat.x + margin && curX < plat.x + plat.w - margin &&
                             curY > plat.y + margin && curY < plat.y + plat.h - margin) {
                             ctx.lineTo(curX + shakeX, curY + shakeY);
                         }
-                        angle += (prng() - 0.5) * 0.7;
+                        angle += (prng() - 0.5) * 0.8; // Daha keskin kırılmalar
                     }
+                    ctx.stroke();
+                }
+                
+                // Ekstra olarak camın kırılganlığını hissettirmek için köşelerden merkeze doğru birkaç ince diagonal çatlak çizelim
+                if (!isTriggered) {
+                    ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+                    ctx.lineWidth = 1;
+                    
+                    // Sol üstten içeri
+                    ctx.beginPath();
+                    ctx.moveTo(plat.x + 4, plat.y + 4);
+                    ctx.lineTo(plat.x + 4 + prng() * 15, plat.y + 4 + prng() * 15);
+                    ctx.stroke();
+                    
+                    // Sağ alttan içeri
+                    ctx.beginPath();
+                    ctx.moveTo(plat.x + plat.w - 4, plat.y + plat.h - 4);
+                    ctx.lineTo(plat.x + plat.w - 4 - prng() * 15, plat.y + plat.h - 4 - prng() * 15);
                     ctx.stroke();
                 }
                 ctx.restore();
