@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v234';
-import { Level } from './level.js?v=v234';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v234';
-import { UIManager } from './ui.js?v=v234';
-import { CloudSaveManager } from './cloud_save.js?v=v234';
-import { audio } from './audio.js?v=v234';
-import { LevelEditor } from './editor.js?v=v234';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v234';
+import { Player } from './player.js?v=v235';
+import { Level } from './level.js?v=v235';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v235';
+import { UIManager } from './ui.js?v=v235';
+import { CloudSaveManager } from './cloud_save.js?v=v235';
+import { audio } from './audio.js?v=v235';
+import { LevelEditor } from './editor.js?v=v235';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v235';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -618,6 +618,18 @@ export class GameManager {
         this.ui.updateHUDViscosity(this.player.viscosity);
         audio.resume();
         this.lastTime = performance.now(); // Reset delta clock to prevent large frame jumps on initial load
+
+        // Hikaye Terminali Tetikleme (Belirtilen bölümlerde ilk girişte)
+        const storyLevels = [1, 5, 10, 11, 16, 20, 21, 26, 29, 30];
+        if (showTitleCard && storyLevels.includes(this.currentLevel)) {
+            this.state = 'STORY';
+            this.ui.showStoryTerminal(this.currentLevel, () => {
+                this.state = 'PLAYING';
+                this.lastTime = performance.now();
+            });
+        } else {
+            this.state = 'PLAYING';
+        }
         this.physicsAccumulator = 0;
     }
 
@@ -1097,6 +1109,23 @@ export class GameManager {
                     }
                 }
             }
+        } else if (this.state === 'STORY') {
+            // Hikaye modunda sadece oyuncuyu ve kamerayı güncelle (animasyonun oynayabilmesi için)
+            this.player.update(this.ui.keys, this.level, (x, y, type, color, count) => this.emitParticles(x, y, type, color, count), (e) => {});
+            
+            // Kamera takibi
+            this.camera.targetX = this.player.x - this.cssWidth / 2;
+            this.camera.targetY = this.player.y - this.cssHeight / 1.38;
+            this.camera.x += (this.camera.targetX - this.camera.x) * 0.15;
+            this.camera.y += (this.camera.targetY - this.camera.y) * 0.15;
+            
+            // Kamera sınırları
+            const minX = 0;
+            const maxX = this.level.width - this.cssWidth;
+            this.camera.x = Math.max(minX, Math.min(this.camera.x, maxX));
+            const minY = -350;
+            const maxY = this.level.height - this.cssHeight + 350;
+            this.camera.y = Math.max(minY, Math.min(this.camera.y, maxY));
         } else if (this.state === 'EDITOR') {
             if (this.editor && this.editor.active) {
                 const dt = elapsed / 16.666;

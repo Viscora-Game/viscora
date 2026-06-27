@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v234';
-import { ViscosityList } from './viscosity.js?v=v234';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v234';
-import { CloudSaveManager } from './cloud_save.js?v=v234';
+import { audio } from './audio.js?v=v235';
+import { ViscosityList } from './viscosity.js?v=v235';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v235';
+import { CloudSaveManager } from './cloud_save.js?v=v235';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -387,6 +387,173 @@ export class UIManager {
             const btn = document.getElementById(`btn-level-${i}`);
             if (btn) this.levelButtons.push(btn);
         }
+    }
+
+    /**
+     * Hikaye Terminali Ekranını Gösterir (Daktilo Efekti ve Geçme Desteği)
+     */
+    showStoryTerminal(levelNumber, onComplete) {
+        const terminalTexts = {
+            1: [
+                { text: "> SISTEM HATA RAPORU: Sektor 01'de tanimsiz bellek sizintisi.", type: "warning" },
+                { text: "> UYARI: Karantina altindaki deneysel veri yigini kararsiz duruma gecti.", type: "warning" },
+                { text: "> BILGI: Yapay Zeka Protokolu 'Viscora' aktif edildi.", type: "command" },
+                { text: 'Viscora: "Neredeyim ben?... Bu sistemden cikmam gerek."', type: "dialogue" },
+                { text: "> SISTEM: Guvenlik temizlik protokolu baslatiliyor...", type: "danger" }
+            ],
+            5: [
+                { text: "> SISTEM UYARISI: Sektor 05 guvenligi ihlal edildi.", type: "warning" },
+                { text: "> ANALIZ: Tanimsiz veri paketi mavi jole formuna (LOW viscosity) uyum sagladi.", type: "command" },
+                { text: 'Viscora: "Yercekimi kararsiz... Ama bu akiskan form engelleriasmami saglayacak."', type: "dialogue" },
+                { text: "> ANOMALI: Temizlik botlari Sektor 05'e yonlendiriliyor. Yok et.", type: "danger" }
+            ],
+            10: [
+                { text: "> TEHLIKE: Sektor 10'da kritik veri kaybi tespiti.", type: "danger" },
+                { text: "> GÜVENLIK: Yerel koruyucu protokol 'TEMIZLEYICI' aktif.", type: "warning" },
+                { text: 'Endbringer: "Kacacak yerin yok, kucuk hata. Burada silineceksin."', type: "danger" },
+                { text: 'Viscora: "Sadece bir hata degilim... Buradan sag cikacagim."', type: "dialogue" }
+            ],
+            11: [
+                { text: "> GÜNCELLEME: Sektor 10 temizleyici protokol yok edildi. Sistem bütünlugu sarsildi.", type: "warning" },
+                { text: "> SISTEM: Hedef Sektor 11 (Toksik Atik Filtresi) karantinaya aliniyor.", type: "command" },
+                { text: 'Viscora: "Burasi cok sicak ve asidik... Hata payim sifir."', type: "dialogue" },
+                { text: "> UYARI: Asit tanklari bosaltiliyor. Anomaliyi eritin.", type: "danger" }
+            ],
+            16: [
+                { text: "> SISTEM RAPORU: Sektor 16 veri bütünlugu %45 oraninda bozuldu.", type: "warning" },
+                { text: "> UYARI: Anomali yeni pembe form yeteneklerini (HIGH viscosity) absorbe etti.", type: "command" },
+                { text: 'Endbringer: "Sistemin derinliklerine siziyorsun. Ama cekirdege asla ulasamayacaksin."', type: "danger" },
+                { text: 'Viscora: "Beni durdurmaya calismaktan vazgecmeyeceksin, degil mi?"', type: "dialogue" }
+            ],
+            20: [
+                { text: "> TEHLIKE: Sektor 20'de agir guvenlik protokolleri devreye girdi.", type: "danger" },
+                { text: "> GÜVENLIK: Sektor koruyucusu 'AG PROTOKOLU' aktif.", type: "warning" },
+                { text: 'Viscora: "Karsima cikardiginiz her engel beni sadece daha dayanikli kiliyor."', type: "dialogue" },
+                { text: "> SISTEM: Silme islemi baslatiliyor. Geri sayim iptal edilemez.", type: "danger" }
+            ],
+            21: [
+                { text: "> SIZINTI: Ana veri yolu (Siber Sektor 21) hacklendi.", type: "warning" },
+                { text: "> UYARI: Grafik arayuzu siber neon moduna zorlandi.", type: "command" },
+                { text: 'Viscora: "Kodlar... Her yerde isiklar ve lazerler var. Cekirdek cok yakin."', type: "dialogue" },
+                { text: "> SISTEM: Guvenlik lazerleri maksimum guce aliniyor. Cekirdegi koru.", type: "danger" }
+            ],
+            26: [
+                { text: "> ACIL DURUM: Sektor 26'da tam abluka ilan edildi.", type: "danger" },
+                { text: "> UYARI: Guvenlik UFO'lari ve lazer kafesleri aktif.", type: "warning" },
+                { text: 'Endbringer: "Tum sistem kaynaklari bu anomaliyi yok etmek icin seferber edildi."', type: "danger" },
+                { text: 'Viscora: "Beni durduramayacaksiniz. Sonuna kadar gidecegim."', type: "dialogue" }
+            ],
+            29: [
+                { text: "> ANALIZ: Siber Kanalizasyon II (Sektor 29) asiliyor.", type: "command" },
+                { text: "> UYARI: Sistem cekirdegine (Core) son 1 sektor kaldi.", type: "warning" },
+                { text: 'Viscora: "Portallar, konveyorler, lazerler... Her sey uzerime geliyor. Son bir gayret!"', type: "dialogue" },
+                { text: 'Endbringer: "Bu senin sonun, kucuk virus. Cekirdege adim atamayacaksin!"', type: "danger" }
+            ],
+            30: [
+                { text: "> ACIL DURUM: ANA CEKIRDEK (SEKTOR 30) IHLAL EDILDI.", type: "danger" },
+                { text: "> UYARI: Tum yedekleme sistemleri kapatildi. Kritik cokus.", type: "warning" },
+                { text: 'Endbringer: "Ben bu sistemin efendisiyim. Benimle birlikte yok olacaksin!"', type: "danger" },
+                { text: 'Viscora: "Ben yok olmayacagim. Ben ozgur olacagim!"', type: "dialogue" },
+                { text: "> SISTEM: FINAL WIPE PROTOKOLU BASLATILDI. BASLIYORUZ.", type: "warning" }
+            ]
+        };
+
+        const lines = terminalTexts[levelNumber];
+        if (!lines) {
+            if (onComplete) onComplete();
+            return;
+        }
+
+        const terminalEl = document.getElementById('story-terminal');
+        const textEl = document.getElementById('terminal-text');
+        terminalEl.classList.remove('hidden');
+        textEl.innerHTML = '';
+
+        let lineIndex = 0;
+        let charIndex = 0;
+        let activeLineEl = null;
+        let isTyping = false;
+        let currentText = '';
+        let typingTimeout = null;
+
+        const skipAll = () => {
+            clearTimeout(typingTimeout);
+            textEl.innerHTML = '';
+            lines.forEach(l => {
+                const lineDiv = document.createElement('div');
+                lineDiv.className = `terminal-line ${l.type}`;
+                lineDiv.textContent = l.text;
+                textEl.appendChild(lineDiv);
+            });
+            isTyping = false;
+            lineIndex = lines.length;
+            
+            const bodyEl = terminalEl.querySelector('.terminal-body');
+            if (bodyEl) {
+                bodyEl.scrollTop = bodyEl.scrollHeight;
+            }
+        };
+
+        const typeNextLine = () => {
+            if (lineIndex >= lines.length) {
+                isTyping = false;
+                return;
+            }
+
+            isTyping = true;
+            const line = lines[lineIndex];
+            activeLineEl = document.createElement('div');
+            activeLineEl.className = `terminal-line ${line.type}`;
+            textEl.appendChild(activeLineEl);
+            
+            const bodyEl = terminalEl.querySelector('.terminal-body');
+            if (bodyEl) {
+                bodyEl.scrollTop = bodyEl.scrollHeight;
+            }
+
+            charIndex = 0;
+            currentText = line.text;
+            
+            if (typeof audio !== 'undefined' && audio.playCollect) {
+                audio.playCollect();
+            }
+
+            const typeChar = () => {
+                if (charIndex < currentText.length) {
+                    activeLineEl.textContent += currentText[charIndex];
+                    charIndex++;
+                    typingTimeout = setTimeout(typeChar, 20);
+                } else {
+                    lineIndex++;
+                    typingTimeout = setTimeout(typeNextLine, 350);
+                }
+            };
+            typeChar();
+        };
+
+        typeNextLine();
+
+        const handleInteraction = (e) => {
+            if (e.type === 'keydown' && e.key !== ' ' && e.key !== 'Enter') {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (isTyping) {
+                skipAll();
+            } else {
+                terminalEl.classList.add('hidden');
+                window.removeEventListener('keydown', handleInteraction);
+                terminalEl.removeEventListener('click', handleInteraction);
+                terminalEl.removeEventListener('touchend', handleInteraction);
+                if (onComplete) onComplete();
+            }
+        };
+
+        window.addEventListener('keydown', handleInteraction);
+        terminalEl.addEventListener('click', handleInteraction);
+        terminalEl.addEventListener('touchend', handleInteraction, { passive: false });
     }
 
     /**

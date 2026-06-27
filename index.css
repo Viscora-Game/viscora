@@ -3555,3 +3555,120 @@ button:hover .icon-svg,
         width: 100% !important;
     }
 }
+
+/* --------------------------------------------------
+   HAKKER TERMINALI & HIKAYE ANLATIMI (STORY TERMINAL)
+-------------------------------------------------- */
+#story-terminal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(10, 10, 15, 0.96);
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    box-sizing: border-box;
+    transition: opacity 0.4s ease, visibility 0.4s;
+}
+
+#story-terminal.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.terminal-box {
+    width: 680px;
+    max-width: 95%;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1.5px solid #10b981;
+    border-radius: 12px;
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.8),
+        0 0 25px rgba(16, 185, 129, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.terminal-header {
+    background: rgba(10, 10, 15, 0.9);
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.terminal-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.terminal-dot.red { background-color: #ef4444; }
+.terminal-dot.yellow { background-color: #f59e0b; }
+.terminal-dot.green { background-color: #10b981; }
+
+.terminal-title {
+    margin-left: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #10b981;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
+}
+
+.terminal-body {
+    padding: 24px;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    text-align: left;
+    color: #34d399;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+    overflow-y: auto;
+}
+
+.terminal-line {
+    margin-bottom: 8px;
+    word-break: break-word;
+}
+
+.terminal-line.command {
+    color: #10b981;
+    font-weight: bold;
+}
+.terminal-line.warning {
+    color: #f59e0b;
+}
+.terminal-line.danger {
+    color: #ef4444;
+}
+.terminal-line.dialogue {
+    color: #38bdf8; /* Cyan-blue for Viscora */
+    font-style: italic;
+}
+
+.terminal-footer {
+    background: rgba(10, 10, 15, 0.9);
+    padding: 12px 16px;
+    border-top: 1px solid rgba(16, 185, 129, 0.2);
+    font-size: 0.7rem;
+    color: rgba(16, 185, 129, 0.6);
+    text-align: center;
+    letter-spacing: 0.05em;
+    animation: terminalPulse 2s infinite;
+}
+
+@keyframes terminalPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
