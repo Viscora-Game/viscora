@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v230';
-import { THEMES } from './generator.js?v=v230';
+import { audio } from './audio.js?v=v231';
+import { THEMES } from './generator.js?v=v231';
 
 /**
  * Viscora Level Design & Manager
@@ -3014,63 +3014,97 @@ export class Level {
                 "name": "SİBER KANALİZASYON II",
                 "tags": [],
                 "themeId": "neon_sewer",
-                "levelWidth": 3000,
-                "levelHeight": 800,
+                "levelWidth": 3400,
+                "levelHeight": 900,
                 "spawn": {
-                    "x": 100,
-                    "y": 600
+                    "x": 80,
+                    "y": 200
                 },
                 "portal": {
-                    "x": 2850,
-                    "y": 150
+                    "x": 3200,
+                    "y": 120
                 },
                 "platforms": [
-                    { "x": 0, "y": 650, "w": 300, "h": 150, "type": "normal" },
-                    { "x": 550, "y": 490, "w": 400, "h": 40, "type": "normal" },
-                    { "x": 1200, "y": 350, "w": 300, "h": 40, "type": "normal" },
-                    { "x": 1750, "y": 500, "w": 400, "h": 40, "type": "normal" },
-                    { "x": 2700, "y": 200, "w": 300, "h": 600, "type": "normal" }
+                    { "x": 0, "y": 250, "w": 200, "h": 40, "type": "normal" },
+                    { "x": 100, "y": 550, "w": 250, "h": 40, "type": "normal" },
+                    { "x": 550, "y": 620, "w": 400, "h": 40, "type": "normal" },
+                    { "x": 900, "y": 150, "w": 40, "h": 300, "type": "sticky" },
+                    { "x": 940, "y": 250, "w": 650, "h": 40, "type": "normal" },
+                    { "x": 1450, "y": 550, "w": 200, "h": 40, "type": "normal" },
+                    { "x": 1650, "y": 500, "w": 150, "h": 400, "type": "normal" },
+                    { "x": 2500, "y": 350, "w": 100, "h": 40, "type": "normal" },
+                    { "x": 2650, "y": 100, "w": 40, "h": 500, "type": "normal" },
+                    { "x": 2950, "y": 0, "w": 40, "h": 600, "type": "normal" },
+                    { "x": 3100, "y": 200, "w": 300, "h": 700, "type": "normal" }
                 ],
-                "spikes": [],
-                "acidPools": [],
+                "spikes": [
+                    { "x": 2690, "y": 200, "w": 20, "h": 60, "direction": "left" },
+                    { "x": 2690, "y": 300, "w": 20, "h": 60, "direction": "left" },
+                    { "x": 2690, "y": 400, "w": 20, "h": 60, "direction": "left" },
+                    { "x": 2930, "y": 150, "w": 20, "h": 60, "direction": "right" },
+                    { "x": 2930, "y": 250, "w": 20, "h": 60, "direction": "right" },
+                    { "x": 2930, "y": 350, "w": 20, "h": 60, "direction": "right" }
+                ],
+                "acidPools": [
+                    { "x": 350, "y": 800, "w": 550, "h": 100 },
+                    { "x": 1800, "y": 800, "w": 700, "h": 100 }
+                ],
                 "lasers": [],
-                "netGates": [],
+                "netGates": [
+                    { "id": 291, "x": 1650, "y": 300, "w": 40, "h": 200, "open": false }
+                ],
                 "movingPlatforms": [],
                 "crystals": [
-                    { "x": 750, "y": 420 },
-                    { "x": 1350, "y": 280 },
-                    { "x": 1950, "y": 430 }
+                    { "x": 750, "y": 350 },
+                    { "x": 1350, "y": 400 },
+                    { "x": 2000, "y": 250 },
+                    { "x": 2870, "y": 280 }
                 ],
                 "enemies": [
-                    { "x": 1000, "y": 150, "rangeX": 120, "speed": 1.2, "isVertical": false, "color": "#a855f7", "type": "tractor_ufo" },
-                    { "x": 2000, "y": 100, "rangeX": 150, "speed": 1.0, "isVertical": false, "color": "#06b6d4", "type": "sweeper_ufo" }
+                    { "x": 780, "y": 200, "rangeX": 150, "speed": 1.3, "isVertical": false, "color": "#06b6d4", "type": "sweeper_ufo" },
+                    { "x": 1900, "y": 350, "rangeY": 150, "speed": 1.5, "isVertical": true, "color": "#a855f7", "type": "tractor_ufo" },
+                    { "x": 2100, "y": 250, "rangeY": 150, "speed": 1.5, "isVertical": true, "color": "#a855f7", "type": "tractor_ufo" }
                 ],
                 "pressurePlates": [],
                 "pushBlocks": [
-                    { "x": 1850, "y": 440, "w": 50, "h": 50, "isMirror": true, "mirrorType": "slash" }
+                    { "x": 1080, "y": 180, "w": 48, "h": 48, "isMirror": true, "mirrorType": "slash" }
                 ],
                 "conveyors": [
-                    { "x": 1800, "y": 490, "w": 300, "h": 20, "direction": 1, "speed": 1.5 }
+                    { "x": 100, "y": 530, "w": 250, "h": 20, "direction": 1, "speed": 2 },
+                    { "x": 1050, "y": 230, "w": 450, "h": 20, "direction": 1, "speed": 1.2 }
                 ],
                 "teleportPairs": [
-                    { "x1": 280, "y1": 150, "x2": 600, "y2": 430 }
+                    { "x1": 320, "y1": 100, "x2": 550, "y2": 600 }
                 ],
                 "bouncePads": [
-                    { "x": 240, "y": 630, "w": 50, "h": 20, "force": 14 }
+                    { "x": 300, "y": 510, "w": 50, "h": 20, "force": 14 }
                 ],
                 "buttons": [],
                 "levers": [],
                 "flamethrowers": [],
                 "fallingPlatforms": [],
-                "breakablePlatforms": [],
+                "breakablePlatforms": [
+                    { "x": 2720, "y": 450, "w": 80, "h": 40, "type": "platform", "broken": false, "timer": 0, "triggered": false },
+                    { "x": 2830, "y": 350, "w": 80, "h": 40, "type": "platform", "broken": false, "timer": 0, "triggered": false },
+                    { "x": 2720, "y": 250, "w": 80, "h": 40, "type": "platform", "broken": false, "timer": 0, "triggered": false },
+                    { "x": 2830, "y": 150, "w": 80, "h": 40, "type": "platform", "broken": false, "timer": 0, "triggered": false }
+                ],
                 "hiddenPassages": [],
                 "fallingBlockTraps": [],
-                "vantuzPoints": [],
+                "vantuzPoints": [
+                    { "x": 750, "y": 450 },
+                    { "x": 1800, "y": 300 },
+                    { "x": 2000, "y": 450 },
+                    { "x": 2200, "y": 300 },
+                    { "x": 2400, "y": 400 }
+                ],
                 "decorations": [],
                 "laserEmitters": [
-                    { "x": 1750, "y": 445, "w": 40, "h": 40, "direction": 0, "color": "red" }
+                    { "x": 1000, "y": 190, "w": 40, "h": 40, "direction": 0, "color": "red" }
                 ],
-                "laserReceivers": [],
+                "laserReceivers": [
+                    { "x": 1500, "y": 510, "w": 40, "h": 40, "linkedGateId": 291 }
+                ],
                 "staticMirrors": [],
                 "arrowShooters": []
             };
