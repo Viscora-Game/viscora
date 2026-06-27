@@ -17,7 +17,8 @@ export class CloudSaveManager {
             authorName: 'viscora_author_name',
             difficulty: 'viscora_difficulty',
             customControls: 'viscora_custom_controls',
-            likedMaps: 'viscora_liked_maps'
+            likedMaps: 'viscora_liked_maps',
+            balanceSig: 'viscora_balance_sig'
         };
     }
 
@@ -37,6 +38,19 @@ export class CloudSaveManager {
         return data;
     }
 
+    static generateSignature(total, spent, ownedStr) {
+        const salt = "ViscoraSecretSaltKey_2026_xYz";
+        const str = `${total}_${spent}_${ownedStr}_${salt}`;
+        let hash1 = 5381;
+        let hash2 = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash1 = ((hash1 << 5) + hash1) + char;
+            hash2 = char + (hash2 << 6) + (hash2 << 16) - hash2;
+        }
+        return (hash1 >>> 0).toString(16) + (hash2 >>> 0).toString(16);
+    }
+
     static applySaveData(data) {
         if (!data || typeof data !== 'object') return false;
         const keys = this.getLocalKeys();
@@ -50,6 +64,19 @@ export class CloudSaveManager {
                 }
             }
         }
+
+        // Legacy support: if signature is not in the restored data, generate it dynamically to prevent resetting
+        if (data.balanceSig === undefined) {
+            const total = data.totalCrystals !== undefined ? Number(data.totalCrystals) : 0;
+            const spent = data.spentCrystals !== undefined ? Number(data.spentCrystals) : 0;
+            let ownedItems = data.ownedItems || ['default_trail', 'default_accessory', 'default_eyes'];
+            const ownedStr = typeof ownedItems === 'string' ? ownedItems : JSON.stringify(ownedItems);
+
+            const sig = this.generateSignature(total, spent, ownedStr);
+            localStorage.setItem('viscora_balance_sig', sig);
+            console.log('Regenerated validation signature for restored crystal balance:', sig);
+        }
+
         return true;
     }
 
