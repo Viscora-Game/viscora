@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v216';
-import { THEMES } from './generator.js?v=v216';
+import { audio } from './audio.js?v=v217';
+import { THEMES } from './generator.js?v=v217';
 
 /**
  * Viscora Level Design & Manager
@@ -2659,6 +2659,17 @@ export class Level {
                     { "x": 800, "y": 780, "w": 60, "h": 20, "type": "normal" },
                     { "x": 560, "y": 720, "w": 60, "h": 20, "type": "normal" },
                     { "x": 140, "y": 540, "w": 60, "h": 20, "type": "normal" }
+                ],
+                "enemies": [
+                    { "x": 720, "y": 1150, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 1550, "y": 1040, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 790, "y": 640, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 1660, "y": 450, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 2690, "y": 610, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 2710, "y": 1090, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 2010, "y": 960, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 920, "y": 530, "rangeX": 150, "speed": 1.2, "isVertical": false, "color": "#06b6d4", "type": "sweeper_ufo" },
+                    { "x": 2960, "y": 650, "rangeX": 150, "speed": 1.2, "isVertical": false, "color": "#06b6d4", "type": "sweeper_ufo" }
                 ],
                 "arrowShooters": [
                     {
