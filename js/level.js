@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v225';
-import { THEMES } from './generator.js?v=v225';
+import { audio } from './audio.js?v=v226';
+import { THEMES } from './generator.js?v=v226';
 
 /**
  * Viscora Level Design & Manager
@@ -6869,7 +6869,7 @@ export class Level {
 
                 // Hem 'normal' hem de 'slippery' platformları destekle, en az 50 genişlik yeterli
                 const candidates = this.platforms
-                    .filter(p => (p.type === 'normal' || p.type === 'slippery') && p.w >= 50 && p.y >= 180 && p.y <= 490)
+                    .filter(p => (p.type === 'normal' || p.type === 'slippery') && p.w >= 50 && p.y >= this.height * 0.15 && p.y <= this.height * 0.85)
                     .map(p => ({ p, dist: Math.abs((p.x + p.w / 2) - targetX) }))
                     .filter(({ dist }) => dist < 600)
                     .sort((a, b) => a.dist - b.dist);
