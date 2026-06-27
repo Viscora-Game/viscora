@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v214';
-import { THEMES } from './generator.js?v=v214';
+import { audio } from './audio.js?v=v215';
+import { THEMES } from './generator.js?v=v215';
 
 /**
  * Viscora Level Design & Manager
@@ -30,6 +30,9 @@ export class Level {
         }
         this.currentLevel = originalLevelNumber;
         this.time = 0;
+        this.name = null;
+        this.serverLevelId = null;
+        this.tags = [];
         this.platforms = [];
         this.hazards = [];
         this.enemies = [];
