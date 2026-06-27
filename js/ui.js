@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v231';
-import { ViscosityList } from './viscosity.js?v=v231';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v231';
-import { CloudSaveManager } from './cloud_save.js?v=v231';
+import { audio } from './audio.js?v=v232';
+import { ViscosityList } from './viscosity.js?v=v232';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v232';
+import { CloudSaveManager } from './cloud_save.js?v=v232';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''

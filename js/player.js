@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v231';
-import { audio } from './audio.js?v=v231';
+import { ViscosityStates } from './viscosity.js?v=v232';
+import { audio } from './audio.js?v=v232';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -180,6 +180,14 @@ export class Player {
         this.invulnerableFrames = 150; // 2.5 saniye doğuş koruması (60 FPS * 2.5 = 150 frames)
         this.viscosity = ViscosityStates.NORMAL;
         this.currentGravity = ViscosityStates.NORMAL.gravity;
+        
+        // Giriş/Çıkış animasyon durumları
+        this.introState = 'materializing';
+        this.introTimer = 45;
+        this.outroState = null;
+        this.outroTimer = 0;
+        this.portalTargetX = 0;
+        this.portalTargetY = 0;
         
         // Ölüm değişkenlerini sıfırla
         this.deathType = null;
@@ -377,6 +385,32 @@ export class Player {
             }
         }
         this.activeColliders = colliders;
+
+        // Giriş/Çıkış animasyon durumlarında kontrolleri kilitle ve fizik güncellemelerini özel yap
+        if (this.introState === 'materializing') {
+            if (this.introTimer > 0) {
+                this.introTimer--;
+            } else {
+                this.introState = null;
+            }
+            this.vx = 0;
+            this.vy = 0;
+            this.updateBlobPhysics();
+            return;
+        }
+
+        if (this.outroState === 'sucking') {
+            if (this.outroTimer > 0) {
+                this.outroTimer--;
+                // Portala doğru süzülme (lerp)
+                this.x += (this.portalTargetX - this.x) * 0.15;
+                this.y += (this.portalTargetY - this.y) * 0.15;
+            }
+            this.vx = 0;
+            this.vy = 0;
+            this.updateBlobPhysics();
+            return;
+        }
 
         if (this.isDead) {
             this.flameHeat = 0;
@@ -1333,6 +1367,47 @@ export class Player {
         ctx.save();
         if (camera) {
             ctx.translate(-camera.x, -camera.y);
+        }
+
+        // Giriş/Çıkış özel efekt ölçeklemesi ve dönmesi
+        let currentScaleX = 1.0;
+        let currentScaleY = 1.0;
+        let currentRotation = 0;
+
+        if (this.introState === 'materializing') {
+            const progress = (45 - this.introTimer) / 45; // 0'dan 1'e
+            currentScaleX = Math.min(1.0, progress * 1.5);
+            currentScaleY = Math.max(0.01, progress);
+
+            // Dijital ışın sütunu
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 3 * (1 - progress);
+            ctx.shadowColor = '#10b981';
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y - 150);
+            ctx.lineTo(this.x, this.y + this.radius);
+            ctx.stroke();
+            ctx.shadowBlur = 0; // gövde çizimi için gölgeyi sıfırla
+        } else if (this.outroState === 'sucking') {
+            const progress = this.outroTimer / 45; // 1'den 0'a
+            currentScaleX = progress;
+            currentScaleY = progress;
+            currentRotation = (45 - this.outroTimer) * 0.15;
+
+            // Spiral süzülme sırasında havada siber partiküller çıkar
+            if (this.game && Math.random() < 0.4) {
+                this.game.emitParticles(this.x, this.y, 'trail', this.viscosity.color, 1);
+            }
+        }
+
+        if (currentScaleX !== 1.0 || currentScaleY !== 1.0 || currentRotation !== 0) {
+            ctx.translate(this.x, this.y);
+            ctx.scale(currentScaleX, currentScaleY);
+            if (currentRotation !== 0) {
+                ctx.rotate(currentRotation);
+            }
+            ctx.translate(-this.x, -this.y);
         }
 
         // Dokunulmazlık durumunda yanıp sönme

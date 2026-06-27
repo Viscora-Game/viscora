@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v231';
-import { Level } from './level.js?v=v231';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v231';
-import { UIManager } from './ui.js?v=v231';
-import { CloudSaveManager } from './cloud_save.js?v=v231';
-import { audio } from './audio.js?v=v231';
-import { LevelEditor } from './editor.js?v=v231';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v231';
+import { Player } from './player.js?v=v232';
+import { Level } from './level.js?v=v232';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v232';
+import { UIManager } from './ui.js?v=v232';
+import { CloudSaveManager } from './cloud_save.js?v=v232';
+import { audio } from './audio.js?v=v232';
+import { LevelEditor } from './editor.js?v=v232';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v232';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1383,9 +1383,17 @@ export class GameManager {
         // 10, 20, 30, 40 vb. tüm boss bölümleri için boss'un ölmüş olması gerekir
         const isBossDefeated = (this.currentLevel <= 0 || this.currentLevel % 10 !== 0 || this.currentLevel === 999) || (this.boss && this.boss.isDead);
         
-        if (dist < this.player.radius + p.w / 2 - 10 && isBossDefeated) {
-            this.state = 'WIN';
+        if (dist < this.player.radius + p.w / 2 - 10 && isBossDefeated && !this.player.outroState) {
+            this.player.outroState = 'sucking';
+            this.player.outroTimer = 45;
+            this.player.portalTargetX = p.x + p.w / 2;
+            this.player.portalTargetY = p.y + p.h / 2;
             audio.playWin();
+        }
+
+        if (this.player.outroState === 'sucking' && this.player.outroTimer <= 0) {
+            this.player.outroState = null;
+            this.state = 'WIN';
             document.getElementById('win-time').textContent = this.timeString;
 
             // Yıldızları Hesapla, Kaydet ve Göster (3 yıldız her zaman gösterilir)
