@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v233';
-import { audio } from './audio.js?v=v233';
+import { ViscosityStates } from './viscosity.js?v=v234';
+import { audio } from './audio.js?v=v234';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -183,7 +183,7 @@ export class Player {
         
         // Giriş/Çıkış animasyon durumları
         this.introState = 'materializing';
-        this.introTimer = 45;
+        this.introTimer = 60;
         this.outroState = null;
         this.outroTimer = 0;
         this.portalTargetX = 0;
@@ -1378,39 +1378,51 @@ export class Player {
         let currentRotation = 0;
 
         if (this.introState === 'materializing') {
-            const progress = (45 - this.introTimer) / 45; // 0'dan 1'e
+            const progress = (60 - this.introTimer) / 60; // 0'dan 1'e
 
-            // Erimiş puddle halinden top haline yumuşak geçiş ve zıplama (squash & stretch)
-            if (progress < 0.7) {
-                const t = progress / 0.7; // 0'dan 1'e
-                currentScaleX = 3.0 - t * 2.2;   // Yerde yayılmış erimiş halden (3.0) daralmaya (0.8)
-                currentScaleY = 0.05 + t * 1.35; // İncecikten (0.05) yukarı doğru uzamaya (1.4)
+            // 3 Aşamalı Jöle Giriş Fiziği (Puddle -> Stretch -> Sphere)
+            if (this.introTimer > 40) {
+                // Aşama 1: Yerde tamamen erimiş jel havuzu olarak bekler (İlk 20 frame - yükleme kasmalarını tamponlar)
+                currentScaleX = 3.2;
+                currentScaleY = 0.05;
+            } else if (this.introTimer > 15) {
+                // Aşama 2: Kendini yukarı doğru fırlatıp uzar (Sonraki 25 frame)
+                const t = (40 - this.introTimer) / 25; // 0'dan 1'e
+                currentScaleX = 3.2 - t * 2.45;  // 3.2 -> 0.75
+                currentScaleY = 0.05 + t * 1.4;  // 0.05 -> 1.45
             } else {
-                const t = (progress - 0.7) / 0.3; // 0'dan 1'e
-                const bounce = Math.sin(t * Math.PI) * 0.25; // Sönümleme yayı
-                currentScaleX = 0.8 + t * 0.2 + bounce; // 1.0'a otururken esneme
-                currentScaleY = 1.4 - t * 0.4 - bounce; // 1.0'a otururken esneme
+                // Aşama 3: Yaylanarak normal formuna oturur (Son 15 frame)
+                const t = (15 - this.introTimer) / 15; // 0'dan 1'e
+                const bounce = Math.sin(t * Math.PI) * 0.25;
+                currentScaleX = 0.75 + t * 0.25 + bounce;
+                currentScaleY = 1.45 - t * 0.45 - bounce;
             }
 
-            // Kuvvetli ve geniş dijital tarama/indirici ışın sütunu
-            const beamWidth = 50 * (1 - progress);
-            
-            // Geniş dış neon hare
-            ctx.fillStyle = `rgba(16, 185, 129, ${0.25 * (1 - progress)})`;
+            // PERFORMANS DOSTU NEON IŞIN EFEKTİ (shadowBlur yerine iç içe çoklu çizgiyle sıfır kasma)
+            const opacity = 1 - progress;
+            const beamWidth = 65 * opacity;
+
+            // 1. Dış geniş tarama hare
+            ctx.fillStyle = `rgba(16, 185, 129, ${0.18 * opacity})`;
             ctx.beginPath();
             ctx.rect(this.x - beamWidth / 2, this.y - 200, beamWidth, 200 + this.radius);
             ctx.fill();
 
-            // Parlak iç çekirdek çizgisi
-            ctx.strokeStyle = '#34d399';
-            ctx.lineWidth = 5 * (1 - progress);
-            ctx.shadowColor = '#10b981';
-            ctx.shadowBlur = 15;
+            // 2. Orta neon ışıma
+            ctx.strokeStyle = `rgba(52, 211, 153, ${0.4 * opacity})`;
+            ctx.lineWidth = 8 * opacity;
             ctx.beginPath();
             ctx.moveTo(this.x, this.y - 200);
             ctx.lineTo(this.x, this.y + this.radius);
             ctx.stroke();
-            ctx.shadowBlur = 0; // gövde çizimi için gölgeyi sıfırla
+
+            // 3. Parlak beyaz iç çekirdek ışını
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.9 * opacity})`;
+            ctx.lineWidth = 2 * opacity;
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y - 200);
+            ctx.lineTo(this.x, this.y + this.radius);
+            ctx.stroke();
         } else if (this.outroState === 'sucking') {
             const progress = this.outroTimer / 45; // 1'den 0'a
             currentScaleX = progress;
