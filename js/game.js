@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v236';
-import { Level } from './level.js?v=v236';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v236';
-import { UIManager } from './ui.js?v=v236';
-import { CloudSaveManager } from './cloud_save.js?v=v236';
-import { audio } from './audio.js?v=v236';
-import { LevelEditor } from './editor.js?v=v236';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v236';
+import { Player } from './player.js?v=v237';
+import { Level } from './level.js?v=v237';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v237';
+import { UIManager } from './ui.js?v=v237';
+import { CloudSaveManager } from './cloud_save.js?v=v237';
+import { audio } from './audio.js?v=v237';
+import { LevelEditor } from './editor.js?v=v237';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v237';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -614,6 +614,17 @@ export class GameManager {
         this.checkpointX = this.level.spawnX;
         this.checkpointY = this.level.spawnY;
         this.player.respawn(this.level.spawnX, this.level.spawnY);
+
+        // Kamera pozisyonunu hemen oyuncu başlangıç noktasına sabitle ve sınırla
+        this.camera.x = this.player.x - this.cssWidth / 2;
+        this.camera.y = this.player.y - this.cssHeight / 1.38;
+        const minX = 0;
+        const maxX = this.level.width - this.cssWidth;
+        this.camera.x = Math.max(minX, Math.min(this.camera.x, maxX));
+        const minY = -350;
+        const maxY = this.level.height - this.cssHeight + 350;
+        this.camera.y = Math.max(minY, Math.min(this.camera.y, maxY));
+
         this.ui.updateHUDHealth(this.player.health);
         this.ui.updateHUDViscosity(this.player.viscosity);
         audio.resume();
@@ -623,8 +634,15 @@ export class GameManager {
         const storyLevels = [1, 2, 3, 5, 10, 11, 16, 20, 21, 26, 29, 30];
         if (showTitleCard && storyLevels.includes(this.currentLevel)) {
             this.state = 'STORY';
+            // Hikaye terminali açıkken oyuncunun maddeleşme animasyonunu henüz başlatma ve gizle
+            this.player.introState = null;
+            this.player.introTimer = 0;
+
             this.ui.showStoryTerminal(this.currentLevel, () => {
                 this.state = 'PLAYING';
+                // Terminal kapandıktan sonra maddeleşme animasyonunu tetikle
+                this.player.introState = 'materializing';
+                this.player.introTimer = 60;
                 this.lastTime = performance.now();
             });
         } else {
@@ -1109,23 +1127,6 @@ export class GameManager {
                     }
                 }
             }
-        } else if (this.state === 'STORY') {
-            // Hikaye modunda sadece oyuncuyu ve kamerayı güncelle (animasyonun oynayabilmesi için)
-            this.player.update(this.ui.keys, this.level, (x, y, type, color, count) => this.emitParticles(x, y, type, color, count), (e) => {});
-            
-            // Kamera takibi
-            this.camera.targetX = this.player.x - this.cssWidth / 2;
-            this.camera.targetY = this.player.y - this.cssHeight / 1.38;
-            this.camera.x += (this.camera.targetX - this.camera.x) * 0.15;
-            this.camera.y += (this.camera.targetY - this.camera.y) * 0.15;
-            
-            // Kamera sınırları
-            const minX = 0;
-            const maxX = this.level.width - this.cssWidth;
-            this.camera.x = Math.max(minX, Math.min(this.camera.x, maxX));
-            const minY = -350;
-            const maxY = this.level.height - this.cssHeight + 350;
-            this.camera.y = Math.max(minY, Math.min(this.camera.y, maxY));
         } else if (this.state === 'EDITOR') {
             if (this.editor && this.editor.active) {
                 const dt = elapsed / 16.666;

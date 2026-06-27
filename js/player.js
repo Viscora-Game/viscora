@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v236';
-import { audio } from './audio.js?v=v236';
+import { ViscosityStates } from './viscosity.js?v=v237';
+import { audio } from './audio.js?v=v237';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -1294,7 +1294,7 @@ export class Player {
      * Blob'u ekrana çizer
      */
     draw(ctx, camera) {
-        if (this.game && this.game.state === 'WIN') {
+        if (this.game && (this.game.state === 'WIN' || this.game.state === 'STORY')) {
             return;
         }
         if (this.isDead) {
