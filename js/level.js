@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v217';
-import { THEMES } from './generator.js?v=v217';
+import { audio } from './audio.js?v=v218';
+import { THEMES } from './generator.js?v=v218';
 
 /**
  * Viscora Level Design & Manager
@@ -2204,7 +2204,11 @@ export class Level {
     ],
     "netGates": [],
     "movingPlatforms": [],
-    "crystals": [],
+    "crystals": [
+        { "x": 120, "y": 200 },
+        { "x": 1450, "y": 170 },
+        { "x": 2430, "y": -20 }
+    ],
     "enemies": [
         {
             "x": 610,
@@ -2694,6 +2698,107 @@ export class Level {
                         "arrowSpeed": 4.5,
                         "arrowRange": 600
                     }
+                ],
+                "crystals": [
+                    { "x": 590, "y": 1250 },
+                    { "x": 1830, "y": 1040 },
+                    { "x": 3300, "y": 1060 }
+                ]
+            };
+        } else if (originalLevelNumber === 26) {
+            data = {
+                "serverLevelId": "map_1782593523989_489",
+                "name": "KARA DÜŞMAN ALANI",
+                "tags": [],
+                "themeId": "neon_sewer",
+                "levelWidth": 4800,
+                "levelHeight": 800,
+                "spawn": {
+                    "x": 90,
+                    "y": 580
+                },
+                "portal": {
+                    "x": 4690,
+                    "y": -20
+                },
+                "platforms": [
+                    { "x": 0, "y": 630, "w": 400, "h": 140, "type": "normal" },
+                    { "x": 700, "y": 570, "w": 240, "h": 80, "type": "normal" },
+                    { "x": 1260, "y": 500, "w": 120, "h": 40, "type": "normal" },
+                    { "x": 1600, "y": 300, "w": 60, "h": 120, "type": "sticky" },
+                    { "x": 1860, "y": 260, "w": 840, "h": 40, "type": "normal" },
+                    { "x": 3450, "y": 260, "w": 240, "h": 40, "type": "normal" },
+                    { "x": 3210, "y": 100, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 3890, "y": 150, "w": 800, "h": 40, "type": "normal" },
+                    { "x": 4120, "y": -210, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 4530, "y": -200, "w": 60, "h": 20, "type": "normal" }
+                ],
+                "spikes": [
+                    { "x": 2060, "y": 240, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 2510, "y": 240, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 760, "y": 550, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 820, "y": 550, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 4120, "y": -190, "w": 60, "h": 20, "direction": "down" },
+                    { "x": 4530, "y": -180, "w": 60, "h": 20, "direction": "down" },
+                    { "x": 4000, "y": 130, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 4440, "y": 130, "w": 60, "h": 20, "direction": "up" }
+                ],
+                "enemies": [
+                    { "x": 1500, "y": 380, "rangeX": 120, "speed": 1.2, "isVertical": true, "color": "#06b6d4", "type": "patrol" },
+                    { "x": 1170, "y": 460, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 1110, "y": 110, "rangeX": 150, "speed": 1.2, "isVertical": false, "color": "#06b6d4", "type": "sweeper_ufo" },
+                    { "x": 540, "y": 500, "rangeX": 120, "speed": 1.2, "isVertical": true, "color": "#06b6d4", "type": "patrol" },
+                    { "x": 2170, "y": -90, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 2310, "y": -180, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 2550, "y": -240, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 2180, "y": 210, "rangeX": 120, "speed": 1.2, "isVertical": false, "color": "#f43f5e", "type": "patrol" },
+                    { "x": 2460, "y": 210, "rangeX": 120, "speed": 1.2, "isVertical": false, "color": "#f43f5e", "type": "patrol" },
+                    { "x": 3570, "y": 240, "rangeX": 110, "speed": 1, "isVertical": false, "color": "#10b981", "type": "chaser" },
+                    { "x": 4020, "y": -320, "rangeX": 150, "speed": 1.2, "isVertical": false, "color": "#06b6d4", "type": "sweeper_ufo" },
+                    { "x": 4470, "y": -320, "rangeX": 150, "speed": 1.2, "isVertical": false, "color": "#06b6d4", "type": "sweeper_ufo" },
+                    { "x": 4310, "y": 120, "rangeX": 120, "speed": 1.2, "isVertical": false, "color": "#f43f5e", "type": "patrol" },
+                    { "x": 4160, "y": -20, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 4430, "y": -90, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 3570, "y": 140, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 3660, "y": 80, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 3490, "y": 30, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 1440, "y": 180, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" }
+                ],
+                "bouncePads": [
+                    { "x": 2640, "y": 240, "w": 50, "h": 20, "force": 12 }
+                ],
+                "flamethrowers": [
+                    {
+                        "id": 9209,
+                        "startX": 1600,
+                        "startY": 500,
+                        "x": 1600,
+                        "y": 500,
+                        "w": 32,
+                        "h": 32,
+                        "dir": "up",
+                        "range": 600,
+                        "moving": true,
+                        "moveRange": 100,
+                        "moveSpeed": 1.5,
+                        "moveAxis": "x",
+                        "disabled": false,
+                        "active": true
+                    }
+                ],
+                "fallingBlockTraps": [
+                    { "startX": 1970, "startY": -40, "x": 1970, "y": -40, "w": 60, "h": 60, "state": "idle", "vy": 0, "timer": 0 },
+                    { "startX": 2290, "startY": -40, "x": 2290, "y": -40, "w": 60, "h": 60, "state": "idle", "vy": 0, "timer": 0 },
+                    { "startX": 2540, "startY": -180, "x": 2540, "y": -180, "w": 60, "h": 60, "state": "idle", "vy": 0, "timer": 0 }
+                ],
+                "arrowShooters": [
+                    { "x": 580, "y": 280, "w": 48, "h": 48, "dir": "target", "detectionRadius": 400, "fireInterval": 2.5, "arrowSpeed": 4.5, "arrowRange": 400 },
+                    { "x": 3050, "y": 390, "w": 48, "h": 48, "dir": "target", "detectionRadius": 400, "fireInterval": 0.75, "arrowSpeed": 9, "arrowRange": 400 }
+                ],
+                "crystals": [
+                    { "x": 820, "y": 530 },
+                    { "x": 2280, "y": 220 },
+                    { "x": 4290, "y": 110 }
                 ]
             };
         } else if (originalLevelNumber === 30) {
@@ -6399,8 +6504,25 @@ export class Level {
                 ];
             } else if (originalLevelNumber === 26) {
                 this.enemies = [
-                    { x: 1000, y: 120, rangeX: 150, speed: 1.2, type: 'tractor_ufo' },
-                    { x: 1800, y: 100, rangeX: 150, speed: 1.3, type: 'sweeper_ufo' }
+                    { "x": 1500, "y": 380, "rangeX": 120, "speed": 1.2, "isVertical": true, "color": "#06b6d4", "type": "patrol" },
+                    { "x": 1170, "y": 460, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 1110, "y": 110, "rangeX": 150, "speed": 1.2, "isVertical": false, "color": "#06b6d4", "type": "sweeper_ufo" },
+                    { "x": 540, "y": 500, "rangeX": 120, "speed": 1.2, "isVertical": true, "color": "#06b6d4", "type": "patrol" },
+                    { "x": 2170, "y": -90, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 2310, "y": -180, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 2550, "y": -240, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 2180, "y": 210, "rangeX": 120, "speed": 1.2, "isVertical": false, "color": "#f43f5e", "type": "patrol" },
+                    { "x": 2460, "y": 210, "rangeX": 120, "speed": 1.2, "isVertical": false, "color": "#f43f5e", "type": "patrol" },
+                    { "x": 3570, "y": 240, "rangeX": 110, "speed": 1, "isVertical": false, "color": "#10b981", "type": "chaser" },
+                    { "x": 4020, "y": -320, "rangeX": 150, "speed": 1.2, "isVertical": false, "color": "#06b6d4", "type": "sweeper_ufo" },
+                    { "x": 4470, "y": -320, "rangeX": 150, "speed": 1.2, "isVertical": false, "color": "#06b6d4", "type": "sweeper_ufo" },
+                    { "x": 4310, "y": 120, "rangeX": 120, "speed": 1.2, "isVertical": false, "color": "#f43f5e", "type": "patrol" },
+                    { "x": 4160, "y": -20, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 4430, "y": -90, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 3570, "y": 140, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 3660, "y": 80, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 3490, "y": 30, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 1440, "y": 180, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" }
                 ];
             } else if (originalLevelNumber === 27) {
                 this.enemies = [
