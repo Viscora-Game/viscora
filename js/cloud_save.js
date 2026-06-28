@@ -87,7 +87,7 @@ export class CloudSaveManager {
         return true;
     }
 
-    static async saveProgress() {
+    static async saveProgress(force = false) {
         let myUserId = localStorage.getItem('viscora_user_id');
         if (!myUserId) {
             myUserId = 'user_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
@@ -104,7 +104,8 @@ export class CloudSaveManager {
                 },
                 body: JSON.stringify({
                     userId: myUserId,
-                    saveData: saveData
+                    saveData: saveData,
+                    force: force
                 })
             });
 
@@ -138,6 +139,23 @@ export class CloudSaveManager {
             return { success: false, error: 'Ağ hatası. Çevrimdışı kaydedildi.' };
         }
         return { success: false, error: 'Bilinmeyen hata.' };
+    }
+
+    static async forceDownloadProgress() {
+        try {
+            const syncCode = localStorage.getItem('viscora_sync_code');
+            if (!syncCode) {
+                return { success: false, error: 'Kurtarma kodunuz bulunamadı. Lütfen önce hesabınızı bağlayın.' };
+            }
+            const res = await this.fetchProgress(syncCode);
+            if (res.success && res.saveData) {
+                this.applySaveData(res.saveData);
+                return { success: true };
+            }
+            return { success: false, error: res.error || 'Buluttan indirme başarısız oldu.' };
+        } catch (e) {
+            return { success: false, error: e.message || 'Bir hata oluştu.' };
+        }
     }
 
     static async fetchProgress(syncCode) {

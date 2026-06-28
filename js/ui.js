@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v282';
-import { ViscosityList } from './viscosity.js?v=v282';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v282';
-import { CloudSaveManager } from './cloud_save.js?v=v282';
+import { audio } from './audio.js?v=v283';
+import { ViscosityList } from './viscosity.js?v=v283';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v283';
+import { CloudSaveManager } from './cloud_save.js?v=v283';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -997,9 +997,13 @@ export class UIManager {
                 // Google Sign-In Durumunu Güncelle
                 const googleStatus = document.getElementById('google-sync-status');
                 const googleEmail = localStorage.getItem('viscora_google_email');
+                const manualSyncDiv = document.getElementById('manual-sync-buttons');
                 if (googleEmail && googleStatus) {
                     googleStatus.textContent = `Bağlı Hesap: ${googleEmail} (Otomatik)`;
                     googleStatus.style.color = '#10b981';
+                    if (manualSyncDiv) manualSyncDiv.style.display = 'flex';
+                } else {
+                    if (manualSyncDiv) manualSyncDiv.style.display = 'none';
                 }
                 
                 // Arka planda bir eşitleme başlat
@@ -1031,6 +1035,8 @@ export class UIManager {
                         googleStatus.textContent = `Bağlı Hesap: ${googleEmail} (Otomatik)`;
                         googleStatus.style.color = '#10b981';
                     }
+                    const manualSyncDiv = document.getElementById('manual-sync-buttons');
+                    if (manualSyncDiv) manualSyncDiv.style.display = 'flex';
                     
                     const lblSyncCode = document.getElementById('text-sync-code');
                     if (lblSyncCode && res.syncCode) {
@@ -1078,6 +1084,57 @@ export class UIManager {
                         }
                     }).catch(() => {
                         alert('Kod kopyalanamadı: ' + code);
+                    });
+                }
+            });
+        }
+
+        // Manuel Bulut Eşitleme Bindings (Yükle / İndir)
+        const btnCloudUpload = document.getElementById('btn-cloud-upload');
+        const btnCloudDownload = document.getElementById('btn-cloud-download');
+
+        if (btnCloudUpload) {
+            this.bindTouchClick(btnCloudUpload, () => {
+                btnCloudUpload.textContent = 'Yükleniyor...';
+                btnCloudUpload.disabled = true;
+                
+                CloudSaveManager.saveProgress(true).then(res => {
+                    btnCloudUpload.textContent = '📤 Buluta Yükle';
+                    btnCloudUpload.disabled = false;
+                    
+                    if (res.success) {
+                        alert("Yerel ilerlemeniz bulut sunucusuna başarıyla yüklendi! Diğer cihazlarınızda 'Buluttan İndir' butonunu kullanarak bu verileri çekebilirsiniz.");
+                    } else {
+                        alert("Yükleme başarısız: " + (res.error || 'Bilinmeyen Hata'));
+                    }
+                }).catch(err => {
+                    btnCloudUpload.textContent = '📤 Buluta Yükle';
+                    btnCloudUpload.disabled = false;
+                    alert("Yükleme hatası: " + err);
+                });
+            });
+        }
+
+        if (btnCloudDownload) {
+            this.bindTouchClick(btnCloudDownload, () => {
+                if (confirm("DİKKAT: Buluttaki ilerlemeniz bu cihaza indirilecek ve yerel ilerlemenizin üzerine yazılacaktır. Devam etmek istiyor musunuz?")) {
+                    btnCloudDownload.textContent = 'İndiriliyor...';
+                    btnCloudDownload.disabled = true;
+                    
+                    CloudSaveManager.forceDownloadProgress().then(res => {
+                        btnCloudDownload.textContent = '📥 Buluttan İndir';
+                        btnCloudDownload.disabled = false;
+                        
+                        if (res.success) {
+                            alert("Bulut kaydınız başarıyla indirildi! Veriler uygulanarak oyun yeniden başlatılıyor...");
+                            window.location.reload();
+                        } else {
+                            alert("İndirme başarısız: " + (res.error || 'Bilinmeyen Hata'));
+                        }
+                    }).catch(err => {
+                        btnCloudDownload.textContent = '📥 Buluttan İndir';
+                        btnCloudDownload.disabled = false;
+                        alert("İndirme hatası: " + err);
                     });
                 }
             });
@@ -3826,7 +3883,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v282`;
+                img.src = `assets/avatars/${av.id}.png?v=v283`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -3886,7 +3943,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v282`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v283`;
             }
         };
         

@@ -676,12 +676,17 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({'error': 'Tasarımcı adı uygunsuz içerik içeremez.'}, ensure_ascii=False).encode('utf-8'))
                 return
                 
+            force = body.get('force', False)
             existing_user = get_user_by_id(user_id)
             if existing_user:
-                db_save = existing_user.get('saveData', {})
-                # Akıllı Birleştirme: Gelen veri ile sunucu verisini harmanla (hiçbir veri kaybolmasın)
-                merged_save = merge_save_data(db_save, save_data)
-                existing_user['saveData'] = merged_save
+                if force:
+                    # Zorla Yükleme: Sunucudaki veriyi tamamen ez
+                    existing_user['saveData'] = save_data
+                else:
+                    db_save = existing_user.get('saveData', {})
+                    # Akıllı Birleştirme: Gelen veri ile sunucu verisini harmanla (hiçbir veri kaybolmasın)
+                    merged_save = merge_save_data(db_save, save_data)
+                    existing_user['saveData'] = merged_save
                 existing_user['lastUpdated'] = datetime.now(timezone.utc).isoformat()
                 user_record = existing_user
             else:
