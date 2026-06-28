@@ -107,6 +107,13 @@ html, body {
     touch-action: pan-y !important;
 }
 
+/* Modalların arkasındaki oynanışın görünmesini engellemek için arka planı karart ve bulanıklaştır */
+.screen:not(#start-screen) {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    background: radial-gradient(circle at center, rgba(10, 10, 18, 0.85) 0%, rgba(5, 5, 10, 0.95) 100%) !important;
+}
+
 #start-screen {
     background: transparent;
     align-items: flex-start;

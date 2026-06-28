@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v260';
-import { ViscosityList } from './viscosity.js?v=v260';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v260';
-import { CloudSaveManager } from './cloud_save.js?v=v260';
+import { audio } from './audio.js?v=v261';
+import { ViscosityList } from './viscosity.js?v=v261';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v261';
+import { CloudSaveManager } from './cloud_save.js?v=v261';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -3728,7 +3728,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v260`;
+                img.src = `assets/avatars/${av.id}.png?v=v261`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -3788,7 +3788,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v260`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v261`;
             }
         };
         
