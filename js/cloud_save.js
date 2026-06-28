@@ -119,6 +119,9 @@ export class CloudSaveManager {
                 if (res.syncCode) {
                     localStorage.setItem('viscora_sync_code', res.syncCode);
                 }
+                if (res.saveData && Object.keys(res.saveData).length > 0) {
+                    this.applySaveData(res.saveData);
+                }
                 console.log('Cloud sync successful. SyncCode:', res.syncCode);
                 return { success: true, syncCode: res.syncCode, lastUpdated: res.lastUpdated };
             } else if (res.status === 'conflict') {

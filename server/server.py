@@ -156,6 +156,49 @@ def get_user_by_id(user_id):
             return u
     return None
 
+def merge_save_data(db_save, incoming_save):
+    if not db_save:
+        return incoming_save or {}
+    if not incoming_save:
+        return db_save or {}
+        
+    merged = db_save.copy()
+    
+    # 1. Kristaller ve Kozmetikler (Paket halinde: en yüksek toplam kristale sahip olan kazanır)
+    db_total = int(db_save.get('totalCrystals', 0) or 0)
+    inc_total = int(incoming_save.get('totalCrystals', 0) or 0)
+    
+    if inc_total >= db_total:
+        merged['totalCrystals'] = inc_total
+        merged['spentCrystals'] = incoming_save.get('spentCrystals', 0)
+        if 'ownedItems' in incoming_save:
+            merged['ownedItems'] = incoming_save['ownedItems']
+        if 'balanceSig' in incoming_save:
+            merged['balanceSig'] = incoming_save['balanceSig']
+            
+    # 2. Bölüm İlerlemesi (En yüksek seviye kazanır)
+    db_lvl = int(db_save.get('unlockedLevel', 1) or 1)
+    inc_lvl = int(incoming_save.get('unlockedLevel', 1) or 1)
+    if inc_lvl >= db_lvl:
+        merged['unlockedLevel'] = inc_lvl
+        if 'progress' in incoming_save:
+            merged['progress'] = incoming_save['progress']
+        if 'stars' in incoming_save:
+            merged['stars'] = incoming_save['stars']
+            
+    # 3. Editör Taslak Haritaları (Boş olmayanları koru)
+    for i in range(1, 6):
+        key = f'draftSlot{i}'
+        if key in incoming_save and incoming_save[key]:
+            merged[key] = incoming_save[key]
+            
+    # 4. Diğer Ayarlar ve Karakter Bilgileri (Boş olmayanları ez)
+    for key in ['avatar', 'authorName', 'difficulty', 'customControls', 'likedMaps', 'dailyLastClaimDate', 'dailyStreak', 'activeSlot', 'activeTrail', 'activeAccessory', 'activeEyes']:
+        if key in incoming_save and incoming_save[key] not in [None, "", [], {}]:
+            merged[key] = incoming_save[key]
+            
+    return merged
+
 def get_user_by_google_id(google_id):
     if mongo_users_collection is not None:
         try:
@@ -628,28 +671,10 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 
             existing_user = get_user_by_id(user_id)
             if existing_user:
-                # Çakışma Kontrolü: Sunucudaki elmas veya seviye daha fazlaysa, sunucu verisini koru ve istemciye gönder
                 db_save = existing_user.get('saveData', {})
-                db_crystals = int(db_save.get('totalCrystals', 0) or 0)
-                db_level = int(db_save.get('unlockedLevel', 1) or 1)
-                
-                incoming_crystals = int(save_data.get('totalCrystals', 0) or 0)
-                incoming_level = int(save_data.get('unlockedLevel', 1) or 1)
-                
-                if db_crystals > incoming_crystals or db_level > incoming_level:
-                    self.send_response(200)
-                    self.send_header('Content-Type', 'application/json; charset=utf-8')
-                    self.end_headers()
-                    self.wfile.write(json.dumps({
-                        'status': 'conflict',
-                        'saveData': db_save,
-                        'syncCode': existing_user.get('syncCode'),
-                        'lastUpdated': existing_user['lastUpdated']
-                    }, ensure_ascii=False).encode('utf-8'))
-                    return
-
-                # Kullanıcı zaten kayıtlı, saveData'yı güncelle
-                existing_user['saveData'] = save_data
+                # Akıllı Birleştirme: Gelen veri ile sunucu verisini harmanla (hiçbir veri kaybolmasın)
+                merged_save = merge_save_data(db_save, save_data)
+                existing_user['saveData'] = merged_save
                 existing_user['lastUpdated'] = datetime.now(timezone.utc).isoformat()
                 user_record = existing_user
             else:
@@ -675,6 +700,7 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({
                     'status': 'success',
                     'syncCode': user_record['syncCode'],
+                    'saveData': user_record['saveData'],
                     'lastUpdated': user_record['lastUpdated']
                 }, ensure_ascii=False).encode('utf-8'))
             else:
