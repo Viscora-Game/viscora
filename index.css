@@ -3977,3 +3977,57 @@ button:hover .icon-svg,
         font-size: 0.75rem !important;
     }
 }
+
+/* Yatay Mod (Landscape) Mobil Cihazlar için Ayarlar Menüsü Optimizasyonu */
+@media (max-height: 480px) {
+    .star-gate-overlay {
+        align-items: flex-start !important;
+        padding-top: 15px !important;
+        padding-bottom: 15px !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    .sound-settings-card {
+        margin: auto !important;
+        max-height: 95vh !important;
+        padding: 0.8rem 1.2rem 0.6rem !important;
+        border-radius: 12px !important;
+        max-width: 440px !important;
+    }
+    .sound-settings-card .star-gate-title {
+        font-size: 0.9rem !important;
+        margin-bottom: 0.1rem !important;
+    }
+    .sound-settings-card div[style*="font-size: 0.85rem"] {
+        font-size: 0.75rem !important;
+        margin-bottom: 6px !important;
+    }
+    .sound-settings-card .menu-settings {
+        max-height: 52vh !important;
+        gap: 6px !important;
+        margin-bottom: 8px !important;
+    }
+    /* Google Sign-In buton alanı ayarları */
+    .sound-settings-card div[style*="background: rgba(15, 23, 42, 0.4)"] {
+        padding: 6px 8px !important;
+        gap: 4px !important;
+    }
+    /* Geri yükleme satırı ayarları */
+    .sound-settings-card .restore-row {
+        gap: 6px !important;
+    }
+    .sound-settings-card input {
+        padding: 6px 10px !important;
+        font-size: 0.8rem !important;
+    }
+    .sound-settings-card button {
+        height: 32px !important;
+        font-size: 0.8rem !important;
+    }
+    .sound-settings-card #btn-close-settings {
+        margin-top: 4px !important;
+        padding: 8px 0 !important;
+        font-size: 0.8rem !important;
+    }
+}
+
