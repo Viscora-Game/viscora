@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v258';
-import { Enemy, GelChaser } from './enemies.js?v=v258';
+import { audio } from './audio.js?v=v259';
+import { Enemy, GelChaser } from './enemies.js?v=v259';
 
 export class Boss {
     constructor(x, y) {

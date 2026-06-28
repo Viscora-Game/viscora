@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v258">
+    <link rel="stylesheet" href="index.css?v=v259">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -593,7 +593,7 @@
                     <span class="terminal-dot red"></span>
                     <span class="terminal-dot yellow"></span>
                     <span class="terminal-dot green"></span>
-                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v258</span>
+                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v259</span>
                 </div>
                 <div class="terminal-body">
                     <div id="terminal-text"></div>
@@ -685,7 +685,7 @@
                 <div class="brand">
                     <!-- Oyuncu Profil Kartı (Kartın Üst Sağ Köşesinde, Markaya Göre Konumlandırılmış) -->
                     <div id="player-profile-widget">
-                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v258" alt="Avatar" />
+                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v259" alt="Avatar" />
                         <div id="profile-widget-name">Oyuncu</div>
                     </div>
                     <h1 class="game-title">VISCORA</h1>
@@ -1345,30 +1345,33 @@
                     </div>
                 </div>
 
-                <!-- İki Bölümlü Düzen: Günlük Giriş ve Haftalık Görevler -->
-                <div class="rewards-sections-container" style="display: grid; grid-template-columns: 1.25fr 1fr; gap: 15px; width: 100%; box-sizing: border-box; align-items: stretch;">
-                    
-                    <!-- Sol Taraf: Günlük Giriş Takvimi -->
-                    <div class="rewards-daily-section" style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(56, 189, 248, 0.15); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; box-sizing: border-box;">
-                        <h3 style="margin: 0 0 12px 0; color: #38bdf8; font-size: 0.9rem; font-family: monospace; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; width: 100%; justify-content: center;">
-                            <svg class="icon-svg" style="width: 16px; height: 16px;"><use href="#icon-calendar"></use></svg> GÜNLÜK GİRİŞ PROTOKOLÜ
-                        </h3>
+                <!-- Kaydırılabilir İçerik Alanı -->
+                <div class="rewards-scroll-wrapper" style="flex: 1; overflow-y: auto; width: 100%; box-sizing: border-box; padding-right: 4px; display: flex; flex-direction: column;">
+                    <!-- İki Bölümlü Düzen: Günlük Giriş ve Haftalık Görevler -->
+                    <div class="rewards-sections-container" style="display: grid; grid-template-columns: 1.25fr 1fr; gap: 15px; width: 100%; box-sizing: border-box; align-items: stretch;">
                         
-                        <div id="daily-rewards-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; margin-bottom: 12px;">
-                            <!-- Dinamik olarak 7 gün render edilecek -->
+                        <!-- Sol Taraf: Günlük Giriş Takvimi -->
+                        <div class="rewards-daily-section" style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(56, 189, 248, 0.15); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; box-sizing: border-box;">
+                            <h3 style="margin: 0 0 12px 0; color: #38bdf8; font-size: 0.9rem; font-family: monospace; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; width: 100%; justify-content: center;">
+                                <svg class="icon-svg" style="width: 16px; height: 16px;"><use href="#icon-calendar"></use></svg> GÜNLÜK GİRİŞ PROTOKOLÜ
+                            </h3>
+                            
+                            <div id="daily-rewards-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; margin-bottom: 12px;">
+                                <!-- Dinamik olarak 7 gün render edilecek -->
+                            </div>
+                            
+                            <button id="btn-claim-daily" class="menu-btn primary-btn" style="width: 100%; margin: 0; padding: 10px; font-size: 0.85rem; height: auto;">GÜNLÜK ÖDÜLÜ AL</button>
                         </div>
-                        
-                        <button id="btn-claim-daily" class="menu-btn primary-btn" style="width: 100%; margin: 0; padding: 10px; font-size: 0.85rem; height: auto;">GÜNLÜK ÖDÜLÜ AL</button>
-                    </div>
 
-                    <!-- Sağ Taraf: Haftalık Siber Görevler -->
-                    <div class="rewards-weekly-section" style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(56, 189, 248, 0.15); border-radius: 12px; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;">
-                        <h3 style="margin: 0 0 12px 0; color: #38bdf8; font-size: 0.9rem; font-family: monospace; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; width: 100%; justify-content: center;">
-                            <svg class="icon-svg" style="width: 16px; height: 16px;"><use href="#icon-flask"></use></svg> HAFTALIK SİBER GÖREVLER
-                        </h3>
-                        
-                        <div id="weekly-challenges-list" style="display: flex; flex-direction: column; gap: 10px; flex: 1; margin-bottom: 0; justify-content: center;">
-                            <!-- Dinamik olarak 3 görev render edilecek -->
+                        <!-- Sağ Taraf: Haftalık Siber Görevler -->
+                        <div class="rewards-weekly-section" style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(56, 189, 248, 0.15); border-radius: 12px; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;">
+                            <h3 style="margin: 0 0 12px 0; color: #38bdf8; font-size: 0.9rem; font-family: monospace; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; width: 100%; justify-content: center;">
+                                <svg class="icon-svg" style="width: 16px; height: 16px;"><use href="#icon-flask"></use></svg> HAFTALIK SİBER GÖREVLER
+                            </h3>
+                            
+                            <div id="weekly-challenges-list" style="display: flex; flex-direction: column; gap: 10px; flex: 1; margin-bottom: 0; justify-content: center;">
+                                <!-- Dinamik olarak 3 görev render edilecek -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1421,8 +1424,8 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v258"></script>
-    <script type="module" src="js/main.js?v=v258"></script>
+    <script src="js/controls_customizer.js?v=v259"></script>
+    <script type="module" src="js/main.js?v=v259"></script>
 </body>
 </html>
 
