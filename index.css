@@ -3572,7 +3572,7 @@ button:hover .icon-svg,
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 2rem;
+    padding: 1rem; /* Reduced padding from 2rem to prevent container overflows */
     box-sizing: border-box;
     transition: opacity 0.4s ease, visibility 0.4s;
 }
@@ -3584,9 +3584,9 @@ button:hover .icon-svg,
 }
 
 .terminal-box {
-    width: 680px;
-    max-width: 95%;
-    height: 440px; /* Fixed height to prevent resizing during typing */
+    width: 560px; /* Reduced from 680px to fit landscape screens perfectly */
+    max-width: 94%;
+    height: 320px; /* Reduced from 440px to fit small mobile screen heights */
     background: rgba(15, 23, 42, 0.85);
     border: 1.5px solid #10b981;
     border-radius: 12px;
@@ -3601,7 +3601,7 @@ button:hover .icon-svg,
 
 .terminal-header {
     background: rgba(10, 10, 15, 0.9);
-    padding: 10px 16px;
+    padding: 8px 12px;
     border-bottom: 1px solid rgba(16, 185, 129, 0.3);
     display: flex;
     align-items: center;
@@ -3609,8 +3609,8 @@ button:hover .icon-svg,
 }
 
 .terminal-dot {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
 }
 .terminal-dot.red { background-color: #ef4444; }
@@ -3618,8 +3618,8 @@ button:hover .icon-svg,
 .terminal-dot.green { background-color: #10b981; }
 
 .terminal-title {
-    margin-left: 12px;
-    font-size: 0.75rem;
+    margin-left: 10px;
+    font-size: 0.7rem;
     font-weight: bold;
     color: #10b981;
     letter-spacing: 0.08em;
@@ -3627,7 +3627,7 @@ button:hover .icon-svg,
 }
 
 .terminal-body {
-    padding: 24px;
+    padding: 16px; /* Reduced padding from 24px */
     flex: 1; /* Take all available space inside fixed height container */
     overflow-y: auto; /* Scroll if content overflows vertically */
     display: flex;
@@ -3635,13 +3635,13 @@ button:hover .icon-svg,
     justify-content: flex-start;
     text-align: left;
     color: #34d399;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    letter-spacing: 0.04em;
+    font-size: 0.8rem; /* Reduced font size from 0.9rem to prevent horizontal scroll */
+    line-height: 1.45;
+    letter-spacing: 0.03em;
 }
 
 .terminal-line {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     white-space: pre-wrap; /* Wrap lines instead of overflowing horizontally */
     word-break: break-word;
     overflow-wrap: break-word;
