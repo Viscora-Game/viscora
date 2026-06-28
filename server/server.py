@@ -192,10 +192,17 @@ def merge_save_data(db_save, incoming_save):
         if key in incoming_save and incoming_save[key]:
             merged[key] = incoming_save[key]
             
-    # 4. Diğer Ayarlar ve Karakter Bilgileri (Boş olmayanları ez)
+    # 4. Diğer Ayarlar ve Karakter Bilgileri (Boş olmayanları ez + Varsayılan koruması)
     for key in ['avatar', 'authorName', 'difficulty', 'customControls', 'likedMaps', 'dailyLastClaimDate', 'dailyStreak', 'activeSlot', 'activeTrail', 'activeAccessory', 'activeEyes']:
-        if key in incoming_save and incoming_save[key] not in [None, "", [], {}]:
-            merged[key] = incoming_save[key]
+        if key in incoming_save:
+            val = incoming_save[key]
+            if val not in [None, "", [], {}]:
+                # Özel Koruma: Varsayılan değerlerin sunucudaki özel değerleri ezmesini engelle
+                if key == 'authorName' and val in ['Tasarımcı', 'Oyuncu', 'oyuncu'] and db_save.get('authorName') not in [None, "", 'Tasarımcı', 'Oyuncu', 'oyuncu']:
+                    continue
+                if key == 'avatar' and val == 'slime_king' and db_save.get('avatar') not in [None, "", 'slime_king']:
+                    continue
+                merged[key] = val
             
     return merged
 
