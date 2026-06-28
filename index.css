@@ -39,7 +39,8 @@
 #pause-screen, #pause-screen *,
 #win-screen, #win-screen *,
 #gameover-screen, #gameover-screen *,
-#shop-screen, #shop-screen * {
+#shop-screen, #shop-screen *,
+#rewards-screen, #rewards-screen * {
     touch-action: pan-y !important;
 }
 
