@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v266';
-import { Level } from './level.js?v=v266';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v266';
-import { UIManager } from './ui.js?v=v266';
-import { CloudSaveManager } from './cloud_save.js?v=v266';
-import { audio } from './audio.js?v=v266';
-import { LevelEditor } from './editor.js?v=v266';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v266';
+import { Player } from './player.js?v=v267';
+import { Level } from './level.js?v=v267';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v267';
+import { UIManager } from './ui.js?v=v267';
+import { CloudSaveManager } from './cloud_save.js?v=v267';
+import { audio } from './audio.js?v=v267';
+import { LevelEditor } from './editor.js?v=v267';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v267';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1192,9 +1192,7 @@ export class GameManager {
                 username = 'Anonim';
             }
 
-            const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                ? ''
-                : 'https://viscora.onrender.com';
+            const API_BASE = 'https://viscora.onrender.com';
             
             fetch(`${API_BASE}/api/levels/${levelId}/score`, {
                 method: 'POST',
@@ -3327,9 +3325,7 @@ export class GameManager {
         }
         const myUserId = localStorage.getItem('viscora_user_id') || 'user_anon';
         
-        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-            ? ''
-            : 'https://viscora.onrender.com';
+        const API_BASE = 'https://viscora.onrender.com';
             
         // Reset container to loading state
         const boardList = document.getElementById('win-leaderboard-list');

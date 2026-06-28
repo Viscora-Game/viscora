@@ -1,11 +1,9 @@
-import { audio } from './audio.js?v=v266';
-import { ViscosityList } from './viscosity.js?v=v266';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v266';
-import { CloudSaveManager } from './cloud_save.js?v=v266';
+import { audio } from './audio.js?v=v267';
+import { ViscosityList } from './viscosity.js?v=v267';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v267';
+import { CloudSaveManager } from './cloud_save.js?v=v267';
 
-const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? ''
-    : 'https://viscora.onrender.com';
+const API_BASE = 'https://viscora.onrender.com';
 
 function isOffensive(text) {
     if (!text) return false;
@@ -3746,7 +3744,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v266`;
+                img.src = `assets/avatars/${av.id}.png?v=v267`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -3806,7 +3804,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v266`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v267`;
             }
         };
         
