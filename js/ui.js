@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v269';
-import { ViscosityList } from './viscosity.js?v=v269';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v269';
-import { CloudSaveManager } from './cloud_save.js?v=v269';
+import { audio } from './audio.js?v=v270';
+import { ViscosityList } from './viscosity.js?v=v270';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v270';
+import { CloudSaveManager } from './cloud_save.js?v=v270';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -993,6 +993,14 @@ export class UIManager {
                 if (savedCode) {
                     if (lblSyncCode) lblSyncCode.textContent = savedCode;
                 }
+
+                // Google Sign-In Durumunu Güncelle
+                const googleStatus = document.getElementById('google-sync-status');
+                const googleEmail = localStorage.getItem('viscora_google_email');
+                if (googleEmail && googleStatus) {
+                    googleStatus.textContent = `Bağlı Hesap: ${googleEmail} (Otomatik)`;
+                    googleStatus.style.color = '#10b981';
+                }
                 
                 // Arka planda bir eşitleme başlat
                 CloudSaveManager.saveProgress().then(res => {
@@ -1007,6 +1015,38 @@ export class UIManager {
                 });
             });
         }
+
+        // Global Google Sign-In Callback handler
+        window.handleGoogleSignIn = (response) => {
+            const googleStatus = document.getElementById('google-sync-status');
+            if (googleStatus) {
+                googleStatus.textContent = 'Doğrulanıyor...';
+                googleStatus.style.color = '#38bdf8';
+            }
+            
+            CloudSaveManager.loginWithGoogle(response.credential).then(res => {
+                if (res.success) {
+                    const googleEmail = localStorage.getItem('viscora_google_email') || 'Hesap Bağlandı';
+                    if (googleStatus) {
+                        googleStatus.textContent = `Bağlı Hesap: ${googleEmail} (Otomatik)`;
+                        googleStatus.style.color = '#10b981';
+                    }
+                    
+                    const lblSyncCode = document.getElementById('text-sync-code');
+                    if (lblSyncCode && res.syncCode) {
+                        lblSyncCode.textContent = res.syncCode;
+                    }
+                    
+                    alert("Bulut kaydınız başarıyla geri yüklendi ve senkronize edildi!");
+                    window.location.reload();
+                } else {
+                    if (googleStatus) {
+                        googleStatus.textContent = 'Bağlantı hatası: ' + (res.error || 'Bilinmeyen Hata');
+                        googleStatus.style.color = '#ef4444';
+                    }
+                }
+            });
+        };
 
         // Bulut Kayıt Kopyalama ve Geri Yükleme Bindings
         const btnCopySyncCode = document.getElementById('btn-copy-sync-code');
@@ -3744,7 +3784,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v269`;
+                img.src = `assets/avatars/${av.id}.png?v=v270`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -3804,7 +3844,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v269`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v270`;
             }
         };
         

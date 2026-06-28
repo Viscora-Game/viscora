@@ -155,6 +155,21 @@ def get_user_by_id(user_id):
             return u
     return None
 
+def get_user_by_google_id(google_id):
+    if mongo_users_collection is not None:
+        try:
+            res = mongo_users_collection.find_one({'googleId': google_id}, {'_id': False})
+            if res:
+                return res
+        except Exception as e:
+            print("MongoDB find_one by googleId error:", e)
+            
+    users = read_users_db()
+    for u in users:
+        if u.get('googleId') == google_id:
+            return u
+    return None
+
 def get_user_by_sync_code(code):
     code = str(code).upper().strip()
     if mongo_users_collection is not None:
@@ -672,6 +687,99 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header('Content-Type', 'application/json; charset=utf-8')
                 self.end_headers()
                 self.wfile.write(json.dumps({'error': 'Geçersiz veya bulunamayan kurtarma kodu.'}, ensure_ascii=False).encode('utf-8'))
+            return
+
+        # Google Giriş ve Senkronizasyon: POST /api/user/google_auth
+        if path == '/api/user/google_auth':
+            id_token = body.get('idToken')
+            current_user_id = body.get('currentUserId')
+            
+            if not id_token:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': 'idToken gereklidir.'}, ensure_ascii=False).encode('utf-8'))
+                return
+                
+            # Google'ın tokeninfo API'si ile token doğrula
+            try:
+                import urllib.request
+                import urllib.parse
+                verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
+                req = urllib.request.Request(verify_url, method="GET")
+                with urllib.request.urlopen(req) as resp:
+                    token_info = json.loads(resp.read().decode('utf-8'))
+                    
+                google_id = token_info.get('sub')
+                email = token_info.get('email')
+                
+                if not google_id:
+                    raise Exception("Geçersiz token.")
+            except Exception as e:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': f'Google doğrulaması başarısız: {str(e)}'}, ensure_ascii=False).encode('utf-8'))
+                return
+                
+            # Google ID ile kayıtlı kullanıcı ara
+            user_record = get_user_by_google_id(google_id)
+            
+            if user_record:
+                # Kullanıcı bulundu! Kayıtlı veriyi geri yükle
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'status': 'success',
+                    'userId': user_record['userId'],
+                    'syncCode': user_record.get('syncCode'),
+                    'saveData': user_record['saveData'],
+                    'lastUpdated': user_record['lastUpdated']
+                }, ensure_ascii=False).encode('utf-8'))
+            else:
+                # Yeni Google kullanıcısı. Mevcut yerel ilerlemeyi bağla
+                linked = False
+                if current_user_id:
+                    anon_user = get_user_by_id(current_user_id)
+                    if anon_user:
+                        anon_user['googleId'] = google_id
+                        anon_user['googleEmail'] = email
+                        anon_user['lastUpdated'] = datetime.now(timezone.utc).isoformat()
+                        save_user(anon_user)
+                        user_record = anon_user
+                        linked = True
+                        
+                if not linked:
+                    # Yeni bir kullanıcı oluştur
+                    import string
+                    import time
+                    import uuid
+                    chars = string.ascii_uppercase + string.digits
+                    sync_code = ''.join(random.choices(chars, k=6))
+                    while get_user_by_sync_code(sync_code) is not None:
+                        sync_code = ''.join(random.choices(chars, k=6))
+                        
+                    user_record = {
+                        'userId': 'user_' + str(uuid.uuid4())[:8] + '_' + str(int(time.time())),
+                        'googleId': google_id,
+                        'googleEmail': email,
+                        'syncCode': sync_code,
+                        'saveData': {},
+                        'lastUpdated': datetime.now(timezone.utc).isoformat()
+                    }
+                    save_user(user_record)
+                    
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'status': 'success',
+                    'userId': user_record['userId'],
+                    'syncCode': user_record['syncCode'],
+                    'saveData': user_record['saveData'],
+                    'lastUpdated': user_record['lastUpdated']
+                }, ensure_ascii=False).encode('utf-8'))
             return
 
         # 1. Yeni seviye yayınlama: POST /api/levels

@@ -157,4 +157,59 @@ export class CloudSaveManager {
         }
         return { success: false, error: 'Bilinmeyen hata.' };
     }
+
+    static async loginWithGoogle(idToken) {
+        const currentUserId = localStorage.getItem('viscora_user_id') || '';
+        try {
+            const response = await fetch(`${API_BASE}/api/user/google_auth`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    idToken: idToken,
+                    currentUserId: currentUserId
+                })
+            });
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                return { success: false, error: errData.error || 'Google girişi başarısız.' };
+            }
+
+            const res = await response.json();
+            if (res.status === 'success') {
+                localStorage.setItem('viscora_user_id', res.userId);
+                if (res.syncCode) {
+                    localStorage.setItem('viscora_sync_code', res.syncCode);
+                }
+                
+                // Eğer sunucuda eski kayıt varsa yerel hafızaya uygula
+                if (res.saveData && Object.keys(res.saveData).length > 0) {
+                    this.applySaveData(res.saveData);
+                }
+                
+                // Google e-posta adresini JWT içinden çözerek yerelde sakla (Arayüzde göstermek için)
+                try {
+                    const base64Url = idToken.split('.')[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                    }).join(''));
+                    const payload = JSON.parse(jsonPayload);
+                    if (payload.email) {
+                        localStorage.setItem('viscora_google_email', payload.email);
+                    }
+                } catch (e) {
+                    console.warn('Google email decode error:', e);
+                }
+
+                return { success: true, userId: res.userId, syncCode: res.syncCode };
+            }
+        } catch (e) {
+            console.error('Google Auth network error:', e);
+            return { success: false, error: 'Ağ hatası. Google bağlantısı kurulamadı.' };
+        }
+        return { success: false, error: 'Bilinmeyen hata.' };
+    }
 }
