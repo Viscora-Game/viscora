@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v257';
-import { audio } from './audio.js?v=v257';
-import { LevelGenerator } from './generator.js?v=v257';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v258';
+import { audio } from './audio.js?v=v258';
+import { LevelGenerator } from './generator.js?v=v258';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -2776,6 +2776,9 @@ export class LevelEditor {
                 this.saveToLocalStorage();
                 if (this.game.ui.loadCommunityMaps) {
                     this.game.ui.loadCommunityMaps(this.game.ui.currentSort || 'popular');
+                }
+                if (this.game.ui && this.game.ui.updateWeeklyChallenge) {
+                    this.game.ui.updateWeeklyChallenge(3, 1);
                 }
                 alert(`Haritanız "${data.name}" başarıyla yeni bir bölüm olarak topluluk sunucusunda paylaşıldı!`);
             })

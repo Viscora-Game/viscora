@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v257';
-import { Level } from './level.js?v=v257';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v257';
-import { UIManager } from './ui.js?v=v257';
-import { CloudSaveManager } from './cloud_save.js?v=v257';
-import { audio } from './audio.js?v=v257';
-import { LevelEditor } from './editor.js?v=v257';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v257';
+import { Player } from './player.js?v=v258';
+import { Level } from './level.js?v=v258';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v258';
+import { UIManager } from './ui.js?v=v258';
+import { CloudSaveManager } from './cloud_save.js?v=v258';
+import { audio } from './audio.js?v=v258';
+import { LevelEditor } from './editor.js?v=v258';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v258';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1165,9 +1165,15 @@ export class GameManager {
         if (isCampaignLvl) {
             this.saveStarsForLevel(this.currentLevel, stars);
             this.submitCampaignScore(this.currentLevel, this.gameTime);
+            if (this.difficulty === 'hardcore' && this.ui) {
+                this.ui.updateWeeklyChallenge(2, 1);
+            }
         } else if (this.currentLevel !== 999) {
             this.saveStarsForLevel(this.currentLevel, stars);
         } else if (this.isCommunityPlay && this.currentCommunityLevelId) {
+            if (this.ui) {
+                this.ui.updateWeeklyChallenge(1, 1);
+            }
             // Topluluk haritası bitirildiğinde skoru gönder
             const levelId = this.currentCommunityLevelId;
             const timeValue = this.gameTime;

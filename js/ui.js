@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v257';
-import { ViscosityList } from './viscosity.js?v=v257';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v257';
-import { CloudSaveManager } from './cloud_save.js?v=v257';
+import { audio } from './audio.js?v=v258';
+import { ViscosityList } from './viscosity.js?v=v258';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v258';
+import { CloudSaveManager } from './cloud_save.js?v=v258';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -122,7 +122,8 @@ export class UIManager {
             gameover: document.getElementById('gameover-screen'),
             codex: document.getElementById('codex-screen'),
             community: document.getElementById('community-screen'),
-            shop: document.getElementById('shop-screen')
+            shop: document.getElementById('shop-screen'),
+            rewards: document.getElementById('rewards-screen')
         };
         
         this.hud = document.getElementById('hud');
@@ -160,6 +161,7 @@ export class UIManager {
         this.initButtonBindings();
         this.updateLevelButtonsUI();
         this.initProfileUI();
+        this.initRewardsUI();
     }
 
     /**
@@ -1124,15 +1126,19 @@ export class UIManager {
             const balance = window.shopManager ? window.shopManager.getBalance() : 0;
             const menuCounter = document.getElementById('menu-crystal-count');
             const shopCounter = document.getElementById('shop-crystal-balance');
+            const rewardsCounter = document.getElementById('rewards-crystal-balance');
             if (menuCounter) menuCounter.textContent = balance;
             if (shopCounter) shopCounter.textContent = balance;
+            if (rewardsCounter) rewardsCounter.textContent = balance;
         };
 
         window.addEventListener('viscora_crystals_changed', (e) => {
             const menuCounter = document.getElementById('menu-crystal-count');
             const shopCounter = document.getElementById('shop-crystal-balance');
+            const rewardsCounter = document.getElementById('rewards-crystal-balance');
             if (menuCounter) menuCounter.textContent = e.detail.balance;
             if (shopCounter) shopCounter.textContent = e.detail.balance;
+            if (rewardsCounter) rewardsCounter.textContent = e.detail.balance;
         });
 
         // initial load of crystals
@@ -1147,41 +1153,7 @@ export class UIManager {
         let previewAnimFrame = null;
 
         const triggerConfetti = () => {
-            const colors = ['#00f2fe', '#4facfe', '#10b981', '#fbbf24', '#f43f5e', '#a855f7'];
-            for (let i = 0; i < 40; i++) {
-                const piece = document.createElement('div');
-                piece.className = 'confetti-particle';
-                const size = 6 + Math.random() * 8;
-                const startLeft = 20 + Math.random() * 60;
-                
-                piece.style.cssText = `
-                    position: fixed;
-                    top: -20px;
-                    left: ${startLeft}%;
-                    width: ${size}px;
-                    height: ${size}px;
-                    background-color: ${colors[Math.floor(Math.random() * colors.length)]};
-                    border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
-                    opacity: ${0.6 + Math.random() * 0.4};
-                    z-index: 9999;
-                    transform: rotate(${Math.random() * 360}deg);
-                    pointer-events: none;
-                    transition: transform 2.5s ease-out, top 2.5s ease-in-out, opacity 2.5s ease-out;
-                `;
-                
-                document.body.appendChild(piece);
-                
-                setTimeout(() => {
-                    const targetLeft = startLeft + (Math.random() - 0.5) * 15;
-                    const targetTop = window.innerHeight + 20;
-                    piece.style.top = `${targetTop}px`;
-                    piece.style.left = `${targetLeft}%`;
-                    piece.style.transform = `rotate(${Math.random() * 720}deg)`;
-                    piece.style.opacity = '0';
-                    
-                    setTimeout(() => piece.remove(), 2500);
-                }, 50);
-            }
+            this.triggerConfetti();
         };
 
         const showToast = (message, isSuccess = true) => {
@@ -3756,7 +3728,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v257`;
+                img.src = `assets/avatars/${av.id}.png?v=v258`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -3816,7 +3788,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v257`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v258`;
             }
         };
         
@@ -3902,6 +3874,318 @@ export class UIManager {
                 openProfileModal(true);
             }, 800);
         }
+    }
+
+    triggerConfetti() {
+        const colors = ['#00f2fe', '#4facfe', '#10b981', '#fbbf24', '#f43f5e', '#a855f7'];
+        for (let i = 0; i < 40; i++) {
+            const piece = document.createElement('div');
+            piece.className = 'confetti-particle';
+            const size = 6 + Math.random() * 8;
+            const startLeft = 20 + Math.random() * 60;
+            
+            piece.style.cssText = `
+                position: fixed;
+                top: -20px;
+                left: ${startLeft}%;
+                width: ${size}px;
+                height: ${size}px;
+                background-color: ${colors[Math.floor(Math.random() * colors.length)]};
+                border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+                opacity: ${0.6 + Math.random() * 0.4};
+                z-index: 9999;
+                transform: rotate(${Math.random() * 360}deg);
+                pointer-events: none;
+                transition: transform 2.5s ease-out, top 2.5s ease-in-out, opacity 2.5s ease-out;
+            `;
+            
+            document.body.appendChild(piece);
+            
+            setTimeout(() => {
+                const targetLeft = startLeft + (Math.random() - 0.5) * 15;
+                const targetTop = window.innerHeight + 20;
+                piece.style.top = `${targetTop}px`;
+                piece.style.left = `${targetLeft}%`;
+                piece.style.transform = `rotate(${Math.random() * 720}deg)`;
+                piece.style.opacity = '0';
+                
+                setTimeout(() => piece.remove(), 2500);
+            }, 50);
+        }
+    }
+
+    initRewardsUI() {
+        const btnRewards = document.getElementById('btn-rewards');
+        const btnCloseRewards = document.getElementById('btn-close-rewards');
+        const btnClaimDaily = document.getElementById('btn-claim-daily');
+        const dailyGrid = document.getElementById('daily-rewards-grid');
+        const weeklyList = document.getElementById('weekly-challenges-list');
+        
+        const dailyRewardAmounts = {
+            1: 10,
+            2: 15,
+            3: 25,
+            4: 35,
+            5: 50,
+            6: 70,
+            7: 100
+        };
+        
+        const weeklyChallengesData = {
+            1: { desc: "Bu haftanın öne çıkan topluluk seviyesini bitir.", target: 1, reward: 15 },
+            2: { desc: "Herhangi 3 ana bölümü Hardcore zorlukta tamamla.", target: 3, reward: 30 },
+            3: { desc: "Seviye Editöründe bir harita tasarla ve yayınla.", target: 1, reward: 50 }
+        };
+
+        const getTodayStr = () => {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        };
+
+        const getYesterdayStr = () => {
+            const d = new Date();
+            d.setDate(d.getDate() - 1);
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        };
+
+        const checkWeeklyReset = () => {
+            let resetTime = localStorage.getItem('viscora_weekly_reset_time');
+            const now = Date.now();
+            if (!resetTime || now > parseInt(resetTime)) {
+                localStorage.setItem('viscora_weekly_reset_time', (now + 7 * 24 * 60 * 60 * 1000).toString());
+                localStorage.setItem('viscora_weekly_progress', JSON.stringify({ 1: 0, 2: 0, 3: 0 }));
+                localStorage.setItem('viscora_weekly_claimed', JSON.stringify({ 1: false, 2: false, 3: false }));
+            }
+        };
+
+        checkWeeklyReset();
+
+        const updateRewardsPanel = () => {
+            checkWeeklyReset();
+            
+            const today = getTodayStr();
+            const yesterday = getYesterdayStr();
+            const lastClaim = localStorage.getItem('viscora_daily_last_claim_date') || '';
+            let streak = parseInt(localStorage.getItem('viscora_daily_streak')) || 0;
+            
+            let nextClaimableDay = 1;
+            let canClaimToday = false;
+            
+            if (lastClaim === '') {
+                nextClaimableDay = 1;
+                canClaimToday = true;
+            } else if (lastClaim === today) {
+                nextClaimableDay = streak;
+                canClaimToday = false;
+            } else if (lastClaim === yesterday) {
+                if (streak >= 7) {
+                    nextClaimableDay = 1;
+                } else {
+                    nextClaimableDay = streak + 1;
+                }
+                canClaimToday = true;
+            } else {
+                nextClaimableDay = 1;
+                canClaimToday = true;
+            }
+
+            if (dailyGrid) {
+                dailyGrid.innerHTML = '';
+                for (let day = 1; day <= 7; day++) {
+                    const box = document.createElement('div');
+                    box.className = 'daily-reward-box';
+                    
+                    let stateClass = 'locked';
+                    if (lastClaim === today && day <= nextClaimableDay) {
+                        stateClass = 'claimed';
+                    } else if (lastClaim !== today && day < nextClaimableDay) {
+                        stateClass = 'claimed';
+                    } else if (lastClaim !== today && day === nextClaimableDay) {
+                        stateClass = 'active';
+                    }
+                    
+                    box.classList.add(stateClass);
+                    
+                    if (day === 7) {
+                        box.style.gridColumn = 'span 2';
+                    }
+                    
+                    let giftIcon = '#icon-gem';
+                    if (day === 7) giftIcon = '#icon-box';
+                    
+                    box.innerHTML = `
+                        <div style="font-size: 0.6rem; color: #94a3b8; font-weight: bold; font-family: monospace;">${day}. GÜN</div>
+                        <svg class="icon-svg" style="width: 20px; height: 20px; margin: 4px 0; color: ${day === 7 ? '#fbbf24' : '#00f2fe'};"><use href="${giftIcon}"></use></svg>
+                        <div style="font-size: 0.65rem; font-weight: bold; color: ${stateClass === 'claimed' ? '#22c55e' : '#f1f5f9'};">${dailyRewardAmounts[day]} Kristal</div>
+                    `;
+                    
+                    dailyGrid.appendChild(box);
+                }
+            }
+
+            if (btnClaimDaily) {
+                if (canClaimToday) {
+                    btnClaimDaily.disabled = false;
+                    btnClaimDaily.textContent = `${nextClaimableDay}. GÜN ÖDÜLÜNÜ AL (+${dailyRewardAmounts[nextClaimableDay]} Kristal)`;
+                    btnClaimDaily.style.opacity = '1';
+                    btnClaimDaily.style.cursor = 'pointer';
+                } else {
+                    btnClaimDaily.disabled = true;
+                    btnClaimDaily.textContent = 'BUGÜNKÜ PROTOKOL TAMAMLANDI';
+                    btnClaimDaily.style.opacity = '0.5';
+                    btnClaimDaily.style.cursor = 'not-allowed';
+                }
+            }
+
+            if (weeklyList) {
+                weeklyList.innerHTML = '';
+                
+                let progress = {};
+                let claimed = {};
+                try {
+                    progress = JSON.parse(localStorage.getItem('viscora_weekly_progress') || '{"1":0,"2":0,"3":0}');
+                    claimed = JSON.parse(localStorage.getItem('viscora_weekly_claimed') || '{"1":false,"2":false,"3":false}');
+                } catch(e) {
+                    progress = { 1: 0, 2: 0, 3: 0 };
+                    claimed = { 1: false, 2: false, 3: false };
+                }
+
+                Object.keys(weeklyChallengesData).forEach(id => {
+                    const task = weeklyChallengesData[id];
+                    const currentProgress = Math.min(task.target, progress[id] || 0);
+                    const isCompleted = currentProgress >= task.target;
+                    const isClaimed = claimed[id] === true;
+
+                    const row = document.createElement('div');
+                    row.className = 'weekly-challenge-row';
+                    if (isClaimed || isCompleted) {
+                        row.classList.add('completed');
+                    }
+
+                    const fillPercent = (currentProgress / task.target) * 100;
+
+                    let btnHtml = '';
+                    if (isClaimed) {
+                        btnHtml = `<button class="menu-btn secondary-btn weekly-challenge-btn" disabled style="opacity: 0.5; background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.3); color: #22c55e;">ALINDI</button>`;
+                    } else if (isCompleted) {
+                        btnHtml = `<button class="menu-btn primary-btn weekly-challenge-btn btn-claim-weekly" data-id="${id}" style="background: #22c55e; border-color: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); cursor: pointer;">ÖDÜLÜ AL</button>`;
+                    } else {
+                        btnHtml = `<button class="menu-btn secondary-btn weekly-challenge-btn" disabled style="opacity: 0.5;">TAMAMLA</button>`;
+                    }
+
+                    row.innerHTML = `
+                        <div class="weekly-challenge-header">
+                            <span class="weekly-challenge-text">${task.desc}</span>
+                            <span class="weekly-challenge-reward">
+                                <svg class="icon-svg icon-gem" style="width: 12px; height: 12px; vertical-align: middle;"><use href="#icon-gem"></use></svg> +${task.reward}
+                            </span>
+                        </div>
+                        <div class="weekly-challenge-progress-bar-bg">
+                            <div class="weekly-challenge-progress-bar-fill" style="width: ${fillPercent}%;"></div>
+                        </div>
+                        <div class="weekly-challenge-footer">
+                            <span class="weekly-challenge-progress-text">${currentProgress} / ${task.target}</span>
+                            ${btnHtml}
+                        </div>
+                    `;
+
+                    weeklyList.appendChild(row);
+                });
+
+                const claimButtons = weeklyList.querySelectorAll('.btn-claim-weekly');
+                claimButtons.forEach(btn => {
+                    this.bindTouchClick(btn, () => {
+                        const challengeId = btn.getAttribute('data-id');
+                        let claimedState = {};
+                        try {
+                            claimedState = JSON.parse(localStorage.getItem('viscora_weekly_claimed') || '{"1":false,"2":false,"3":false}');
+                        } catch(e) { claimedState = { 1: false, 2: false, 3: false }; }
+
+                        claimedState[challengeId] = true;
+                        localStorage.setItem('viscora_weekly_claimed', JSON.stringify(claimedState));
+
+                        const rewardAmt = weeklyChallengesData[challengeId].reward;
+                        if (window.shopManager) {
+                            window.shopManager.addCrystals(rewardAmt);
+                        }
+                        
+                        this.showGlobalToast(`Tebrikler! ${rewardAmt} Kristal haftalık ödülünüz alındı.`, true);
+                        updateRewardsPanel();
+                    });
+                });
+            }
+
+            if (window.shopManager) {
+                const balanceEl = document.getElementById('rewards-crystal-balance');
+                if (balanceEl) balanceEl.textContent = window.shopManager.getBalance();
+            }
+        };
+
+        if (btnRewards) {
+            this.bindTouchClick(btnRewards, () => {
+                this.showScreen('rewards');
+                if (window.gameInstance) {
+                    window.gameInstance.state = 'REWARDS';
+                }
+                updateRewardsPanel();
+            });
+        }
+
+        if (btnCloseRewards) {
+            this.bindTouchClick(btnCloseRewards, () => {
+                if (window.gameInstance) {
+                    window.gameInstance.state = 'MENU';
+                }
+                this.showScreen('start');
+            });
+        }
+
+        if (btnClaimDaily) {
+            this.bindTouchClick(btnClaimDaily, () => {
+                const today = getTodayStr();
+                const yesterday = getYesterdayStr();
+                const lastClaim = localStorage.getItem('viscora_daily_last_claim_date') || '';
+                let streak = parseInt(localStorage.getItem('viscora_daily_streak')) || 0;
+                
+                if (lastClaim === today) {
+                    this.showGlobalToast("Bugünkü ödülünüzü zaten aldınız!", false);
+                    return;
+                }
+                
+                let nextStreak = 1;
+                if (lastClaim === yesterday) {
+                    nextStreak = streak >= 7 ? 1 : streak + 1;
+                } else {
+                    nextStreak = 1;
+                }
+
+                const rewardAmount = dailyRewardAmounts[nextStreak];
+                if (window.shopManager) {
+                    window.shopManager.addCrystals(rewardAmount);
+                }
+
+                localStorage.setItem('viscora_daily_last_claim_date', today);
+                localStorage.setItem('viscora_daily_streak', nextStreak.toString());
+
+                this.showGlobalToast(`Tebrikler! ${nextStreak}. Gün ödülü olarak ${rewardAmount} Kristal aldınız!`, true);
+                
+                this.triggerConfetti();
+                updateRewardsPanel();
+            });
+        }
+    }
+
+    updateWeeklyChallenge(id, amount) {
+        let progress = {};
+        try {
+            progress = JSON.parse(localStorage.getItem('viscora_weekly_progress') || '{"1":0,"2":0,"3":0}');
+        } catch(e) {
+            progress = { 1: 0, 2: 0, 3: 0 };
+        }
+
+        progress[id] = (progress[id] || 0) + amount;
+        localStorage.setItem('viscora_weekly_progress', JSON.stringify(progress));
+        console.log(`Weekly Challenge ${id} progress updated. Current:`, progress[id]);
     }
 }
 export default UIManager;

@@ -3765,3 +3765,174 @@ button:hover .icon-svg,
     border-color: #38bdf8 !important;
     box-shadow: 0 0 8px rgba(56, 189, 248, 0.3) !important;
 }
+
+/* Siber Ödüller Paneli Stilleri */
+.daily-reward-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    border-radius: 8px;
+    padding: 6px;
+    text-align: center;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    min-height: 70px;
+    position: relative;
+    overflow: hidden;
+}
+
+.daily-reward-box.claimed {
+    opacity: 0.6;
+    border-color: rgba(34, 197, 94, 0.3);
+    background: rgba(20, 83, 45, 0.15);
+}
+
+.daily-reward-box.active {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.25);
+    animation: reward-pulse 2s infinite ease-in-out;
+}
+
+.daily-reward-box.active::after {
+    content: 'AKTİF';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.45rem;
+    color: #38bdf8;
+    font-weight: bold;
+    font-family: monospace;
+    letter-spacing: 0.5px;
+    background: rgba(56, 189, 248, 0.2);
+    padding: 1px 3px;
+    border-radius: 3px;
+}
+
+.daily-reward-box.claimed::after {
+    content: 'ALINDI';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.45rem;
+    color: #22c55e;
+    font-weight: bold;
+    font-family: monospace;
+    background: rgba(34, 197, 94, 0.2);
+    padding: 1px 3px;
+    border-radius: 3px;
+}
+
+.daily-reward-box.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+@keyframes reward-pulse {
+    0% { border-color: rgba(56, 189, 248, 0.3); box-shadow: 0 0 4px rgba(56, 189, 248, 0.1); }
+    50% { border-color: rgba(56, 189, 248, 0.8); box-shadow: 0 0 10px rgba(56, 189, 248, 0.35); }
+    100% { border-color: rgba(56, 189, 248, 0.3); box-shadow: 0 0 4px rgba(56, 189, 248, 0.1); }
+}
+
+/* Haftalık Görev Satırları */
+.weekly-challenge-row {
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(56, 189, 248, 0.1);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.weekly-challenge-row.completed {
+    border-color: rgba(34, 197, 94, 0.2);
+    background: rgba(20, 83, 45, 0.08);
+}
+
+.weekly-challenge-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.weekly-challenge-text {
+    font-size: 0.72rem;
+    color: #f1f5f9;
+    line-height: 1.35;
+    font-family: monospace;
+}
+
+.weekly-challenge-reward {
+    font-size: 0.72rem;
+    font-weight: bold;
+    color: #00f2fe;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.weekly-challenge-progress-bar-bg {
+    background: rgba(15, 23, 42, 0.8);
+    height: 6px;
+    border-radius: 3px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.weekly-challenge-progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #38bdf8, #00f2fe);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.weekly-challenge-row.completed .weekly-challenge-progress-bar-fill {
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+}
+
+.weekly-challenge-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2px;
+}
+
+.weekly-challenge-progress-text {
+    font-size: 0.65rem;
+    color: #94a3b8;
+    font-family: monospace;
+}
+
+.weekly-challenge-btn {
+    margin: 0 !important;
+    padding: 3px 8px !important;
+    font-size: 0.6rem !important;
+    height: auto !important;
+    border-radius: 4px !important;
+}
+
+/* Yatay Modda Aksiyon Butonu */
+@media (orientation: landscape) and (max-height: 640px) {
+    #start-screen #btn-rewards {
+        flex: 1.2 !important;
+        margin: 0 !important;
+        font-size: 0.74rem !important;
+        padding: 0.5rem 0.3rem !important;
+        border-radius: 10px !important;
+        white-space: nowrap !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+}
