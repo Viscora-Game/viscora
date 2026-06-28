@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v268';
-import { ViscosityList } from './viscosity.js?v=v268';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v268';
-import { CloudSaveManager } from './cloud_save.js?v=v268';
+import { audio } from './audio.js?v=v269';
+import { ViscosityList } from './viscosity.js?v=v269';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v269';
+import { CloudSaveManager } from './cloud_save.js?v=v269';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -3744,7 +3744,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v268`;
+                img.src = `assets/avatars/${av.id}.png?v=v269`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -3804,7 +3804,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v268`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v269`;
             }
         };
         

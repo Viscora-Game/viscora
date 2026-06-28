@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v268';
-import { Level } from './level.js?v=v268';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v268';
-import { UIManager } from './ui.js?v=v268';
-import { CloudSaveManager } from './cloud_save.js?v=v268';
-import { audio } from './audio.js?v=v268';
-import { LevelEditor } from './editor.js?v=v268';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v268';
+import { Player } from './player.js?v=v269';
+import { Level } from './level.js?v=v269';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v269';
+import { UIManager } from './ui.js?v=v269';
+import { CloudSaveManager } from './cloud_save.js?v=v269';
+import { audio } from './audio.js?v=v269';
+import { LevelEditor } from './editor.js?v=v269';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v269';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1547,7 +1547,15 @@ export class GameManager {
             this.camera.x = Math.max(minX, Math.min(this.camera.x, maxX));
         }
 
-        const cameraYBuffer = 350;
+        // Haritadaki en yüksek platformun (negatif Y) konumuna göre kamera sınırını dinamik genişlet
+        let minPlatformY = 0;
+        if (this.level && this.level.platforms) {
+            this.level.platforms.forEach(p => {
+                if (p.y < minPlatformY) minPlatformY = p.y;
+            });
+        }
+        const cameraYBuffer = Math.max(350, -minPlatformY + 250);
+
         if (this.cssHeight > this.level.height + cameraYBuffer * 2) {
             this.camera.y = (this.level.height - this.cssHeight) / 2;
         } else {
