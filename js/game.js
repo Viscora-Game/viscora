@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v246';
-import { Level } from './level.js?v=v246';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v246';
-import { UIManager } from './ui.js?v=v246';
-import { CloudSaveManager } from './cloud_save.js?v=v246';
-import { audio } from './audio.js?v=v246';
-import { LevelEditor } from './editor.js?v=v246';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v246';
+import { Player } from './player.js?v=v247';
+import { Level } from './level.js?v=v247';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v247';
+import { UIManager } from './ui.js?v=v247';
+import { CloudSaveManager } from './cloud_save.js?v=v247';
+import { audio } from './audio.js?v=v247';
+import { LevelEditor } from './editor.js?v=v247';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v247';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -633,18 +633,23 @@ export class GameManager {
         // Hikaye Terminali Tetikleme (Belirtilen bölümlerde ilk girişte)
         const storyLevels = [1, 2, 3, 5, 9, 10, 11, 15, 16, 17, 20, 21, 22, 26, 29, 30];
         if (showTitleCard && storyLevels.includes(this.currentLevel)) {
-            this.state = 'STORY';
-            // Hikaye terminali açıkken oyuncunun maddeleşme animasyonunu henüz başlatma ve gizle
-            this.player.introState = null;
-            this.player.introTimer = 0;
+            if (this.currentLevel === 1) {
+                this.state = 'INTRO_CINEMATIC';
+                this.initIntroCinematic();
+            } else {
+                this.state = 'STORY';
+                // Hikaye terminali açıkken oyuncunun maddeleşme animasyonunu henüz başlatma ve gizle
+                this.player.introState = null;
+                this.player.introTimer = 0;
 
-            this.ui.showStoryTerminal(this.currentLevel, () => {
-                this.state = 'PLAYING';
-                // Terminal kapandıktan sonra maddeleşme animasyonunu tetikle
-                this.player.introState = 'materializing';
-                this.player.introTimer = 60;
-                this.lastTime = performance.now();
-            });
+                this.ui.showStoryTerminal(this.currentLevel, () => {
+                    this.state = 'PLAYING';
+                    // Terminal kapandıktan sonra maddeleşme animasyonunu tetikle
+                    this.player.introState = 'materializing';
+                    this.player.introTimer = 60;
+                    this.lastTime = performance.now();
+                });
+            }
         } else {
             this.state = 'PLAYING';
         }
@@ -1101,7 +1106,7 @@ export class GameManager {
         }
 
         // Menülerde dikey modda gezinmeye izin ver, oyun başlarken veya editördeyken yatay mod uyarısı göster
-        const isGameActive = this.state === 'PLAYING' || this.state === 'EDITOR' || this.state === 'PAUSED' || this.state === 'WIN' || this.state === 'GAMEOVER';
+        const isGameActive = this.state === 'PLAYING' || this.state === 'INTRO_CINEMATIC' || this.state === 'STORY' || this.state === 'EDITOR' || this.state === 'PAUSED' || this.state === 'WIN' || this.state === 'GAMEOVER';
         if (isGameActive) {
             document.body.classList.add('game-active');
         } else {
@@ -1127,6 +1132,8 @@ export class GameManager {
                     }
                 }
             }
+        } else if (this.state === 'INTRO_CINEMATIC') {
+            this.updateIntroCinematic(elapsed);
         } else if (this.state === 'EDITOR') {
             if (this.editor && this.editor.active) {
                 const dt = elapsed / 16.666;
@@ -1804,6 +1811,12 @@ export class GameManager {
 
         // Ekranı temizle
         this.ctx.clearRect(0, 0, this.cssWidth, this.cssHeight);
+
+        // --- INTRO CINEMATIC DRAWING ---
+        if (this.state === 'INTRO_CINEMATIC') {
+            this.drawIntroCinematic();
+            return;
+        }
 
         // --- MENU ARKA PLAN SIMULASYON ÇIZIMI ---
         if (this.state === 'MENU' || this.state === 'SHOP') {
@@ -2816,6 +2829,236 @@ export class GameManager {
         }
         
         this.splatters.push(...splatterGroup);
+    }
+
+    initIntroCinematic() {
+        this.introTimer = 0;
+        this.introPhase = 'matrix'; // phases: 'matrix', 'glitch_alarm', 'shatter', 'flash', 'end'
+        this.introMatrixLines = [];
+        this.introGlitchIntensity = 0;
+        this.introCoreParticles = [];
+        this.introCoreX = this.cssWidth / 2;
+        this.introCoreY = this.cssHeight / 2;
+        this.introCoreRadius = 60;
+        this.introAlarmPlayed = false;
+        this.introShatterPlayed = false;
+        this.introMatrixChars = "01010101ABCDEF#@$*".split("");
+
+        // Initialize some matrix columns
+        const cols = Math.floor(this.cssWidth / 20) + 1;
+        for (let i = 0; i < cols; i++) {
+            this.introMatrixLines.push({
+                x: i * 20,
+                y: Math.random() * -this.cssHeight,
+                speed: 3 + Math.random() * 5,
+                chars: []
+            });
+        }
+    }
+
+    updateIntroCinematic(elapsed) {
+        this.introTimer += elapsed;
+        
+        // Matrix lines update
+        this.introMatrixLines.forEach(line => {
+            line.y += line.speed * (elapsed / 16.66);
+            if (line.y > this.cssHeight + 100) {
+                line.y = -100;
+                line.speed = 3 + Math.random() * 5;
+            }
+            // Periodically add a character
+            if (Math.random() < 0.15) {
+                const char = this.introMatrixChars[Math.floor(Math.random() * this.introMatrixChars.length)];
+                line.chars.push({ char, yOffset: 0 });
+                if (line.chars.length > 15) {
+                    line.chars.shift();
+                }
+            }
+        });
+
+        // Phase transitions
+        if (this.introTimer < 2500) {
+            this.introPhase = 'matrix';
+        } else if (this.introTimer < 4000) {
+            this.introPhase = 'glitch_alarm';
+            this.introGlitchIntensity = 0.15 + Math.sin(this.introTimer * 0.05) * 0.1;
+            
+            // Alarm sound
+            if (!this.introAlarmPlayed) {
+                this.introAlarmPlayed = true;
+                audio.playSystemAlert();
+            }
+        } else if (this.introTimer < 5200) {
+            this.introPhase = 'shatter';
+            this.introGlitchIntensity = 0.45;
+            
+            // Shatter sound and particles initialization
+            if (!this.introShatterPlayed) {
+                this.introShatterPlayed = true;
+                audio.playShatter();
+                
+                // Explode the core
+                for (let i = 0; i < 80; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 2 + Math.random() * 8;
+                    this.introCoreParticles.push({
+                        x: this.introCoreX,
+                        y: this.introCoreY,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        radius: 2 + Math.random() * 4,
+                        color: Math.random() < 0.6 ? '#ef4444' : '#f59e0b',
+                        alpha: 1.0,
+                        life: 1.0,
+                        decay: 0.015 + Math.random() * 0.02
+                    });
+                }
+            }
+            
+            // Update particles
+            this.introCoreParticles.forEach(p => {
+                p.x += p.vx * (elapsed / 16.66);
+                p.y += p.vy * (elapsed / 16.66);
+                p.life -= p.decay;
+                p.alpha = Math.max(0, p.life);
+            });
+        } else if (this.introTimer < 5600) {
+            this.introPhase = 'flash';
+            this.introGlitchIntensity = 0.05;
+        } else {
+            // End of cinematic! Transition to STORY screen
+            this.introPhase = 'end';
+            this.state = 'STORY';
+            
+            this.ui.showStoryTerminal(this.currentLevel, () => {
+                this.state = 'PLAYING';
+                // Trigger player materialization
+                this.player.introState = 'materializing';
+                this.player.introTimer = 60;
+                this.lastTime = performance.now();
+            });
+        }
+    }
+
+    drawIntroCinematic() {
+        // Clear screen with solid black
+        this.ctx.fillStyle = '#020204';
+        this.ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
+
+        // 1. Draw falling Matrix code
+        this.ctx.font = '14px monospace';
+        this.ctx.textAlign = 'center';
+        
+        this.introMatrixLines.forEach(line => {
+            // Matrix colors based on phase
+            if (this.introPhase === 'matrix') {
+                this.ctx.fillStyle = 'rgba(16, 185, 129, 0.4)'; // green
+            } else if (this.introPhase === 'glitch_alarm') {
+                this.ctx.fillStyle = Math.random() < 0.5 ? 'rgba(245, 158, 11, 0.4)' : 'rgba(239, 68, 68, 0.4)'; // yellow/red alert
+            } else {
+                this.ctx.fillStyle = 'rgba(239, 68, 68, 0.15)'; // faint red
+            }
+            
+            let y = line.y;
+            line.chars.forEach((c, idx) => {
+                const charY = y - (idx * 16);
+                if (charY > 0 && charY < this.cssHeight) {
+                    // Bright lead character
+                    if (idx === line.chars.length - 1 && this.introPhase === 'matrix') {
+                        this.ctx.fillStyle = '#ffffff';
+                    }
+                    this.ctx.fillText(c.char, line.x, charY);
+                }
+            });
+        });
+
+        // 2. Draw Core Node
+        if (this.introPhase === 'matrix' || this.introPhase === 'glitch_alarm') {
+            const centerX = this.cssWidth / 2;
+            const centerY = this.cssHeight / 2;
+            this.introCoreX = centerX;
+            this.introCoreY = centerY;
+            
+            // Draw concentric background waves
+            const pulse = 1 + Math.sin(this.introTimer * 0.005) * 0.05;
+            const radius = this.introCoreRadius * pulse;
+            
+            this.ctx.save();
+            this.ctx.shadowColor = this.introPhase === 'matrix' ? '#10b981' : '#ef4444';
+            this.ctx.shadowBlur = 15;
+            
+            // Outer ring
+            this.ctx.strokeStyle = this.introPhase === 'matrix' ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.7)';
+            this.ctx.lineWidth = 3;
+            this.ctx.beginPath();
+            this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            this.ctx.stroke();
+
+            // Inner core
+            this.ctx.fillStyle = this.introPhase === 'matrix' ? 'rgba(16, 185, 129, 0.85)' : 'rgba(239, 68, 68, 0.9)';
+            this.ctx.beginPath();
+            this.ctx.arc(centerX, centerY, radius * 0.6, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.restore();
+
+            // Text tag
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.font = 'bold 12px monospace';
+            this.ctx.textAlign = 'center';
+            if (this.introPhase === 'matrix') {
+                this.ctx.fillText("CORE: VISCORA_NET [STATUS: OK]", centerX, centerY + radius + 25);
+            } else {
+                this.ctx.fillStyle = '#ef4444';
+                if (Math.floor(this.introTimer / 150) % 2 === 0) {
+                    this.ctx.fillText("SYSTEM WARNING: UNKNOWN EXPLOIT DETECTED", centerX, centerY + radius + 25);
+                }
+            }
+        }
+
+        // 3. Draw Core Shattered Particles
+        if (this.introPhase === 'shatter') {
+            this.introCoreParticles.forEach(p => {
+                if (p.alpha > 0) {
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.alpha;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            });
+            this.ctx.globalAlpha = 1.0;
+        }
+
+        // 4. Glitch Screen Slices (Horizontal parazit)
+        if (this.introGlitchIntensity > 0 && Math.random() < this.introGlitchIntensity) {
+            const slices = 3 + Math.floor(Math.random() * 5);
+            for (let i = 0; i < slices; i++) {
+                const sy = Math.random() * this.cssHeight;
+                const sh = 10 + Math.random() * 40;
+                const disp = (Math.random() - 0.5) * 45;
+                
+                this.ctx.drawImage(
+                    this.canvas,
+                    0, sy, this.cssWidth, sh,
+                    disp, sy, this.cssWidth, sh
+                );
+            }
+            
+            // Draw random horizontal flash lines
+            this.ctx.fillStyle = Math.random() < 0.5 ? 'rgba(239, 68, 68, 0.45)' : 'rgba(245, 158, 11, 0.45)';
+            this.ctx.fillRect(0, Math.random() * this.cssHeight, this.cssWidth, 2 + Math.random() * 6);
+        }
+
+        // 5. White/Green recovery flash
+        if (this.introPhase === 'flash') {
+            this.ctx.fillStyle = 'rgba(16, 185, 129, 0.85)';
+            this.ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
+            
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.font = 'bold 16px monospace';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText("INITIALIZING BACKUP SYSTEM_RECOVERY...", this.cssWidth / 2, this.cssHeight / 2);
+        }
     }
 }
 export default GameManager;

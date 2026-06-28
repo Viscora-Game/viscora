@@ -1330,6 +1330,90 @@ class AudioManager {
         }
     }
 
+    playSystemAlert() {
+        try {
+            if (!this.ctx || this.isMuted || this.isSfxMuted || this.sfxVolumeLevel === 0) return;
+            this.resume();
+
+            const now = this.ctx.currentTime;
+            
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sawtooth';
+            // Alternating alarm frequency
+            osc.frequency.setValueAtTime(600, now);
+            osc.frequency.setValueAtTime(450, now + 0.12);
+            osc.frequency.setValueAtTime(600, now + 0.24);
+            osc.frequency.setValueAtTime(450, now + 0.36);
+
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+            osc.connect(gain);
+            gain.connect(this.sfxVolume);
+
+            osc.start(now);
+            osc.stop(now + 0.5);
+        } catch (e) {
+            console.error("Error playing system alert SFX:", e);
+        }
+    }
+
+    playShatter() {
+        try {
+            if (!this.ctx || this.isMuted || this.isSfxMuted || this.sfxVolumeLevel === 0) return;
+            this.resume();
+
+            const now = this.ctx.currentTime;
+
+            // White noise burst mixed with a falling triangle wave
+            const bufferSize = (this.ctx.sampleRate || 44100) * 0.4; // 0.4s
+            const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate || 44100);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noiseNode = this.ctx.createBufferSource();
+            noiseNode.buffer = buffer;
+
+            const noiseFilter = this.ctx.createBiquadFilter();
+            noiseFilter.type = 'lowpass';
+            noiseFilter.frequency.setValueAtTime(800, now);
+            noiseFilter.frequency.exponentialRampToValueAtTime(80, now + 0.4);
+
+            const noiseGain = this.ctx.createGain();
+            noiseGain.gain.setValueAtTime(0.7, now);
+            noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+            noiseNode.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(this.sfxVolume);
+
+            noiseNode.start(now);
+            noiseNode.stop(now + 0.4);
+
+            const osc = this.ctx.createOscillator();
+            const oscGain = this.ctx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(180, now);
+            osc.frequency.exponentialRampToValueAtTime(30, now + 0.35);
+
+            oscGain.gain.setValueAtTime(0.5, now);
+            oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+            osc.connect(oscGain);
+            oscGain.connect(this.sfxVolume);
+
+            osc.start(now);
+            osc.stop(now + 0.35);
+        } catch (e) {
+            console.error("Error playing shatter SFX:", e);
+        }
+    }
+
     /**
      * Updates or creates the procedural sizzling sound for player flame heating.
      * @param {number} intensity - The player's current flameHeat value (0.0 to 1.0)

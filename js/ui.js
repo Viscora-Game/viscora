@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v246';
-import { ViscosityList } from './viscosity.js?v=v246';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v246';
-import { CloudSaveManager } from './cloud_save.js?v=v246';
+import { audio } from './audio.js?v=v247';
+import { ViscosityList } from './viscosity.js?v=v247';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v247';
+import { CloudSaveManager } from './cloud_save.js?v=v247';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -395,11 +395,11 @@ export class UIManager {
     showStoryTerminal(levelNumber, onComplete) {
         const terminalTexts = {
             1: [
-                { text: "> SİSTEM HATA RAPORU: Sektör 01'de tanımsız bellek sızıntısı tespit edildi.", type: "warning" },
-                { text: "> BİLGİ: Deneysel veri yığını 'Null' aktif edildi. Form: Yeşil Jöle (Dengeli Viskozite).", type: "command" },
-                { text: "> MEKANİK: Yön tuşları ile hareket et. [SPACE] ile zıpla. [E] ile form değiştir.", type: "command" },
-                { text: "> MEKANİK: Kırmızı devriye botları seni takip eder. Üzerlerine zıplayarak ez!", type: "command" },
-                { text: 'Null: "Neredeyim ben?... Bu sistemden çıkmam gerek."', type: "dialogue" },
+                { text: "> SİSTEM HATA RAPORU: Ana veri çekirdeği virüs saldırısıyla parçalandı!", type: "warning" },
+                { text: "> SİSTEM: Acil durum kurtarma protokolü etkinleştirildi. Deneysel anomali hücresi 'Null' derlendi.", type: "command" },
+                { text: "> BİLGİ: Form: Yeşil Jöle (Dengeli Viskozite). Yön tuşları ile hareket et, [SPACE] ile zıpla, [E] ile form değiştir.", type: "command" },
+                { text: "> BİLGİ: Kırmızı devriye botları sistemi koruyor. Üzerlerine zıplayarak ez!", type: "command" },
+                { text: 'Null: "Veri çekirdeği yok oldu... Çökmeden önce bu sistemden kaçmam gerek."', type: "dialogue" },
                 { text: "> SİSTEM: Güvenlik temizlik protokolü başlatılıyor...", type: "danger" }
             ],
             2: [
