@@ -215,6 +215,7 @@ html, body {
 
 /* Cam Görünümlü Kart Tasarımları (Glassmorphism) */
 .menu-card {
+    position: relative;
     background: var(--bg-card);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -3690,7 +3691,44 @@ button:hover .icon-svg,
 
 /* Oyuncu Profil Kartı Widget & Modal Stilleri */
 #player-profile-widget {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 20px;
+    padding: 5px 12px;
+    cursor: pointer;
+    text-shadow: 0 0 5px rgba(56,189,248,0.3);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+    z-index: 10;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+#profile-widget-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    filter: drop-shadow(0 0 5px currentColor);
+}
+
+#profile-widget-name {
+    font-family: monospace;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #f8fafc;
+    max-width: 85px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 #player-profile-widget:hover {
