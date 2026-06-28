@@ -192,16 +192,28 @@ def merge_save_data(db_save, incoming_save):
         if key in incoming_save and incoming_save[key]:
             merged[key] = incoming_save[key]
             
-    # 4. Diğer Ayarlar ve Karakter Bilgileri (Boş olmayanları ez + Varsayılan koruması)
-    for key in ['avatar', 'authorName', 'difficulty', 'customControls', 'likedMaps', 'dailyLastClaimDate', 'dailyStreak', 'activeSlot', 'activeTrail', 'activeAccessory', 'activeEyes']:
+    # 4. Diğer Ayarlar ve Karakter Bilgileri (Boş olmayanları ez + Akıllı Zaman Damgası Koruması)
+    db_profile_time = int(db_save.get('profileLastChanged', 0) or 0)
+    inc_profile_time = int(incoming_save.get('profileLastChanged', 0) or 0)
+    
+    # Eğer gelen cihazdaki profil değişikliği sunucudakinden daha yeniyse, ismi, avatarı ve aktif kozmetikleri güncelle
+    if inc_profile_time >= db_profile_time:
+        for key in ['avatar', 'authorName', 'activeTrail', 'activeAccessory', 'activeEyes', 'profileLastChanged']:
+            if key in incoming_save:
+                val = incoming_save[key]
+                if val not in [None, ""]:
+                    # Varsayılan koruması (Ekstra Güvenlik)
+                    if key == 'authorName' and val in ['Tasarımcı', 'Oyuncu', 'oyuncu'] and db_save.get('authorName') not in [None, "", 'Tasarımcı', 'Oyuncu', 'oyuncu']:
+                        continue
+                    if key == 'avatar' and val == 'slime_king' and db_save.get('avatar') not in [None, "", 'slime_king']:
+                        continue
+                    merged[key] = val
+                    
+    # Profil dışı diğer genel ayarları doğrudan eşitle
+    for key in ['difficulty', 'customControls', 'likedMaps', 'dailyLastClaimDate', 'dailyStreak', 'activeSlot']:
         if key in incoming_save:
             val = incoming_save[key]
             if val not in [None, "", [], {}]:
-                # Özel Koruma: Varsayılan değerlerin sunucudaki özel değerleri ezmesini engelle
-                if key == 'authorName' and val in ['Tasarımcı', 'Oyuncu', 'oyuncu'] and db_save.get('authorName') not in [None, "", 'Tasarımcı', 'Oyuncu', 'oyuncu']:
-                    continue
-                if key == 'avatar' and val == 'slime_king' and db_save.get('avatar') not in [None, "", 'slime_king']:
-                    continue
                 merged[key] = val
             
     return merged

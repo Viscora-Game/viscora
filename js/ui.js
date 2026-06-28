@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v284';
-import { ViscosityList } from './viscosity.js?v=v284';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v284';
-import { CloudSaveManager } from './cloud_save.js?v=v284';
+import { audio } from './audio.js?v=v285';
+import { ViscosityList } from './viscosity.js?v=v285';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v285';
+import { CloudSaveManager } from './cloud_save.js?v=v285';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -3891,7 +3891,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v284`;
+                img.src = `assets/avatars/${av.id}.png?v=v285`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -3951,7 +3951,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v284`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v285`;
             }
         };
         
@@ -4017,10 +4017,14 @@ export class UIManager {
                 localStorage.setItem('viscora_author_name', name);
                 localStorage.setItem('viscora_avatar', this.selectedAvatar);
                 localStorage.setItem('viscora_username_set', 'true');
+                localStorage.setItem('viscora_profile_last_changed', String(Date.now()));
                 
                 updateWidget();
                 modal.classList.add('hidden');
                 this.showGlobalToast("Profil başarıyla kaydedildi!", true);
+                
+                // Profil değiştiğinde arka planda buluta hemen eşitle
+                CloudSaveManager.saveProgress().catch(e => console.warn("Otomatik profil eşitleme hatası:", e));
             });
         }
         
