@@ -1,22 +1,33 @@
-const CACHE_NAME = 'viscora-cache-v261';
+const CACHE_NAME = 'viscora-cache-v262';
 const ASSETS = [
   './',
   './index.html',
-  './index.css?v=v261',
+  './index.css?v=v262',
   './manifest.json',
-  './js/main.js?v=v261',
-  './js/game.js?v=v261',
-  './js/audio.js?v=v261',
-  './js/ui.js?v=v261',
-  './js/level.js?v=v261',
-  './js/player.js?v=v261',
-  './js/enemies.js?v=v261',
-  './js/viscosity.js?v=v261',
-  './js/boss.js?v=v261',
-  './js/editor.js?v=v261',
-  './js/controls_customizer.js?v=v261',
-  './js/cloud_save.js?v=v261',
-  './assets/dragon_head.png'
+  './js/main.js?v=v262',
+  './js/game.js?v=v262',
+  './js/audio.js?v=v262',
+  './js/ui.js?v=v262',
+  './js/level.js?v=v262',
+  './js/player.js?v=v262',
+  './js/enemies.js?v=v262',
+  './js/viscosity.js?v=v262',
+  './js/boss.js?v=v262',
+  './js/editor.js?v=v262',
+  './js/controls_customizer.js?v=v262',
+  './js/cloud_save.js?v=v262',
+  './js/generator.js?v=v262',
+  './js/shop.js?v=v262',
+  './assets/dragon_head.png',
+  './assets/flamethrower.png',
+  './assets/avatars/slime_king.png?v=v262',
+  './assets/avatars/mecha_drone.png?v=v262',
+  './assets/avatars/fire_elemental.png?v=v262',
+  './assets/avatars/ancient_totem.png?v=v262',
+  './assets/avatars/crystal_shard.png?v=v262',
+  './assets/avatars/ghost_orb.png?v=v262',
+  './assets/avatars/tentacle_blob.png?v=v262',
+  './assets/avatars/shadow_artifact.png?v=v262'
 ];
 
 self.addEventListener('install', (e) => {
