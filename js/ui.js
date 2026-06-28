@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v274';
-import { ViscosityList } from './viscosity.js?v=v274';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v274';
-import { CloudSaveManager } from './cloud_save.js?v=v274';
+import { audio } from './audio.js?v=v275';
+import { ViscosityList } from './viscosity.js?v=v275';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v275';
+import { CloudSaveManager } from './cloud_save.js?v=v275';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -1037,8 +1037,14 @@ export class UIManager {
                         lblSyncCode.textContent = res.syncCode;
                     }
                     
-                    alert("Bulut kaydınız başarıyla geri yüklendi ve senkronize edildi!");
-                    window.location.reload();
+                    // Giriş sonrası yerel ilerlemeyi HEMEN buluta eşitle
+                    CloudSaveManager.saveProgress().then(() => {
+                        alert("Bulut kaydınız başarıyla senkronize edildi!");
+                        window.location.reload();
+                    }).catch(err => {
+                        console.warn("Eşitleme hatası:", err);
+                        window.location.reload();
+                    });
                 } else {
                     if (googleStatus) {
                         googleStatus.textContent = 'Bağlantı hatası: ' + (res.error || 'Bilinmeyen Hata');
@@ -3790,7 +3796,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v274`;
+                img.src = `assets/avatars/${av.id}.png?v=v275`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -3850,7 +3856,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v274`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v275`;
             }
         };
         
