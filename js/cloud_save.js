@@ -16,7 +16,16 @@ export class CloudSaveManager {
             difficulty: 'viscora_difficulty',
             customControls: 'viscora_custom_controls',
             likedMaps: 'viscora_liked_maps',
-            balanceSig: 'viscora_balance_sig'
+            balanceSig: 'viscora_balance_sig',
+            avatar: 'viscora_avatar',
+            dailyLastClaimDate: 'viscora_daily_last_claim_date',
+            dailyStreak: 'viscora_daily_streak',
+            draftSlot1: 'viscora_draft_slot_1',
+            draftSlot2: 'viscora_draft_slot_2',
+            draftSlot3: 'viscora_draft_slot_3',
+            draftSlot4: 'viscora_draft_slot_4',
+            draftSlot5: 'viscora_draft_slot_5',
+            activeSlot: 'viscora_active_slot'
         };
     }
 
