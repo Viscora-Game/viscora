@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v254';
-import { ViscosityList } from './viscosity.js?v=v254';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v254';
-import { CloudSaveManager } from './cloud_save.js?v=v254';
+import { audio } from './audio.js?v=v255';
+import { ViscosityList } from './viscosity.js?v=v255';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v255';
+import { CloudSaveManager } from './cloud_save.js?v=v255';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -3757,8 +3757,8 @@ export class UIManager {
                 // Add image
                 const img = document.createElement('img');
                 img.src = `assets/avatars/${av.id}.png`;
-                img.style.width = '48px';
-                img.style.height = '44px';
+                img.style.width = '42px';
+                img.style.height = '42px';
                 img.style.objectFit = 'contain';
                 img.style.filter = 'drop-shadow(0 0 4px rgba(0, 242, 254, 0.25))';
                 
