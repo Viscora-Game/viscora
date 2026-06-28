@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v251';
-import { ViscosityList } from './viscosity.js?v=v251';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v251';
-import { CloudSaveManager } from './cloud_save.js?v=v251';
+import { audio } from './audio.js?v=v252';
+import { ViscosityList } from './viscosity.js?v=v252';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v252';
+import { CloudSaveManager } from './cloud_save.js?v=v252';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -3715,18 +3715,25 @@ export class UIManager {
         const btnSave = document.getElementById('btn-save-profile');
         const btnClose = document.getElementById('btn-close-profile');
         
-        // Define avatars list
+        // Define avatars list with precise filenames and user generated labels
         this.profileAvatars = [
-            { char: '🟢' },
-            { char: '🔵' },
-            { char: '🌸' },
-            { char: '🤖' },
-            { char: '👾' },
-            { char: '🚀' }
+            { id: 'slime_king', label: 'Slime King' },
+            { id: 'mecha_drone', label: 'Mecha-Drone' },
+            { id: 'fire_elemental', label: 'Fire-Elemental' },
+            { id: 'ancient_totem', label: 'Ancient Totem' },
+            { id: 'crystal_shard', label: 'Crystal Shard' },
+            { id: 'ghost_orb', label: 'Ghost-Orb' },
+            { id: 'tentacle_blob', label: 'Tentacle-Blob' },
+            { id: 'shadow_artifact', label: 'Shadow-Artifact' }
         ];
         
         // Selected avatar state
-        this.selectedAvatar = localStorage.getItem('viscora_avatar') || '🟢';
+        this.selectedAvatar = localStorage.getItem('viscora_avatar') || 'slime_king';
+        if (this.selectedAvatar.includes('🟢') || this.selectedAvatar.includes('🔵') || this.selectedAvatar.includes('🌸') || this.selectedAvatar.includes('🤖') || this.selectedAvatar.includes('👾') || this.selectedAvatar.includes('🚀')) {
+            // Reset legacy emoji avatars to default new image avatar
+            this.selectedAvatar = 'slime_king';
+            localStorage.setItem('viscora_avatar', 'slime_king');
+        }
         
         // Render avatar list inside picker
         if (avatarPicker) {
@@ -3735,35 +3742,61 @@ export class UIManager {
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'avatar-choice-btn';
-                btn.style.width = '100%';
-                btn.style.height = '42px';
+                btn.dataset.avatar = av.id;
+                btn.style.display = 'flex';
+                btn.style.flexDirection = 'column';
+                btn.style.alignItems = 'center';
+                btn.style.justifyContent = 'center';
+                btn.style.gap = '4px';
+                btn.style.padding = '6px';
                 btn.style.background = 'rgba(15, 23, 42, 0.5)';
                 btn.style.border = '1px solid rgba(56, 189, 248, 0.15)';
                 btn.style.borderRadius = '8px';
-                btn.style.fontSize = '1.3rem';
                 btn.style.cursor = 'pointer';
-                btn.style.display = 'flex';
-                btn.style.alignItems = 'center';
-                btn.style.justifyContent = 'center';
-                btn.innerHTML = av.char;
                 
-                if (av.char === this.selectedAvatar) {
+                // Add image
+                const img = document.createElement('img');
+                img.src = `assets/avatars/${av.id}.png`;
+                img.style.width = '36px';
+                img.style.height = '36px';
+                img.style.objectFit = 'contain';
+                img.style.filter = 'drop-shadow(0 0 4px rgba(0, 242, 254, 0.25))';
+                
+                // Add label
+                const label = document.createElement('span');
+                label.textContent = av.label;
+                label.style.fontSize = '0.55rem';
+                label.style.color = '#94a3b8';
+                label.style.fontFamily = 'monospace';
+                label.style.whiteSpace = 'nowrap';
+                label.style.overflow = 'hidden';
+                label.style.textOverflow = 'ellipsis';
+                label.style.maxWidth = '64px';
+                
+                btn.appendChild(img);
+                btn.appendChild(label);
+                
+                if (av.id === this.selectedAvatar) {
                     btn.style.borderColor = '#38bdf8';
                     btn.style.background = 'rgba(56, 189, 248, 0.2)';
                     btn.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.3)';
+                    label.style.color = '#38bdf8';
                 }
                 
                 btn.addEventListener('click', () => {
-                    this.selectedAvatar = av.char;
+                    this.selectedAvatar = av.id;
                     // Reset all other choice borders
                     Array.from(avatarPicker.children).forEach(child => {
                         child.style.borderColor = 'rgba(56, 189, 248, 0.15)';
                         child.style.background = 'rgba(15, 23, 42, 0.5)';
                         child.style.boxShadow = 'none';
+                        const splEl = child.querySelector('span');
+                        if (splEl) splEl.style.color = '#94a3b8';
                     });
                     btn.style.borderColor = '#38bdf8';
                     btn.style.background = 'rgba(56, 189, 248, 0.2)';
                     btn.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.3)';
+                    label.style.color = '#38bdf8';
                 });
                 
                 avatarPicker.appendChild(btn);
@@ -3773,11 +3806,18 @@ export class UIManager {
         // Initial setup function
         const updateWidget = () => {
             const currentName = localStorage.getItem('viscora_author_name') || 'Oyuncu';
-            const currentAvatar = localStorage.getItem('viscora_avatar') || '🟢';
+            let currentAvatar = localStorage.getItem('viscora_avatar') || 'slime_king';
+            if (currentAvatar.includes('🟢') || currentAvatar.includes('🔵') || currentAvatar.includes('🌸') || currentAvatar.includes('🤖') || currentAvatar.includes('👾') || currentAvatar.includes('🚀')) {
+                currentAvatar = 'slime_king';
+                localStorage.setItem('viscora_avatar', 'slime_king');
+            }
+            
             const widgetName = document.getElementById('profile-widget-name');
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
-            if (widgetAvatar) widgetAvatar.textContent = currentAvatar;
+            if (widgetAvatar) {
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png`;
+            }
         };
         
         updateWidget();
@@ -3793,20 +3833,28 @@ export class UIManager {
                 if (btnClose) btnClose.style.display = 'block';
             }
             
-            this.selectedAvatar = localStorage.getItem('viscora_avatar') || '🟢';
+            this.selectedAvatar = localStorage.getItem('viscora_avatar') || 'slime_king';
+            if (this.selectedAvatar.includes('🟢') || this.selectedAvatar.includes('🔵') || this.selectedAvatar.includes('🌸') || this.selectedAvatar.includes('🤖') || this.selectedAvatar.includes('👾') || this.selectedAvatar.includes('🚀')) {
+                this.selectedAvatar = 'slime_king';
+            }
             usernameInput.value = localStorage.getItem('viscora_author_name') || '';
             
             // Highlight current avatar choice
             if (avatarPicker) {
                 Array.from(avatarPicker.children).forEach(child => {
-                    if (child.innerHTML === this.selectedAvatar) {
+                    const childAvatar = child.dataset.avatar;
+                    if (childAvatar === this.selectedAvatar) {
                         child.style.borderColor = '#38bdf8';
                         child.style.background = 'rgba(56, 189, 248, 0.2)';
                         child.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.3)';
+                        const splEl = child.querySelector('span');
+                        if (splEl) splEl.style.color = '#38bdf8';
                     } else {
                         child.style.borderColor = 'rgba(56, 189, 248, 0.15)';
                         child.style.background = 'rgba(15, 23, 42, 0.5)';
                         child.style.boxShadow = 'none';
+                        const splEl = child.querySelector('span');
+                        if (splEl) splEl.style.color = '#94a3b8';
                     }
                 });
             }
