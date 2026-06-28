@@ -628,6 +628,26 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 
             existing_user = get_user_by_id(user_id)
             if existing_user:
+                # Çakışma Kontrolü: Sunucudaki elmas veya seviye daha fazlaysa, sunucu verisini koru ve istemciye gönder
+                db_save = existing_user.get('saveData', {})
+                db_crystals = int(db_save.get('totalCrystals', 0) or 0)
+                db_level = int(db_save.get('unlockedLevel', 1) or 1)
+                
+                incoming_crystals = int(save_data.get('totalCrystals', 0) or 0)
+                incoming_level = int(save_data.get('unlockedLevel', 1) or 1)
+                
+                if db_crystals > incoming_crystals or db_level > incoming_level:
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        'status': 'conflict',
+                        'saveData': db_save,
+                        'syncCode': existing_user.get('syncCode'),
+                        'lastUpdated': existing_user['lastUpdated']
+                    }, ensure_ascii=False).encode('utf-8'))
+                    return
+
                 # Kullanıcı zaten kayıtlı, saveData'yı güncelle
                 existing_user['saveData'] = save_data
                 existing_user['lastUpdated'] = datetime.now(timezone.utc).isoformat()

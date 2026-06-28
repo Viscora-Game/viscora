@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v277';
-import { ViscosityList } from './viscosity.js?v=v277';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v277';
-import { CloudSaveManager } from './cloud_save.js?v=v277';
+import { audio } from './audio.js?v=v278';
+import { ViscosityList } from './viscosity.js?v=v278';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v278';
+import { CloudSaveManager } from './cloud_save.js?v=v278';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -1207,6 +1207,11 @@ export class UIManager {
             if (menuCounter) menuCounter.textContent = e.detail.balance;
             if (shopCounter) shopCounter.textContent = e.detail.balance;
             if (rewardsCounter) rewardsCounter.textContent = e.detail.balance;
+        });
+
+        window.addEventListener('viscora_cloud_restored', (e) => {
+            alert("Bulutta daha yeni bir ilerleme bulundu! Verileriniz güncelleniyor...");
+            window.location.reload();
         });
 
         // initial load of crystals
@@ -3796,7 +3801,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v277`;
+                img.src = `assets/avatars/${av.id}.png?v=v278`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -3856,7 +3861,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v277`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v278`;
             }
         };
         

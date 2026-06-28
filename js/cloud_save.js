@@ -112,6 +112,14 @@ export class CloudSaveManager {
                 }
                 console.log('Cloud sync successful. SyncCode:', res.syncCode);
                 return { success: true, syncCode: res.syncCode, lastUpdated: res.lastUpdated };
+            } else if (res.status === 'conflict') {
+                console.log('Cloud sync conflict: Server has better progress. Restoring server progress.');
+                this.applySaveData(res.saveData);
+                if (res.syncCode) {
+                    localStorage.setItem('viscora_sync_code', res.syncCode);
+                }
+                window.dispatchEvent(new CustomEvent('viscora_cloud_restored', { detail: { saveData: res.saveData } }));
+                return { success: true, restored: true, syncCode: res.syncCode, lastUpdated: res.lastUpdated };
             }
         } catch (e) {
             console.warn('Cloud sync network error:', e);
