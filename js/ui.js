@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v240';
-import { ViscosityList } from './viscosity.js?v=v240';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v240';
-import { CloudSaveManager } from './cloud_save.js?v=v240';
+import { audio } from './audio.js?v=v241';
+import { ViscosityList } from './viscosity.js?v=v241';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v241';
+import { CloudSaveManager } from './cloud_save.js?v=v241';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -446,8 +446,9 @@ export class UIManager {
             ],
             16: [
                 { text: "> SİSTEM RAPORU: Sektör 16 veri bütünlüğü %45 oranında bozuldu.", type: "warning" },
-                { text: "> MEKANİK: Vantuz noktaları! Pembe formda vantuzlara tutunarak sallan ve [SPACE] ile fırla!", type: "command" },
-                { text: 'Null: "Tavandaki vantuzlar... Endbringer\'ın engellerini havadan aşmam için harika bir fırsat."', type: "dialogue" }
+                { text: "> MEKANİK: Lazer Aynaları ve İtilebilir Ayna Blokları! Lazer ışınlarını aynalardan yansıt.", type: "command" },
+                { text: "> MEKANİK: Blokları iterek lazer yolunu ayarla ve sarı lazer kapılarını devreden çıkar!", type: "command" },
+                { text: 'Null: "Aynalar ve lazerler... Endbringer yolları çözülmesi zor siber bulmacalarla kapatmış."', type: "dialogue" }
             ],
             17: [
                 { text: "> GÜVENLİK: Otomatik savunma kuleleri aktif hale getirildi.", type: "warning" },
@@ -457,16 +458,18 @@ export class UIManager {
             20: [
                 { text: "> TEHLİKE: Sektör 20'de ağır güvenlik protokolleri devreye girdi.", type: "danger" },
                 { text: "> GÜVENLİK: Sektör koruyucusu 'SİBER MUHAFIZ' aktif.", type: "warning" },
-                { text: "> MEKANİK: İkinci boss savaşı! Siber Muhafız'ın 4 canı var. Kafasına 4 kez zıpla veya lazerleri ona sektir!", type: "command" },
+                { text: "> MEKANİK: İkinci boss savaşı! Siber Muhafız'ın 4 canı var. Ona doğrudan zıplayarak hasar veremezsin!", type: "command" },
+                { text: "> MEKANİK: Üst platformlardaki itilebilir kutuları boss'un üzerine düşürerek hasar ver!", type: "command" },
+                { text: "> MEKANİK: Tavandaki pembe vantuz noktalarına pembe formda tutunup sallanarak kaçabilirsin!", type: "command" },
                 { text: 'Siber Muhafız: "Sistemi korumak için programlandım. Geçiş izni reddedildi."', type: "danger" },
-                { text: 'Null: "Endbringer\'ın bu siber savunması da beni durduramayacak."', type: "dialogue" }
+                { text: 'Null: "Kutuları üzerine düşürürsem bu zırhı aşabilirim. Endbringer\'ın bu siber savunması da beni durduramayacak!"', type: "dialogue" }
             ],
             21: [
                 { text: "> SIZINTI: Ana veri yolu (Siber Sektör 21) hacklendi.", type: "warning" },
                 { text: "> UYARI: Grafik arayüzü siber neon moduna zorlandı.", type: "command" },
-                { text: "> MEKANİK: Çekici UFO ve Lazer Aynaları! UFO seni yukarı çeker, aynalarla lazerleri yansıt!", type: "command" },
-                { text: "> MEKANİK: Şalterler ile sarı lazer kapılarını açabilirsin!", type: "command" },
-                { text: 'Null: "Çekici UFO\'lar ve lazerler... Çekirdeğe yaklaştıkça Endbringer\'ın engelleri daha da çılgınlaşıyor!"', type: "dialogue" }
+                { text: "> MEKANİK: Çekici UFO! Yerçekimini bükerek seni yukarı çeker, havada asılı kalmamaya dikkat et!", type: "command" },
+                { text: "> MEKANİK: Şalterler ile sarı lazer kapılarını devre dışı bırak!", type: "command" },
+                { text: 'Null: "Yerçekimini büken UFO\'lar... Çekirdeğe yaklaştıkça Endbringer\'ın engelleri daha da çılgınlaşıyor!"', type: "dialogue" }
             ],
             22: [
                 { text: "> ANALİZ: Sektör 22'de uçan güvenlik birimleri aktif edildi.", type: "warning" },
@@ -488,9 +491,10 @@ export class UIManager {
             30: [
                 { text: "> ACİL DURUM: ANA ÇEKİRDEK (SEKTÖR 30) İHLAL EDİLDİ.", type: "danger" },
                 { text: "> GÜVENLİK: Nihai sistem yapay zekası 'ENDBRINGER' devrede.", type: "warning" },
-                { text: "> MEKANİK: Final savaşı! Endbringer'ın 5 canı var. Onu yok et ve özgür ol!", type: "command" },
+                { text: "> MEKANİK: Final savaşı! Endbringer'ın 5 canı var. Ona doğrudan hasar veremezsin!", type: "command" },
+                { text: "> MEKANİK: Endbringer'ın ürettiği küçük devriyeleri yok ederek onu zayıflat! Canı 1'e düştüğünde kafasına zıplayarak bitir!", type: "command" },
                 { text: 'Endbringer: "Ben bu sistemin efendisiyim. Benimle birlikte yok olacaksın!"', type: "danger" },
-                { text: 'Null: "Ben yok olmayacağım. Ben özgür olacağım!"', type: "dialogue" }
+                { text: 'Null: "Ürettiğin koruyucuları sana karşı kullanacağım. Ben yok olmayacağım, özgür olacağım!"', type: "dialogue" }
             ]
         };
 
