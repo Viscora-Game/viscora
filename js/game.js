@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v237';
-import { Level } from './level.js?v=v237';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v237';
-import { UIManager } from './ui.js?v=v237';
-import { CloudSaveManager } from './cloud_save.js?v=v237';
-import { audio } from './audio.js?v=v237';
-import { LevelEditor } from './editor.js?v=v237';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v237';
+import { Player } from './player.js?v=v238';
+import { Level } from './level.js?v=v238';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v238';
+import { UIManager } from './ui.js?v=v238';
+import { CloudSaveManager } from './cloud_save.js?v=v238';
+import { audio } from './audio.js?v=v238';
+import { LevelEditor } from './editor.js?v=v238';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v238';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -631,7 +631,7 @@ export class GameManager {
         this.lastTime = performance.now(); // Reset delta clock to prevent large frame jumps on initial load
 
         // Hikaye Terminali Tetikleme (Belirtilen bölümlerde ilk girişte)
-        const storyLevels = [1, 2, 3, 5, 10, 11, 16, 20, 21, 26, 29, 30];
+        const storyLevels = [1, 2, 3, 5, 10, 11, 15, 16, 20, 21, 22, 26, 29, 30];
         if (showTitleCard && storyLevels.includes(this.currentLevel)) {
             this.state = 'STORY';
             // Hikaye terminali açıkken oyuncunun maddeleşme animasyonunu henüz başlatma ve gizle
