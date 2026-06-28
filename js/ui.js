@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v283';
-import { ViscosityList } from './viscosity.js?v=v283';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v283';
-import { CloudSaveManager } from './cloud_save.js?v=v283';
+import { audio } from './audio.js?v=v284';
+import { ViscosityList } from './viscosity.js?v=v284';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v284';
+import { CloudSaveManager } from './cloud_save.js?v=v284';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -993,6 +993,14 @@ export class UIManager {
                 if (savedCode) {
                     if (lblSyncCode) lblSyncCode.textContent = savedCode;
                 }
+
+                // Cihaz bellek debug bilgilerini güncelle
+                const debugLocalName = document.getElementById('debug-local-name');
+                const debugLocalAvatar = document.getElementById('debug-local-avatar');
+                const debugLocalCrystals = document.getElementById('debug-local-crystals');
+                if (debugLocalName) debugLocalName.textContent = localStorage.getItem('viscora_author_name') || 'Belirlenmedi';
+                if (debugLocalAvatar) debugLocalAvatar.textContent = localStorage.getItem('viscora_avatar') || 'slime_king';
+                if (debugLocalCrystals) debugLocalCrystals.textContent = localStorage.getItem('viscora_total_crystals') || '0';
 
                 // Google Sign-In Durumunu Güncelle
                 const googleStatus = document.getElementById('google-sync-status');
@@ -3883,7 +3891,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v283`;
+                img.src = `assets/avatars/${av.id}.png?v=v284`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -3943,7 +3951,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v283`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v284`;
             }
         };
         
