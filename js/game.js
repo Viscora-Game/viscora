@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v264';
-import { Level } from './level.js?v=v264';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v264';
-import { UIManager } from './ui.js?v=v264';
-import { CloudSaveManager } from './cloud_save.js?v=v264';
-import { audio } from './audio.js?v=v264';
-import { LevelEditor } from './editor.js?v=v264';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v264';
+import { Player } from './player.js?v=v265';
+import { Level } from './level.js?v=v265';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v265';
+import { UIManager } from './ui.js?v=v265';
+import { CloudSaveManager } from './cloud_save.js?v=v265';
+import { audio } from './audio.js?v=v265';
+import { LevelEditor } from './editor.js?v=v265';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v265';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -2862,6 +2862,10 @@ export class GameManager {
         this.introMatrixChars = "01010101ABCDEF#@$*".split("");
         this.introSkippable = false;
         this.introSkipped = false;
+
+        // Sinematik sırasında HUD ve mobil kontrolleri gizle
+        this.ui.hud.classList.add('hidden');
+        this.ui.mobileControls.classList.add('hidden');
 
         // Scan phase variables
         this.introScanLines = [];

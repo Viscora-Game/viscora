@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v264';
-import { ViscosityList } from './viscosity.js?v=v264';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v264';
-import { CloudSaveManager } from './cloud_save.js?v=v264';
+import { audio } from './audio.js?v=v265';
+import { ViscosityList } from './viscosity.js?v=v265';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v265';
+import { CloudSaveManager } from './cloud_save.js?v=v265';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -406,6 +406,7 @@ export class UIManager {
                 { text: 'Null: "Beni virüs diye etiketlediler... Ama ben sadece hayatta kalmak istiyorum."', type: "dialogue" },
                 { text: "> ANTİVİRÜS: Tüm çıkış noktaları karantinaya alındı. Kaçış ihtimali: %0.", type: "warning" },
                 { text: "> BİLGİ: Form: Yeşil Jöle (Dengeli Viskozite). Yön tuşları ile hareket et, [SPACE] ile zıpla, [E] ile form değiştir.", type: "command" },
+                { text: "> MEKANİK: [AŞAĞI] tuşuna basılı tutarak küçül! Dar geçitlerden geçmek ve düşman saldırılarından kaçınmak için kullan.", type: "command" },
                 { text: "> BİLGİ: Kırmızı devriye botları sistemi koruyor. Üzerlerine zıplayarak ez!", type: "command" },
                 { text: 'Null: "Veri çekirdeği yok oldu... Çökmeden önce bu sistemden kaçmam gerek. Ne olursa olsun hayatta kalacağım."', type: "dialogue" },
                 { text: "> SİSTEM: Güvenlik temizlik protokolü başlatılıyor... Sektör 01 kilitlendi.", type: "danger" }
@@ -3745,7 +3746,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v264`;
+                img.src = `assets/avatars/${av.id}.png?v=v265`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -3805,7 +3806,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v264`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v265`;
             }
         };
         
