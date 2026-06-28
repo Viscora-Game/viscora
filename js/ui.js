@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v263';
-import { ViscosityList } from './viscosity.js?v=v263';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v263';
-import { CloudSaveManager } from './cloud_save.js?v=v263';
+import { audio } from './audio.js?v=v264';
+import { ViscosityList } from './viscosity.js?v=v264';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v264';
+import { CloudSaveManager } from './cloud_save.js?v=v264';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -399,11 +399,16 @@ export class UIManager {
         const terminalTexts = {
             1: [
                 { text: "> SİSTEM HATA RAPORU: Ana veri çekirdeği virüs saldırısıyla parçalandı!", type: "warning" },
+                { text: "> ANTİVİRÜS: Bilinmeyen veri anomalisi tespit edildi. Sınıflandırma: PARAZİTİK KOD.", type: "danger" },
+                { text: "> ANTİVİRÜS: Tarama tamamlandı. Hedef: 'Null'. Tehdit seviyesi: KRİTİK.", type: "danger" },
                 { text: "> SİSTEM: Acil durum kurtarma protokolü etkinleştirildi. Deneysel anomali hücresi 'Null' derlendi.", type: "command" },
+                { text: "> SON GETİREN: Dikkat tüm savunma birimleri. Anomali 'Null' izole edilecek ve silinecek.", type: "danger" },
+                { text: 'Null: "Beni virüs diye etiketlediler... Ama ben sadece hayatta kalmak istiyorum."', type: "dialogue" },
+                { text: "> ANTİVİRÜS: Tüm çıkış noktaları karantinaya alındı. Kaçış ihtimali: %0.", type: "warning" },
                 { text: "> BİLGİ: Form: Yeşil Jöle (Dengeli Viskozite). Yön tuşları ile hareket et, [SPACE] ile zıpla, [E] ile form değiştir.", type: "command" },
                 { text: "> BİLGİ: Kırmızı devriye botları sistemi koruyor. Üzerlerine zıplayarak ez!", type: "command" },
-                { text: 'Null: "Veri çekirdeği yok oldu... Çökmeden önce bu sistemden kaçmam gerek."', type: "dialogue" },
-                { text: "> SİSTEM: Güvenlik temizlik protokolü başlatılıyor...", type: "danger" }
+                { text: 'Null: "Veri çekirdeği yok oldu... Çökmeden önce bu sistemden kaçmam gerek. Ne olursa olsun hayatta kalacağım."', type: "dialogue" },
+                { text: "> SİSTEM: Güvenlik temizlik protokolü başlatılıyor... Sektör 01 kilitlendi.", type: "danger" }
             ],
             2: [
                 { text: "> ANALİZ: Anomali mavi jöle formuna (Düşük Viskozite) uyum sağladı.", type: "command" },
@@ -3740,7 +3745,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v263`;
+                img.src = `assets/avatars/${av.id}.png?v=v264`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -3800,7 +3805,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v263`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v264`;
             }
         };
         

@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v263';
-import { Level } from './level.js?v=v263';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v263';
-import { UIManager } from './ui.js?v=v263';
-import { CloudSaveManager } from './cloud_save.js?v=v263';
-import { audio } from './audio.js?v=v263';
-import { LevelEditor } from './editor.js?v=v263';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v263';
+import { Player } from './player.js?v=v264';
+import { Level } from './level.js?v=v264';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v264';
+import { UIManager } from './ui.js?v=v264';
+import { CloudSaveManager } from './cloud_save.js?v=v264';
+import { audio } from './audio.js?v=v264';
+import { LevelEditor } from './editor.js?v=v264';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v264';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -2848,7 +2848,8 @@ export class GameManager {
 
     initIntroCinematic() {
         this.introTimer = 0;
-        this.introPhase = 'matrix'; // phases: 'matrix', 'glitch_alarm', 'shatter', 'flash', 'end'
+        // phases: 'matrix', 'glitch_alarm', 'shatter', 'scan', 'null_birth', 'flash', 'end'
+        this.introPhase = 'matrix';
         this.introMatrixLines = [];
         this.introGlitchIntensity = 0;
         this.introCoreParticles = [];
@@ -2857,9 +2858,21 @@ export class GameManager {
         this.introCoreRadius = 60;
         this.introAlarmPlayed = false;
         this.introShatterPlayed = false;
+        this.introScanSoundPlayed = false;
         this.introMatrixChars = "01010101ABCDEF#@$*".split("");
+        this.introSkippable = false;
+        this.introSkipped = false;
 
-        // Initialize some matrix columns
+        // Scan phase variables
+        this.introScanLines = [];
+        this.introScanProgress = 0;
+        this.introScanWarnings = [];
+
+        // Null birth phase variables
+        this.introNullParticles = [];
+        this.introNullAssembled = false;
+
+        // Initialize matrix columns
         const cols = Math.floor(this.cssWidth / 20) + 1;
         for (let i = 0; i < cols; i++) {
             this.introMatrixLines.push({
@@ -2869,10 +2882,38 @@ export class GameManager {
                 chars: []
             });
         }
+
+        // Skip handler — 3.5 saniye sonra geçilebilir
+        const skipHandler = (e) => {
+            if (!this.introSkippable) return;
+            if (e.type === 'keydown' && e.key !== ' ' && e.key !== 'Enter' && e.key !== 'Escape') return;
+            if (e.preventDefault) e.preventDefault();
+
+            this.introSkipped = true;
+            window.removeEventListener('keydown', skipHandler);
+            this.canvas.removeEventListener('click', skipHandler);
+            this.canvas.removeEventListener('touchend', skipHandler);
+        };
+        this._introSkipHandler = skipHandler;
+        window.addEventListener('keydown', skipHandler);
+        this.canvas.addEventListener('click', skipHandler);
+        this.canvas.addEventListener('touchend', skipHandler, { passive: false });
     }
 
     updateIntroCinematic(elapsed) {
         this.introTimer += elapsed;
+
+        // 3.5 saniye sonra geçme izni
+        if (this.introTimer >= 3500) {
+            this.introSkippable = true;
+        }
+
+        // Geçme tetiklendiğinde direkt sona atla
+        if (this.introSkipped) {
+            this.introPhase = 'end';
+            this._finishIntroCinematic();
+            return;
+        }
         
         // Matrix lines update
         this.introMatrixLines.forEach(line => {
@@ -2881,7 +2922,6 @@ export class GameManager {
                 line.y = -100;
                 line.speed = 3 + Math.random() * 5;
             }
-            // Periodically add a character
             if (Math.random() < 0.15) {
                 const char = this.introMatrixChars[Math.floor(Math.random() * this.introMatrixChars.length)];
                 line.chars.push({ char, yOffset: 0 });
@@ -2898,7 +2938,6 @@ export class GameManager {
             this.introPhase = 'glitch_alarm';
             this.introGlitchIntensity = 0.15 + Math.sin(this.introTimer * 0.05) * 0.1;
             
-            // Alarm sound
             if (!this.introAlarmPlayed) {
                 this.introAlarmPlayed = true;
                 audio.playSystemAlert();
@@ -2907,12 +2946,10 @@ export class GameManager {
             this.introPhase = 'shatter';
             this.introGlitchIntensity = 0.45;
             
-            // Shatter sound and particles initialization
             if (!this.introShatterPlayed) {
                 this.introShatterPlayed = true;
                 audio.playShatter();
                 
-                // Explode the core
                 for (let i = 0; i < 80; i++) {
                     const angle = Math.random() * Math.PI * 2;
                     const speed = 2 + Math.random() * 8;
@@ -2930,29 +2967,100 @@ export class GameManager {
                 }
             }
             
-            // Update particles
             this.introCoreParticles.forEach(p => {
                 p.x += p.vx * (elapsed / 16.66);
                 p.y += p.vy * (elapsed / 16.66);
                 p.life -= p.decay;
                 p.alpha = Math.max(0, p.life);
             });
-        } else if (this.introTimer < 5600) {
+        } else if (this.introTimer < 7500) {
+            // ★ YENİ FAZ: Antivirüs Tarama (scan)
+            this.introPhase = 'scan';
+            this.introGlitchIntensity = 0.05;
+            const scanElapsed = this.introTimer - 5200;
+            this.introScanProgress = Math.min(1.0, scanElapsed / 2300);
+
+            if (!this.introScanSoundPlayed) {
+                this.introScanSoundPlayed = true;
+                // Alarm sesini tarama için de kullan
+                audio.playSystemAlert();
+            }
+
+            // Tarama sırasında ekranda beliren uyarı metinleri
+            const warningTexts = [
+                { time: 300, text: "SCANNING SECTOR_01..." },
+                { time: 800, text: "ANOMALY SIGNATURE DETECTED" },
+                { time: 1300, text: "CLASSIFICATION: PARASITIC_CODE" },
+                { time: 1800, text: "THREAT LEVEL: ████ CRITICAL ████" },
+                { time: 2100, text: "INITIATING PURGE PROTOCOL..." }
+            ];
+            warningTexts.forEach(w => {
+                if (scanElapsed >= w.time && !this.introScanWarnings.includes(w.text)) {
+                    this.introScanWarnings.push(w.text);
+                }
+            });
+
+        } else if (this.introTimer < 9500) {
+            // ★ YENİ FAZ: Null'un Doğuşu (null_birth)
+            this.introPhase = 'null_birth';
+            this.introGlitchIntensity = 0.02;
+            const birthElapsed = this.introTimer - 7500;
+
+            // Null parçacıklarını oluştur
+            if (!this.introNullAssembled) {
+                this.introNullAssembled = true;
+                const cx = this.cssWidth / 2;
+                const cy = this.cssHeight / 2;
+                for (let i = 0; i < 60; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 80 + Math.random() * 200;
+                    this.introNullParticles.push({
+                        startX: cx + Math.cos(angle) * dist,
+                        startY: cy + Math.sin(angle) * dist,
+                        targetX: cx + (Math.random() - 0.5) * 30,
+                        targetY: cy + (Math.random() - 0.5) * 30,
+                        progress: 0,
+                        speed: 0.3 + Math.random() * 0.5,
+                        size: 2 + Math.random() * 3,
+                        hue: 120 + Math.random() * 40 // yeşil tonları
+                    });
+                }
+            }
+
+            // Parçacıkları merkeze doğru hareket ettir
+            this.introNullParticles.forEach(p => {
+                p.progress = Math.min(1.0, p.progress + p.speed * (elapsed / 300));
+            });
+
+        } else if (this.introTimer < 10000) {
             this.introPhase = 'flash';
             this.introGlitchIntensity = 0.05;
         } else {
-            // End of cinematic! Transition to STORY screen
-            this.introPhase = 'end';
-            this.state = 'STORY';
-            
-            this.ui.showStoryTerminal(this.currentLevel, () => {
-                this.state = 'PLAYING';
-                // Trigger player materialization
-                this.player.introState = 'materializing';
-                this.player.introTimer = 60;
-                this.lastTime = performance.now();
-            });
+            // End of cinematic
+            this._finishIntroCinematic();
         }
+    }
+
+    /** Sinematik bitişini gerçekleştir */
+    _finishIntroCinematic() {
+        if (this.introPhase === 'done') return; // çift çağrıyı engelle
+        this.introPhase = 'done';
+        this.state = 'STORY';
+
+        // Skip handler'ı temizle
+        if (this._introSkipHandler) {
+            window.removeEventListener('keydown', this._introSkipHandler);
+            this.canvas.removeEventListener('click', this._introSkipHandler);
+            this.canvas.removeEventListener('touchend', this._introSkipHandler);
+            this._introSkipHandler = null;
+        }
+
+        this.ui.showStoryTerminal(this.currentLevel, () => {
+            this.state = 'PLAYING';
+            this.player.introState = 'materializing';
+            this.player.introTimer = 60;
+            this.lastTime = performance.now();
+        });
     }
 
     drawIntroCinematic() {
@@ -2965,20 +3073,22 @@ export class GameManager {
         this.ctx.textAlign = 'center';
         
         this.introMatrixLines.forEach(line => {
-            // Matrix colors based on phase
             if (this.introPhase === 'matrix') {
-                this.ctx.fillStyle = 'rgba(16, 185, 129, 0.4)'; // green
+                this.ctx.fillStyle = 'rgba(16, 185, 129, 0.4)';
             } else if (this.introPhase === 'glitch_alarm') {
-                this.ctx.fillStyle = Math.random() < 0.5 ? 'rgba(245, 158, 11, 0.4)' : 'rgba(239, 68, 68, 0.4)'; // yellow/red alert
+                this.ctx.fillStyle = Math.random() < 0.5 ? 'rgba(245, 158, 11, 0.4)' : 'rgba(239, 68, 68, 0.4)';
+            } else if (this.introPhase === 'scan') {
+                this.ctx.fillStyle = 'rgba(239, 68, 68, 0.2)';
+            } else if (this.introPhase === 'null_birth') {
+                this.ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
             } else {
-                this.ctx.fillStyle = 'rgba(239, 68, 68, 0.15)'; // faint red
+                this.ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
             }
             
             let y = line.y;
             line.chars.forEach((c, idx) => {
                 const charY = y - (idx * 16);
                 if (charY > 0 && charY < this.cssHeight) {
-                    // Bright lead character
                     if (idx === line.chars.length - 1 && this.introPhase === 'matrix') {
                         this.ctx.fillStyle = '#ffffff';
                     }
@@ -2987,14 +3097,13 @@ export class GameManager {
             });
         });
 
-        // 2. Draw Core Node
+        // 2. Draw Core Node (matrix & glitch_alarm phases)
         if (this.introPhase === 'matrix' || this.introPhase === 'glitch_alarm') {
             const centerX = this.cssWidth / 2;
             const centerY = this.cssHeight / 2;
             this.introCoreX = centerX;
             this.introCoreY = centerY;
             
-            // Draw concentric background waves
             const pulse = 1 + Math.sin(this.introTimer * 0.005) * 0.05;
             const radius = this.introCoreRadius * pulse;
             
@@ -3002,21 +3111,18 @@ export class GameManager {
             this.ctx.shadowColor = this.introPhase === 'matrix' ? '#10b981' : '#ef4444';
             this.ctx.shadowBlur = 15;
             
-            // Outer ring
             this.ctx.strokeStyle = this.introPhase === 'matrix' ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.7)';
             this.ctx.lineWidth = 3;
             this.ctx.beginPath();
             this.ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             this.ctx.stroke();
 
-            // Inner core
             this.ctx.fillStyle = this.introPhase === 'matrix' ? 'rgba(16, 185, 129, 0.85)' : 'rgba(239, 68, 68, 0.9)';
             this.ctx.beginPath();
             this.ctx.arc(centerX, centerY, radius * 0.6, 0, Math.PI * 2);
             this.ctx.fill();
             this.ctx.restore();
 
-            // Text tag
             this.ctx.fillStyle = '#ffffff';
             this.ctx.font = 'bold 12px monospace';
             this.ctx.textAlign = 'center';
@@ -3030,7 +3136,7 @@ export class GameManager {
             }
         }
 
-        // 3. Draw Core Shattered Particles
+        // 3. Core Shattered Particles
         if (this.introPhase === 'shatter') {
             this.introCoreParticles.forEach(p => {
                 if (p.alpha > 0) {
@@ -3044,7 +3150,128 @@ export class GameManager {
             this.ctx.globalAlpha = 1.0;
         }
 
-        // 4. Glitch Screen Slices (Horizontal parazit)
+        // 4. ★ YENİ: Antivirüs Tarama Fazı
+        if (this.introPhase === 'scan') {
+            const cx = this.cssWidth / 2;
+            const cy = this.cssHeight / 2;
+
+            // Kırmızı tarama çizgileri — ekranın yukarısından aşağısına doğru hareket ediyor
+            const scanY = this.introScanProgress * this.cssHeight;
+            this.ctx.strokeStyle = 'rgba(239, 68, 68, 0.6)';
+            this.ctx.lineWidth = 2;
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, scanY);
+            this.ctx.lineTo(this.cssWidth, scanY);
+            this.ctx.stroke();
+
+            // Tarama çizgisi etrafında parlama
+            const scanGrad = this.ctx.createLinearGradient(0, scanY - 30, 0, scanY + 30);
+            scanGrad.addColorStop(0, 'rgba(239, 68, 68, 0)');
+            scanGrad.addColorStop(0.5, 'rgba(239, 68, 68, 0.15)');
+            scanGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+            this.ctx.fillStyle = scanGrad;
+            this.ctx.fillRect(0, scanY - 30, this.cssWidth, 60);
+
+            // Dönen radar/hedef işareti
+            this.ctx.save();
+            this.ctx.translate(cx, cy);
+            this.ctx.rotate(this.introTimer * 0.003);
+            this.ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+            this.ctx.lineWidth = 1.5;
+            // Artı işareti
+            const crossSize = 40;
+            this.ctx.beginPath();
+            this.ctx.moveTo(-crossSize, 0); this.ctx.lineTo(crossSize, 0);
+            this.ctx.moveTo(0, -crossSize); this.ctx.lineTo(0, crossSize);
+            this.ctx.stroke();
+            // Daire
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, 50, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, 30, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.restore();
+
+            // Uyarı metinleri (hacker terminali stili)
+            this.ctx.font = 'bold 11px monospace';
+            this.ctx.textAlign = 'left';
+            this.introScanWarnings.forEach((text, idx) => {
+                const alpha = 0.6 + Math.sin(this.introTimer * 0.01 + idx) * 0.3;
+                this.ctx.fillStyle = text.includes('CRITICAL') ? `rgba(239, 68, 68, ${alpha})` : `rgba(245, 158, 11, ${alpha})`;
+                this.ctx.fillText(`> ${text}`, 30, 40 + idx * 22);
+            });
+
+            // Sağ alt köşede tarama yüzdesi
+            this.ctx.font = 'bold 14px monospace';
+            this.ctx.textAlign = 'right';
+            this.ctx.fillStyle = '#ef4444';
+            this.ctx.fillText(`SCAN: ${Math.floor(this.introScanProgress * 100)}%`, this.cssWidth - 30, this.cssHeight - 30);
+        }
+
+        // 5. ★ YENİ: Null'un Doğuşu Fazı
+        if (this.introPhase === 'null_birth') {
+            const cx = this.cssWidth / 2;
+            const cy = this.cssHeight / 2;
+
+            // Parçacıklar merkeze toplanıyor
+            this.introNullParticles.forEach(p => {
+                const t = p.progress;
+                const easeT = t * t * (3 - 2 * t); // smoothstep
+                const x = p.startX + (p.targetX - p.startX) * easeT;
+                const y = p.startY + (p.targetY - p.startY) * easeT;
+
+                this.ctx.fillStyle = `hsla(${p.hue}, 80%, 55%, ${0.3 + t * 0.7})`;
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, p.size * (0.5 + t * 0.5), 0, Math.PI * 2);
+                this.ctx.fill();
+            });
+
+            // Merkezdeki oluşan jöle formu (progress arttıkça daha belirgin)
+            const avgProgress = this.introNullParticles.length > 0
+                ? this.introNullParticles.reduce((s, p) => s + p.progress, 0) / this.introNullParticles.length
+                : 0;
+
+            if (avgProgress > 0.3) {
+                this.ctx.save();
+                this.ctx.globalAlpha = Math.min(1.0, (avgProgress - 0.3) * 2);
+                this.ctx.shadowColor = '#10b981';
+                this.ctx.shadowBlur = 20 + avgProgress * 15;
+
+                // Jöle formu (basit yuvarlak blob)
+                this.ctx.fillStyle = `rgba(16, 185, 129, ${0.5 + avgProgress * 0.4})`;
+                this.ctx.beginPath();
+                const blobSize = 12 + avgProgress * 10;
+                this.ctx.arc(cx, cy, blobSize, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // İç parlama
+                this.ctx.fillStyle = `rgba(52, 211, 153, ${avgProgress * 0.6})`;
+                this.ctx.beginPath();
+                this.ctx.arc(cx, cy, blobSize * 0.6, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.restore();
+            }
+
+            // "Null" etiketi yavaşça beliriyor
+            if (avgProgress > 0.6) {
+                this.ctx.save();
+                this.ctx.globalAlpha = Math.min(1.0, (avgProgress - 0.6) * 2.5);
+                this.ctx.font = 'bold 13px monospace';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillStyle = '#10b981';
+                this.ctx.shadowColor = '#10b981';
+                this.ctx.shadowBlur = 10;
+                this.ctx.fillText('> ANOMALY_CELL "NULL" COMPILED', cx, cy + 45);
+                this.ctx.fillStyle = '#94a3b8';
+                this.ctx.shadowBlur = 0;
+                this.ctx.font = '11px monospace';
+                this.ctx.fillText('Form: Jöle | Sınıf: Bilinmeyen | Tehdit: ?', cx, cy + 65);
+                this.ctx.restore();
+            }
+        }
+
+        // 6. Glitch Screen Slices
         if (this.introGlitchIntensity > 0 && Math.random() < this.introGlitchIntensity) {
             const slices = 3 + Math.floor(Math.random() * 5);
             for (let i = 0; i < slices; i++) {
@@ -3059,12 +3286,11 @@ export class GameManager {
                 );
             }
             
-            // Draw random horizontal flash lines
             this.ctx.fillStyle = Math.random() < 0.5 ? 'rgba(239, 68, 68, 0.45)' : 'rgba(245, 158, 11, 0.45)';
             this.ctx.fillRect(0, Math.random() * this.cssHeight, this.cssWidth, 2 + Math.random() * 6);
         }
 
-        // 5. White/Green recovery flash
+        // 7. Recovery flash
         if (this.introPhase === 'flash') {
             this.ctx.fillStyle = 'rgba(16, 185, 129, 0.85)';
             this.ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
@@ -3072,7 +3298,21 @@ export class GameManager {
             this.ctx.fillStyle = '#ffffff';
             this.ctx.font = 'bold 16px monospace';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText("INITIALIZING BACKUP SYSTEM_RECOVERY...", this.cssWidth / 2, this.cssHeight / 2);
+            this.ctx.fillText("BACKUP_RECOVERY INITIALIZED... DEPLOYING NULL", this.cssWidth / 2, this.cssHeight / 2);
+        }
+
+        // 8. ★ YENİ: Geçme ipucu (3.5 saniye sonra)
+        if (this.introSkippable && this.introPhase !== 'flash' && this.introPhase !== 'done') {
+            const blinkAlpha = 0.4 + Math.sin(this.introTimer * 0.006) * 0.3;
+            this.ctx.save();
+            this.ctx.globalAlpha = blinkAlpha;
+            this.ctx.font = '12px monospace';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillStyle = '#94a3b8';
+            const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            const skipText = isTouchDevice ? '[ Geçmek için dokun ]' : '[ Geçmek için SPACE ]';
+            this.ctx.fillText(skipText, this.cssWidth / 2, this.cssHeight - 25);
+            this.ctx.restore();
         }
     }
 
