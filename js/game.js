@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v247';
-import { Level } from './level.js?v=v247';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v247';
-import { UIManager } from './ui.js?v=v247';
-import { CloudSaveManager } from './cloud_save.js?v=v247';
-import { audio } from './audio.js?v=v247';
-import { LevelEditor } from './editor.js?v=v247';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v247';
+import { Player } from './player.js?v=v248';
+import { Level } from './level.js?v=v248';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v248';
+import { UIManager } from './ui.js?v=v248';
+import { CloudSaveManager } from './cloud_save.js?v=v248';
+import { audio } from './audio.js?v=v248';
+import { LevelEditor } from './editor.js?v=v248';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v248';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1156,7 +1156,16 @@ export class GameManager {
 
         // Yıldızları Hesapla, Kaydet ve Göster (3 yıldız her zaman gösterilir)
         const stars = this.calculateStars();
-        if (this.currentLevel !== 999) {
+        const isCampaignLvl = this.currentLevel !== 999 && this.currentLevel >= 1 && this.currentLevel <= 30;
+        const leadContainer = document.getElementById('win-leaderboard-container');
+        if (leadContainer) {
+            leadContainer.style.display = isCampaignLvl ? 'flex' : 'none';
+        }
+
+        if (isCampaignLvl) {
+            this.saveStarsForLevel(this.currentLevel, stars);
+            this.submitCampaignScore(this.currentLevel, this.gameTime);
+        } else if (this.currentLevel !== 999) {
             this.saveStarsForLevel(this.currentLevel, stars);
         } else if (this.isCommunityPlay && this.currentCommunityLevelId) {
             // Topluluk haritası bitirildiğinde skoru gönder
@@ -3059,6 +3068,82 @@ export class GameManager {
             this.ctx.textAlign = 'center';
             this.ctx.fillText("INITIALIZING BACKUP SYSTEM_RECOVERY...", this.cssWidth / 2, this.cssHeight / 2);
         }
+    }
+
+    submitCampaignScore(levelNumber, timeValue) {
+        let username = localStorage.getItem('viscora_author_name');
+        if (!username || username === 'Tasarımcı' || username.trim() === '') {
+            username = 'Oyuncu';
+        }
+        const myUserId = localStorage.getItem('viscora_user_id') || 'user_anon';
+        
+        const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? ''
+            : 'https://viscora.onrender.com';
+            
+        // Reset container to loading state
+        const boardList = document.getElementById('win-leaderboard-list');
+        const percentileText = document.getElementById('win-percentile-text');
+        if (boardList) boardList.innerHTML = '<div style="color: #9ca3af; text-align:center;">Skorlar yükleniyor...</div>';
+        if (percentileText) percentileText.textContent = '';
+        
+        fetch(`${API_BASE}/api/campaign/${levelNumber}/score`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: myUserId, username: username, time: timeValue })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Kampanya skoru kaydedilemedi.");
+            return res.json();
+        })
+        .then(data => {
+            if (boardList) {
+                boardList.innerHTML = '';
+                if (data.leaderboard && data.leaderboard.length > 0) {
+                    data.leaderboard.forEach((s, idx) => {
+                        const medalEmoji = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : '🥉');
+                        const medalColor = idx === 0 ? '#f59e0b' : (idx === 1 ? '#cbd5e1' : '#b45309');
+                        const row = document.createElement('div');
+                        row.style.display = 'flex';
+                        row.style.justifyContent = 'space-between';
+                        row.style.alignItems = 'center';
+                        row.style.padding = '3px 0';
+                        row.style.borderBottom = '1px solid rgba(255,255,255,0.03)';
+                        
+                        const left = document.createElement('span');
+                        left.style.color = '#f3f4f6';
+                        left.style.display = 'flex';
+                        left.style.alignItems = 'center';
+                        left.style.gap = '6px';
+                        left.innerHTML = `<span style="color: ${medalColor}">${medalEmoji}</span> ${s.username}`;
+                        
+                        const right = document.createElement('span');
+                        right.style.color = '#38bdf8';
+                        right.textContent = this.formatTime(s.time);
+                        
+                        row.appendChild(left);
+                        row.appendChild(right);
+                        boardList.appendChild(row);
+                    });
+                } else {
+                    boardList.innerHTML = '<div style="color: #9ca3af; text-align:center;">Henüz derece yok.</div>';
+                }
+            }
+            if (percentileText && data.percentile !== null) {
+                percentileText.innerHTML = `Süreniz en hızlı oyuncular arasında <span style="color: #34d399; font-weight: bold;">ilk %${data.percentile}'lik</span> dilimde! (Sıralama: ${data.rank}/${data.totalPlayers})`;
+            }
+        })
+        .catch(err => {
+            console.error("Kampanya skor kaydetme hatası:", err);
+            if (boardList) boardList.innerHTML = '<div style="color: #ef4444; text-align:center;">Yükleme başarısız.</div>';
+        });
+    }
+
+    formatTime(timeSecs) {
+        const min = Math.floor(timeSecs / 60);
+        const sec = Math.floor(timeSecs % 60);
+        const ms = Math.floor((timeSecs % 1) * 100);
+        return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
     }
 }
 export default GameManager;

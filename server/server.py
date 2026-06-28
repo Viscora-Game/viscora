@@ -66,6 +66,47 @@ if not os.path.exists(DB_USERS_FILE):
     with open(DB_USERS_FILE, 'w', encoding='utf-8') as f:
         json.dump([], f, indent=2)
 
+DB_CAMPAIGN_FILE = os.path.join(os.path.dirname(__file__), 'db_campaign_scores.json')
+if not os.path.exists(DB_CAMPAIGN_FILE):
+    with open(DB_CAMPAIGN_FILE, 'w', encoding='utf-8') as f:
+        json.dump([], f, indent=2)
+
+def read_campaign_db():
+    if mongo_collection is not None:
+        try:
+            db_conn = mongo_collection.database
+            return list(db_conn['campaign_scores'].find({}, {'_id': False}))
+        except Exception as e:
+            print("MongoDB campaign scores okuma hatası, yerel JSON dosyasına geçiliyor:", e)
+
+    try:
+        with open(DB_CAMPAIGN_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        print("Campaign scores veritabanı okuma hatası:", e)
+        return []
+
+def write_campaign_db(data):
+    if mongo_collection is not None:
+        try:
+            db_conn = mongo_collection.database
+            coll = db_conn['campaign_scores']
+            for item in data:
+                level_num = item.get('levelNumber')
+                if level_num is not None:
+                    coll.update_one({'levelNumber': level_num}, {'$set': item}, upsert=True)
+            return True
+        except Exception as e:
+            print("MongoDB campaign scores yazma hatası, yerel JSON dosyasına geçiliyor:", e)
+
+    try:
+        with open(DB_CAMPAIGN_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print("Campaign scores veritabanı yazma hatası:", e)
+        return False
+
 def read_users_db():
     if mongo_users_collection is not None:
         try:
@@ -464,6 +505,65 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 "environment_keys": list(os.environ.keys())
             }
             self.wfile.write(json.dumps(status_data, ensure_ascii=False).encode('utf-8'))
+        elif path.startswith('/api/campaign/') and path.endswith('/leaderboard'):
+            parts = path.split('/')
+            if len(parts) >= 4:
+                try:
+                    level_num = int(parts[3])
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    return
+                
+                user_id = query.get('userId', [''])[0]
+                
+                db = read_campaign_db()
+                found = None
+                for item in db:
+                    if item.get('levelNumber') == level_num:
+                        found = item
+                        break
+                
+                all_scores = found.get('scores', []) if found else []
+                all_scores = sorted(all_scores, key=lambda s: s['time'])
+                
+                # Top 3 leaderboard
+                top_3 = []
+                for idx, s in enumerate(all_scores[:3]):
+                    top_3.append({
+                        'username': s.get('username', 'Anonim'),
+                        'time': s.get('time'),
+                        'medal': 'gold' if idx == 0 else ('silver' if idx == 1 else 'bronze')
+                    })
+                
+                # Find personal stats
+                rank = None
+                percentile = None
+                personal_best = None
+                total_players = len(all_scores)
+                
+                if user_id:
+                    for idx, s in enumerate(all_scores):
+                        if s.get('userId') == user_id:
+                            rank = idx + 1
+                            personal_best = s.get('time')
+                            break
+                    if rank is not None and total_players > 0:
+                        percentile = round((rank / total_players) * 100, 1)
+                
+                res_data = {
+                    'leaderboard': top_3,
+                    'rank': rank,
+                    'totalPlayers': total_players,
+                    'percentile': percentile,
+                    'personalBest': personal_best
+                }
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps(res_data, ensure_ascii=False).encode('utf-8'))
+                return
         else:
             # Diğer tüm istekleri (index.html, js/, css/ vb.) standart SimpleHTTPRequestHandler ile sun
             super().do_GET()
@@ -850,6 +950,117 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_response(404)
                     self.end_headers()
                     self.wfile.write('{"error": "Harita bulunamadı."}'.encode('utf-8'))
+            else:
+                self.send_response(400)
+                self.end_headers()
+        elif path.startswith('/api/campaign/') and path.endswith('/score'):
+            parts = path.split('/')
+            if len(parts) >= 4:
+                try:
+                    level_num = int(parts[3])
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    return
+                
+                user_id = body.get('userId')
+                username = body.get('username')
+                score_time = body.get('time')
+                
+                if not user_id or not username or score_time is None:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write('{"error": "Kullanıcı ID, adı ve süre zorunludur."}'.encode('utf-8'))
+                    return
+                
+                try:
+                    score_time = float(score_time)
+                except ValueError:
+                    self.send_response(400)
+                    self.end_headers()
+                    return
+                
+                if score_time <= 0:
+                    self.send_response(400)
+                    self.end_headers()
+                    return
+                
+                if is_offensive(username):
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write('{"error": "Kullanıcı adı uygunsuz içerik içeremez."}'.encode('utf-8'))
+                    return
+
+                db = read_campaign_db()
+                found = None
+                for item in db:
+                    if item.get('levelNumber') == level_num:
+                        found = item
+                        break
+                
+                if not found:
+                    found = {'levelNumber': level_num, 'scores': []}
+                    db.append(found)
+                
+                # Check for existing user score
+                existing = None
+                for s in found['scores']:
+                    if s.get('userId') == user_id:
+                        existing = s
+                        break
+                
+                if existing:
+                    existing['username'] = username.strip()
+                    if score_time < existing['time']:
+                        existing['time'] = score_time
+                        existing['date'] = datetime.now(timezone.utc).isoformat()
+                else:
+                    found['scores'].append({
+                        'userId': user_id,
+                        'username': username.strip(),
+                        'time': score_time,
+                        'date': datetime.now(timezone.utc).isoformat()
+                    })
+                
+                write_campaign_db(db)
+                
+                # Recalculate stats
+                all_scores = sorted(found['scores'], key=lambda s: s['time'])
+                top_3 = []
+                for idx, s in enumerate(all_scores[:3]):
+                    top_3.append({
+                        'username': s.get('username', 'Anonim'),
+                        'time': s.get('time'),
+                        'medal': 'gold' if idx == 0 else ('silver' if idx == 1 else 'bronze')
+                    })
+                
+                rank = None
+                personal_best = None
+                total_players = len(all_scores)
+                for idx, s in enumerate(all_scores):
+                    if s.get('userId') == user_id:
+                        rank = idx + 1
+                        personal_best = s.get('time')
+                        break
+                
+                percentile = round((rank / total_players) * 100, 1) if rank else 100.0
+                
+                res_data = {
+                    'success': True,
+                    'leaderboard': top_3,
+                    'rank': rank,
+                    'totalPlayers': total_players,
+                    'percentile': percentile,
+                    'personalBest': personal_best
+                }
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps(res_data, ensure_ascii=False).encode('utf-8'))
+                return
             else:
                 self.send_response(400)
                 self.end_headers()
