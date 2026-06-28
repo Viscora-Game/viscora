@@ -3584,6 +3584,7 @@ button:hover .icon-svg,
 .terminal-box {
     width: 680px;
     max-width: 95%;
+    height: 440px; /* Fixed height to prevent resizing during typing */
     background: rgba(15, 23, 42, 0.85);
     border: 1.5px solid #10b981;
     border-radius: 12px;
@@ -3625,7 +3626,8 @@ button:hover .icon-svg,
 
 .terminal-body {
     padding: 24px;
-    min-height: 220px;
+    flex: 1; /* Take all available space inside fixed height container */
+    overflow-y: auto; /* Scroll if content overflows vertically */
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -3634,12 +3636,13 @@ button:hover .icon-svg,
     font-size: 0.9rem;
     line-height: 1.6;
     letter-spacing: 0.04em;
-    overflow-y: auto;
 }
 
 .terminal-line {
     margin-bottom: 8px;
+    white-space: pre-wrap; /* Wrap lines instead of overflowing horizontally */
     word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .terminal-line.command {

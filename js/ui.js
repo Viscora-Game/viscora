@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v241';
-import { ViscosityList } from './viscosity.js?v=v241';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v241';
-import { CloudSaveManager } from './cloud_save.js?v=v241';
+import { audio } from './audio.js?v=v242';
+import { ViscosityList } from './viscosity.js?v=v242';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v242';
+import { CloudSaveManager } from './cloud_save.js?v=v242';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -468,8 +468,8 @@ export class UIManager {
                 { text: "> SIZINTI: Ana veri yolu (Siber Sektör 21) hacklendi.", type: "warning" },
                 { text: "> UYARI: Grafik arayüzü siber neon moduna zorlandı.", type: "command" },
                 { text: "> MEKANİK: Çekici UFO! Yerçekimini bükerek seni yukarı çeker, havada asılı kalmamaya dikkat et!", type: "command" },
-                { text: "> MEKANİK: Şalterler ile sarı lazer kapılarını devre dışı bırak!", type: "command" },
-                { text: 'Null: "Yerçekimini büken UFO\'lar... Çekirdeğe yaklaştıkça Endbringer\'ın engelleri daha da çılgınlaşıyor!"', type: "dialogue" }
+                { text: "> MEKANİK: Lazerleri aynalardan sektirerek güvenlik bariyerlerini devre dışı bırak!", type: "command" },
+                { text: 'Null: "Yerçekimini büken UFO\'lar ve lazerler... Çekirdeğe yaklaştıkça Endbringer\'ın engelleri daha da çılgınlaşıyor!"', type: "dialogue" }
             ],
             22: [
                 { text: "> ANALİZ: Sektör 22'de uçan güvenlik birimleri aktif edildi.", type: "warning" },
