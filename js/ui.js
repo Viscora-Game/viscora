@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v279';
-import { ViscosityList } from './viscosity.js?v=v279';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v279';
-import { CloudSaveManager } from './cloud_save.js?v=v279';
+import { audio } from './audio.js?v=v280';
+import { ViscosityList } from './viscosity.js?v=v280';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v280';
+import { CloudSaveManager } from './cloud_save.js?v=v280';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -1139,6 +1139,31 @@ export class UIManager {
                     if (typeof navigator !== 'undefined' && navigator.vibrate) {
                         navigator.vibrate(60);
                     }
+                }
+            });
+        }
+
+        const btnForceUpdate = document.getElementById('btn-force-update-cache');
+        if (btnForceUpdate) {
+            this.bindTouchClick(btnForceUpdate, () => {
+                if ('serviceWorker' in navigator) {
+                    btnForceUpdate.textContent = 'GÜNCELLENİYOR...';
+                    navigator.serviceWorker.getRegistrations().then(regs => {
+                        for (let r of regs) {
+                            r.unregister();
+                        }
+                    }).then(() => {
+                        return caches.keys().then(keys => {
+                            return Promise.all(keys.map(k => caches.delete(k)));
+                        });
+                    }).then(() => {
+                        window.location.reload(true);
+                    }).catch(err => {
+                        alert("Hata: " + err);
+                        window.location.reload(true);
+                    });
+                } else {
+                    window.location.reload(true);
                 }
             });
         }
@@ -3801,7 +3826,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v279`;
+                img.src = `assets/avatars/${av.id}.png?v=v280`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -3861,7 +3886,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v279`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v280`;
             }
         };
         
