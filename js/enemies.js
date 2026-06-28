@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v239';
+import { audio } from './audio.js?v=v240';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {

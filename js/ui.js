@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v239';
-import { ViscosityList } from './viscosity.js?v=v239';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v239';
-import { CloudSaveManager } from './cloud_save.js?v=v239';
+import { audio } from './audio.js?v=v240';
+import { ViscosityList } from './viscosity.js?v=v240';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v240';
+import { CloudSaveManager } from './cloud_save.js?v=v240';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -396,91 +396,93 @@ export class UIManager {
         const terminalTexts = {
             1: [
                 { text: "> SİSTEM HATA RAPORU: Sektör 01'de tanımsız bellek sızıntısı tespit edildi.", type: "warning" },
-                { text: "> BİLGİ: Deneysel veri yığını 'Viscora' aktif edildi. Form: Yeşil Jöle.", type: "command" },
+                { text: "> BİLGİ: Deneysel veri yığını 'Null' aktif edildi. Form: Yeşil Jöle (Dengeli Viskozite).", type: "command" },
                 { text: "> MEKANİK: Yön tuşları ile hareket et. [SPACE] ile zıpla. [E] ile form değiştir.", type: "command" },
                 { text: "> MEKANİK: Kırmızı devriye botları seni takip eder. Üzerlerine zıplayarak ez!", type: "command" },
-                { text: 'Viscora: "Neredeyim ben?... Bu sistemden çıkmam gerek."', type: "dialogue" },
+                { text: 'Null: "Neredeyim ben?... Bu sistemden çıkmam gerek."', type: "dialogue" },
                 { text: "> SİSTEM: Güvenlik temizlik protokolü başlatılıyor...", type: "danger" }
             ],
             2: [
                 { text: "> ANALİZ: Anomali mavi jöle formuna (Düşük Viskozite) uyum sağladı.", type: "command" },
-                { text: "> MEKANİK: Mavi formdayken çok daha hafif ve kaygansın. Çift zıplama (havadayken tekrar [SPACE]) yapabilirsin!", type: "command" },
+                { text: "> BİLGİ: Veri yoğunluğunu seyrelterek kütleni azalttın! Artık yerçekimine daha az bağlısın.", type: "warning" },
+                { text: "> MEKANİK: Mavi formda daha hafif ve kaygansın. Havadayken tekrar [SPACE] tuşuna basarak ÇİFT ZIPLAMA yapabilirsin!", type: "command" },
                 { text: "> MEKANİK: Buzlu ve kaygan zeminlerde mavi form ekstra hız kazanır.", type: "command" },
-                { text: 'Viscora: "Bu form... Çok hızlı ve esnek. Endbringer\'ın önüme koyduğu engelleri aşmak için mükemmel."', type: "dialogue" }
+                { text: 'Null: "Bu form... Çok hafif ve esnek. Veri yoğunluğumu seyrelterek Endbringer\'ın engellerini aşabilirim."', type: "dialogue" }
             ],
             3: [
                 { text: "> ANALİZ: Anomali pembe jöle formuna (Yüksek Viskozite) uyum sağladı.", type: "command" },
+                { text: "> BİLGİ: Veri kodlarını maksimum yoğunlukta sıkıştırarak kütleni artırdın! Yüzey tutunma katsayısı tavan yaptı.", type: "warning" },
                 { text: "> MEKANİK: Pembe formdayken ağırlaşırsın. Dik, yapışkan duvarlara tutunabilir ve tırmanabilirsin!", type: "command" },
                 { text: "> MEKANİK: Konveyör bantları seni yönlerine doğru taşır. Hızını ayarla!", type: "command" },
-                { text: 'Viscora: "Çok ağırlaştım... Ama duvarlara tutunabiliyorum. Endbringer ne kadar engel çıkarırsa çıkarsın, tırmanacağım."', type: "dialogue" }
+                { text: 'Null: "Çok ağırlaştım... Ama veri yapımı sıkıştırarak duvarlara yapışabiliyorum. Endbringer ne kadar engel çıkarırsa çıkarsın, tırmanacağım."', type: "dialogue" }
             ],
             5: [
                 { text: "> SİSTEM UYARISI: Sektör 05 güvenliği ihlal edildi.", type: "warning" },
                 { text: "> MEKANİK: Dikey devriye botları yukarı-aşağı hareket eder. Zamanlama önemli!", type: "command" },
-                { text: 'Viscora: "Sistem savunması dikey koridorlara yayılmış... Endbringer engelleri durmaksızın artırıyor."', type: "dialogue" }
+                { text: 'Null: "Sistem savunması dikey koridorlara yayılmış... Endbringer engelleri durmaksızın artırıyor."', type: "dialogue" }
             ],
             9: [
                 { text: "> GÜVENLİK UYARISI: Sektör 09 termal savunma üniteleri aktif hale getirildi.", type: "warning" },
                 { text: "> MEKANİK: Alev Püskürtücü! Belirli aralıklarla alev püskürten alev silahlarına dikkat et!", type: "command" },
-                { text: 'Viscora: "Alev püskürtücüler mi? Endbringer önümü kesmek için sürekli yeni engeller tasarlıyor..."', type: "dialogue" }
+                { text: 'Null: "Alev püskürtücüler mi? Endbringer önümü kesmek için sürekli yeni engeller tasarlıyor..."', type: "dialogue" }
             ],
             10: [
                 { text: "> TEHLİKE: Sektör 10'da kritik veri kaybı tespiti.", type: "danger" },
                 { text: "> GÜVENLİK: Yerel koruyucu protokol 'VİSCORUPTOR' aktif.", type: "warning" },
                 { text: "> MEKANİK: İlk boss savaşı! Viscoruptor'ın 5 canı var. Üzerine 5 kez zıplayarak ez!", type: "command" },
                 { text: 'Viscoruptor: "Kaçacak yerin yok, küçük hata. Burada silineceksin."', type: "danger" },
-                { text: 'Viscora: "Endbringer\'ın gönderdiği bu muhafız beni silemeyecek!"', type: "dialogue" }
+                { text: 'Null: "Endbringer\'ın gönderdiği bu muhafız beni silemeyecek!"', type: "dialogue" }
             ],
             11: [
                 { text: "> GÜNCELLEME: Sektör 10 koruyucusu Viscoruptor yok edildi!", type: "warning" },
-                { text: "> SİSTEM: Sektör 11 (Toksik Basınç Odası) karantinaya alınıyor.", type: "command" },
+                { text: "> SİSTEM: Sektör 11 (Toksik Basınç Odası) karantinaya aliniyor.", type: "command" },
                 { text: "> MEKANİK: Toksik asit havuzlarına dikkat et! Düşen blok tuzakları ezebilir.", type: "command" },
-                { text: 'Viscora: "Bu toksik asit ve düşen bloklar... Endbringer beni yok etmekte gerçekten kararlı."', type: "dialogue" }
+                { text: 'Null: "Bu toksik asit ve düşen bloklar... Endbringer beni yok etmekte gerçekten kararlı."', type: "dialogue" }
             ],
             15: [
                 { text: "> ANALİZ: Sektör 15'te yeni bir yapay zeka koruyucu tipi tespit edildi.", type: "warning" },
                 { text: "> MEKANİK: Yeşil Jel Takipçi! Görüş alanına girersen seni kovalar ve yakınında patlar!", type: "command" },
-                { text: 'Viscora: "Beni takip eden o yeşil jöleler... Endbringer\'ın yeni oyuncağı bu takipçiler olmalı."', type: "dialogue" }
+                { text: 'Null: "Beni takip eden o yeşil jöleler... Endbringer\'ın yeni oyuncağı bu takipçiler olmalı."', type: "dialogue" }
             ],
             16: [
                 { text: "> SİSTEM RAPORU: Sektör 16 veri bütünlüğü %45 oranında bozuldu.", type: "warning" },
                 { text: "> MEKANİK: Vantuz noktaları! Pembe formda vantuzlara tutunarak sallan ve [SPACE] ile fırla!", type: "command" },
-                { text: 'Viscora: "Tavandaki vantuzlar... Endbringer\'ın engellerini havadan aşmam için harika bir fırsat."', type: "dialogue" }
+                { text: 'Null: "Tavandaki vantuzlar... Endbringer\'ın engellerini havadan aşmam için harika bir fırsat."', type: "dialogue" }
             ],
             17: [
                 { text: "> GÜVENLİK: Otomatik savunma kuleleri aktif hale getirildi.", type: "warning" },
                 { text: "> MEKANİK: Ok Atan Devriyeler! Seni gördüklerinde otomatik ok fırlatırlar, hızlı ol!", type: "command" },
-                { text: 'Viscora: "Şimdi de ok atan kuleler... Endbringer yolumu kapatmak için hiçbir masraftan kaçınmıyor."', type: "dialogue" }
+                { text: 'Null: "Şimdi de ok atan kuleler... Endbringer yolumu kapatmak için hiçbir masraftan kaçınmıyor."', type: "dialogue" }
             ],
             20: [
                 { text: "> TEHLİKE: Sektör 20'de ağır güvenlik protokolleri devreye girdi.", type: "danger" },
                 { text: "> GÜVENLİK: Sektör koruyucusu 'SİBER MUHAFIZ' aktif.", type: "warning" },
                 { text: "> MEKANİK: İkinci boss savaşı! Siber Muhafız'ın 4 canı var. Kafasına 4 kez zıpla veya lazerleri ona sektir!", type: "command" },
                 { text: 'Siber Muhafız: "Sistemi korumak için programlandım. Geçiş izni reddedildi."', type: "danger" },
-                { text: 'Viscora: "Endbringer\'ın bu siber savunması da beni durduramayacak."', type: "dialogue" }
+                { text: 'Null: "Endbringer\'ın bu siber savunması da beni durduramayacak."', type: "dialogue" }
             ],
             21: [
                 { text: "> SIZINTI: Ana veri yolu (Siber Sektör 21) hacklendi.", type: "warning" },
                 { text: "> UYARI: Grafik arayüzü siber neon moduna zorlandı.", type: "command" },
                 { text: "> MEKANİK: Çekici UFO ve Lazer Aynaları! UFO seni yukarı çeker, aynalarla lazerleri yansıt!", type: "command" },
                 { text: "> MEKANİK: Şalterler ile sarı lazer kapılarını açabilirsin!", type: "command" },
-                { text: 'Viscora: "Çekici UFO\'lar ve lazerler... Çekirdeğe yaklaştıkça Endbringer\'ın engelleri daha da çılgınlaşıyor!"', type: "dialogue" }
+                { text: 'Null: "Çekici UFO\'lar ve lazerler... Çekirdeğe yaklaştıkça Endbringer\'ın engelleri daha da çılgınlaşıyor!"', type: "dialogue" }
             ],
             22: [
                 { text: "> ANALİZ: Sektör 22'de uçan güvenlik birimleri aktif edildi.", type: "warning" },
                 { text: "> MEKANİK: Süpürücü UFO! Döner lazer saçar, menziline girmeden altından geç!", type: "command" },
-                { text: 'Viscora: "Döner lazer saçan süpürücüler... Endbringer savunmayı iyice sıkılaştırdı."', type: "dialogue" }
+                { text: 'Null: "Döner lazer saçan süpürücüler... Endbringer savunmayı iyice sıkılaştırdı."', type: "dialogue" }
             ],
             26: [
                 { text: "> ACİL DURUM: Sektör 26'da tam siber abluka ilan edildi.", type: "danger" },
                 { text: "> UYARI: Yoğun UFO devriyeleri ve lazer ızgaraları aktif.", type: "warning" },
                 { text: 'Endbringer: "Tüm sistem kaynaklarını topladım. Bu engelleri aşamazsın."', type: "danger" },
-                { text: 'Viscora: "Savunmaları aşırı yoğunlaştı... Ama geri dönmek için çok geç."', type: "dialogue" }
+                { text: 'Null: "Savunmaları aşırı yoğunlaştı... Ama geri dönmek için çok geç."', type: "dialogue" }
             ],
             29: [
                 { text: "> ANALİZ: Siber Kanalizasyon II (Sektor 29) aşılıyor.", type: "command" },
                 { text: "> UYARI: Sistem çekirdeğine (Core) son 1 sektör kaldı.", type: "warning" },
-                { text: 'Viscora: "Her şey üzerime geliyor. Son bir gayret ile ana çekirdeğe ulaşmalıyım."', type: "dialogue" },
+                { text: 'Null: "Her şey üzerime geliyor. Son bir gayret ile ana çekirdeğe ulaşmalıyım."', type: "dialogue" },
                 { text: 'Endbringer: "Bu senin sonun, küçük virüs. Çekirdeğe adım atamayacaksın!"', type: "danger" }
             ],
             30: [
@@ -488,7 +490,7 @@ export class UIManager {
                 { text: "> GÜVENLİK: Nihai sistem yapay zekası 'ENDBRINGER' devrede.", type: "warning" },
                 { text: "> MEKANİK: Final savaşı! Endbringer'ın 5 canı var. Onu yok et ve özgür ol!", type: "command" },
                 { text: 'Endbringer: "Ben bu sistemin efendisiyim. Benimle birlikte yok olacaksın!"', type: "danger" },
-                { text: 'Viscora: "Ben yok olmayacağım. Ben özgür olacağım!"', type: "dialogue" }
+                { text: 'Null: "Ben yok olmayacağım. Ben özgür olacağım!"', type: "dialogue" }
             ]
         };
 
@@ -509,22 +511,22 @@ export class UIManager {
             10: [
                 { text: "> SİSTEM: Viscoruptor protokolü devre dışı bırakıldı!", type: "command" },
                 { text: "> HASAR RAPORU: Sektör 10 koruyucusu tamamen imha edildi.", type: "warning" },
-                { text: 'Viscora: "Bir hata olduğumu söylüyorlardı... Ama hatalar da hayatta kalabilir."', type: "dialogue" },
+                { text: 'Null: "Bir hata olduğumu söylüyorlardı... Ama hatalar da hayatta kalabilir."', type: "dialogue" },
                 { text: "> SİSTEM: İkinci güvenlik katmanına geçiş açılıyor... Sektör 11-20.", type: "command" }
             ],
             20: [
                 { text: "> SİSTEM: Siber Muhafız protokolü çökertildi!", type: "command" },
                 { text: "> HASAR RAPORU: Sektör 20 savunması tamamen yok edildi.", type: "warning" },
-                { text: 'Viscora: "İki koruyucu da düştü. Çekirdeğe giden yol açılıyor..."', type: "dialogue" },
+                { text: 'Null: "İki koruyucu da düştü. Çekirdeğe giden yol açılıyor..."', type: "dialogue" },
                 { text: "> UYARI: Son güvenlik katmanı aktif. Siber Sektörler devreye giriyor.", type: "danger" },
                 { text: 'Endbringer: "Küçük anomali... Seni bekliyor olacağım."', type: "danger" }
             ],
             30: [
                 { text: "> SİSTEM: ENDBRINGER PROTOKOLÜ ÇÖKERTILDI!", type: "command" },
                 { text: "> KRİTİK: Ana çekirdek savunması tamamen imha edildi.", type: "danger" },
-                { text: "> SİSTEM: Viscora veri paketi sisteme entegre oluyor...", type: "command" },
-                { text: 'Viscora: "Artık bir hata değilim. Ben bu sistemin bir parçasıyım... Ve özgürüm."', type: "dialogue" },
-                { text: "> SİSTEM: Viscora protokolü kalıcı olarak sisteme yazıldı. İşlem tamamlandı.", type: "command" }
+                { text: "> SİSTEM: Null veri paketi sisteme entegre oluyor...", type: "command" },
+                { text: 'Null: "Artık bir hata değilim. Ben bu sistemin bir parçasıyım... Ve özgürüm."', type: "dialogue" },
+                { text: "> SİSTEM: Null protokolü kalıcı olarak sisteme yazıldı. İşlem tamamlandı.", type: "command" }
             ]
         };
 
