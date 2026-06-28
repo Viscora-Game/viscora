@@ -74,6 +74,8 @@ html, body {
     background-color: var(--bg-dark);
     font-family: var(--font-game);
     color: var(--text-primary);
+    -webkit-text-size-adjust: 100%; /* Disable browser mobile text autosizing/inflation */
+    text-size-adjust: 100%;
 }
 
 /* Menü ekranlarının kaydırılabilir olması için */
@@ -3596,12 +3598,14 @@ button:hover .icon-svg,
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Courier New', Courier, monospace !important;
     
     /* Force consistent font smoothing to prevent browser text-bolding shifts after transitions */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: none !important;
+    text-size-adjust: none !important;
 }
 
 .terminal-header {
@@ -3640,13 +3644,14 @@ button:hover .icon-svg,
     justify-content: flex-start;
     text-align: left;
     color: #34d399;
-    font-size: 0.8rem; /* Reduced font size from 0.9rem to prevent horizontal scroll */
+    font-size: 0.8rem !important; /* Fixed font size to prevent horizontal scroll */
     line-height: 1.45;
     letter-spacing: 0.03em;
 }
 
 .terminal-line {
     margin-bottom: 6px;
+    font-size: 0.8rem !important; /* Absolute lock */
     white-space: pre-wrap; /* Wrap lines instead of overflowing horizontally */
     word-break: break-word;
     overflow-wrap: break-word;
