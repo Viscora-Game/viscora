@@ -3,6 +3,7 @@ import json
 import os
 import random
 import urllib.parse
+import urllib.request
 from datetime import datetime, timezone
 
 PORT = int(os.environ.get('PORT', 8080))
@@ -703,8 +704,6 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 
             # Google'ın tokeninfo API'si ile token doğrula
             try:
-                import urllib.request
-                import urllib.parse
                 verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
                 req = urllib.request.Request(verify_url, method="GET")
                 with urllib.request.urlopen(req) as resp:
