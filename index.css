@@ -3597,6 +3597,11 @@ button:hover .icon-svg,
     flex-direction: column;
     overflow: hidden;
     font-family: 'Courier New', Courier, monospace;
+    
+    /* Force consistent font smoothing to prevent browser text-bolding shifts after transitions */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 .terminal-header {
