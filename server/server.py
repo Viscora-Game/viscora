@@ -488,6 +488,26 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
         path = parsed_url.path
         query = urllib.parse.parse_qs(parsed_url.query)
 
+        if path == '/api/debug_users':
+            users = read_users_db()
+            debug_info = []
+            for u in users:
+                debug_info.append({
+                    'userId': u.get('userId'),
+                    'googleEmail': u.get('googleEmail'),
+                    'syncCode': u.get('syncCode'),
+                    'totalCrystals': u.get('saveData', {}).get('totalCrystals'),
+                    'spentCrystals': u.get('saveData', {}).get('spentCrystals'),
+                    'avatar': u.get('saveData', {}).get('avatar'),
+                    'authorName': u.get('saveData', {}).get('authorName'),
+                    'lastUpdated': u.get('lastUpdated')
+                })
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps(debug_info, ensure_ascii=False).encode('utf-8'))
+            return
+
         if path == '/api/levels':
             db = read_db()
             sort_type = query.get('sort', ['new'])[0]
