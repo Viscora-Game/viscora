@@ -3689,11 +3689,16 @@ button:hover .icon-svg,
     50% { opacity: 1; }
 }
 
+.brand {
+    position: relative;
+    width: 100%;
+}
+
 /* Oyuncu Profil Kartı Widget & Modal Stilleri */
 #player-profile-widget {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: -8px;
+    right: 0;
     display: flex;
     align-items: center;
     gap: 8px;
