@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v253';
-import { THEMES } from './generator.js?v=v253';
+import { audio } from './audio.js?v=v254';
+import { THEMES } from './generator.js?v=v254';
 
 /**
  * Viscora Level Design & Manager
@@ -3111,7 +3111,7 @@ export class Level {
         } else if (originalLevelNumber === 30) {
             data = {
                 "serverLevelId": null,
-                "name": "ENDBRINGER",
+                "name": "SON GETİREN",
                 "tags": [],
                 "themeId": "magma_core",
                 "levelWidth": 3500,
@@ -6873,7 +6873,7 @@ export class Level {
                     27: "LAZER KAFESİ",
                     28: "KOD DEPOSU",
                     29: "SİBER KANALİZASYON II",
-                    30: "ENDBRINGER"
+                    30: "SON GETİREN"
                 };
                 baseName = names[originalLevelNumber] || "";
             }

@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v253';
-import { Level } from './level.js?v=v253';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v253';
-import { UIManager } from './ui.js?v=v253';
-import { CloudSaveManager } from './cloud_save.js?v=v253';
-import { audio } from './audio.js?v=v253';
-import { LevelEditor } from './editor.js?v=v253';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v253';
+import { Player } from './player.js?v=v254';
+import { Level } from './level.js?v=v254';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v254';
+import { UIManager } from './ui.js?v=v254';
+import { CloudSaveManager } from './cloud_save.js?v=v254';
+import { audio } from './audio.js?v=v254';
+import { LevelEditor } from './editor.js?v=v254';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v254';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -38,7 +38,7 @@ const LEVEL_NAMES = [
     "SİBER VERİ AKIŞI: LAZER KAFESİ",
     "SİBER VERİ AKIŞI: KOD DEPOSU",
     "SİBER VERİ AKIŞI: SİBER KANALİZASYON II",
-    "SİBER VERİ AKIŞI: ENDBRINGER"
+    "SİBER VERİ AKIŞI: SON GETİREN"
 ];
 
 // Bölüm bazlı bağlamsal ipuçları — ilk kez tanıtılan mekanikler için kısa yardım metinleri

@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v253';
-import { ViscosityList } from './viscosity.js?v=v253';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v253';
-import { CloudSaveManager } from './cloud_save.js?v=v253';
+import { audio } from './audio.js?v=v254';
+import { ViscosityList } from './viscosity.js?v=v254';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v254';
+import { CloudSaveManager } from './cloud_save.js?v=v254';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -408,53 +408,53 @@ export class UIManager {
                 { text: "> BİLGİ: Veri yoğunluğunu seyrelterek kütleni azalttın! Artık yerçekimine daha az bağlısın.", type: "warning" },
                 { text: "> MEKANİK: Mavi formda daha hafif ve kaygansın. Havadayken tekrar [SPACE] tuşuna basarak ÇİFT ZIPLAMA yapabilirsin!", type: "command" },
                 { text: "> MEKANİK: Buzlu ve kaygan zeminlerde mavi form ekstra hız kazanır.", type: "command" },
-                { text: 'Null: "Bu form... Çok hafif ve esnek. Veri yoğunluğumu seyrelterek Endbringer\'ın engellerini aşabilirim."', type: "dialogue" }
+                { text: 'Null: "Bu form... Çok hafif ve esnek. Veri yoğunluğumu seyrelterek Son Getiren\'in engellerini aşabilirim."', type: "dialogue" }
             ],
             3: [
                 { text: "> ANALİZ: Anomali pembe jöle formuna (Yüksek Viskozite) uyum sağladı.", type: "command" },
                 { text: "> BİLGİ: Veri kodlarını maksimum yoğunlukta sıkıştırarak kütleni artırdın! Yüzey tutunma katsayısı tavan yaptı.", type: "warning" },
                 { text: "> MEKANİK: Pembe formdayken ağırlaşırsın. Dik, yapışkan duvarlara tutunabilir ve tırmanabilirsin!", type: "command" },
                 { text: "> MEKANİK: Konveyör bantları seni yönlerine doğru taşır. Hızını ayarla!", type: "command" },
-                { text: 'Null: "Çok ağırlaştım... Ama veri yapımı sıkıştırarak duvarlara yapışabiliyorum. Endbringer ne kadar engel çıkarırsa çıkarsın, tırmanacağım."', type: "dialogue" }
+                { text: 'Null: "Çok ağırlaştım... Ama veri yapımı sıkıştırarak duvarlara yapışabiliyorum. Son Getiren ne kadar engel çıkarırsa çıkarsın, tırmanacağım."', type: "dialogue" }
             ],
             5: [
                 { text: "> SİSTEM UYARISI: Sektör 05 güvenliği ihlal edildi.", type: "warning" },
                 { text: "> MEKANİK: Dikey devriye botları yukarı-aşağı hareket eder. Zamanlama önemli!", type: "command" },
-                { text: 'Null: "Sistem savunması dikey koridorlara yayılmış... Endbringer engelleri durmaksızın artırıyor."', type: "dialogue" }
+                { text: 'Null: "Sistem savunması dikey koridorlara yayılmış... Son Getiren engelleri durmaksızın artırıyor."', type: "dialogue" }
             ],
             9: [
                 { text: "> GÜVENLİK UYARISI: Sektör 09 termal savunma üniteleri aktif hale getirildi.", type: "warning" },
                 { text: "> MEKANİK: Alev Püskürtücü! Belirli aralıklarla alev püskürten alev silahlarına dikkat et!", type: "command" },
-                { text: 'Null: "Alev püskürtücüler mi? Endbringer önümü kesmek için sürekli yeni engeller tasarlıyor..."', type: "dialogue" }
+                { text: 'Null: "Alev püskürtücüler mi? Son Getiren önümü kesmek için sürekli yeni engeller tasarlıyor..."', type: "dialogue" }
             ],
             10: [
                 { text: "> TEHLİKE: Sektör 10'da kritik veri kaybı tespiti.", type: "danger" },
-                { text: "> GÜVENLİK: Yerel koruyucu protokol 'VİSCORUPTOR' aktif.", type: "warning" },
-                { text: "> MEKANİK: İlk boss savaşı! Viscoruptor'ın 5 canı var. Üzerine 5 kez zıplayarak ez!", type: "command" },
-                { text: 'Viscoruptor: "Kaçacak yerin yok, küçük hata. Burada silineceksin."', type: "danger" },
-                { text: 'Null: "Endbringer\'ın gönderdiği bu muhafız beni silemeyecek!"', type: "dialogue" }
+                { text: "> GÜVENLİK: Yerel koruyucu protokol 'VİSKO-BOZUCU' aktif.", type: "warning" },
+                { text: "> MEKANİK: İlk boss savaşı! Visko-Bozucu'nun 5 canı var. Üzerine 5 kez zıplayarak ez!", type: "command" },
+                { text: 'Visko-Bozucu: "Kaçacak yerin yok, küçük hata. Burada silineceksin."', type: "danger" },
+                { text: 'Null: "Son Getiren\'in gönderdiği bu muhafız beni silemeyecek!"', type: "dialogue" }
             ],
             11: [
-                { text: "> GÜNCELLEME: Sektör 10 koruyucusu Viscoruptor yok edildi!", type: "warning" },
+                { text: "> GÜNCELLEME: Sektör 10 koruyucusu Visko-Bozucu yok edildi!", type: "warning" },
                 { text: "> SİSTEM: Sektör 11 (Toksik Basınç Odası) karantinaya aliniyor.", type: "command" },
                 { text: "> MEKANİK: Toksik asit havuzlarına dikkat et! Düşen blok tuzakları ezebilir.", type: "command" },
-                { text: 'Null: "Bu toksik asit ve düşen bloklar... Endbringer beni yok etmekte gerçekten kararlı."', type: "dialogue" }
+                { text: 'Null: "Bu toksik asit ve düşen bloklar... Son Getiren beni yok etmekte gerçekten kararlı."', type: "dialogue" }
             ],
             15: [
                 { text: "> ANALİZ: Sektör 15'te yeni bir yapay zeka koruyucu tipi tespit edildi.", type: "warning" },
                 { text: "> MEKANİK: Yeşil Jel Takipçi! Görüş alanına girersen seni kovalar ve yakınında patlar!", type: "command" },
-                { text: 'Null: "Beni takip eden o yeşil jöleler... Endbringer\'ın yeni oyuncağı bu takipçiler olmalı."', type: "dialogue" }
+                { text: 'Null: "Beni takip eden o yeşil jöleler... Son Getiren\'in yeni oyuncağı bu takipçiler olmalı."', type: "dialogue" }
             ],
             16: [
                 { text: "> SİSTEM RAPORU: Sektör 16 veri bütünlüğü %45 oranında bozuldu.", type: "warning" },
                 { text: "> MEKANİK: Lazer Aynaları ve İtilebilir Ayna Blokları! Lazer ışınlarını aynalardan yansıt.", type: "command" },
                 { text: "> MEKANİK: Blokları iterek lazer yolunu ayarla ve sarı lazer kapılarını devreden çıkar!", type: "command" },
-                { text: 'Null: "Aynalar ve lazerler... Endbringer yolları çözülmesi zor siber bulmacalarla kapatmış."', type: "dialogue" }
+                { text: 'Null: "Aynalar ve lazerler... Son Getiren yolları çözülmesi zor siber bulmacalarla kapatmış."', type: "dialogue" }
             ],
             17: [
                 { text: "> GÜVENLİK: Otomatik savunma kuleleri aktif hale getirildi.", type: "warning" },
                 { text: "> MEKANİK: Ok Atan Devriyeler! Seni gördüklerinde otomatik ok fırlatırlar, hızlı ol!", type: "command" },
-                { text: 'Null: "Şimdi de ok atan kuleler... Endbringer yolumu kapatmak için hiçbir masraftan kaçınmıyor."', type: "dialogue" }
+                { text: 'Null: "Şimdi de ok atan kuleler... Son Getiren yolumu kapatmak için hiçbir masraftan kaçınmıyor."', type: "dialogue" }
             ],
             20: [
                 { text: "> TEHLİKE: Sektör 20'de ağır güvenlik protokolleri devreye girdi.", type: "danger" },
@@ -463,38 +463,38 @@ export class UIManager {
                 { text: "> MEKANİK: Üst platformlardaki itilebilir kutuları boss'un üzerine düşürerek hasar ver!", type: "command" },
                 { text: "> MEKANİK: Tavandaki pembe vantuz noktalarına pembe formda tutunup sallanarak kaçabilirsin!", type: "command" },
                 { text: 'Siber Muhafız: "Sistemi korumak için programlandım. Geçiş izni reddedildi."', type: "danger" },
-                { text: 'Null: "Kutuları üzerine düşürürsem bu zırhı aşabilirim. Endbringer\'ın bu siber savunması da beni durduramayacak!"', type: "dialogue" }
+                { text: 'Null: "Kutuları üzerine düşürürsem bu zırhı aşabilirim. Son Getiren\'in bu siber savunması da beni durduramayacak!"', type: "dialogue" }
             ],
             21: [
                 { text: "> SIZINTI: Ana veri yolu (Siber Sektör 21) hacklendi.", type: "warning" },
                 { text: "> UYARI: Grafik arayüzü siber neon moduna zorlandı.", type: "command" },
                 { text: "> MEKANİK: Çekici UFO! Yerçekimini bükerek seni yukarı çeker, havada asılı kalmamaya dikkat et!", type: "command" },
                 { text: "> MEKANİK: Lazerleri aynalardan sektirerek güvenlik bariyerlerini devre dışı bırak!", type: "command" },
-                { text: 'Null: "Yerçekimini büken UFO\'lar ve lazerler... Çekirdeğe yaklaştıkça Endbringer\'ın engelleri daha da çılgınlaşıyor!"', type: "dialogue" }
+                { text: 'Null: "Yerçekimini büken UFO\'lar ve lazerler... Çekirdeğe yaklaştıkça Son Getiren\'in engelleri daha da çılgınlaşıyor!"', type: "dialogue" }
             ],
             22: [
                 { text: "> ANALİZ: Sektör 22'de uçan güvenlik birimleri aktif edildi.", type: "warning" },
                 { text: "> MEKANİK: Süpürücü UFO! Döner lazer saçar, menziline girmeden altından geç!", type: "command" },
-                { text: 'Null: "Döner lazer saçan süpürücüler... Endbringer savunmayı iyice sıkılaştırdı."', type: "dialogue" }
+                { text: 'Null: "Döner lazer saçan süpürücüler... Son Getiren savunmayı iyice sıkılaştırdı."', type: "dialogue" }
             ],
             26: [
                 { text: "> ACİL DURUM: Sektör 26'da tam siber abluka ilan edildi.", type: "danger" },
                 { text: "> UYARI: Yoğun UFO devriyeleri ve lazer ızgaraları aktif.", type: "warning" },
-                { text: 'Endbringer: "Tüm sistem kaynaklarını topladım. Bu engelleri aşamazsın."', type: "danger" },
+                { text: 'Son Getiren: "Tüm sistem kaynaklarını topladım. Bu engelleri aşamazsın."', type: "danger" },
                 { text: 'Null: "Savunmaları aşırı yoğunlaştı... Ama geri dönmek için çok geç."', type: "dialogue" }
             ],
             29: [
                 { text: "> ANALİZ: Siber Kanalizasyon II (Sektor 29) aşılıyor.", type: "command" },
                 { text: "> UYARI: Sistem çekirdeğine (Core) son 1 sektör kaldı.", type: "warning" },
                 { text: 'Null: "Her şey üzerime geliyor. Son bir gayret ile ana çekirdeğe ulaşmalıyım."', type: "dialogue" },
-                { text: 'Endbringer: "Bu senin sonun, küçük virüs. Çekirdeğe adım atamayacaksın!"', type: "danger" }
+                { text: 'Son Getiren: "Bu senin sonun, küçük virüs. Çekirdeğe adım atamayacaksın!"', type: "danger" }
             ],
             30: [
                 { text: "> ACİL DURUM: ANA ÇEKİRDEK (SEKTÖR 30) İHLAL EDİLDİ.", type: "danger" },
-                { text: "> GÜVENLİK: Nihai sistem yapay zekası 'ENDBRINGER' devrede.", type: "warning" },
-                { text: "> MEKANİK: Final savaşı! Endbringer'ın 5 canı var. Ona doğrudan hasar veremezsin!", type: "command" },
-                { text: "> MEKANİK: Endbringer'ın ürettiği küçük devriyeleri yok ederek onu zayıflat! Canı 1'e düştüğünde kafasına zıplayarak bitir!", type: "command" },
-                { text: 'Endbringer: "Ben bu sistemin efendisiyim. Benimle birlikte yok olacaksın!"', type: "danger" },
+                { text: "> GÜVENLİK: Nihai sistem yapay zekası 'SON GETİREN' devrede.", type: "warning" },
+                { text: "> MEKANİK: Final savaşı! Son Getiren'in 5 canı var. Ona doğrudan hasar veremezsin!", type: "command" },
+                { text: "> MEKANİK: Son Getiren'in ürettiği küçük devriyeleri yok ederek onu zayıflat! Canı 1'e düştüğünde kafasına zıplayarak bitir!", type: "command" },
+                { text: 'Son Getiren: "Ben bu sistemin efendisiyim. Benimle birlikte yok olacaksın!"', type: "danger" },
                 { text: 'Null: "Ürettiğin koruyucuları sana karşı kullanacağım. Ben yok olmayacağım, özgür olacağım!"', type: "dialogue" }
             ]
         };
@@ -514,7 +514,7 @@ export class UIManager {
     showBossDefeatTerminal(levelNumber, onComplete) {
         const bossDefeatTexts = {
             10: [
-                { text: "> SİSTEM: Viscoruptor protokolü devre dışı bırakıldı!", type: "command" },
+                { text: "> SİSTEM: Visko-Bozucu protokolü devre dışı bırakıldı!", type: "command" },
                 { text: "> HASAR RAPORU: Sektör 10 koruyucusu tamamen imha edildi.", type: "warning" },
                 { text: 'Null: "Bir hata olduğumu söylüyorlardı... Ama hatalar da hayatta kalabilir."', type: "dialogue" },
                 { text: "> SİSTEM: İkinci güvenlik katmanına geçiş açılıyor... Sektör 11-20.", type: "command" }
@@ -524,10 +524,10 @@ export class UIManager {
                 { text: "> HASAR RAPORU: Sektör 20 savunması tamamen yok edildi.", type: "warning" },
                 { text: 'Null: "İki koruyucu da düştü. Çekirdeğe giden yol açılıyor..."', type: "dialogue" },
                 { text: "> UYARI: Son güvenlik katmanı aktif. Siber Sektörler devreye giriyor.", type: "danger" },
-                { text: 'Endbringer: "Küçük anomali... Seni bekliyor olacağım."', type: "danger" }
+                { text: 'Son Getiren: "Küçük anomali... Seni bekliyor olacağım."', type: "danger" }
             ],
             30: [
-                { text: "> SİSTEM: ENDBRINGER PROTOKOLÜ ÇÖKERTILDI!", type: "command" },
+                { text: "> SİSTEM: SON GETİREN PROTOKOLÜ ÇÖKERTİLDİ!", type: "command" },
                 { text: "> KRİTİK: Ana çekirdek savunması tamamen imha edildi.", type: "danger" },
                 { text: "> SİSTEM: Null veri paketi sisteme entegre oluyor...", type: "command" },
                 { text: 'Null: "Artık bir hata değilim. Ben bu sistemin bir parçasıyım... Ve özgürüm."', type: "dialogue" },
@@ -3715,16 +3715,16 @@ export class UIManager {
         const btnSave = document.getElementById('btn-save-profile');
         const btnClose = document.getElementById('btn-close-profile');
         
-        // Define avatars list with precise filenames and user generated labels
+        // Define avatars list with precise filenames and Turkish labels
         this.profileAvatars = [
-            { id: 'slime_king', label: 'Slime King' },
-            { id: 'mecha_drone', label: 'Mecha-Drone' },
-            { id: 'fire_elemental', label: 'Fire-Elemental' },
-            { id: 'ancient_totem', label: 'Ancient Totem' },
-            { id: 'crystal_shard', label: 'Crystal Shard' },
-            { id: 'ghost_orb', label: 'Ghost-Orb' },
-            { id: 'tentacle_blob', label: 'Tentacle-Blob' },
-            { id: 'shadow_artifact', label: 'Shadow-Artifact' }
+            { id: 'slime_king', label: 'Jöle Kralı' },
+            { id: 'mecha_drone', label: 'Mekanik Drone' },
+            { id: 'fire_elemental', label: 'Ateş Elementali' },
+            { id: 'ancient_totem', label: 'Kadim Totem' },
+            { id: 'crystal_shard', label: 'Kristal Canavar' },
+            { id: 'ghost_orb', label: 'Hayalet Küre' },
+            { id: 'tentacle_blob', label: 'Dokunaçlı Jöle' },
+            { id: 'shadow_artifact', label: 'Gölge Miğferi' }
         ];
         
         // Selected avatar state
@@ -3757,8 +3757,8 @@ export class UIManager {
                 // Add image
                 const img = document.createElement('img');
                 img.src = `assets/avatars/${av.id}.png`;
-                img.style.width = '36px';
-                img.style.height = '36px';
+                img.style.width = '48px';
+                img.style.height = '44px';
                 img.style.objectFit = 'contain';
                 img.style.filter = 'drop-shadow(0 0 4px rgba(0, 242, 254, 0.25))';
                 

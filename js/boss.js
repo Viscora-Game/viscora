@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v253';
-import { Enemy, GelChaser } from './enemies.js?v=v253';
+import { audio } from './audio.js?v=v254';
+import { Enemy, GelChaser } from './enemies.js?v=v254';
 
 export class Boss {
     constructor(x, y) {
@@ -901,7 +901,7 @@ export class Boss {
         ctx.fillStyle = '#f8fafc';
         ctx.font = 'bold 11px Courier New, monospace';
         ctx.textAlign = 'center';
-        ctx.fillText('VISCORUPTOR - SLIME KING', barX + barW / 2, barY - 8);
+        ctx.fillText('VİSKO-BOZUCU - JÖLE KRALI', barX + barW / 2, barY - 8);
 
         // Fill HP segments
         const healthPercent = Math.max(0, this.health / this.maxHealth);
@@ -2640,9 +2640,9 @@ export class UfoBoss extends Boss {
         ctx.font = 'bold 11px Courier New, monospace';
         ctx.textAlign = 'center';
         
-        let labelText = 'ENDBRINGER - COMMAND UFO';
+        let labelText = 'SON GETİREN - KOMUTA UFO';
         if (this.state === 'VULNERABLE') {
-            labelText = '⚠️ WARNING: ENDBRINGER SYSTEM FAILURE - STOMP NOW! ⚠️';
+            labelText = '⚠️ UYARI: SON GETİREN SİSTEM ARIZASI - ŞİMDİ EZ! ⚠️';
         }
         ctx.fillText(labelText, barX + barW / 2, barY - 8);
 
