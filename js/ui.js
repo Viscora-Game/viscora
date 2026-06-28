@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v249';
-import { ViscosityList } from './viscosity.js?v=v249';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v249';
-import { CloudSaveManager } from './cloud_save.js?v=v249';
+import { audio } from './audio.js?v=v250';
+import { ViscosityList } from './viscosity.js?v=v250';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v250';
+import { CloudSaveManager } from './cloud_save.js?v=v250';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -159,6 +159,7 @@ export class UIManager {
         this.initInputListeners();
         this.initButtonBindings();
         this.updateLevelButtonsUI();
+        this.initProfileUI();
     }
 
     /**
@@ -3704,6 +3705,155 @@ export class UIManager {
             toast.style.opacity = '0';
             setTimeout(() => toast.remove(), 350);
         }, 3000);
+    }
+
+    initProfileUI() {
+        const widget = document.getElementById('player-profile-widget');
+        const modal = document.getElementById('profile-settings-modal');
+        const usernameInput = document.getElementById('profile-username-input');
+        const avatarPicker = document.getElementById('profile-avatar-picker');
+        const btnSave = document.getElementById('btn-save-profile');
+        const btnClose = document.getElementById('btn-close-profile');
+        
+        // Define avatars list
+        this.profileAvatars = [
+            { char: '🟢' },
+            { char: '🔵' },
+            { char: '🌸' },
+            { char: '🤖' },
+            { char: '👾' },
+            { char: '🚀' }
+        ];
+        
+        // Selected avatar state
+        this.selectedAvatar = localStorage.getItem('viscora_avatar') || '🟢';
+        
+        // Render avatar list inside picker
+        if (avatarPicker) {
+            avatarPicker.innerHTML = '';
+            this.profileAvatars.forEach(av => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'avatar-choice-btn';
+                btn.style.width = '100%';
+                btn.style.height = '42px';
+                btn.style.background = 'rgba(15, 23, 42, 0.5)';
+                btn.style.border = '1px solid rgba(56, 189, 248, 0.15)';
+                btn.style.borderRadius = '8px';
+                btn.style.fontSize = '1.3rem';
+                btn.style.cursor = 'pointer';
+                btn.style.display = 'flex';
+                btn.style.alignItems = 'center';
+                btn.style.justifyContent = 'center';
+                btn.innerHTML = av.char;
+                
+                if (av.char === this.selectedAvatar) {
+                    btn.style.borderColor = '#38bdf8';
+                    btn.style.background = 'rgba(56, 189, 248, 0.2)';
+                    btn.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.3)';
+                }
+                
+                btn.addEventListener('click', () => {
+                    this.selectedAvatar = av.char;
+                    // Reset all other choice borders
+                    Array.from(avatarPicker.children).forEach(child => {
+                        child.style.borderColor = 'rgba(56, 189, 248, 0.15)';
+                        child.style.background = 'rgba(15, 23, 42, 0.5)';
+                        child.style.boxShadow = 'none';
+                    });
+                    btn.style.borderColor = '#38bdf8';
+                    btn.style.background = 'rgba(56, 189, 248, 0.2)';
+                    btn.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.3)';
+                });
+                
+                avatarPicker.appendChild(btn);
+            });
+        }
+        
+        // Initial setup function
+        const updateWidget = () => {
+            const currentName = localStorage.getItem('viscora_author_name') || 'Oyuncu';
+            const currentAvatar = localStorage.getItem('viscora_avatar') || '🟢';
+            const widgetName = document.getElementById('profile-widget-name');
+            const widgetAvatar = document.getElementById('profile-widget-avatar');
+            if (widgetName) widgetName.textContent = currentName;
+            if (widgetAvatar) widgetAvatar.textContent = currentAvatar;
+        };
+        
+        updateWidget();
+        
+        // Show Profile settings Modal
+        const openProfileModal = (isFirstTime = false) => {
+            const titleEl = modal.querySelector('.star-gate-title');
+            if (isFirstTime) {
+                if (titleEl) titleEl.innerHTML = '<svg class="icon-svg"><use href="#icon-flask"></use></svg> SİSTEME GİRİŞ YAPIN';
+                if (btnClose) btnClose.style.display = 'none';
+            } else {
+                if (titleEl) titleEl.innerHTML = '<svg class="icon-svg"><use href="#icon-flask"></use></svg> OYUNCU PROFİLİ';
+                if (btnClose) btnClose.style.display = 'block';
+            }
+            
+            this.selectedAvatar = localStorage.getItem('viscora_avatar') || '🟢';
+            usernameInput.value = localStorage.getItem('viscora_author_name') || '';
+            
+            // Highlight current avatar choice
+            if (avatarPicker) {
+                Array.from(avatarPicker.children).forEach(child => {
+                    if (child.innerHTML === this.selectedAvatar) {
+                        child.style.borderColor = '#38bdf8';
+                        child.style.background = 'rgba(56, 189, 248, 0.2)';
+                        child.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.3)';
+                    } else {
+                        child.style.borderColor = 'rgba(56, 189, 248, 0.15)';
+                        child.style.background = 'rgba(15, 23, 42, 0.5)';
+                        child.style.boxShadow = 'none';
+                    }
+                });
+            }
+            
+            modal.classList.remove('hidden');
+        };
+        
+        // Bind Widget Click
+        if (widget) {
+            this.bindTouchClick(widget, () => {
+                openProfileModal(false);
+            });
+        }
+        
+        // Bind Save Button
+        if (btnSave) {
+            this.bindTouchClick(btnSave, () => {
+                let name = usernameInput.value.trim();
+                const nameRegex = /^[a-zA-Z0-9 ığüşöçİĞÜŞÖÇ_.-]{2,14}$/;
+                if (!name || !nameRegex.test(name)) {
+                    this.showGlobalToast("Geçersiz isim! (2-14 karakter, harf/sayı)", false);
+                    return;
+                }
+                
+                localStorage.setItem('viscora_author_name', name);
+                localStorage.setItem('viscora_avatar', this.selectedAvatar);
+                localStorage.setItem('viscora_username_set', 'true');
+                
+                updateWidget();
+                modal.classList.add('hidden');
+                this.showGlobalToast("Profil başarıyla kaydedildi!", true);
+            });
+        }
+        
+        // Bind Cancel/Close Button
+        if (btnClose) {
+            this.bindTouchClick(btnClose, () => {
+                modal.classList.add('hidden');
+            });
+        }
+        
+        // Trigger First-time username prompt if not set
+        if (!localStorage.getItem('viscora_username_set')) {
+            setTimeout(() => {
+                openProfileModal(true);
+            }, 800);
+        }
     }
 }
 export default UIManager;

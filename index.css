@@ -3687,3 +3687,38 @@ button:hover .icon-svg,
     0%, 100% { opacity: 0.5; }
     50% { opacity: 1; }
 }
+
+/* Oyuncu Profil Kartı Widget & Modal Stilleri */
+#player-profile-widget {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+#player-profile-widget:hover {
+    background: rgba(15, 23, 42, 0.95) !important;
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.45) !important;
+    transform: scale(1.04) !important;
+}
+
+#player-profile-widget:active {
+    transform: scale(0.97) !important;
+}
+
+.avatar-choice-btn {
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.avatar-choice-btn:hover {
+    border-color: rgba(56, 189, 248, 0.6) !important;
+    background: rgba(56, 189, 248, 0.08) !important;
+    transform: scale(1.06) !important;
+}
+
+.avatar-choice-btn:active {
+    transform: scale(0.95) !important;
+}
+
+#profile-username-input:focus {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.3) !important;
+}

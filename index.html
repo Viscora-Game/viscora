@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v249">
+    <link rel="stylesheet" href="index.css?v=v250">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -580,7 +580,7 @@
                     <span class="terminal-dot red"></span>
                     <span class="terminal-dot yellow"></span>
                     <span class="terminal-dot green"></span>
-                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v249</span>
+                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v250</span>
                 </div>
                 <div class="terminal-body">
                     <div id="terminal-text"></div>
@@ -668,6 +668,11 @@
 
         <!-- Başlangıç Ekranı -->
         <div id="start-screen" class="screen active">
+            <!-- Oyuncu Profil Kartı (Üst Köşede) -->
+            <div id="player-profile-widget" style="position: absolute; top: 15px; right: 15px; display: flex; align-items: center; gap: 8px; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; padding: 6px 14px; cursor: pointer; text-shadow: 0 0 5px rgba(56,189,248,0.3); box-shadow: 0 4px 12px rgba(0,0,0,0.5); backdrop-filter: blur(8px); transition: all 0.2s ease; z-index: 100;">
+                <div id="profile-widget-avatar" style="width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; filter: drop-shadow(0 0 5px currentColor);">🟢</div>
+                <div id="profile-widget-name" style="font-family: monospace; font-size: 0.85rem; font-weight: bold; color: #f8fafc; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Oyuncu</div>
+            </div>
             <div class="menu-card animate-fade-in">
                 <div class="brand">
                     <h1 class="game-title">VISCORA</h1>
@@ -728,6 +733,32 @@
             </div>
         </div>
  
+        <!-- Profil Özelleştirme Modalı -->
+        <div id="profile-settings-modal" class="star-gate-overlay hidden">
+            <div class="star-gate-card sound-settings-card" style="max-width: 320px;">
+                <h2 class="star-gate-title"><svg class="icon-svg"><use href="#icon-flask"></use></svg> OYUNCU PROFİLİ</h2>
+                <div class="menu-settings" style="display: flex; flex-direction: column; gap: 15px; width: 100%; margin: 20px 0;">
+                    <!-- Kullanıcı Adı Girişi -->
+                    <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; align-items: flex-start;">
+                        <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: bold; letter-spacing: 0.5px;">KULLANICI ADI</span>
+                        <input type="text" id="profile-username-input" placeholder="Adınızı girin..." maxlength="14" style="width: 100%; height: 38px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 8px; color: #f8fafc; padding: 0 12px; font-family: monospace; font-size: 0.9rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;" />
+                    </div>
+                    
+                    <!-- Avatar Seçimi -->
+                    <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; align-items: flex-start;">
+                        <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: bold; letter-spacing: 0.5px;">AVATAR SEÇİN</span>
+                        <div id="profile-avatar-picker" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%;">
+                            <!-- Avatars will be generated here -->
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; width: 100%;">
+                    <button id="btn-save-profile" class="menu-btn primary-btn" style="flex: 1; margin: 0; height: 38px; font-size: 0.9rem;">KAYDET</button>
+                    <button id="btn-close-profile" class="menu-btn danger-btn" style="flex: 1; margin: 0; height: 38px; font-size: 0.9rem;">İPTAL</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Ses Ayarları Modalı -->
         <div id="settings-modal" class="star-gate-overlay hidden">
             <div class="star-gate-card sound-settings-card">
@@ -1324,8 +1355,8 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v249"></script>
-    <script type="module" src="js/main.js?v=v249"></script>
+    <script src="js/controls_customizer.js?v=v250"></script>
+    <script type="module" src="js/main.js?v=v250"></script>
 </body>
 </html>
 
