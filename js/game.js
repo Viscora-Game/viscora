@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v242';
-import { Level } from './level.js?v=v242';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v242';
-import { UIManager } from './ui.js?v=v242';
-import { CloudSaveManager } from './cloud_save.js?v=v242';
-import { audio } from './audio.js?v=v242';
-import { LevelEditor } from './editor.js?v=v242';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v242';
+import { Player } from './player.js?v=v243';
+import { Level } from './level.js?v=v243';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v243';
+import { UIManager } from './ui.js?v=v243';
+import { CloudSaveManager } from './cloud_save.js?v=v243';
+import { audio } from './audio.js?v=v243';
+import { LevelEditor } from './editor.js?v=v243';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v243';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -2740,6 +2740,7 @@ export class GameManager {
      * Kamera sarsıntısı tetikler
      */
     shakeCamera(intensity, duration) {
+        if (window.screenShakeDisabled) return;
         this.camera.shakeIntensity = intensity;
         this.camera.shakeDuration = duration;
     }

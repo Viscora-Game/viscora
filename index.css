@@ -2540,7 +2540,9 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 .star-gate-card .menu-settings {
     flex: 1;
     overflow-y: auto;
-    padding-right: 4px;
+    padding-right: 6px;
+    -webkit-overflow-scrolling: touch; /* Smooth momentum scrolling on iOS/mobile Safari */
+    touch-action: pan-y; /* Ensure native vertical touch scrolling works smoothly */
 }
 
 .star-gate-card .menu-settings::-webkit-scrollbar {

@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v242';
-import { ViscosityList } from './viscosity.js?v=v242';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v242';
-import { CloudSaveManager } from './cloud_save.js?v=v242';
+import { audio } from './audio.js?v=v243';
+import { ViscosityList } from './viscosity.js?v=v243';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v243';
+import { CloudSaveManager } from './cloud_save.js?v=v243';
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? ''
@@ -863,6 +863,36 @@ export class UIManager {
         // Başlangıçta ses durumlarını UI ile senkronize et
         updateMusicUI(Math.round(audio.musicVolumeLevel * 100), audio.isMusicMuted);
         updateSfxUI(Math.round(audio.sfxVolumeLevel * 100), audio.isSfxMuted);
+
+        // Ekran Titreşimi (Screen Shake) Ayarı
+        window.screenShakeDisabled = localStorage.getItem('viscora_screen_shake_disabled') === 'true';
+        const btnToggleShake = document.getElementById('btn-toggle-shake');
+        const btnToggleShakePause = document.getElementById('btn-toggle-shake-pause');
+
+        const updateShakeUI = () => {
+            const label = window.screenShakeDisabled ? 'KAPALI' : 'AÇIK';
+            if (btnToggleShake) {
+                btnToggleShake.textContent = label;
+                btnToggleShake.classList.toggle('muted', window.screenShakeDisabled);
+            }
+            if (btnToggleShakePause) {
+                btnToggleShakePause.textContent = label;
+                btnToggleShakePause.classList.toggle('muted', window.screenShakeDisabled);
+            }
+        };
+
+        const handleShakeToggle = () => {
+            window.screenShakeDisabled = !window.screenShakeDisabled;
+            localStorage.setItem('viscora_screen_shake_disabled', window.screenShakeDisabled.toString());
+            updateShakeUI();
+            audio.init();
+            audio.playCollect();
+        };
+
+        if (btnToggleShake) this.bindTouchClick(btnToggleShake, handleShakeToggle);
+        if (btnToggleShakePause) this.bindTouchClick(btnToggleShakePause, handleShakeToggle);
+
+        updateShakeUI();
 
         // Ödüllü Reklam: Devam Et (Checkpoint'ten Full Canla)
         this.bindTouchClick(document.getElementById('btn-rewarded-continue'), () => {
