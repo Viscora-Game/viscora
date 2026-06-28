@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v267';
-import { THEMES } from './generator.js?v=v267';
+import { audio } from './audio.js?v=v268';
+import { THEMES } from './generator.js?v=v268';
 
 /**
  * Viscora Level Design & Manager
@@ -3014,99 +3014,155 @@ export class Level {
                 "name": "SİBER KANALİZASYON II",
                 "tags": [],
                 "themeId": "neon_sewer",
-                "levelWidth": 3400,
+                "levelWidth": 4400,
                 "levelHeight": 900,
                 "spawn": {
-                    "x": 80,
-                    "y": 200
+                    "x": 40,
+                    "y": 680
                 },
                 "portal": {
-                    "x": 3200,
-                    "y": 120
+                    "x": 1820,
+                    "y": -130
                 },
                 "platforms": [
-                    { "x": 0, "y": 250, "w": 200, "h": 40, "type": "normal" },
-                    { "x": 100, "y": 550, "w": 250, "h": 40, "type": "normal" },
-                    { "x": 550, "y": 620, "w": 400, "h": 40, "type": "normal" },
-                    { "x": 900, "y": 150, "w": 40, "h": 300, "type": "sticky" },
-                    { "x": 940, "y": 250, "w": 650, "h": 40, "type": "normal" },
-                    { "x": 1450, "y": 550, "w": 200, "h": 40, "type": "normal" },
-                    { "x": 1650, "y": 500, "w": 150, "h": 400, "type": "normal" },
-                    { "x": 2500, "y": 350, "w": 100, "h": 40, "type": "normal" },
-                    { "x": 2650, "y": 100, "w": 40, "h": 500, "type": "normal" },
-                    { "x": 2950, "y": 0, "w": 40, "h": 600, "type": "normal" },
-                    { "x": 3100, "y": 200, "w": 300, "h": 700, "type": "normal" }
+                    { "x": 0, "y": 720, "w": 400, "h": 140, "type": "normal" },
+                    { "x": 720, "y": 510, "w": 40, "h": 120, "type": "sticky" },
+                    { "x": 620, "y": 720, "w": 120, "h": 40, "type": "normal" },
+                    { "x": 560, "y": 280, "w": 240, "h": 40, "type": "normal" },
+                    { "x": 1430, "y": 720, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 1580, "y": 720, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 2270, "y": 590, "w": 600, "h": 40, "type": "normal" },
+                    { "x": 2530, "y": 320, "w": 240, "h": 40, "type": "normal" },
+                    { "x": 2790, "y": 20, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 3190, "y": 710, "w": 240, "h": 40, "type": "normal" },
+                    { "x": 3690, "y": 550, "w": 80, "h": 20, "type": "normal" },
+                    { "x": 3980, "y": 550, "w": 80, "h": 20, "type": "normal" },
+                    { "x": 4230, "y": 550, "w": 80, "h": 20, "type": "normal" },
+                    { "x": 3650, "y": 770, "w": 745, "h": 40, "type": "normal" },
+                    { "x": 4310, "y": 90, "w": 40, "h": 650, "type": "sticky" },
+                    { "x": 3820, "y": 90, "w": 450, "h": 40, "type": "normal" },
+                    { "x": 3600, "y": 40, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 3420, "y": -80, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 3220, "y": -230, "w": 60, "h": 20, "type": "normal" },
+                    { "x": 2300, "y": -300, "w": 800, "h": 40, "type": "normal" },
+                    { "x": 550, "y": -520, "w": 3000, "h": 40, "type": "normal" },
+                    { "x": 1760, "y": -30, "w": 240, "h": 40, "type": "normal" },
+                    { "x": 1760, "y": -150, "w": 40, "h": 120, "type": "normal" },
+                    { "x": 1760, "y": -190, "w": 240, "h": 40, "type": "normal" },
+                    { "x": 2030, "y": -20, "w": 60, "h": 20, "type": "normal" }
                 ],
                 "spikes": [
-                    { "x": 2690, "y": 200, "w": 20, "h": 60, "direction": "left" },
-                    { "x": 2690, "y": 300, "w": 20, "h": 60, "direction": "left" },
-                    { "x": 2690, "y": 400, "w": 20, "h": 60, "direction": "left" },
-                    { "x": 2930, "y": 150, "w": 20, "h": 60, "direction": "right" },
-                    { "x": 2930, "y": 250, "w": 20, "h": 60, "direction": "right" },
-                    { "x": 2930, "y": 350, "w": 20, "h": 60, "direction": "right" }
+                    { "x": 300, "y": 700, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 200, "y": 700, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 100, "y": 700, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 680, "y": 700, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 620, "y": 700, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 740, "y": 320, "w": 60, "h": 20, "direction": "down" },
+                    { "x": 560, "y": 320, "w": 60, "h": 20, "direction": "down" },
+                    { "x": 2590, "y": 360, "w": 60, "h": 20, "direction": "down" },
+                    { "x": 2650, "y": 360, "w": 60, "h": 20, "direction": "down" },
+                    { "x": 2570, "y": 300, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 2670, "y": 300, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 2790, "y": 570, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 2610, "y": 570, "w": 80, "h": 20, "direction": "up" },
+                    { "x": 2300, "y": -260, "w": 800, "h": 20, "direction": "down" },
+                    { "x": 2850, "y": -320, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 2660, "y": -320, "w": 60, "h": 20, "direction": "up" },
+                    { "x": 2470, "y": -320, "w": 60, "h": 20, "direction": "up" }
                 ],
-                "acidPools": [
-                    { "x": 350, "y": 800, "w": 550, "h": 100 },
-                    { "x": 1800, "y": 800, "w": 700, "h": 100 }
+                "acidPools": [],
+                "lasers": [
+                    { "x": 670, "y": 320, "w": 20, "h": 400, "type": "pinkLaser", "id": 486 },
+                    { "x": 1930, "y": -150, "w": 20, "h": 120, "type": "yellowLaser", "id": 99 }
                 ],
-                "lasers": [],
-                "netGates": [
-                    { "id": 291, "x": 1650, "y": 300, "w": 40, "h": 200, "open": false }
+                "netGates": [],
+                "movingPlatforms": [
+                    { "startX": 1060, "startY": 500, "targetX": 1210, "targetY": 500, "w": 100, "h": 20, "speed": 0.015 },
+                    { "startX": 1930, "startY": 710, "targetX": 2080, "targetY": 710, "w": 100, "h": 20, "speed": 0.015 }
                 ],
-                "movingPlatforms": [],
                 "crystals": [
-                    { "x": 750, "y": 350 },
-                    { "x": 1350, "y": 400 },
-                    { "x": 2000, "y": 250 },
-                    { "x": 2870, "y": 280 }
+                    { "x": 1460, "y": 640, "color": "#eab308" },
+                    { "x": 2320, "y": 510, "color": "#eab308" },
+                    { "x": 750, "y": 220, "color": "#eab308" },
+                    { "x": 740, "y": 410, "color": "#eab308" },
+                    { "x": 500, "y": 600, "color": "#eab308" },
+                    { "x": 2160, "y": -220, "color": "#eab308" },
+                    { "x": 2790, "y": -370, "color": "#eab308" },
+                    { "x": 2590, "y": -370, "color": "#eab308" },
+                    { "x": 3460, "y": -150, "color": "#eab308" },
+                    { "x": 4170, "y": -40, "color": "#eab308" },
+                    { "x": 3880, "y": 680, "color": "#eab308" },
+                    { "x": 4120, "y": 660, "color": "#eab308" },
+                    { "x": 4370, "y": 400, "color": "#eab308" },
+                    { "x": 4340, "y": 70, "color": "#eab308" }
                 ],
                 "enemies": [
-                    { "x": 780, "y": 200, "rangeX": 150, "speed": 1.3, "isVertical": false, "color": "#06b6d4", "type": "sweeper_ufo" },
-                    { "x": 1900, "y": 350, "rangeY": 150, "speed": 1.5, "isVertical": true, "color": "#a855f7", "type": "tractor_ufo" },
-                    { "x": 2100, "y": 250, "rangeY": 150, "speed": 1.5, "isVertical": true, "color": "#a855f7", "type": "tractor_ufo" }
+                    { "x": 270, "y": 650, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 680, "y": 250, "rangeX": 110, "speed": 1, "isVertical": false, "color": "#10b981", "type": "chaser" },
+                    { "x": 680, "y": 200, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 1340, "y": 430, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 1190, "y": 660, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 920, "y": 420, "rangeX": 120, "speed": 1.2, "isVertical": true, "color": "#06b6d4", "type": "patrol" },
+                    { "x": 2400, "y": 560, "rangeX": 120, "speed": 1.2, "isVertical": false, "color": "#f43f5e", "type": "patrol" },
+                    { "x": 1970, "y": 660, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 2650, "y": 480, "rangeX": 120, "speed": 1.2, "isVertical": true, "color": "#06b6d4", "type": "patrol" },
+                    { "x": 2180, "y": 610, "rangeX": 120, "speed": 1.2, "isVertical": true, "color": "#06b6d4", "type": "patrol" },
+                    { "x": 3310, "y": 690, "rangeX": 120, "speed": 1.2, "isVertical": false, "color": "#f43f5e", "type": "patrol" },
+                    { "x": 3050, "y": 430, "rangeX": 120, "speed": 1.2, "isVertical": true, "color": "#06b6d4", "type": "patrol" },
+                    { "x": 3910, "y": 50, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 4170, "y": 50, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 4050, "y": 60, "rangeX": 150, "speed": 1, "isVertical": false, "color": "#10b981", "type": "chaser" },
+                    { "x": 2980, "y": -340, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 2690, "y": -340, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" },
+                    { "x": 2500, "y": -340, "rangeX": 180, "speed": 2, "isVertical": false, "color": "#eab308", "type": "patrol" }
                 ],
                 "pressurePlates": [],
-                "pushBlocks": [
-                    { "x": 1080, "y": 180, "w": 48, "h": 48, "isMirror": true, "mirrorType": "slash" }
-                ],
-                "conveyors": [
-                    { "x": 100, "y": 530, "w": 250, "h": 20, "direction": 1, "speed": 2 },
-                    { "x": 1050, "y": 230, "w": 450, "h": 20, "direction": 1, "speed": 1.2 }
-                ],
-                "teleportPairs": [
-                    { "x1": 320, "y1": 100, "x2": 550, "y2": 600 }
-                ],
+                "pushBlocks": [],
+                "conveyors": [],
+                "teleportPairs": [],
                 "bouncePads": [
-                    { "x": 300, "y": 510, "w": 50, "h": 20, "force": 14 }
+                    { "x": 2640, "y": 300, "w": 25, "h": 20, "force": 12 }
                 ],
                 "buttons": [],
-                "levers": [],
-                "flamethrowers": [],
+                "levers": [
+                    { "x": 2800, "y": -10, "w": 32, "h": 32, "linkedGateId": 99 }
+                ],
+                "flamethrowers": [
+                    {
+                        "id": 9606,
+                        "startX": 1520,
+                        "startY": 770,
+                        "x": 1520,
+                        "y": 770,
+                        "w": 58,
+                        "h": 32,
+                        "dir": "up",
+                        "range": 200,
+                        "moving": true,
+                        "moveRange": 200,
+                        "moveSpeed": 1.5,
+                        "moveAxis": "x",
+                        "disabled": false,
+                        "active": true
+                    }
+                ],
                 "fallingPlatforms": [],
-                "breakablePlatforms": [
-                    { "x": 2720, "y": 450, "w": 80, "h": 40, "type": "platform", "broken": false, "timer": 0, "triggered": false },
-                    { "x": 2830, "y": 350, "w": 80, "h": 40, "type": "platform", "broken": false, "timer": 0, "triggered": false },
-                    { "x": 2720, "y": 250, "w": 80, "h": 40, "type": "platform", "broken": false, "timer": 0, "triggered": false },
-                    { "x": 2830, "y": 150, "w": 80, "h": 40, "type": "platform", "broken": false, "timer": 0, "triggered": false }
-                ],
+                "breakablePlatforms": [],
                 "hiddenPassages": [],
-                "fallingBlockTraps": [],
-                "vantuzPoints": [
-                    { "x": 750, "y": 450 },
-                    { "x": 1800, "y": 300 },
-                    { "x": 2000, "y": 450 },
-                    { "x": 2200, "y": 300 },
-                    { "x": 2400, "y": 400 }
+                "fallingBlockTraps": [
+                    { "startX": 2530, "startY": 360, "x": 2530, "y": 360, "w": 60, "h": 60, "state": "idle", "vy": 0, "timer": 0 },
+                    { "startX": 2710, "startY": 360, "x": 2710, "y": 360, "w": 60, "h": 60, "state": "idle", "vy": 0, "timer": 0 },
+                    { "startX": 4010, "startY": -260, "x": 4010, "y": -260, "w": 60, "h": 60, "state": "idle", "vy": 0, "timer": 0 }
                 ],
+                "vantuzPoints": [],
                 "decorations": [],
-                "laserEmitters": [
-                    { "x": 1000, "y": 190, "w": 40, "h": 40, "direction": 0, "color": "red" }
-                ],
-                "laserReceivers": [
-                    { "x": 1500, "y": 510, "w": 40, "h": 40, "linkedGateId": 291 }
-                ],
+                "laserEmitters": [],
+                "laserReceivers": [],
                 "staticMirrors": [],
-                "arrowShooters": []
+                "arrowShooters": [
+                    { "x": 3930, "y": 370, "w": 48, "h": 48, "dir": "target", "detectionRadius": 400, "fireInterval": 1.75, "arrowSpeed": 7.5, "arrowRange": 400 },
+                    { "x": 4040, "y": 370, "w": 48, "h": 48, "dir": "target", "detectionRadius": 400, "fireInterval": 1.25, "arrowSpeed": 5.5, "arrowRange": 400 }
+                ]
             };
         } else if (originalLevelNumber === 30) {
             data = {
