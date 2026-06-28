@@ -502,6 +502,7 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 "mongodb_uri_configured": MONGO_URI is not None,
                 "mongodb_uri_masked": masked_uri,
                 "server_time_utc": datetime.now(timezone.utc).isoformat(),
+                "git_commit": os.environ.get('RENDER_GIT_COMMIT', 'unknown'),
                 "environment_keys": list(os.environ.keys())
             }
             self.wfile.write(json.dumps(status_data, ensure_ascii=False).encode('utf-8'))
