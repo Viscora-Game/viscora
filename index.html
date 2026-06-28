@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v270">
+    <link rel="stylesheet" href="index.css?v=v271">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -288,10 +288,21 @@
                 lowerMsg.includes('failed to fetch') ||
                 lowerMsg.includes('networkerror') ||
                 lowerMsg.includes('onrender.com') ||
+                lowerMsg.includes('gsi_logger') ||
+                lowerMsg.includes('accounts.google.com') ||
                 lowerMsg.includes('cors')) {
                 return;
             }
             showError('Console Error: ' + msg);
+        };
+
+        // Google Sign-In callback buffer to prevent race conditions
+        window.handleGoogleSignIn = function(response) {
+            if (typeof window.handleGoogleSignInActual === 'function') {
+                window.handleGoogleSignInActual(response);
+            } else {
+                window.googleSignInResponseBuffer = response;
+            }
         };
     </script>
     <!-- Google Sign-In SDK -->
@@ -595,7 +606,7 @@
                     <span class="terminal-dot red"></span>
                     <span class="terminal-dot yellow"></span>
                     <span class="terminal-dot green"></span>
-                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v270</span>
+                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v271</span>
                 </div>
                 <div class="terminal-body">
                     <div id="terminal-text"></div>
@@ -687,7 +698,7 @@
                 <div class="brand">
                     <!-- Oyuncu Profil Kartı (Kartın Üst Sağ Köşesinde, Markaya Göre Konumlandırılmış) -->
                     <div id="player-profile-widget">
-                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v270" alt="Avatar" />
+                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v271" alt="Avatar" />
                         <div id="profile-widget-name">Oyuncu</div>
                     </div>
                     <h1 class="game-title">VISCORA</h1>
@@ -1456,8 +1467,8 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v270"></script>
-    <script type="module" src="js/main.js?v=v270"></script>
+    <script src="js/controls_customizer.js?v=v271"></script>
+    <script type="module" src="js/main.js?v=v271"></script>
 </body>
 </html>
 
