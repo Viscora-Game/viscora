@@ -32,8 +32,8 @@ function isOffensive(text) {
         'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto',
         'bok', 'ibne', 'gavat', 'gavad', 'gerzek', 'angut', 'cuk', 'dalyo',
         // İngilizce — tek başına
-        'ass', 'shit', 'cunt', 'dick', 'cock', 'slut', 'nigga',
-        'bastard', 'fag', 'boner', 'cum', 'rape',
+        'ass', 'shit', 'cunt', 'dick', 'cock', 'slut', 'nigga', 'fag', 'cum', 'rape',
+        'bastard', 'boner', 'piss', 'wank', 'twat', 'tit', 'hoe', 'dyke', 'crap',
         // Sayı bypass’ları (s2m = sikim, 2 = iki anlamında)
         's2m', 's2k', 's2ks', 'am2', 'g2t'
     ]);
@@ -61,7 +61,9 @@ function isOffensive(text) {
         // İngilizce — alt kelime
         'fuck', 'bitch', 'asshole', 'motherfuck', 'nigger', 'faggot',
         'whore', 'porn', 'dildo', 'fucker', 'fuckin', 'goddamn',
-        'pussy', 'rapist', 'pedophil', 'pedofil', 'meme'
+        'pussy', 'rapist', 'pedophil', 'pedofil', 'meme', 'blowjob',
+        'prick', 'jackoff', 'bollocks', 'clitoris', 'clit', 'dumbass',
+        'scumbag', 'wanker', 'twatwaffle', 'cooter'
     ]);
 
     const normSet = w => { let s = w.toLowerCase(); for (const [k,v] of Object.entries(turkishMap)) s = s.split(k).join(v); return s; };
