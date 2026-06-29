@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v289';
-import { audio } from './audio.js?v=v289';
-import { LevelGenerator } from './generator.js?v=v289';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v290';
+import { audio } from './audio.js?v=v290';
+import { LevelGenerator } from './generator.js?v=v290';
 
 const API_BASE = 'https://viscora.onrender.com';
 

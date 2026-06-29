@@ -40,7 +40,8 @@
 #win-screen, #win-screen *,
 #gameover-screen, #gameover-screen *,
 #shop-screen, #shop-screen *,
-#rewards-screen, #rewards-screen * {
+#rewards-screen, #rewards-screen *,
+.star-gate-overlay, .star-gate-overlay * {
     touch-action: pan-y !important;
 }
 
