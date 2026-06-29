@@ -2090,17 +2090,17 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 /* Yatay Modda Başlangıç Ekranı İki Sütunlu Kompakt Yerleşim Optimizasyonu */
 @media (orientation: landscape) and (max-height: 640px) {
     #start-screen {
-        padding-top: 35px !important; /* Üstten hafif boşluk */
-        padding-bottom: 60px !important; /* Reklam alanına doğru aradaki boşluğu azalt */
-        align-items: flex-end !important; /* Ana menüyü biraz aşağı çek */
+        padding-top: 15px !important;
+        padding-bottom: 50px !important; /* Reklam alanından mesafe bırak */
+        align-items: center !important; /* Dikeyde ortala, köşeler kesilmesin */
         justify-content: center !important;
         overflow-y: auto !important;
         box-sizing: border-box !important;
     }
     
     #start-screen .menu-card {
-        width: 98% !important;
-        max-width: 900px !important;
+        width: 95% !important; /* Kenarlardan 2.5% boşluk bırak */
+        max-width: 860px !important;
         padding: 1.2rem 1.8rem !important;
         border-radius: 20px !important;
         display: grid !important;
@@ -2111,6 +2111,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         align-items: center !important;
         box-sizing: border-box !important;
         overflow-x: hidden !important;
+        margin: auto !important;
     }
     
     /* Sol Sütun: Brand - Row 1 */
@@ -3217,20 +3218,22 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 @media (orientation: landscape) and (max-height: 640px) {
     #community-screen {
         padding: 0 !important;
-        align-items: stretch !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         overflow: hidden !important;
     }
     #community-screen .community-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        height: 100vh !important;
-        max-height: 100vh !important;
-        padding: 0.5rem 1rem !important;
+        width: 96% !important;
+        max-width: 860px !important;
+        height: 94vh !important;
+        max-height: 94vh !important;
+        padding: 0.5rem 1.2rem !important;
         display: flex !important;
         flex-direction: column !important;
         overflow: hidden !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
+        margin: auto !important;
+        border-radius: 16px !important;
         min-height: 0 !important;
     }
     #community-screen .community-header {
@@ -3331,20 +3334,22 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 @media (orientation: landscape) and (max-height: 640px) {
     #shop-screen {
         padding: 0 !important;
-        align-items: stretch !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         overflow: hidden !important;
     }
     #shop-screen .menu-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        height: 100vh !important;
-        max-height: 100vh !important;
-        padding: 0.4rem 1rem !important;
+        width: 96% !important;
+        max-width: 860px !important;
+        height: 94vh !important;
+        max-height: 94vh !important;
+        padding: 0.5rem 1.2rem !important;
         display: flex !important;
         flex-direction: column !important;
         overflow: hidden !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
+        margin: auto !important;
+        border-radius: 16px !important;
     }
     /* Header kompakt */
     #shop-screen .community-header {
