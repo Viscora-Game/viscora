@@ -209,8 +209,8 @@ def merge_save_data(db_save, incoming_save):
                         continue
                     merged[key] = val
                     
-    # Profil dışı diğer genel ayarları doğrudan eşitle
-    for key in ['difficulty', 'customControls', 'likedMaps', 'dailyLastClaimDate', 'dailyStreak', 'activeSlot']:
+    # Profil dışı diğer genel ayarları ve haftalık görevleri doğrudan eşitle
+    for key in ['difficulty', 'customControls', 'likedMaps', 'dailyLastClaimDate', 'dailyStreak', 'activeSlot', 'weeklyProgress', 'weeklyClaimed', 'weeklyResetTime']:
         if key in incoming_save:
             val = incoming_save[key]
             if val not in [None, "", [], {}]:

@@ -26,7 +26,10 @@ export class CloudSaveManager {
             draftSlot4: 'viscora_draft_slot_4',
             draftSlot5: 'viscora_draft_slot_5',
             activeSlot: 'viscora_active_slot',
-            profileLastChanged: 'viscora_profile_last_changed'
+            profileLastChanged: 'viscora_profile_last_changed',
+            weeklyProgress: 'viscora_weekly_progress',
+            weeklyClaimed: 'viscora_weekly_claimed',
+            weeklyResetTime: 'viscora_weekly_reset_time'
         };
     }
 
