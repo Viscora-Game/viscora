@@ -27,9 +27,11 @@ function isOffensive(text) {
     for (const [k, v] of Object.entries(leetMap)) norm = norm.split(k).join(v);
 
     const shortBad = new Set([
+        // Türkçe — tek başına
         'amk', 'aq', 'sik', 'am', 'got', 'pic', 'oc', 'pust',
         'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto',
-        'bok', 'ibne', 'gavat', 'gavad', 'gerzek', 'angut',
+        'bok', 'ibne', 'gavat', 'gavad', 'gerzek', 'angut', 'cuk', 'dalyo',
+        // İngilizce — tek başına
         'ass', 'shit', 'cunt', 'dick', 'cock', 'slut', 'nigga',
         'bastard', 'fag', 'boner', 'cum', 'rape',
         // Sayı bypass’ları (s2m = sikim, 2 = iki anlamında)
@@ -37,10 +39,11 @@ function isOffensive(text) {
     ]);
 
     const longBad = new Set([
+        // Türkçe — alt kelime
         'yarrak', 'yarak', 'assak', 'tasak', 'tassak', 'dassak', 'dasak', 'orospu', 'siktir', 'pezevenk', 'kahpe',
-        'amcik', 'kaltak', 'erdogan', 'pkk',
-        'kilicdaroglu', 'imamoglu', 'ataturk',
-        'siken', 'domalt', 'domalan', 'domalm',
+        'amcik', 'kaltak', 'erdogan', 'pkk', 'abaza', 'abazan', 'bosalmak', 'bizir',
+        'kilicdaroglu', 'imamoglu', 'ataturk', 'dallama', 'daltassak',
+        'siken', 'domalt', 'domalan', 'domalm', 'sokuk', 'soktugum', 'sokuklar',
         'sikim', 'sikime', 'sikis', 'sikti', 'sike', 'sikip', 'siksen',
         'sikem', 'siker', 'siktim', 'sikcem', 'sikicem', 'sikik',
         'sikisler', 'soktum', 'sokar',
@@ -52,7 +55,10 @@ function isOffensive(text) {
         'godos', 'godumun', 'atmik',
         'amina', 'aminako', 'aminakoy',
         'boklu', 'boktan', 'bokbok', 'bombok',
-        'orosbuc', 'orospuc',
+        'orosbuc', 'orospuc', 'kancik', 'kasar', 'meme', 'gogu',
+        'fahişe', 'itoglu', 'itogluity', 'picin', 'gotos', 'gotluk',
+        'gottan', 'gotune', 'gotunu', 'sokam', 'amciklar',
+        // İngilizce — alt kelime
         'fuck', 'bitch', 'asshole', 'motherfuck', 'nigger', 'faggot',
         'whore', 'porn', 'dildo', 'fucker', 'fuckin', 'goddamn',
         'pussy', 'rapist', 'pedophil', 'pedofil', 'meme'
