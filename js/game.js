@@ -1736,7 +1736,6 @@ export class GameManager {
                     this.ui.resetKeys();
                     
                     // Ölüm ekranında liderlik tablosunu yükle (kendi özel bölümleri hariç)
-                    const isCustom = this.level && this.level.isCustom;
                     const goBoard = document.getElementById('gameover-leaderboard-container');
                     if (goBoard) {
                         if (!isCustom) {
