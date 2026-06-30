@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v291';
-import { ViscosityList } from './viscosity.js?v=v291';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v291';
-import { CloudSaveManager } from './cloud_save.js?v=v291';
+import { audio } from './audio.js?v=v292';
+import { ViscosityList } from './viscosity.js?v=v292';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v292';
+import { CloudSaveManager } from './cloud_save.js?v=v292';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -3728,6 +3728,32 @@ export class UIManager {
             }
         });
 
+        // Bölüm grup kartlarını (Chapter) dinamik olarak aç
+        const wrapper = document.getElementById('level-selector-wrapper');
+        if (wrapper) {
+            const cards = wrapper.querySelectorAll('.level-group-card');
+            cards.forEach(card => {
+                const groupId = parseInt(card.getAttribute('data-group-id'));
+                if (groupId === 1) return; // Bölüm 1 her zaman açık
+                
+                const startLvl = groupId === 2 ? 11 : 21;
+                const isGroupUnlocked = this.isLevelUnlocked(startLvl);
+                
+                if (isGroupUnlocked) {
+                    card.classList.remove('locked');
+                    card.classList.add('unlocked');
+                    const statusEl = card.querySelector('.level-group-status');
+                    if (statusEl && statusEl.innerHTML.includes('🔒')) {
+                        const endLvl = groupId === 2 ? 20 : 30;
+                        statusEl.innerHTML = `Bölüm ${startLvl}-${endLvl}`;
+                    }
+                } else {
+                    card.classList.remove('unlocked');
+                    card.classList.add('locked');
+                }
+            });
+        }
+
         // Chapter star badges güncelle (sadece chapter 1 görünür şu an)
         const groups = [
             { id: 1, start: 1, end: 10 },
@@ -3991,7 +4017,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v291`;
+                img.src = `assets/avatars/${av.id}.png?v=v292`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4051,7 +4077,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v291`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v292`;
             }
         };
         
