@@ -1734,6 +1734,18 @@ export class GameManager {
 
                     this.ui.showScreen('gameover');
                     this.ui.resetKeys();
+                    
+                    // Ölüm ekranında liderlik tablosunu yükle (kendi özel bölümleri hariç)
+                    const isCustom = this.level && this.level.isCustom;
+                    const goBoard = document.getElementById('gameover-leaderboard-container');
+                    if (goBoard) {
+                        if (!isCustom) {
+                            goBoard.style.display = 'flex';
+                            this.fetchCampaignLeaderboard(this.currentLevel);
+                        } else {
+                            goBoard.style.display = 'none';
+                        }
+                    }
                 }
             }
         }
@@ -3391,6 +3403,58 @@ export class GameManager {
         })
         .catch(err => {
             console.error("Kampanya skor kaydetme hatası:", err);
+            if (boardList) boardList.innerHTML = '<div style="color: #ef4444; text-align:center;">Yükleme başarısız.</div>';
+        });
+    }
+
+    fetchCampaignLeaderboard(levelNumber) {
+        const API_BASE = 'https://viscora.onrender.com';
+        const boardList = document.getElementById('gameover-leaderboard-list');
+        if (boardList) boardList.innerHTML = '<div style="color: #9ca3af; text-align:center;">Yükleme...</div>';
+        
+        fetch(`${API_BASE}/api/campaign/${levelNumber}/leaderboard`, {
+            method: 'GET'
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Skorlar alınamadı.");
+            return res.json();
+        })
+        .then(data => {
+            if (boardList) {
+                boardList.innerHTML = '';
+                if (data.leaderboard && data.leaderboard.length > 0) {
+                    data.leaderboard.forEach((s, idx) => {
+                        const medalEmoji = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : '🥉');
+                        const medalColor = idx === 0 ? '#f59e0b' : (idx === 1 ? '#cbd5e1' : '#b45309');
+                        const row = document.createElement('div');
+                        row.style.display = 'flex';
+                        row.style.justifyContent = 'space-between';
+                        row.style.alignItems = 'center';
+                        row.style.padding = '3px 0';
+                        row.style.borderBottom = '1px solid rgba(255,255,255,0.03)';
+                        
+                        const left = document.createElement('span');
+                        left.style.color = '#f3f4f6';
+                        left.style.display = 'flex';
+                        left.style.alignItems = 'center';
+                        left.style.gap = '6px';
+                        left.innerHTML = `<span style="color: ${medalColor}">${medalEmoji}</span> ${s.username}`;
+                        
+                        const right = document.createElement('span');
+                        right.style.color = '#f43f5e'; // Red color for gameover screen
+                        right.textContent = this.formatTime(s.time);
+                        
+                        row.appendChild(left);
+                        row.appendChild(right);
+                        boardList.appendChild(row);
+                    });
+                } else {
+                    boardList.innerHTML = '<div style="color: #9ca3af; text-align:center;">Henüz derece yok.</div>';
+                }
+            }
+        })
+        .catch(err => {
+            console.error("Kampanya liderlik tablosu yükleme hatası:", err);
             if (boardList) boardList.innerHTML = '<div style="color: #ef4444; text-align:center;">Yükleme başarısız.</div>';
         });
     }

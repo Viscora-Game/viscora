@@ -1051,6 +1051,13 @@
             <div class="menu-card hazard-border">
                 <h2 class="gameover-title">VISCORA DAĞILDI</h2>
                 <p>Hücre bütünlüğü korunamadı.</p>
+                <!-- Liderlik Tablosu (Ölüm Ekranı) -->
+                <div id="gameover-leaderboard-container" style="margin-top: 15px; margin-bottom: 10px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                    <span style="font-size: 0.85rem; color: #f43f5e; font-weight: bold; letter-spacing: 0.5px;">BÖLÜM REKORLARI</span>
+                    <div id="gameover-leaderboard-list" style="display: flex; flex-direction: column; gap: 4px; width: 100%; max-width: 220px; font-size: 0.8rem; font-family: monospace;">
+                        <!-- Top 3 scores will load here -->
+                    </div>
+                </div>
                 <button id="btn-rewarded-continue" class="menu-btn rewarded-btn" style="display:none"><svg class="icon-svg"><use href="#icon-play"></use></svg> DEVAM ET <span class="rewarded-tag">Reklam İzle</span></button>
                 <button id="btn-rewarded-skip" class="menu-btn rewarded-btn skip-btn" style="display:none"><svg class="icon-svg"><use href="#icon-run"></use></svg> BÖLÜMÜ ATLA <span class="rewarded-tag">Reklam İzle</span></button>
                 <button id="btn-retry" class="menu-btn primary-btn">YENİDEN DENE</button>
