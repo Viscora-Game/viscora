@@ -226,21 +226,27 @@ export class UIManager {
             if (e.repeat) return;
 
             const key = e.key ? e.key.toLowerCase() : '';
-            if (key === 'a' || (e.key && e.key === 'ArrowLeft')) {
+            if (key === 'a' || key === 'arrowleft') {
                 this.keys.left = true;
-            } else if (key === 'd' || (e.key && e.key === 'ArrowRight')) {
+            }
+            if (key === 'd' || key === 'arrowright') {
                 this.keys.right = true;
-            } else if (key === 'w' || (e.key && e.key === 'ArrowUp')) {
+            }
+            if (key === 'w' || key === 'arrowup') {
                 this.keys.up = true;
                 this.game.player.jump(false);
-            } else if (key === 's' || (e.key && e.key === 'ArrowDown')) {
+            }
+            if (key === 's' || key === 'arrowdown') {
                 this.keys.down = true;
-            } else if (e.key && e.key === ' ') {
+            }
+            if (key === ' ' || key === 'spacebar') {
                 this.keys.jump = true;
                 this.game.player.jump(true);
-            } else if ((e.key && e.key === 'Shift') || key === 'e') {
+            }
+            if (key === 'shift' || key === 'e') {
                 this.triggerViscosityShift();
-            } else if ((e.key && e.key === 'Escape') || key === 'p') {
+            }
+            if (key === 'escape' || key === 'p') {
                 this.game.togglePause();
             }
         });
@@ -248,15 +254,19 @@ export class UIManager {
         // Tuş bırakma
         window.addEventListener('keyup', (e) => {
             const key = e.key ? e.key.toLowerCase() : '';
-            if (key === 'a' || (e.key && e.key === 'ArrowLeft')) {
+            if (key === 'a' || key === 'arrowleft') {
                 this.keys.left = false;
-            } else if (key === 'd' || (e.key && e.key === 'ArrowRight')) {
+            }
+            if (key === 'd' || key === 'arrowright') {
                 this.keys.right = false;
-            } else if (key === 'w' || (e.key && e.key === 'ArrowUp')) {
+            }
+            if (key === 'w' || key === 'arrowup') {
                 this.keys.up = false;
-            } else if (key === 's' || (e.key && e.key === 'ArrowDown')) {
+            }
+            if (key === 's' || key === 'arrowdown') {
                 this.keys.down = false;
-            } else if (e.key && e.key === ' ') {
+            }
+            if (key === ' ' || key === 'spacebar') {
                 this.keys.jump = false;
             }
         });
@@ -670,33 +680,37 @@ export class UIManager {
      * Mobil buton dokunmatik event eşlemeleri
      */
     initButtonBindings() {
-        // Buton Eşleştirme Yardımcısı — pointerdown kullanılır (touchstart'tan ~daha hızlı)
+        // Buton Eşleştirme Yardımcısı — touch ve mouse eventlerini ayrı ayrı bağlayarak multi-touch çakışmalarını önler
         const bindTouchButton = (btnId, keyName, onDownCallback = null, vibrate = false) => {
             const btn = document.getElementById(btnId);
             if (!btn) return;
 
-            // pointerdown: touchstart ve mousedown'ı tek seferde karşılar, tarayıcı gecikmesi yok
-            btn.addEventListener('pointerdown', (e) => {
+            const handleDown = (e) => {
                 e.preventDefault();
-                btn.setPointerCapture(e.pointerId); // Parmak kaysa da takip et
                 this.keys[keyName] = true;
                 btn.classList.add('active');
-                // Sadece aksiyon butonlarında titreşim (sol/sağ butonlarda gecikme olur)
+                // Sadece aksiyon butonlarında titreşim
                 if (vibrate && typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(12);
                 }
                 if (onDownCallback) onDownCallback();
-            }, { passive: false });
+            };
 
-            // pointerup / pointercancel: her iki durumu da kapsar
-            const release = (e) => {
+            const handleUp = (e) => {
                 e.preventDefault();
                 this.keys[keyName] = false;
                 btn.classList.remove('active');
             };
-            btn.addEventListener('pointerup', release, { passive: false });
-            btn.addEventListener('pointercancel', release, { passive: false });
-            btn.addEventListener('lostpointercapture', release, { passive: false });
+
+            // Mobil Dokunmatik Kontroller (Multi-touch destekli, pointer capture hatalarını önler)
+            btn.addEventListener('touchstart', handleDown, { passive: false });
+            btn.addEventListener('touchend', handleUp, { passive: false });
+            btn.addEventListener('touchcancel', handleUp, { passive: false });
+
+            // Masaüstü Fare Tıklama Desteği
+            btn.addEventListener('mousedown', handleDown);
+            btn.addEventListener('mouseup', handleUp);
+            btn.addEventListener('mouseleave', handleUp);
         };
 
         // Butonları eşle
@@ -709,17 +723,18 @@ export class UIManager {
         }, true); // Zıplamada titreşim
         bindTouchButton('btn-down', 'down', null, false);
 
-        // Viskozite Değiştirme Butonu (Shift) — pointerdown ile anında tepki
+        // Viskozite Değiştirme Butonu (Shift) — Dokunmatik ve Fare olayları ile anında tepki
         const shiftBtn = document.getElementById('btn-shift');
         if (shiftBtn) {
-            shiftBtn.addEventListener('pointerdown', (e) => {
+            const handleShift = (e) => {
                 e.preventDefault();
-                shiftBtn.setPointerCapture(e.pointerId);
                 this.triggerViscosityShift();
                 if (typeof navigator !== 'undefined' && navigator.vibrate) {
                     navigator.vibrate(25);
                 }
-            }, { passive: false });
+            };
+            shiftBtn.addEventListener('touchstart', handleShift, { passive: false });
+            shiftBtn.addEventListener('mousedown', handleShift);
         }
 
         // HUD Duraklatma Butonu
