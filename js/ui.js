@@ -171,6 +171,68 @@ export class UIManager {
     }
 
     /**
+     * Dynamically loads the Google Sign-In SDK only when settings are opened.
+     * This prevents Google Sign-In from slowing down the game startup on mobile.
+     */
+    loadGoogleSignInSDK() {
+        if (window.google && window.google.accounts) {
+            this.initGoogleSignInButton();
+            return;
+        }
+
+        if (this._googleSdkLoading) return;
+        this._googleSdkLoading = true;
+
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+            this._googleSdkLoading = false;
+            this.initGoogleSignInButton();
+        };
+        script.onerror = () => {
+            this._googleSdkLoading = false;
+            const container = document.getElementById('google-signin-btn-container');
+            if (container) {
+                container.innerHTML = '<span style="font-size: 0.75rem; color: #ef4444; padding: 6px;">Google Bağlantı Hatası</span>';
+            }
+        };
+        document.head.appendChild(script);
+    }
+
+    initGoogleSignInButton() {
+        if (!window.google || !window.google.accounts) return;
+
+        try {
+            window.google.accounts.id.initialize({
+                client_id: '15853335626-gtdu2riughd6lf3jf3gig8mfl8pr1v7k.apps.googleusercontent.com',
+                callback: (response) => {
+                    if (typeof window.handleGoogleSignInActual === 'function') {
+                        window.handleGoogleSignInActual(response);
+                    }
+                },
+                auto_select: false
+            });
+
+            const container = document.getElementById('google-signin-btn-container');
+            if (container) {
+                container.innerHTML = ''; // Clear "Yükleniyor..."
+                window.google.accounts.id.renderButton(container, {
+                    theme: 'dark',
+                    size: 'medium',
+                    type: 'standard',
+                    shape: 'rectangular',
+                    text: 'signin_with',
+                    logo_alignment: 'left'
+                });
+            }
+        } catch (e) {
+            console.warn('Google Sign-In initialization failed:', e);
+        }
+    }
+
+    /**
      * Touch-safe click listener that prevents double-firing
      */
     bindTouchClick(btn, callback) {
@@ -1015,6 +1077,7 @@ export class UIManager {
         if (btnOpenSettings && settingsModal) {
             this.bindTouchClick(btnOpenSettings, () => {
                 settingsModal.classList.remove('hidden');
+                this.loadGoogleSignInSDK(); // Lazy load Google SDK to speed up game startup
                 
                 // Bulut kurtarma kodunu güncelle/tetikle
                 const lblSyncCode = document.getElementById('text-sync-code');

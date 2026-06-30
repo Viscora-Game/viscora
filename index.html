@@ -337,8 +337,7 @@
             }
         };
     </script>
-    <!-- Google Sign-In SDK -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Google Sign-In SDK loaded dynamically on settings open -->
 </head>
 <body style="background-color: #0a0a0f; margin: 0; padding: 0;">
     <!-- Gooey Gel Splash Screen (Giriş Animasyonu) -->
@@ -861,22 +860,8 @@
                         <!-- Google ile Giriş Yap (Otomatik Bulut Kaydı) -->
                         <div style="display: flex; flex-direction: column; gap: 6px; background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(56, 189, 248, 0.15); padding: 10px; border-radius: 8px;">
                             <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 600;">OTOMATİK YEDEKLEME (GOOGLE)</span>
-                            <div style="display: flex; justify-content: center; margin: 4px 0;">
-                                <div id="g_id_onload"
-                                     data-client_id="15853335626-gtdu2riughd6lf3jf3gig8mfl8pr1v7k.apps.googleusercontent.com"
-                                     data-context="signin"
-                                     data-ux_mode="popup"
-                                     data-callback="handleGoogleSignIn"
-                                     data-auto_select="false">
-                                </div>
-                                <div class="g_id_signin"
-                                     data-type="standard"
-                                     data-shape="rectangular"
-                                     data-theme="dark"
-                                     data-text="signin_with"
-                                     data-size="medium"
-                                     data-logo_alignment="left">
-                                </div>
+                            <div id="google-signin-btn-container" style="display: flex; justify-content: center; margin: 4px 0; min-height: 40px; align-items: center;">
+                                <span style="font-size: 0.75rem; color: #64748b; padding: 6px;">Yükleniyor...</span>
                             </div>
                             <span id="google-sync-status" style="font-size: 0.7rem; color: #a1a1aa; text-align: center; display: block;">Hesap bağlı değil (Yedekleme devre dışı)</span>
                             
