@@ -3612,6 +3612,14 @@ export class UIManager {
         this.hud.classList.add('hidden');
         this.mobileControls.classList.add('hidden');
 
+        // Oyun HUD'ı dışında bir ekrana geçiş yapılıyorsa (Menü, Pause, Gameover, Win vb.)
+        // Buton boyutu ayarlama panelini otomatik olarak kapat ve kaydet.
+        if (screenName !== 'hud') {
+            if (window.controlsCustomizer && window.controlsCustomizer.isEditing) {
+                window.controlsCustomizer.exitEditMode(true);
+            }
+        }
+
         // Belirtilen ekranı göster
         if (screenName === 'hud') {
             this.hud.classList.remove('hidden');
