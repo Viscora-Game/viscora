@@ -952,10 +952,16 @@ export class UIManager {
             this.game.restart();
         });
 
-        // Bölüm Sonu Ekranı - Tekrar Oyna
+        // Bölüm Sonu Ekranı - Tekrar Oyna (Sonraki Bölüm)
         this.bindTouchClick(document.getElementById('btn-next'), () => {
             this.showScreen('hud');
             this.game.nextLevel();
+        });
+
+        // Bölüm Sonu Ekranı - Bölümü Tekrarla (Aynı Bölümü Yeniden Başlat)
+        this.bindTouchClick(document.getElementById('btn-win-retry'), () => {
+            this.showScreen('hud');
+            this.game.restart();
         });
 
         // Bölüm Sonu Ekranı - Ana Menüye Dön
