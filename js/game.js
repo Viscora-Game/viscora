@@ -973,15 +973,17 @@ export class GameManager {
         }
     }
 
-    /**
-     * Oyunu Duraklat / Devam Et
-     */
     togglePause() {
         if (this.editor && this.editor.active) return; // Editör aktifken (Playtest dahil) duraklatmayı engelle
         if (this.state === 'PLAYING') {
             this.state = 'PAUSED';
             this.ui.showScreen('pause');
             this.ui.resetKeys();
+            
+            // Buton boyutu ayarlama panelini kapat ve kaydet
+            if (window.controlsCustomizer && window.controlsCustomizer.isEditing) {
+                window.controlsCustomizer.exitEditMode(true);
+            }
         } else if (this.state === 'PAUSED') {
             this.state = 'PLAYING';
             this.ui.showScreen('hud');
