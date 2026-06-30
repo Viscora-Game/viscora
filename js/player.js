@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v292';
-import { audio } from './audio.js?v=v292';
+import { ViscosityStates } from './viscosity.js?v=v293';
+import { audio } from './audio.js?v=v293';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -558,10 +558,10 @@ export class Player {
 
             let dirX = 0;
             let dirY = 0;
-            if (keys.left) dirX = -1;
-            if (keys.right) dirX = 1;
-            if (keys.up) dirY = -1;
-            if (keys.down) dirY = 1;
+            if (keys.left && !keys.right) dirX = -1;
+            else if (keys.right && !keys.left) dirX = 1;
+            if (keys.up && !keys.down) dirY = -1;
+            else if (keys.down && !keys.up) dirY = 1;
 
             if (keys.jump) {
                 if (dirX === 0 && dirY === 0) dirY = -1; // Default launch upwards
@@ -584,7 +584,7 @@ export class Player {
         }
 
         // Normal Form Ball Roll
-        this.isRolling = this.viscosity.id === 'NORMAL' && keys.down && this.onGround;
+        this.isRolling = this.viscosity.id === 'NORMAL' && keys.down && !keys.up && this.onGround;
         if (this.isRolling) {
             this.radius = 12;
             this.rollAngle += this.vx * 0.15;
@@ -638,7 +638,7 @@ export class Player {
 
         // Slingshot Charge on Hold
         if (this.isClinging) {
-            const pushingAway = (this.clingingWall === 1 && keys.left) || (this.clingingWall === -1 && keys.right);
+            const pushingAway = (this.clingingWall === 1 && keys.left && !keys.right) || (this.clingingWall === -1 && keys.right && !keys.left);
             if (pushingAway) {
                 this.slingshotCharge = Math.min(this.slingshotCharge + 0.05, 1.0);
                 this.applySquish(-this.clingingWall * 0.06 * this.slingshotCharge, 0);
@@ -658,16 +658,16 @@ export class Player {
             this.vx = 0; // Prevent horizontal jitter
             this.clingTimer = (this.clingTimer || 0) + 1;
 
-            let goUp = keys.up;
-            let goDown = keys.down;
+            let goUp = keys.up && !keys.down;
+            let goDown = keys.down && !keys.up;
 
             // Use left/right keys for climbing on mobile
             if (this.clingingWall === -1) { // Left wall
-                if (keys.left) goUp = true;
-                if (keys.right) goDown = true;
+                if (keys.left && !keys.right) goUp = true;
+                if (keys.right && !keys.left) goDown = true;
             } else if (this.clingingWall === 1) { // Right wall
-                if (keys.right) goUp = true;
-                if (keys.left) goDown = true;
+                if (keys.right && !keys.left) goUp = true;
+                if (keys.left && !keys.right) goDown = true;
             }
 
             if (goUp) {
@@ -697,8 +697,8 @@ export class Player {
 
         // Klavye girdilerine göre hız ivmelendirmesi
         let inputX = 0;
-        if (keys.left) inputX = -1;
-        if (keys.right) inputX = 1;
+        if (keys.left && !keys.right) inputX = -1;
+        else if (keys.right && !keys.left) inputX = 1;
 
         if (inputX !== 0) {
             // In HIGH viscosity, Left/Right is used for vertical climbing, so don't detach
