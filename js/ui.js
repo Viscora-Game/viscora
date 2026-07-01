@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v293';
-import { ViscosityList } from './viscosity.js?v=v293';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v293';
-import { CloudSaveManager } from './cloud_save.js?v=v293';
+import { audio } from './audio.js?v=v294';
+import { ViscosityList } from './viscosity.js?v=v294';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v294';
+import { CloudSaveManager } from './cloud_save.js?v=v294';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -3843,6 +3843,10 @@ export class UIManager {
         modal.className = 'viscora-modal';
         modal.style.width = '400px';
         modal.style.maxWidth = '90vw';
+        modal.style.maxHeight = '92%';
+        modal.style.display = 'flex';
+        modal.style.flexDirection = 'column';
+        modal.style.boxSizing = 'border-box';
         modal.style.background = '#0d0d12';
         modal.style.border = '2px solid #00f2fe';
         modal.style.boxShadow = '0 0 25px rgba(0, 242, 254, 0.25)';
@@ -3858,7 +3862,7 @@ export class UIManager {
                 </div>
             `;
         } else {
-            scoresHtml = '<div style="display: flex; flex-direction: column; gap: 8px; margin: 15px 0;">';
+            scoresHtml = '<div style="display: flex; flex-direction: column; gap: 8px; margin: 15px 0; width: 100%; box-sizing: border-box;">';
             scores.forEach((s, index) => {
                 const badge = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
                 
@@ -3869,7 +3873,7 @@ export class UIManager {
                 const timeStr = `${m.toString().padStart(2, '0')}:${rSec.padStart(5, '0')}`;
                 
                 scoresHtml += `
-                    <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; box-sizing: border-box; width: 100%;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span style="font-size: 1.1rem; width: 24px; text-align: center;">${badge}</span>
                             <span style="font-weight: 600; color: #f1f5f9;">${s.username}</span>
@@ -3884,16 +3888,18 @@ export class UIManager {
         }
 
         modal.innerHTML = `
-            <div class="viscora-modal-title" style="border-bottom: 1px solid rgba(0,242,254,0.2); padding-bottom: 10px; margin-bottom: 12px; color: #00f2fe; display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 1.15rem; font-family: inherit;">
+            <div class="viscora-modal-title" style="flex-shrink: 0; border-bottom: 1px solid rgba(0,242,254,0.2); padding-bottom: 10px; margin-bottom: 12px; color: #00f2fe; display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 1.15rem; font-family: inherit;">
                 <svg class="icon-svg" style="color: #eab308; width: 18px; height: 18px; margin: 0; fill: currentColor;"><use href="#icon-star"></use></svg> 
                 EN İYİ DERECELER
             </div>
-            <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px;">Harita: <strong style="color: #f1f5f9;">${level.name}</strong></div>
-            <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 15px;">Tasarımcı: <strong style="color: #f1f5f9;">${level.author}</strong></div>
             
-            ${scoresHtml}
+            <div style="flex: 1; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 2px; -webkit-overflow-scrolling: touch; touch-action: pan-y;">
+                <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px; text-align: left;">Harita: <strong style="color: #f1f5f9;">${level.name}</strong></div>
+                <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 15px; text-align: left;">Tasarımcı: <strong style="color: #f1f5f9;">${level.author}</strong></div>
+                ${scoresHtml}
+            </div>
             
-            <div class="viscora-modal-actions" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+            <div class="viscora-modal-actions" style="flex-shrink: 0; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
                 <button class="viscora-modal-btn primary" style="background: linear-gradient(135deg, #00f2fe, #4facfe); border: none; width: 100%; font-weight: bold;" id="btn-close-leaderboard">KAPAT</button>
             </div>
         `;
@@ -4017,7 +4023,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v293`;
+                img.src = `assets/avatars/${av.id}.png?v=v294`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4077,7 +4083,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v293`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v294`;
             }
         };
         

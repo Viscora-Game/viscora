@@ -2913,15 +2913,18 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     border: 2px solid rgba(217, 70, 239, 0.4);
     box-shadow: 0 0 30px rgba(217, 70, 239, 0.25);
     border-radius: 12px;
-    padding: 24px;
+    padding: 20px;
     width: 380px;
     max-width: 90vw;
+    max-height: 92vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     color: #f3f4f6;
     font-family: 'Outfit', sans-serif;
     text-align: center;
     box-sizing: border-box;
     animation: viscoraModalZoomIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    touch-action: none !important;
+    touch-action: pan-y !important;
 }
 
 .viscora-modal-title {
@@ -3240,8 +3243,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     #community-screen .community-card {
         width: 96% !important;
         max-width: 860px !important;
-        height: 94vh !important;
-        max-height: 94vh !important;
+        height: 94% !important;
+        max-height: 94% !important;
         padding: 0.5rem 1.2rem !important;
         display: flex !important;
         flex-direction: column !important;
@@ -3356,8 +3359,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     #shop-screen .menu-card {
         width: 96% !important;
         max-width: 860px !important;
-        height: 94vh !important;
-        max-height: 94vh !important;
+        height: 94% !important;
+        max-height: 94% !important;
         padding: 0.5rem 1.2rem !important;
         display: flex !important;
         flex-direction: column !important;
