@@ -41,7 +41,8 @@
 #gameover-screen, #gameover-screen *,
 #shop-screen, #shop-screen *,
 #rewards-screen, #rewards-screen *,
-.star-gate-overlay, .star-gate-overlay * {
+.star-gate-overlay, .star-gate-overlay *,
+.viscora-modal, .viscora-modal * {
     touch-action: pan-y !important;
 }
 
@@ -1198,6 +1199,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 #level-selector-wrapper {
     max-height: 250px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding-right: 6px;
     margin-bottom: 1.5rem;
     display: flex;
@@ -1499,7 +1501,6 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     overflow-y: auto;
     padding-right: 6px;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
     min-height: 0;
 }
 
@@ -3054,7 +3055,6 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     max-height: 380px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
 }
 
 .shop-grid {
@@ -3319,7 +3319,6 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         min-height: 0 !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
-        overscroll-behavior: contain !important;
     }
     /* Harita kartlarını kompakt yap */
     #community-screen .map-grid {
@@ -3429,7 +3428,6 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
         min-height: 0 !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
-        overscroll-behavior: contain !important;
     }
 }
 
