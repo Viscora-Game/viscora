@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v298';
-import { ViscosityList } from './viscosity.js?v=v298';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v298';
-import { CloudSaveManager } from './cloud_save.js?v=v298';
+import { audio } from './audio.js?v=v299';
+import { ViscosityList } from './viscosity.js?v=v299';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v299';
+import { CloudSaveManager } from './cloud_save.js?v=v299';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -776,97 +776,9 @@ export class UIManager {
             btn.addEventListener('mouseleave', handleUp);
         };
 
-        // --- HAREKET TUŞLARI İÇİN SÜRÜKLEME DESTEKLİ GELİŞMİŞ MOBİL D-PAD ---
-        const dpadLeft = document.querySelector('.dpad-left');
-        if (dpadLeft) {
-            const btnLeft = document.getElementById('btn-left');
-            const btnRight = document.getElementById('btn-right');
-            
-            const updateDpad = (e) => {
-                e.preventDefault();
-                let leftPressed = false;
-                let rightPressed = false;
-                
-                // Butonların konumlarını dinamik olarak al
-                const rectLeft = btnLeft.getBoundingClientRect();
-                const rectRight = btnRight.getBoundingClientRect();
-                
-                // Aktif tüm dokunuşları tara
-                for (let i = 0; i < e.touches.length; i++) {
-                    const touch = e.touches[i];
-                    const tx = touch.clientX;
-                    const ty = touch.clientY;
-                    
-                    // Dokunuş sol butonun sınırları içinde mi?
-                    if (tx >= rectLeft.left && tx <= rectLeft.right &&
-                        ty >= rectLeft.top && ty <= rectLeft.bottom) {
-                        leftPressed = true;
-                    }
-                    // Dokunuş sağ butonun sınırları içinde mi?
-                    if (tx >= rectRight.left && tx <= rectRight.right &&
-                        ty >= rectRight.top && ty <= rectRight.bottom) {
-                        rightPressed = true;
-                    }
-                }
-                
-                // Değerleri güncelle ve görsel sınıfları ata
-                if (leftPressed && !rightPressed) {
-                    this.keys.left = true;
-                    this.keys.right = false;
-                    btnLeft.classList.add('active');
-                    btnRight.classList.remove('active');
-                } else if (rightPressed && !leftPressed) {
-                    this.keys.right = true;
-                    this.keys.left = false;
-                    btnRight.classList.add('active');
-                    btnLeft.classList.remove('active');
-                } else {
-                    // Aynı anda basma veya hiç basmama durumunda sıfırla
-                    this.keys.left = false;
-                    this.keys.right = false;
-                    btnLeft.classList.remove('active');
-                    btnRight.classList.remove('active');
-                }
-            };
-            
-            const clearDpad = (e) => {
-                e.preventDefault();
-                updateDpad(e);
-            };
-            
-            // Dokunmatik sürükleme desteği
-            dpadLeft.addEventListener('touchstart', updateDpad, { passive: false });
-            dpadLeft.addEventListener('touchmove', updateDpad, { passive: false });
-            dpadLeft.addEventListener('touchend', clearDpad, { passive: false });
-            dpadLeft.addEventListener('touchcancel', clearDpad, { passive: false });
-            
-            // Masaüstü fare tıklama uyumluluğu
-            btnLeft.addEventListener('mousedown', (e) => {
-                this.keys.left = true;
-                btnLeft.classList.add('active');
-            });
-            btnLeft.addEventListener('mouseup', () => {
-                this.keys.left = false;
-                btnLeft.classList.remove('active');
-            });
-            btnLeft.addEventListener('mouseleave', () => {
-                this.keys.left = false;
-                btnLeft.classList.remove('active');
-            });
-            
-            btnRight.addEventListener('mousedown', (e) => {
-                this.keys.right = true;
-                btnRight.classList.add('active');
-            });
-            btnRight.addEventListener('mouseup', () => {
-                this.keys.right = false;
-                btnRight.classList.remove('active');
-            });
-            btnRight.addEventListener('mouseleave', () => {
-                this.keys.right = false;
-                btnRight.classList.remove('active');
-            });
-        }
+        // Yön tuşlarını eşle (Bireysel dokunmatik izleme, sıfır hata oranı ve touchmove engelleme koruması)
+        bindTouchButton('btn-left', 'left');
+        bindTouchButton('btn-right', 'right');
 
         // Aksiyon Butonları (Zıplama ve Eğil/Roll)
         bindTouchButton('btn-jump', 'jump', () => {
@@ -4143,7 +4055,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v298`;
+                img.src = `assets/avatars/${av.id}.png?v=v299`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4203,7 +4115,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v298`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v299`;
             }
         };
         
