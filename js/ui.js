@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v296';
-import { ViscosityList } from './viscosity.js?v=v296';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v296';
-import { CloudSaveManager } from './cloud_save.js?v=v296';
+import { audio } from './audio.js?v=v297';
+import { ViscosityList } from './viscosity.js?v=v297';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v297';
+import { CloudSaveManager } from './cloud_save.js?v=v297';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -2055,108 +2055,129 @@ export class UIManager {
                 const cy = canvas.height / 2 + 5; // shift down for hats
                 const radius = 18;
 
-                // 1. Draw Trail Particles (behind Viscora)
+                // 1. Draw Trail Particles (directly across the canvas)
                 if (item.category === 'trail') {
                     ctx.save();
+                    
+                    const points = [];
+                    for (let x = 8; x <= 72; x += 2) {
+                        const y = 35 + Math.sin(x * 0.12) * 10;
+                        points.push({ x, y });
+                    }
+                    
                     if (item.id === 'default_trail') {
-                        // Soft trailing path
-                        const trailGrad = ctx.createLinearGradient(cx - 20, cy + 10, cx, cy);
-                        trailGrad.addColorStop(0, 'rgba(6, 182, 212, 0)');
-                        trailGrad.addColorStop(1, 'rgba(6, 182, 212, 0.35)');
-                        ctx.fillStyle = trailGrad;
-                        ctx.beginPath();
-                        ctx.moveTo(cx - 22, cy + 12);
-                        ctx.lineTo(cx, cy + radius);
-                        ctx.lineTo(cx - radius, cy);
-                        ctx.closePath();
-                        ctx.fill();
-
-                        ctx.fillStyle = '#06b6d4';
+                        const trailGrad = ctx.createLinearGradient(8, 35, 72, 35);
+                        trailGrad.addColorStop(0, 'rgba(6, 182, 212, 0.1)');
+                        trailGrad.addColorStop(0.5, 'rgba(6, 182, 212, 0.55)');
+                        trailGrad.addColorStop(1, 'rgba(6, 182, 212, 0.95)');
+                        ctx.strokeStyle = trailGrad;
+                        ctx.lineWidth = 4;
+                        ctx.lineCap = 'round';
                         ctx.shadowColor = '#06b6d4';
-                        ctx.shadowBlur = 6;
+                        ctx.shadowBlur = 8;
                         ctx.beginPath();
-                        ctx.arc(cx - 12, cy + 8, 4.0, 0, Math.PI * 2);
-                        ctx.arc(cx - 6, cy + 12, 2.5, 0, Math.PI * 2);
-                        ctx.fill();
+                        ctx.moveTo(points[0].x, points[0].y);
+                        for (let i = 1; i < points.length; i++) {
+                            ctx.lineTo(points[i].x, points[i].y);
+                        }
+                        ctx.stroke();
+                        
+                        ctx.fillStyle = '#06b6d4';
+                        ctx.shadowBlur = 4;
+                        points.forEach((p, idx) => {
+                            if (idx % 5 === 0) {
+                                ctx.beginPath();
+                                ctx.arc(p.x, p.y + (Math.random() - 0.5) * 6, 1.8 + Math.random() * 2, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                        });
                     } else if (item.id === 'fire_trail') {
-                        // Sweeping fire flame gradient path
-                        const flameGrad = ctx.createLinearGradient(cx - 24, cy + 12, cx, cy);
-                        flameGrad.addColorStop(0, 'rgba(239, 68, 68, 0)');
-                        flameGrad.addColorStop(0.5, 'rgba(249, 115, 22, 0.5)');
-                        flameGrad.addColorStop(1, 'rgba(245, 158, 11, 0.8)');
-                        ctx.fillStyle = flameGrad;
+                        const fireGrad = ctx.createLinearGradient(8, 35, 72, 35);
+                        fireGrad.addColorStop(0, 'rgba(239, 68, 68, 0.1)');
+                        fireGrad.addColorStop(0.4, 'rgba(249, 115, 22, 0.65)');
+                        fireGrad.addColorStop(0.8, 'rgba(245, 158, 11, 0.9)');
+                        fireGrad.addColorStop(1, 'rgba(254, 240, 138, 1)');
+                        ctx.strokeStyle = fireGrad;
+                        ctx.lineWidth = 6;
+                        ctx.lineCap = 'round';
+                        ctx.shadowColor = '#f97316';
+                        ctx.shadowBlur = 10;
                         ctx.beginPath();
-                        ctx.moveTo(cx - 24, cy + 14);
-                        ctx.quadraticCurveTo(cx - 12, cy + 14, cx - 4, cy + radius - 2);
-                        ctx.lineTo(cx - radius, cy);
-                        ctx.quadraticCurveTo(cx - 18, cy + 2, cx - 24, cy + 14);
-                        ctx.closePath();
-                        ctx.fill();
+                        ctx.moveTo(points[0].x, points[0].y);
+                        for (let i = 1; i < points.length; i++) {
+                            ctx.lineTo(points[i].x, points[i].y);
+                        }
+                        ctx.stroke();
 
-                        // Glowing flame sparks
-                        const sparks = [
-                            { x: cx - 14, y: cy + 6, r: 4.5, c: '#ef4444' },
-                            { x: cx - 9, y: cy + 11, r: 3.5, c: '#f97316' },
-                            { x: cx - 18, y: cy + 12, r: 2.2, c: '#f59e0b' }
-                        ];
-                        sparks.forEach(s => {
-                            ctx.fillStyle = s.c;
-                            ctx.shadowColor = s.c;
-                            ctx.shadowBlur = 8;
-                            ctx.beginPath();
-                            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                            ctx.fill();
+                        points.forEach((p, idx) => {
+                            if (idx % 3 === 0) {
+                                ctx.fillStyle = idx % 2 === 0 ? '#ef4444' : '#f59e0b';
+                                ctx.shadowColor = ctx.fillStyle;
+                                ctx.shadowBlur = 6;
+                                ctx.beginPath();
+                                ctx.arc(p.x, p.y - 2 - Math.random() * 6, 1.5 + Math.random() * 2.5, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
                         });
                     } else if (item.id === 'ice_trail') {
-                        // Frosty mist path
-                        const frostGrad = ctx.createLinearGradient(cx - 22, cy + 10, cx, cy);
-                        frostGrad.addColorStop(0, 'rgba(56, 189, 248, 0)');
-                        frostGrad.addColorStop(1, 'rgba(125, 211, 252, 0.4)');
-                        ctx.fillStyle = frostGrad;
+                        const iceGrad = ctx.createLinearGradient(8, 35, 72, 35);
+                        iceGrad.addColorStop(0, 'rgba(56, 189, 248, 0.1)');
+                        iceGrad.addColorStop(0.6, 'rgba(125, 211, 252, 0.55)');
+                        iceGrad.addColorStop(1, 'rgba(255, 255, 255, 0.95)');
+                        ctx.strokeStyle = iceGrad;
+                        ctx.lineWidth = 3.5;
+                        ctx.lineCap = 'round';
+                        ctx.shadowColor = '#38bdf8';
+                        ctx.shadowBlur = 8;
                         ctx.beginPath();
-                        ctx.moveTo(cx - 22, cy + 12);
-                        ctx.lineTo(cx, cy + radius);
-                        ctx.lineTo(cx - radius, cy);
-                        ctx.closePath();
-                        ctx.fill();
+                        ctx.moveTo(points[0].x, points[0].y);
+                        for (let i = 1; i < points.length; i++) {
+                            ctx.lineTo(points[i].x, points[i].y);
+                        }
+                        ctx.stroke();
 
-                        // Ice crystal diamonds
-                        const drawCrystal = (x, y, w, h) => {
+                        const drawDiamond = (x, y, size) => {
                             ctx.save();
                             ctx.fillStyle = '#ffffff';
-                            ctx.shadowColor = '#38bdf8';
+                            ctx.shadowColor = '#7dd3fc';
                             ctx.shadowBlur = 5;
                             ctx.beginPath();
-                            ctx.moveTo(x, y - h/2);
-                            ctx.lineTo(x - w/2, y);
-                            ctx.lineTo(x, y + h/2);
-                            ctx.lineTo(x + w/2, y);
+                            ctx.moveTo(x, y - size);
+                            ctx.lineTo(x - size * 0.7, y);
+                            ctx.lineTo(x, y + size);
+                            ctx.lineTo(x + size * 0.7, y);
                             ctx.closePath();
                             ctx.fill();
                             ctx.restore();
                         };
-                        drawCrystal(cx - 14, cy + 8, 5, 8);
-                        drawCrystal(cx - 8, cy + 13, 3, 5);
-                        drawCrystal(cx - 19, cy + 12, 2, 4);
+                        
+                        points.forEach((p, idx) => {
+                            if (idx === 3 || idx === 8 || idx === 13 || idx === 18 || idx === 23 || idx === 28) {
+                                drawDiamond(p.x, p.y + (idx % 2 === 0 ? 5 : -5), 2.2 + Math.random() * 1.8);
+                            }
+                        });
                     } else if (item.id === 'gold_trail') {
-                        // Golden aura path
-                        const goldPathGrad = ctx.createLinearGradient(cx - 22, cy + 10, cx, cy);
-                        goldPathGrad.addColorStop(0, 'rgba(251, 191, 36, 0)');
-                        goldPathGrad.addColorStop(1, 'rgba(251, 191, 36, 0.35)');
-                        ctx.fillStyle = goldPathGrad;
+                        const goldGrad = ctx.createLinearGradient(8, 35, 72, 35);
+                        goldGrad.addColorStop(0, 'rgba(251, 191, 36, 0.1)');
+                        goldGrad.addColorStop(0.5, 'rgba(251, 191, 36, 0.65)');
+                        goldGrad.addColorStop(1, 'rgba(254, 240, 138, 1)');
+                        ctx.strokeStyle = goldGrad;
+                        ctx.lineWidth = 4.5;
+                        ctx.lineCap = 'round';
+                        ctx.shadowColor = '#fbbf24';
+                        ctx.shadowBlur = 10;
                         ctx.beginPath();
-                        ctx.moveTo(cx - 22, cy + 12);
-                        ctx.lineTo(cx, cy + radius);
-                        ctx.lineTo(cx - radius, cy);
-                        ctx.closePath();
-                        ctx.fill();
+                        ctx.moveTo(points[0].x, points[0].y);
+                        for (let i = 1; i < points.length; i++) {
+                            ctx.lineTo(points[i].x, points[i].y);
+                        }
+                        ctx.stroke();
 
-                        // Glinting gold stars helper
                         const drawGoldStar = (x, y, r) => {
                             ctx.save();
+                            ctx.fillStyle = '#ffffff';
                             ctx.shadowColor = '#fbbf24';
                             ctx.shadowBlur = 6;
-                            ctx.fillStyle = '#ffffff';
                             ctx.beginPath();
                             ctx.moveTo(x, y - r);
                             ctx.quadraticCurveTo(x, y, x - r, y);
@@ -2167,25 +2188,32 @@ export class UIManager {
                             ctx.fill();
                             ctx.restore();
                         };
-                        drawGoldStar(cx - 13, cy + 7, 5.0);
-                        drawGoldStar(cx - 6, cy + 12, 3.2);
-                    } else if (item.id === 'rainbow_trail') {
-                        // Sweeping multi-colored rainbow ribbon
-                        ctx.lineWidth = 3.5;
-                        ctx.lineCap = 'round';
-                        ctx.shadowBlur = 4;
                         
+                        points.forEach((p, idx) => {
+                            if (idx === 4 || idx === 11 || idx === 18 || idx === 25) {
+                                drawGoldStar(p.x, p.y + (idx % 3 === 0 ? 6 : -6), 3.2 + Math.random() * 1.8);
+                            }
+                        });
+                    } else if (item.id === 'rainbow_trail') {
                         const rainbowColors = ['#ef4444', '#f97316', '#eab308', '#10b981', '#3b82f6', '#8b5cf6'];
-                        rainbowColors.forEach((col, idx) => {
+                        ctx.shadowBlur = 6;
+                        rainbowColors.forEach((col, colorIdx) => {
                             ctx.strokeStyle = col;
                             ctx.shadowColor = col;
-                            ctx.lineWidth = 1.2;
+                            ctx.lineWidth = 1.8;
+                            ctx.lineCap = 'round';
                             ctx.beginPath();
-                            ctx.arc(cx - 8, cy + 8, radius + 2 + idx * 1.5, Math.PI * 0.7, Math.PI * 1.7);
+                            
+                            const offset = colorIdx * 1.5 - 4.5;
+                            ctx.moveTo(points[0].x, points[0].y + offset);
+                            for (let i = 1; i < points.length; i++) {
+                                ctx.lineTo(points[i].x, points[i].y + offset);
+                            }
                             ctx.stroke();
                         });
                     }
                     ctx.restore();
+                    return; // Return early, don't render body/accessory/eyes on trail cards
                 }
 
                 // 2. Draw Viscora Gel Body (Wobbly organic shape + glossy gradient + highlight)
@@ -4023,7 +4051,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v296`;
+                img.src = `assets/avatars/${av.id}.png?v=v297`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4083,7 +4111,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v296`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v297`;
             }
         };
         
