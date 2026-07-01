@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v294';
-import { Level } from './level.js?v=v294';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v294';
-import { UIManager } from './ui.js?v=v294';
-import { CloudSaveManager } from './cloud_save.js?v=v294';
-import { audio } from './audio.js?v=v294';
-import { LevelEditor } from './editor.js?v=v294';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v294';
+import { Player } from './player.js?v=v295';
+import { Level } from './level.js?v=v295';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v295';
+import { UIManager } from './ui.js?v=v295';
+import { CloudSaveManager } from './cloud_save.js?v=v295';
+import { audio } from './audio.js?v=v295';
+import { LevelEditor } from './editor.js?v=v295';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v295';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -702,38 +702,10 @@ export class GameManager {
             this.hintTimer = 0;
         }
 
-        if (this.difficulty === 'easy' && this.checkpointX !== undefined && this.checkpointY !== undefined && (this.checkpointX !== this.level.spawnX || this.checkpointY !== this.level.spawnY)) {
-            this.state = 'PLAYING';
-            this.particles = [];
-            this.splatters = [];
-            this.level.resetLevelRuntimeState(true);
-            this.initEnemies(this.currentLevel);
-            this.bossRespawnsUsed = 0;
-            const mappedLvl = this.getMappedLevel();
-            if (this.currentLevel === 30) {
-                this.boss = new UfoBoss(1200, 150);
-            } else if (mappedLvl === 10) {
-                this.boss = new Boss(1200, 300);
-            } else if (mappedLvl === 20) {
-                this.boss = new CyberBoss(1200, 300);
-            } else {
-                this.boss = null;
-            }
-            let maxH = 3;
-            this.player.maxHealth = maxH;
-            this.player.health = 1;
-            this.player.respawn(this.checkpointX, this.checkpointY, 1);
-            this.ui.updateHUDHealth(this.player.health);
-            this.ui.updateHUDViscosity(this.player.viscosity);
-            audio.resume();
-            this.lastTime = performance.now();
-            this.physicsAccumulator = 0;
+        if (this.currentLevel === 999 && this.currentCustomLevelData) {
+            this.startCustomLevel(this.currentCustomLevelData);
         } else {
-            if (this.currentLevel === 999 && this.currentCustomLevelData) {
-                this.startCustomLevel(this.currentCustomLevelData);
-            } else {
-                this.start(false);
-            }
+            this.start(false);
         }
     }
 
