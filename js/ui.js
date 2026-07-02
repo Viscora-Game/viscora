@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v318';
-import { ViscosityList } from './viscosity.js?v=v318';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v318';
-import { CloudSaveManager } from './cloud_save.js?v=v318';
+import { audio } from './audio.js?v=v319';
+import { ViscosityList } from './viscosity.js?v=v319';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v319';
+import { CloudSaveManager } from './cloud_save.js?v=v319';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -1480,6 +1480,11 @@ export class UIManager {
             
             ctx.save();
             ctx.scale(canvas.width / 70, canvas.height / 70);
+            
+            // Zoom ve ortalama ayarı: Karakteri mobilde çok daha belirgin yapmak için büyütüyoruz
+            ctx.translate(35, 38);
+            ctx.scale(1.45, 1.45);
+            ctx.translate(-35, -38);
             
             const activeTrail = tempTrail || (window.shopManager ? window.shopManager.getActiveCosmetic('trail') : 'default_trail');
             const activeAccessory = tempAccessory || (window.shopManager ? window.shopManager.getActiveCosmetic('accessory') : 'default_accessory');
@@ -4643,7 +4648,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v318`;
+                img.src = `assets/avatars/${av.id}.png?v=v319`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4685,7 +4690,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v318`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v319`;
             }
         };
         
