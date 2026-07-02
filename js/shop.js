@@ -308,6 +308,7 @@ class ShopManager {
         const ownedStr = JSON.stringify(this.ownedItems);
         const sig = this.generateSignature(this.totalCrystals, this.spentCrystals, ownedStr);
         
+        localStorage.setItem('viscora_last_save_time', Date.now().toString());
         localStorage.setItem('viscora_total_crystals', this.totalCrystals);
         localStorage.setItem('viscora_spent_crystals', this.spentCrystals);
         localStorage.setItem('viscora_owned_items', ownedStr);

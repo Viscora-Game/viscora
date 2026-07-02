@@ -1,22 +1,5 @@
 const API_BASE = 'https://viscora.onrender.com';
 
-// LocalStorage Interceptor: Hangi cihazda ilerleme kaydedildiyse onun zaman damgasını otomatik güncellemek için.
-if (typeof window !== 'undefined') {
-    window._viscoraApplyingSaveData = false;
-    const originalSetItem = localStorage.setItem;
-    localStorage.setItem = function(key, value) {
-        originalSetItem.apply(this, arguments);
-        if (key.startsWith('viscora_') && 
-            key !== 'viscora_last_save_time' && 
-            key !== 'viscora_user_id' && 
-            key !== 'viscora_sync_code' && 
-            key !== 'viscora_google_email' &&
-            !window._viscoraApplyingSaveData) {
-            originalSetItem.call(localStorage, 'viscora_last_save_time', Date.now().toString());
-        }
-    };
-}
-
 export class CloudSaveManager {
     static getLocalKeys() {
         return {
@@ -83,39 +66,34 @@ export class CloudSaveManager {
     static applySaveData(data) {
         if (!data || typeof data !== 'object') return false;
         
-        window._viscoraApplyingSaveData = true;
-        try {
-            const currentLocalTime = localStorage.getItem('viscora_last_save_time') || '0';
-            const incomingTime = data.lastSaveTime ? String(data.lastSaveTime) : '0';
-            if (incomingTime !== '0' && incomingTime !== currentLocalTime) {
-                localStorage.setItem('viscora_last_save_time_updated', 'true');
-            }
+        const currentLocalTime = localStorage.getItem('viscora_last_save_time') || '0';
+        const incomingTime = data.lastSaveTime ? String(data.lastSaveTime) : '0';
+        if (incomingTime !== '0' && incomingTime !== currentLocalTime) {
+            localStorage.setItem('viscora_last_save_time_updated', 'true');
+        }
 
-            const keys = this.getLocalKeys();
-            for (const [key, storageKey] of Object.entries(keys)) {
-                if (data[key] !== undefined) {
-                    const val = data[key];
-                    if (typeof val === 'object') {
-                        localStorage.setItem(storageKey, JSON.stringify(val));
-                    } else {
-                        localStorage.setItem(storageKey, String(val));
-                    }
+        const keys = this.getLocalKeys();
+        for (const [key, storageKey] of Object.entries(keys)) {
+            if (data[key] !== undefined) {
+                const val = data[key];
+                if (typeof val === 'object') {
+                    localStorage.setItem(storageKey, JSON.stringify(val));
+                } else {
+                    localStorage.setItem(storageKey, String(val));
                 }
             }
+        }
 
-            // Legacy support: if signature is not in the restored data, generate it dynamically to prevent resetting
-            if (data.balanceSig === undefined) {
-                const total = data.totalCrystals !== undefined ? Number(data.totalCrystals) : 0;
-                const spent = data.spentCrystals !== undefined ? Number(data.spentCrystals) : 0;
-                let ownedItems = data.ownedItems || ['default_trail', 'default_accessory', 'default_eyes'];
-                const ownedStr = typeof ownedItems === 'string' ? ownedItems : JSON.stringify(ownedItems);
+        // Legacy support: if signature is not in the restored data, generate it dynamically to prevent resetting
+        if (data.balanceSig === undefined) {
+            const total = data.totalCrystals !== undefined ? Number(data.totalCrystals) : 0;
+            const spent = data.spentCrystals !== undefined ? Number(data.spentCrystals) : 0;
+            let ownedItems = data.ownedItems || ['default_trail', 'default_accessory', 'default_eyes'];
+            const ownedStr = typeof ownedItems === 'string' ? ownedItems : JSON.stringify(ownedItems);
 
-                const sig = this.generateSignature(total, spent, ownedStr);
-                localStorage.setItem('viscora_balance_sig', sig);
-                console.log('Regenerated validation signature for restored crystal balance:', sig);
-            }
-        } finally {
-            window._viscoraApplyingSaveData = false;
+            const sig = this.generateSignature(total, spent, ownedStr);
+            localStorage.setItem('viscora_balance_sig', sig);
+            console.log('Regenerated validation signature for restored crystal balance:', sig);
         }
 
         return true;

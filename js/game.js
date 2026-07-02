@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v326';
-import { Level } from './level.js?v=v326';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v326';
-import { UIManager } from './ui.js?v=v326';
-import { CloudSaveManager } from './cloud_save.js?v=v326';
-import { audio } from './audio.js?v=v326';
-import { LevelEditor } from './editor.js?v=v326';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v326';
+import { Player } from './player.js?v=v327';
+import { Level } from './level.js?v=v327';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v327';
+import { UIManager } from './ui.js?v=v327';
+import { CloudSaveManager } from './cloud_save.js?v=v327';
+import { audio } from './audio.js?v=v327';
+import { LevelEditor } from './editor.js?v=v327';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v327';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -483,6 +483,7 @@ export class GameManager {
             const data = localStorage.getItem('viscora_stars') || '{}';
             const parsed = JSON.parse(data);
             parsed[lvl] = Math.max(parsed[lvl] || 0, stars);
+            localStorage.setItem('viscora_last_save_time', Date.now().toString());
             localStorage.setItem('viscora_stars', JSON.stringify(parsed));
             CloudSaveManager.saveProgress();
         } catch(e) {}
@@ -886,6 +887,7 @@ export class GameManager {
                     if (!progress[nextLvlKey]) {
                         progress[nextLvlKey] = { unlocked: true };
                     }
+                    localStorage.setItem('viscora_last_save_time', Date.now().toString());
                     localStorage.setItem('viscora_progress', JSON.stringify(progress));
                 } catch(e) { /* localStorage hatası yoksay */ }
                 game.ui.showScreen('hud');
@@ -905,6 +907,7 @@ export class GameManager {
                         if (!progress[nextLvlKey]) {
                             progress[nextLvlKey] = { unlocked: true };
                         }
+                        localStorage.setItem('viscora_last_save_time', Date.now().toString());
                         localStorage.setItem('viscora_progress', JSON.stringify(progress));
                     } catch(e) {}
                     game.ui.showScreen('hud');
@@ -1259,6 +1262,7 @@ export class GameManager {
         if (this.currentLevel < maxLvl) {
             const nextLvl = this.currentLevel + 1;
             this.unlockedLevel = Math.max(this.unlockedLevel, nextLvl);
+            localStorage.setItem('viscora_last_save_time', Date.now().toString());
             localStorage.setItem('viscora_unlocked_level', this.unlockedLevel.toString());
             CloudSaveManager.saveProgress();
             this.ui.updateLevelButtonsUI();
@@ -2400,7 +2404,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v326', this.cssWidth - 10, 10);
+        this.ctx.fillText('v327', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
