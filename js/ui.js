@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v311';
-import { ViscosityList } from './viscosity.js?v=v311';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v311';
-import { CloudSaveManager } from './cloud_save.js?v=v311';
+import { audio } from './audio.js?v=v312';
+import { ViscosityList } from './viscosity.js?v=v312';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v312';
+import { CloudSaveManager } from './cloud_save.js?v=v312';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -2049,6 +2049,145 @@ export class UIManager {
 
                 drawFluffyPuff(topX, topY - 2.0, 9.6, 2.0, 2.6);
                 drawFluffyPuff(topX + 9.2, topY - 10.0, 2.2, 2.2, 2.2);
+            } else if (activeAccessory === 'cyber_visor') {
+                // Siber Vizör (Neon Degrade + Siber Gövde)
+                ctx.save();
+                // Kafa bandı
+                ctx.strokeStyle = '#334155';
+                ctx.lineWidth = 1.8;
+                ctx.beginPath();
+                ctx.arc(px, finalY - 2.5, radius - 0.8, Math.PI * 0.9, Math.PI * 0.1, true);
+                ctx.stroke();
+
+                // Vizör camı parlaması
+                ctx.shadowColor = '#00f2fe';
+                ctx.shadowBlur = 6;
+
+                // Yarı saydam neon vizör camı
+                const visorGrad = ctx.createLinearGradient(px - 9, finalY - 5, px + 9, finalY);
+                visorGrad.addColorStop(0, 'rgba(255, 0, 127, 0.85)');
+                visorGrad.addColorStop(0.5, 'rgba(139, 92, 246, 0.85)');
+                visorGrad.addColorStop(1, 'rgba(0, 242, 254, 0.85)');
+
+                ctx.beginPath();
+                if (ctx.roundRect) {
+                    ctx.roundRect(px - 9, finalY - 5.2, 18, 5.8, 2.5);
+                } else {
+                    ctx.rect(px - 9, finalY - 5.2, 18, 5.8);
+                }
+                ctx.fillStyle = visorGrad;
+                ctx.fill();
+
+                // Kenarlık parlaması
+                ctx.strokeStyle = '#00f2fe';
+                ctx.lineWidth = 0.8;
+                ctx.stroke();
+
+                // Tarama Çizgisi (Scanline)
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.lineWidth = 0.4;
+                ctx.beginPath();
+                ctx.moveTo(px - 7, finalY - 2.3);
+                ctx.lineTo(px + 7, finalY - 2.3);
+                ctx.stroke();
+                ctx.restore();
+            } else if (activeAccessory === 'gaming_headset') {
+                // RGB Oyuncu Kulaklığı (Siber Band + Yanal RGB Kupaları)
+                ctx.save();
+                
+                // 1. Kafa Bandı (Koyu Siber Metal)
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 2.2;
+                ctx.beginPath();
+                ctx.arc(px, finalY, radius + 0.4, Math.PI * 1.15, Math.PI * 1.85, false);
+                ctx.stroke();
+
+                // 2. Kafa Bandı Üst Yumuşak Doku (Detay)
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 0.8;
+                ctx.beginPath();
+                ctx.arc(px, finalY, radius + 0.9, Math.PI * 1.25, Math.PI * 1.75, false);
+                ctx.stroke();
+
+                const drawEarcup = (ex, ey, isLeft) => {
+                    ctx.save();
+                    ctx.fillStyle = '#0f172a';
+                    ctx.strokeStyle = '#334155';
+                    ctx.lineWidth = 0.8;
+                    ctx.beginPath();
+                    if (ctx.ellipse) {
+                        ctx.ellipse(ex, ey, 2.2, 4.4, 0, 0, Math.PI * 2);
+                    } else {
+                        ctx.arc(ex, ey, 3, 0, Math.PI * 2);
+                    }
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // RGB Neon Işık Halkası
+                    ctx.shadowColor = '#22c55e';
+                    ctx.shadowBlur = 4;
+                    ctx.strokeStyle = '#22c55e';
+                    ctx.lineWidth = 0.6;
+                    ctx.beginPath();
+                    if (ctx.ellipse) {
+                        ctx.ellipse(ex, ey, 1.2, 2.6, 0, 0, Math.PI * 2);
+                    } else {
+                        ctx.arc(ex, ey, 1.5, 0, Math.PI * 2);
+                    }
+                    ctx.stroke();
+                    ctx.restore();
+                };
+
+                // Sol Earcup
+                drawEarcup(px - radius + 0.8, finalY - 2.2, true);
+                // Sağ Earcup
+                drawEarcup(px + radius - 0.8, finalY - 2.2, false);
+                
+                ctx.restore();
+            } else if (activeAccessory === 'cat_ears') {
+                // Siber Kedi Kulakları (Karbon Gövde + Neon Pembe Degrade Paneller)
+                ctx.save();
+                
+                const drawCatEar = (earX, earY, isLeft) => {
+                    const dir = isLeft ? -1 : 1;
+                    
+                    // 1. Dış Gövde
+                    ctx.fillStyle = '#0f172a';
+                    ctx.strokeStyle = '#1e293b';
+                    ctx.lineWidth = 0.8;
+                    ctx.beginPath();
+                    ctx.moveTo(earX, earY);
+                    ctx.lineTo(earX + dir * 6, earY - 0.8);
+                    ctx.lineTo(earX + dir * 4.2, earY - 7.0);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // 2. İç Neon Panel
+                    ctx.shadowColor = '#d946ef';
+                    ctx.shadowBlur = 5;
+                    
+                    const innerGrad = ctx.createLinearGradient(earX, earY, earX + dir * 4, earY - 5);
+                    innerGrad.addColorStop(0, '#c084fc');
+                    innerGrad.addColorStop(1, '#d946ef');
+                    
+                    ctx.fillStyle = innerGrad;
+                    ctx.beginPath();
+                    ctx.moveTo(earX + dir * 1.2, earY - 0.8);
+                    ctx.lineTo(earX + dir * 5.0, earY - 1.4);
+                    ctx.lineTo(earX + dir * 3.6, earY - 5.5);
+                    ctx.closePath();
+                    ctx.fill();
+                };
+
+                // Sol kulak
+                drawCatEar(topX - 2.0, topY, true);
+                // Sağ kulak
+                drawCatEar(topX + 2.0, topY, false);
+                
+                ctx.restore();
+            }
             }
             
             if (window.gameInstance && window.gameInstance.state === 'SHOP') {
@@ -4206,7 +4345,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v311`;
+                img.src = `assets/avatars/${av.id}.png?v=v312`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4248,7 +4387,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v311`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v312`;
             }
         };
         
