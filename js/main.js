@@ -1,8 +1,25 @@
-import { GameManager } from './game.js?v=v321';
-import { audio } from './audio.js?v=v321';
+import { GameManager } from './game.js?v=v322';
+import { audio } from './audio.js?v=v322';
+import { CloudSaveManager } from './cloud_save.js?v=v322';
 
 // Oyun Başlatma Girişi
 window.addEventListener('DOMContentLoaded', () => {
+    // Otomatik Bulut Eşitlemesi (Startup Sync): Oyuncu bağlıysa başlangıçta en güncel veriyi çek
+    const syncCode = localStorage.getItem('viscora_sync_code') || localStorage.getItem('viscora_user_id');
+    if (syncCode) {
+        CloudSaveManager.saveProgress().then(res => {
+            if (res && res.success) {
+                const hasUpdated = localStorage.getItem('viscora_last_save_time_updated') === 'true';
+                if (hasUpdated) {
+                    localStorage.removeItem('viscora_last_save_time_updated');
+                    console.log("Daha güncel bir bulut kaydı bulundu, oyun yenileniyor...");
+                    window.location.reload();
+                }
+            }
+        }).catch(err => {
+            console.warn("Otomatik başlangıç eşitleme hatası:", err);
+        });
+    }
     // Giriş Animasyonu (Splash Screen) Kontrolü
     const splash = document.getElementById('splash-screen');
     let splashTimeout = null;

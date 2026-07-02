@@ -85,6 +85,12 @@ export class CloudSaveManager {
         
         window._viscoraApplyingSaveData = true;
         try {
+            const currentLocalTime = localStorage.getItem('viscora_last_save_time') || '0';
+            const incomingTime = data.lastSaveTime ? String(data.lastSaveTime) : '0';
+            if (incomingTime !== '0' && incomingTime !== currentLocalTime) {
+                localStorage.setItem('viscora_last_save_time_updated', 'true');
+            }
+
             const keys = this.getLocalKeys();
             for (const [key, storageKey] of Object.entries(keys)) {
                 if (data[key] !== undefined) {
