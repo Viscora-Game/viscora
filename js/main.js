@@ -1,9 +1,8 @@
-import { GameManager } from './game.js?v=v327';
-import { audio } from './audio.js?v=v327';
-import { CloudSaveManager } from './cloud_save.js?v=v327';
+import { GameManager } from './game.js?v=v328';
+import { audio } from './audio.js?v=v328';
+import { CloudSaveManager } from './cloud_save.js?v=v328';
 
-// Oyun Başlatma Girişi
-window.addEventListener('DOMContentLoaded', () => {
+const initGame = () => {
     // Otomatik Bulut Eşitlemesi (Startup Sync): Oyuncu bağlıysa başlangıçta en güncel veriyi çek
     const syncCode = localStorage.getItem('viscora_sync_code') || localStorage.getItem('viscora_user_id');
     if (syncCode) {
@@ -75,6 +74,13 @@ window.addEventListener('DOMContentLoaded', () => {
             // Ses aktivasyonu click handler ile zaten gerçekleşiyor
         });
     }
-});
+};
+
+// DOMContentLoaded yarışı engellemek için durum kontrolü
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', initGame);
+} else {
+    initGame();
+}
 
 
