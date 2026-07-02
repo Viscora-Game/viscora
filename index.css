@@ -2615,6 +2615,9 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 }
 
 .star-gate-card .menu-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     flex: 1;
     overflow-y: auto;
     padding-right: 6px;
