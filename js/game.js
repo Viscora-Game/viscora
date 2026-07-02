@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v324';
-import { Level } from './level.js?v=v324';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v324';
-import { UIManager } from './ui.js?v=v324';
-import { CloudSaveManager } from './cloud_save.js?v=v324';
-import { audio } from './audio.js?v=v324';
-import { LevelEditor } from './editor.js?v=v324';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v324';
+import { Player } from './player.js?v=v325';
+import { Level } from './level.js?v=v325';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v325';
+import { UIManager } from './ui.js?v=v325';
+import { CloudSaveManager } from './cloud_save.js?v=v325';
+import { audio } from './audio.js?v=v325';
+import { LevelEditor } from './editor.js?v=v325';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v325';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -2400,7 +2400,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v324', this.cssWidth - 10, 10);
+        this.ctx.fillText('v325', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
