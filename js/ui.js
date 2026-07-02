@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v316';
-import { ViscosityList } from './viscosity.js?v=v316';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v316';
-import { CloudSaveManager } from './cloud_save.js?v=v316';
+import { audio } from './audio.js?v=v317';
+import { ViscosityList } from './viscosity.js?v=v317';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v317';
+import { CloudSaveManager } from './cloud_save.js?v=v317';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -1476,7 +1476,10 @@ export class UIManager {
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             
-            ctx.clearRect(0, 0, 70, 70);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.save();
+            ctx.scale(canvas.width / 70, canvas.height / 70);
             
             const activeTrail = tempTrail || (window.shopManager ? window.shopManager.getActiveCosmetic('trail') : 'default_trail');
             const activeAccessory = tempAccessory || (window.shopManager ? window.shopManager.getActiveCosmetic('accessory') : 'default_accessory');
@@ -1488,38 +1491,102 @@ export class UIManager {
             
             // 1. Emit trail particles
             previewHue = (previewHue + 2.5) % 360;
-            if (activeTrail && activeTrail !== 'default_trail' && Math.random() < 0.35) {
+            if (activeTrail && activeTrail !== 'default_trail' && Math.random() < 0.45) {
                 let pColor = '#06b6d4';
+                let pType = 'trail';
+                let pChar = '';
+                
                 if (activeTrail === 'fire_trail') {
                     pColor = Math.random() > 0.5 ? '#ef4444' : '#f97316';
+                    pType = 'trail';
                 } else if (activeTrail === 'ice_trail') {
                     pColor = Math.random() > 0.5 ? '#38bdf8' : '#ffffff';
+                    pType = 'trail';
                 } else if (activeTrail === 'gold_trail') {
                     pColor = '#fbbf24';
+                    pType = 'trail';
                 } else if (activeTrail === 'rainbow_trail') {
                     pColor = `hsl(${previewHue}, 100%, 60%)`;
+                    pType = 'trail';
+                } else if (activeTrail === 'lightning_trail') {
+                    const colors = ['#a855f7', '#00f2fe', '#8b5cf6', '#ffffff'];
+                    pColor = colors[Math.floor(Math.random() * colors.length)];
+                    pType = 'lightning';
+                } else if (activeTrail === 'toxic_trail') {
+                    const colors = ['#22c55e', '#4ade80', '#15803d', '#ffffff'];
+                    pColor = colors[Math.floor(Math.random() * colors.length)];
+                    pType = 'toxic';
+                } else if (activeTrail === 'binary_trail') {
+                    const colors = ['#22c55e', '#16a34a', '#86efac'];
+                    pColor = colors[Math.floor(Math.random() * colors.length)];
+                    pType = 'binary';
+                    pChar = Math.random() > 0.5 ? '1' : '0';
                 }
+                
                 previewParticles.push({
-                    x: px + (Math.random() - 0.5) * 16,
-                    y: py + radius - 3,
-                    vx: (Math.random() - 0.5) * 0.8,
-                    vy: 0.6 + Math.random() * 1.2,
-                    size: 1.5 + Math.random() * 2.5,
-                    life: 25 + Math.random() * 15,
-                    color: pColor
+                    x: px + (Math.random() - 0.5) * 14,
+                    y: py + radius - 2,
+                    vx: (Math.random() - 0.5) * 0.7,
+                    vy: 0.5 + Math.random() * 1.0,
+                    size: pType === 'lightning' ? (1.5 + Math.random() * 2.0) : (2.0 + Math.random() * 3.0),
+                    life: pType === 'lightning' ? (15 + Math.random() * 10) : (25 + Math.random() * 15),
+                    color: pColor,
+                    type: pType,
+                    char: pChar
                 });
             }
             
-            // Update & Draw particles
+            // Update & Draw particles with high fidelity custom rendering
             previewParticles.forEach(p => {
                 p.x += p.vx;
                 p.y += p.vy;
                 p.life--;
-                ctx.fillStyle = p.color;
+                
+                ctx.save();
                 ctx.globalAlpha = Math.max(0, p.life / 40);
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.fillStyle = p.color;
+                
+                if (p.type === 'lightning') {
+                    ctx.globalCompositeOperation = 'lighter';
+                    ctx.globalAlpha = Math.max(0, p.life / 40) * 0.4;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size * 2.2, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.globalAlpha = Math.max(0, p.life / 40) * 0.7;
+                    ctx.fillStyle = '#00f2fe';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size * 1.4, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.globalAlpha = Math.max(0, p.life / 40);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size * 0.7, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (p.type === 'toxic') {
+                    ctx.shadowColor = p.color;
+                    ctx.shadowBlur = 4;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+                    ctx.shadowBlur = 0;
+                    ctx.beginPath();
+                    ctx.arc(p.x - p.size * 0.3, p.y - p.size * 0.3, p.size * 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (p.type === 'binary') {
+                    ctx.font = `bold ${Math.floor(p.size * 1.6 + 5)}px monospace`;
+                    ctx.shadowColor = p.color;
+                    ctx.shadowBlur = 3;
+                    ctx.fillText(p.char || '0', p.x - p.size/2, p.y + p.size/2);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
             });
             ctx.globalAlpha = 1.0;
             previewParticles = previewParticles.filter(p => p.life > 0);
@@ -1807,36 +1874,35 @@ export class UIManager {
                 ctx.restore();
             } else if (activeEyes === 'cyber_matrix_eyes') {
                 ctx.save();
-                ctx.fillStyle = '#22c55e';
-                ctx.shadowColor = '#22c55e';
-                ctx.shadowBlur = 6;
-                ctx.font = 'bold 7.5px monospace';
+                ctx.fillStyle = '#39ff14'; // Florasan yeşil
+                ctx.shadowColor = '#39ff14';
+                ctx.shadowBlur = 10;
+                ctx.font = 'bold 11px monospace';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('1', eyeX - 4.5, eyeY);
                 ctx.fillText('0', eyeX + 4.5, eyeY);
                 ctx.restore();
             } else if (activeEyes === 'targeting_eye') {
-                ctx.fillStyle = '#06b6d4';
-                ctx.shadowColor = '#00f2fe';
-                ctx.shadowBlur = 4;
+                // Neon Sarı/Altın robotik mercek
+                ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
                 ctx.arc(eyeX - 4.5, eyeY, 2.5, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = '#ffffff';
+                ctx.fillStyle = '#0f172a';
                 ctx.beginPath();
-                ctx.arc(eyeX - 5.2, eyeY - 0.7, 0.7, 0, Math.PI * 2);
+                ctx.arc(eyeX - 4.5, eyeY, 0.8, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.save();
-                ctx.shadowColor = '#ef4444';
+                ctx.shadowColor = '#fbbf24';
                 ctx.shadowBlur = 6;
-                ctx.fillStyle = '#b91c1c';
+                ctx.fillStyle = '#fbbf24';
                 ctx.beginPath();
                 ctx.arc(eyeX + 4.5, eyeY, 2.7, 0, Math.PI * 2);
                 ctx.fill();
 
-                ctx.strokeStyle = '#ef4444';
+                ctx.strokeStyle = '#f59e0b';
                 ctx.lineWidth = 0.6;
                 ctx.beginPath();
                 ctx.arc(eyeX + 4.5, eyeY, 4.4, 0, Math.PI * 2);
@@ -1861,11 +1927,11 @@ export class UIManager {
                 ctx.restore();
             } else if (activeEyes === 'pixel_glasses') {
                 ctx.save();
-                ctx.fillStyle = 'rgba(6, 182, 212, 0.35)';
-                ctx.strokeStyle = '#00f2fe';
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.75)'; // Koyu yarı saydam camlar
+                ctx.strokeStyle = '#39ff14'; // Parlak yeşil çerçeve
                 ctx.lineWidth = 0.8;
-                ctx.shadowColor = '#00f2fe';
-                ctx.shadowBlur = 3;
+                ctx.shadowColor = '#39ff14';
+                ctx.shadowBlur = 4;
 
                 ctx.fillRect(eyeX - 7.5, eyeY - 2.2, 5.0, 3.2);
                 ctx.strokeRect(eyeX - 7.5, eyeY - 2.2, 5.0, 3.2);
@@ -1873,7 +1939,7 @@ export class UIManager {
                 ctx.fillRect(eyeX + 2.5, eyeY - 2.2, 5.0, 3.2);
                 ctx.strokeRect(eyeX + 2.5, eyeY - 2.2, 5.0, 3.2);
 
-                ctx.fillStyle = '#0891b2';
+                ctx.fillStyle = '#1e293b';
                 ctx.fillRect(eyeX - 2.5, eyeY - 1.5, 5.0, 1.2);
                 ctx.fillRect(eyeX - 9.0, eyeY - 1.5, 1.5, 1.2);
                 ctx.fillRect(eyeX + 7.5, eyeY - 1.5, 1.5, 1.2);
@@ -2266,6 +2332,8 @@ export class UIManager {
                 ctx.restore();
             }
             
+            ctx.restore();
+            
             if (window.gameInstance && window.gameInstance.state === 'SHOP') {
                 previewAnimFrame = requestAnimationFrame(updatePreviewAvatar);
             } else {
@@ -2449,22 +2517,37 @@ export class UIManager {
                             ctx.stroke();
                         });
                     } else if (item.id === 'lightning_trail') {
-                        const lightningGrad = ctx.createLinearGradient(8, 35, 72, 35);
-                        lightningGrad.addColorStop(0, 'rgba(168, 85, 247, 0.1)');
-                        lightningGrad.addColorStop(0.5, 'rgba(0, 242, 254, 0.85)');
-                        lightningGrad.addColorStop(1, 'rgba(139, 92, 246, 1)');
-                        ctx.strokeStyle = lightningGrad;
-                        ctx.lineWidth = 3.0;
-                        ctx.lineCap = 'round';
-                        ctx.shadowColor = '#00f2fe';
-                        ctx.shadowBlur = 10;
-                        ctx.beginPath();
-                        ctx.moveTo(points[0].x, points[0].y);
-                        for (let i = 1; i < points.length; i++) {
-                            const jaggedY = points[i].y + (i % 2 === 0 ? 3.5 : -3.5);
-                            ctx.lineTo(points[i].x, jaggedY);
-                        }
-                        ctx.stroke();
+                        // Plazma İz Önizlemesi (Kart üzerinde parlayan plazma orbları)
+                        ctx.save();
+                        ctx.globalCompositeOperation = 'lighter';
+                        points.forEach((p, idx) => {
+                            if (idx % 3 === 0) {
+                                const size = 3.5 + Math.sin(idx * 0.5) * 1.5;
+                                const alpha = 0.3 + (idx / points.length) * 0.7;
+                                
+                                // 1. Dış Aura
+                                ctx.globalAlpha = alpha * 0.45;
+                                ctx.fillStyle = idx % 2 === 0 ? '#a855f7' : '#00f2fe';
+                                ctx.beginPath();
+                                ctx.arc(p.x, p.y, size * 2.2, 0, Math.PI * 2);
+                                ctx.fill();
+                                
+                                // 2. Orta Enerji
+                                ctx.globalAlpha = alpha * 0.75;
+                                ctx.fillStyle = '#00f2fe';
+                                ctx.beginPath();
+                                ctx.arc(p.x, p.y, size * 1.3, 0, Math.PI * 2);
+                                ctx.fill();
+                                
+                                // 3. Çekirdek
+                                ctx.globalAlpha = alpha;
+                                ctx.fillStyle = '#ffffff';
+                                ctx.beginPath();
+                                ctx.arc(p.x, p.y, size * 0.65, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                        });
+                        ctx.restore();
                     } else if (item.id === 'toxic_trail') {
                         const toxicGrad = ctx.createLinearGradient(8, 35, 72, 35);
                         toxicGrad.addColorStop(0, 'rgba(34, 197, 94, 0.1)');
@@ -2771,36 +2854,35 @@ export class UIManager {
                         ctx.restore();
                     } else if (eyeStyle === 'cyber_matrix_eyes') {
                         ctx.save();
-                        ctx.fillStyle = '#22c55e';
-                        ctx.shadowColor = '#22c55e';
-                        ctx.shadowBlur = 6;
-                        ctx.font = 'bold 7.5px monospace';
+                        ctx.fillStyle = '#39ff14'; // Florasan yeşil
+                        ctx.shadowColor = '#39ff14';
+                        ctx.shadowBlur = 8;
+                        ctx.font = 'bold 9.5px monospace';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
                         ctx.fillText('1', cx - 4.5, cy - 1);
                         ctx.fillText('0', cx + 4.5, cy - 1);
                         ctx.restore();
                     } else if (eyeStyle === 'targeting_eye') {
-                        ctx.fillStyle = '#06b6d4';
-                        ctx.shadowColor = '#00f2fe';
-                        ctx.shadowBlur = 4;
+                        // Neon Sarı/Altın robotik mercek
+                        ctx.fillStyle = '#ffffff';
                         ctx.beginPath();
                         ctx.arc(cx - 4.5, cy - 1, 2.5, 0, Math.PI * 2);
                         ctx.fill();
-                        ctx.fillStyle = '#ffffff';
+                        ctx.fillStyle = '#0f172a';
                         ctx.beginPath();
-                        ctx.arc(cx - 5.2, cy - 1.7, 0.7, 0, Math.PI * 2);
+                        ctx.arc(cx - 4.5, cy - 1, 0.8, 0, Math.PI * 2);
                         ctx.fill();
 
                         ctx.save();
-                        ctx.shadowColor = '#ef4444';
+                        ctx.shadowColor = '#fbbf24';
                         ctx.shadowBlur = 6;
-                        ctx.fillStyle = '#b91c1c';
+                        ctx.fillStyle = '#fbbf24';
                         ctx.beginPath();
                         ctx.arc(cx + 4.5, cy - 1, 2.7, 0, Math.PI * 2);
                         ctx.fill();
 
-                        ctx.strokeStyle = '#ef4444';
+                        ctx.strokeStyle = '#f59e0b';
                         ctx.lineWidth = 0.6;
                         ctx.beginPath();
                         ctx.arc(cx + 4.5, cy - 1, 4.4, 0, Math.PI * 2);
@@ -2825,11 +2907,11 @@ export class UIManager {
                         ctx.restore();
                     } else if (eyeStyle === 'pixel_glasses') {
                         ctx.save();
-                        ctx.fillStyle = 'rgba(6, 182, 212, 0.35)';
-                        ctx.strokeStyle = '#00f2fe';
+                        ctx.fillStyle = 'rgba(15, 23, 42, 0.75)'; // Koyu yarı saydam camlar
+                        ctx.strokeStyle = '#39ff14'; // Parlak yeşil çerçeve
                         ctx.lineWidth = 0.8;
-                        ctx.shadowColor = '#00f2fe';
-                        ctx.shadowBlur = 3;
+                        ctx.shadowColor = '#39ff14';
+                        ctx.shadowBlur = 4;
 
                         ctx.fillRect(cx - 7.5, cy - 3.2, 5.0, 3.2);
                         ctx.strokeRect(cx - 7.5, cy - 3.2, 5.0, 3.2);
@@ -2837,7 +2919,7 @@ export class UIManager {
                         ctx.fillRect(cx + 2.5, cy - 3.2, 5.0, 3.2);
                         ctx.strokeRect(cx + 2.5, cy - 3.2, 5.0, 3.2);
 
-                        ctx.fillStyle = '#0891b2';
+                        ctx.fillStyle = '#1e293b';
                         ctx.fillRect(cx - 2.5, cy - 2.5, 5.0, 1.2);
                         ctx.fillRect(cx - 9.0, cy - 2.5, 1.5, 1.2);
                         ctx.fillRect(cx + 7.5, cy - 2.5, 1.5, 1.2);
@@ -4561,7 +4643,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v316`;
+                img.src = `assets/avatars/${av.id}.png?v=v317`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4603,7 +4685,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v316`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v317`;
             }
         };
         

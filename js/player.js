@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v316';
-import { audio } from './audio.js?v=v316';
+import { ViscosityStates } from './viscosity.js?v=v317';
+import { audio } from './audio.js?v=v317';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -1712,39 +1712,37 @@ export class Player {
             ctx.quadraticCurveTo(this.x - 5.5 + dx, this.y + 7.5 + dy, this.x - 8.5 + dx, this.y + 4.5 + dy);
             ctx.fill();
         } else if (activeEyes === 'cyber_matrix_eyes') {
-            // Siber Matrix Gözleri (Sol "1", Sağ "0" parlayan yeşil karakterler)
+            // Siber Matrix Gözleri (Sol "1", Sağ "0" parlayan yeşil karakterler - Büyük & Belirgin)
             ctx.save();
-            ctx.fillStyle = '#22c55e';
-            ctx.shadowColor = '#22c55e';
-            ctx.shadowBlur = 8;
-            ctx.font = 'bold 8.5px monospace';
+            ctx.fillStyle = '#39ff14'; // Florasan yeşil
+            ctx.shadowColor = '#39ff14';
+            ctx.shadowBlur = 12;
+            ctx.font = 'bold 12.5px monospace';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('1', this.x - 6.2 + dx, this.y - 3.2 + dy);
-            ctx.fillText('0', this.x + 6.2 + dx, this.y - 3.2 + dy);
+            ctx.fillText('1', this.x - 6.0 + dx, this.y - 3.0 + dy);
+            ctx.fillText('0', this.x + 6.0 + dx, this.y - 3.0 + dy);
             ctx.restore();
         } else if (activeEyes === 'targeting_eye') {
-            // Terminatör Hedefleme Gözü (Asimetrik: Sol Mavi, Sağ Kırmızı Hedefleyici)
-            ctx.fillStyle = '#06b6d4';
-            ctx.shadowColor = '#00f2fe';
-            ctx.shadowBlur = 6;
+            // Terminatör Hedefleme Gözü (Neon Sarı/Altın rengi mekanik hedefleme, gövde renginden farklı)
+            ctx.fillStyle = '#ffffff';
             ctx.beginPath();
             ctx.arc(this.x - 6 + dx, this.y - 3 + dy, 3.5, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = '#0f172a';
             ctx.beginPath();
-            ctx.arc(this.x - 7 + dx, this.y - 4 + dy, 1.0, 0, Math.PI * 2);
+            ctx.arc(this.x - 6 + dx, this.y - 3 + dy, 1.2, 0, Math.PI * 2);
             ctx.fill();
 
             ctx.save();
-            ctx.shadowColor = '#ef4444';
+            ctx.shadowColor = '#fbbf24';
             ctx.shadowBlur = 8;
-            ctx.fillStyle = '#b91c1c';
+            ctx.fillStyle = '#fbbf24';
             ctx.beginPath();
             ctx.arc(this.x + 6 + dx, this.y - 3 + dy, 3.8, 0, Math.PI * 2);
             ctx.fill();
 
-            ctx.strokeStyle = '#ef4444';
+            ctx.strokeStyle = '#f59e0b';
             ctx.lineWidth = 0.8;
             ctx.beginPath();
             ctx.arc(this.x + 6 + dx, this.y - 3 + dy, 6.0, 0, Math.PI * 2);
@@ -1768,13 +1766,13 @@ export class Player {
             ctx.fill();
             ctx.restore();
         } else if (activeEyes === 'pixel_glasses') {
-            // 8-Bit Retro Gözlük (Neon Saydam Camlar + Parlak Çerçeve)
+            // 8-Bit Retro Gözlük (Florasan Yeşil Çerçeve + Koyu Karbon Yarı Saydam Camlar)
             ctx.save();
-            ctx.fillStyle = 'rgba(6, 182, 212, 0.35)';
-            ctx.strokeStyle = '#00f2fe';
-            ctx.lineWidth = 1.0;
-            ctx.shadowColor = '#00f2fe';
-            ctx.shadowBlur = 4;
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.75)'; // Koyu yarı saydam camlar
+            ctx.strokeStyle = '#39ff14'; // Parlak yeşil çerçeve
+            ctx.lineWidth = 1.2;
+            ctx.shadowColor = '#39ff14';
+            ctx.shadowBlur = 5;
 
             ctx.fillRect(this.x - 10 + dx, this.y - 5.5 + dy, 6.8, 4.2);
             ctx.strokeRect(this.x - 10 + dx, this.y - 5.5 + dy, 6.8, 4.2);
@@ -1782,7 +1780,7 @@ export class Player {
             ctx.fillRect(this.x + 3.2 + dx, this.y - 5.5 + dy, 6.8, 4.2);
             ctx.strokeRect(this.x + 3.2 + dx, this.y - 5.5 + dy, 6.8, 4.2);
 
-            ctx.fillStyle = '#0891b2';
+            ctx.fillStyle = '#1e293b';
             ctx.fillRect(this.x - 3.2 + dx, this.y - 4.5 + dy, 6.4, 1.6);
             ctx.fillRect(this.x - 12 + dx, this.y - 4.5 + dy, 2.0, 1.6);
             ctx.fillRect(this.x + 10 + dx, this.y - 4.5 + dy, 2.0, 1.6);

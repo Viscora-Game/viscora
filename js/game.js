@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v316';
-import { Level } from './level.js?v=v316';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v316';
-import { UIManager } from './ui.js?v=v316';
-import { CloudSaveManager } from './cloud_save.js?v=v316';
-import { audio } from './audio.js?v=v316';
-import { LevelEditor } from './editor.js?v=v316';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v316';
+import { Player } from './player.js?v=v317';
+import { Level } from './level.js?v=v317';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v317';
+import { UIManager } from './ui.js?v=v317';
+import { CloudSaveManager } from './cloud_save.js?v=v317';
+import { audio } from './audio.js?v=v317';
+import { LevelEditor } from './editor.js?v=v317';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v317';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -2186,20 +2186,34 @@ export class GameManager {
                     this.ctx.fillStyle = p.color;
                     
                     if (p.type === 'lightning') {
-                        this.ctx.save();
-                        this.ctx.globalAlpha = p.alpha;
-                        this.ctx.fillStyle = p.color;
-                        this.ctx.shadowColor = p.color;
-                        this.ctx.shadowBlur = 6;
-                        this.ctx.beginPath();
+                        // Plazma Topu (Parlak beyaz çekirdek + parlayan mor/cyan aura)
                         const cx = p.x - this.camera.x;
                         const cy = p.y - this.camera.y;
-                        this.ctx.moveTo(cx, cy - p.size);
-                        this.ctx.lineTo(cx + p.size * 0.7, cy);
-                        this.ctx.lineTo(cx, cy + p.size);
-                        this.ctx.lineTo(cx - p.size * 0.7, cy);
-                        this.ctx.closePath();
+                        
+                        this.ctx.save();
+                        this.ctx.globalCompositeOperation = 'lighter'; // Parlak neon kaynaşma
+                        
+                        // 1. Dış Aura (Büyük parlayan neon mor/cyan çember)
+                        this.ctx.globalAlpha = p.alpha * 0.45;
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.beginPath();
+                        this.ctx.arc(cx, cy, p.size * 2.2, 0, Math.PI * 2);
                         this.ctx.fill();
+                        
+                        // 2. Orta Enerji Halkası (Neon Mavi/Cyan)
+                        this.ctx.globalAlpha = p.alpha * 0.75;
+                        this.ctx.fillStyle = '#00f2fe';
+                        this.ctx.beginPath();
+                        this.ctx.arc(cx, cy, p.size * 1.3, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        // 3. İç Sıcak Çekirdek (Parlak Beyaz)
+                        this.ctx.globalAlpha = p.alpha;
+                        this.ctx.fillStyle = '#ffffff';
+                        this.ctx.beginPath();
+                        this.ctx.arc(cx, cy, p.size * 0.65, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
                         this.ctx.restore();
                     } else if (p.type === 'toxic') {
                         this.ctx.save();
@@ -2386,7 +2400,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v316', this.cssWidth - 10, 10);
+        this.ctx.fillText('v317', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {

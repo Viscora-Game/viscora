@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v316">
+    <link rel="stylesheet" href="index.css?v=v317">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -658,7 +658,7 @@
                     <span class="terminal-dot red"></span>
                     <span class="terminal-dot yellow"></span>
                     <span class="terminal-dot green"></span>
-                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v316</span>
+                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v317</span>
                 </div>
                 <div class="terminal-body">
                     <div id="terminal-text"></div>
@@ -753,7 +753,7 @@
                     
                     <!-- Oyuncu Profil Kartı (Karakter & Bakiye) -->
                     <div id="player-profile-widget">
-                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v316" alt="Avatar" />
+                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v317" alt="Avatar" />
                         <div id="profile-widget-name">Oyuncu</div>
                         <div class="profile-divider"></div>
                         <div class="profile-crystals">
@@ -1454,17 +1454,20 @@
                     <button id="btn-close-shop" class="close-btn" type="button" aria-label="Kapat" style="display: flex; align-items: center; justify-content: center; margin-left: 12px;"><svg class="icon-svg" style="width: 14px; height: 14px;"><use href="#icon-close"></use></svg></button>
                 </div>
 
-                <!-- Kategori Sekmeleri ve Canlı Önizleme Satırı -->
-                <div class="shop-tabs-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 18px; width: 100%; box-sizing: border-box;">
-                    <div class="shop-tabs" style="display: flex; gap: 8px; flex: 1; margin-bottom: 0;">
-                        <button class="community-tab-btn active" data-category="trail" type="button"><svg class="icon-svg"><use href="#icon-rainbow"></use></svg> İz Efekti</button>
-                        <button class="community-tab-btn" data-category="accessory" type="button"><svg class="icon-svg"><use href="#icon-hat"></use></svg> Aksesuar</button>
-                        <button class="community-tab-btn" data-category="eyes" type="button"><svg class="icon-svg"><use href="#icon-eye"></use></svg> Göz Stili</button>
+                <!-- Canlı Önizleme Alanı -->
+                <div style="display: flex; justify-content: center; margin-bottom: 15px; width: 100%;">
+                    <div class="preview-avatar-container" style="position: relative; width: 100px; height: 100px; background: radial-gradient(circle, rgba(15,23,42,0.85) 0%, rgba(2,6,23,0.98) 100%); border: 2px solid #00f2fe; box-shadow: 0 0 15px rgba(0,242,254,0.35), inset 0 0 10px rgba(0,242,254,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: visible;">
+                        <canvas id="shop-preview-canvas" width="200" height="200" style="display: block; width: 100px; height: 100px;"></canvas>
+                        <span style="position: absolute; bottom: 4px; font-size: 0.62rem; color: #00f2fe; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; background: rgba(2,6,23,0.85); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(0,242,254,0.25); pointer-events: none;">ÖNİZLEME</span>
                     </div>
-                    
-                    <!-- Dairesel Canlı Karakter Önizleme -->
-                    <div class="preview-avatar-container" style="position: relative; width: 50px; height: 50px; flex-shrink: 0; background: rgba(10, 10, 20, 0.65); border: 2px solid #00f2fe; box-shadow: 0 0 10px rgba(0,242,254,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: visible;">
-                        <canvas id="shop-preview-canvas" width="70" height="70" style="display: block; width: 50px; height: 50px;"></canvas>
+                </div>
+
+                <!-- Kategori Sekmeleri -->
+                <div class="shop-tabs-row" style="display: flex; align-items: center; justify-content: center; margin-bottom: 15px; width: 100%; box-sizing: border-box;">
+                    <div class="shop-tabs" style="display: flex; gap: 8px; justify-content: center; width: 100%; margin-bottom: 0;">
+                        <button class="community-tab-btn active" data-category="trail" type="button" style="flex: 1; justify-content: center;"><svg class="icon-svg"><use href="#icon-rainbow"></use></svg> İz Efekti</button>
+                        <button class="community-tab-btn" data-category="accessory" type="button" style="flex: 1; justify-content: center;"><svg class="icon-svg"><use href="#icon-hat"></use></svg> Aksesuar</button>
+                        <button class="community-tab-btn" data-category="eyes" type="button" style="flex: 1; justify-content: center;"><svg class="icon-svg"><use href="#icon-eye"></use></svg> Göz Stili</button>
                     </div>
                 </div>
 
@@ -1576,8 +1579,8 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v316"></script>
-    <script type="module" src="js/main.js?v=v316"></script>
+    <script src="js/controls_customizer.js?v=v317"></script>
+    <script type="module" src="js/main.js?v=v317"></script>
 </body>
 </html>
 
