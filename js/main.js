@@ -1,6 +1,6 @@
-import { GameManager } from './game.js?v=v325';
-import { audio } from './audio.js?v=v325';
-import { CloudSaveManager } from './cloud_save.js?v=v325';
+import { GameManager } from './game.js?v=v326';
+import { audio } from './audio.js?v=v326';
+import { CloudSaveManager } from './cloud_save.js?v=v326';
 
 // Oyun Başlatma Girişi
 window.addEventListener('DOMContentLoaded', () => {
