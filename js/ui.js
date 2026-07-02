@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v307';
-import { ViscosityList } from './viscosity.js?v=v307';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v307';
-import { CloudSaveManager } from './cloud_save.js?v=v307';
+import { audio } from './audio.js?v=v308';
+import { ViscosityList } from './viscosity.js?v=v308';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v308';
+import { CloudSaveManager } from './cloud_save.js?v=v308';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -4064,60 +4064,32 @@ export class UIManager {
                 btn.type = 'button';
                 btn.className = 'avatar-choice-btn';
                 btn.dataset.avatar = av.id;
-                btn.style.display = 'flex';
-                btn.style.flexDirection = 'column';
-                btn.style.alignItems = 'center';
-                btn.style.justifyContent = 'center';
-                btn.style.gap = '4px';
-                btn.style.padding = '6px';
-                btn.style.background = 'rgba(15, 23, 42, 0.5)';
-                btn.style.border = '1px solid rgba(56, 189, 248, 0.15)';
-                btn.style.borderRadius = '8px';
-                btn.style.cursor = 'pointer';
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v307`;
+                img.src = `assets/avatars/${av.id}.png?v=v308`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
-                img.style.filter = 'drop-shadow(0 0 4px rgba(0, 242, 254, 0.25))';
                 
                 // Add label
                 const label = document.createElement('span');
                 label.textContent = av.label;
-                label.style.fontSize = '0.55rem';
-                label.style.color = '#94a3b8';
-                label.style.fontFamily = 'monospace';
-                label.style.whiteSpace = 'nowrap';
-                label.style.overflow = 'hidden';
-                label.style.textOverflow = 'ellipsis';
-                label.style.maxWidth = '64px';
                 
                 btn.appendChild(img);
                 btn.appendChild(label);
                 
                 if (av.id === this.selectedAvatar) {
-                    btn.style.borderColor = '#38bdf8';
-                    btn.style.background = 'rgba(56, 189, 248, 0.2)';
-                    btn.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.3)';
-                    label.style.color = '#38bdf8';
+                    btn.classList.add('selected');
                 }
                 
                 btn.addEventListener('click', () => {
                     this.selectedAvatar = av.id;
-                    // Reset all other choice borders
+                    // Reset all other choice states
                     Array.from(avatarPicker.children).forEach(child => {
-                        child.style.borderColor = 'rgba(56, 189, 248, 0.15)';
-                        child.style.background = 'rgba(15, 23, 42, 0.5)';
-                        child.style.boxShadow = 'none';
-                        const splEl = child.querySelector('span');
-                        if (splEl) splEl.style.color = '#94a3b8';
+                        child.classList.remove('selected');
                     });
-                    btn.style.borderColor = '#38bdf8';
-                    btn.style.background = 'rgba(56, 189, 248, 0.2)';
-                    btn.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.3)';
-                    label.style.color = '#38bdf8';
+                    btn.classList.add('selected');
                 });
                 
                 avatarPicker.appendChild(btn);
@@ -4137,7 +4109,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v307`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v308`;
             }
         };
         

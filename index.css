@@ -3687,6 +3687,265 @@ button:hover .icon-svg,
 }
 
 /* Responsive adjustments for Settings Modal */
+/* Premium Settings & Profile Customizer Layouts */
+.settings-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    align-items: flex-start;
+    box-sizing: border-box;
+}
+
+.settings-block-title {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 800;
+    letter-spacing: 0.8px;
+}
+
+.profile-input {
+    width: 100%;
+    height: 38px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 10px;
+    color: #f8fafc;
+    padding: 0 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: all 0.25s ease;
+}
+
+.profile-input:focus {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.2) !important;
+}
+
+.avatar-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    width: 100%;
+}
+
+.avatar-choice-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 6px;
+    background: rgba(15, 23, 42, 0.5) !important;
+    border: 1px solid rgba(56, 189, 248, 0.15) !important;
+    border-radius: 10px !important;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.avatar-choice-btn:hover {
+    border-color: rgba(56, 189, 248, 0.45) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(56, 189, 248, 0.12) !important;
+}
+
+.avatar-choice-btn.selected {
+    border-color: #38bdf8 !important;
+    background: rgba(56, 189, 248, 0.16) !important;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.25) !important;
+}
+
+.avatar-choice-btn img {
+    filter: drop-shadow(0 0 4px rgba(0, 242, 254, 0.25)) !important;
+    transition: all 0.2s ease;
+}
+
+.avatar-choice-btn:hover img {
+    filter: drop-shadow(0 0 6px rgba(0, 242, 254, 0.4)) !important;
+    transform: scale(1.05);
+}
+
+.avatar-choice-btn span {
+    font-size: 0.55rem;
+    color: #94a3b8;
+    font-family: monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 64px;
+    transition: all 0.2s ease;
+}
+
+.avatar-choice-btn.selected span {
+    color: #38bdf8 !important;
+}
+
+.settings-control-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 14px;
+    padding: 10px 14px;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.settings-control-row:hover {
+    border-color: rgba(6, 182, 212, 0.15);
+    background: rgba(15, 23, 42, 0.55);
+}
+
+.settings-control-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    text-align: left;
+}
+
+.settings-control-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.settings-slider-wrapper {
+    flex: 1;
+    max-width: 130px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.volume-val-text {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    min-width: 32px;
+    text-align: right;
+    font-weight: 600;
+}
+
+.cloud-sync-container {
+    border-top: 1px dashed rgba(255, 255, 255, 0.08);
+    margin-top: 12px;
+    padding-top: 15px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+    box-sizing: border-box;
+}
+
+.cloud-sync-title {
+    font-size: 0.85rem;
+    color: #38bdf8;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cloud-sync-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, rgba(15, 23, 42, 0.5) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.16);
+    padding: 12px;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+.cloud-sync-card-label {
+    font-size: 0.72rem;
+    color: #38bdf8;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.google-btn-slot {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0;
+    min-height: 38px;
+    align-items: center;
+}
+
+.cloud-status-text {
+    font-size: 0.68rem;
+    color: #a1a1aa;
+    text-align: center;
+    display: block;
+    line-height: 1.3;
+}
+
+.manual-sync-btn-grid {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.manual-sync-action-btn {
+    flex: 1;
+    border: none;
+    height: 30px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.manual-sync-action-btn.upload {
+    background: linear-gradient(135deg, #059669, #047857);
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.2);
+}
+
+.manual-sync-action-btn.upload:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
+}
+
+.manual-sync-action-btn.download {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.2);
+}
+
+.manual-sync-action-btn.download:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+}
+
+.cache-update-btn {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+    border: none !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2) !important;
+}
+
+.cache-update-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35) !important;
+}
+
 #settings-modal .star-gate-card {
     max-width: 400px;
 }
@@ -4158,36 +4417,43 @@ button:hover .icon-svg,
         font-size: 0.9rem !important;
         margin-bottom: 0.1rem !important;
     }
-    .sound-settings-card div[style*="font-size: 0.85rem"] {
-        font-size: 0.75rem !important;
+    .sound-settings-card .menu-settings {
+        max-height: 50vh !important;
         margin-bottom: 6px !important;
     }
-    .sound-settings-card .menu-settings {
-        max-height: 52vh !important;
-        gap: 6px !important;
-        margin-bottom: 8px !important;
+    .sound-settings-card .settings-control-row {
+        padding: 6px 10px !important;
     }
-    /* Google Sign-In buton alanı ayarları */
-    .sound-settings-card div[style*="background: rgba(15, 23, 42, 0.4)"] {
+    .sound-settings-card .settings-control-label {
+        font-size: 0.75rem !important;
+    }
+    .sound-settings-card .settings-slider-wrapper {
+        max-width: 105px !important;
+    }
+    .sound-settings-card .cloud-sync-container {
+        margin-top: 8px !important;
+        padding-top: 10px !important;
+    }
+    .sound-settings-card .cloud-sync-card {
         padding: 6px 8px !important;
         gap: 4px !important;
     }
-    /* Geri yükleme satırı ayarları */
-    .sound-settings-card .restore-row {
-        gap: 6px !important;
+    .sound-settings-card .cloud-sync-card-label {
+        font-size: 0.65rem !important;
+    }
+    .sound-settings-card .google-btn-slot {
+        min-height: 32px !important;
+    }
+    .sound-settings-card .cloud-status-text {
+        font-size: 0.62rem !important;
     }
     .sound-settings-card input {
-        padding: 6px 10px !important;
+        padding: 4px 8px !important;
         font-size: 0.8rem !important;
     }
     .sound-settings-card button {
-        height: 32px !important;
-        font-size: 0.8rem !important;
-    }
-    .sound-settings-card #btn-close-settings {
-        margin-top: 4px !important;
-        padding: 8px 0 !important;
-        font-size: 0.8rem !important;
+        height: 30px !important;
+        font-size: 0.75rem !important;
     }
 }
 

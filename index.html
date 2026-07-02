@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v307">
+    <link rel="stylesheet" href="index.css?v=v308">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -639,7 +639,7 @@
                     <span class="terminal-dot red"></span>
                     <span class="terminal-dot yellow"></span>
                     <span class="terminal-dot green"></span>
-                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v307</span>
+                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v308</span>
                 </div>
                 <div class="terminal-body">
                     <div id="terminal-text"></div>
@@ -734,7 +734,7 @@
                     
                     <!-- Oyuncu Profil Kartı (Karakter & Bakiye) -->
                     <div id="player-profile-widget">
-                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v307" alt="Avatar" />
+                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v308" alt="Avatar" />
                         <div id="profile-widget-name">Oyuncu</div>
                         <div class="profile-divider"></div>
                         <div class="profile-crystals">
@@ -812,26 +812,26 @@
  
         <!-- Profil Özelleştirme Modalı -->
         <div id="profile-settings-modal" class="star-gate-overlay hidden">
-            <div class="star-gate-card sound-settings-card" style="max-width: 380px; width: 90%;">
+            <div class="star-gate-card sound-settings-card" style="max-width: 380px; width: 92%;">
                 <h2 class="star-gate-title"><svg class="icon-svg"><use href="#icon-flask"></use></svg> OYUNCU PROFİLİ</h2>
-                <div class="menu-settings" style="display: flex; flex-direction: column; gap: 15px; width: 100%; margin: 20px 0;">
+                <div class="menu-settings" style="margin: 15px 0;">
                     <!-- Kullanıcı Adı Girişi -->
-                    <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; align-items: flex-start;">
-                        <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: bold; letter-spacing: 0.5px;">KULLANICI ADI</span>
-                        <input type="text" id="profile-username-input" placeholder="Adınızı girin..." maxlength="14" style="width: 100%; height: 38px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 8px; color: #f8fafc; padding: 0 12px; font-family: monospace; font-size: 0.9rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;" />
+                    <div class="settings-block">
+                        <span class="settings-block-title">KULLANICI ADI</span>
+                        <input type="text" id="profile-username-input" class="profile-input" placeholder="Adınızı girin..." maxlength="14" />
                     </div>
                     
                     <!-- Avatar Seçimi -->
-                    <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; align-items: flex-start;">
-                        <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: bold; letter-spacing: 0.5px;">AVATAR SEÇİN</span>
-                        <div id="profile-avatar-picker" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%;">
+                    <div class="settings-block" style="margin-top: 15px;">
+                        <span class="settings-block-title">AVATAR SEÇİN</span>
+                        <div id="profile-avatar-picker" class="avatar-picker-grid">
                             <!-- Avatars will be generated here -->
                         </div>
                     </div>
                 </div>
-                <div style="display: flex; gap: 10px; width: 100%;">
-                    <button id="btn-save-profile" class="menu-btn primary-btn" style="flex: 1; margin: 0; height: 38px; font-size: 0.9rem;">KAYDET</button>
-                    <button id="btn-close-profile" class="menu-btn danger-btn" style="flex: 1; margin: 0; height: 38px; font-size: 0.9rem;">İPTAL</button>
+                <div style="display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
+                    <button id="btn-save-profile" class="menu-btn primary-btn" style="flex: 1; margin: 0; height: 38px; font-size: 0.85rem;">KAYDET</button>
+                    <button id="btn-close-profile" class="menu-btn danger-btn" style="flex: 1; margin: 0; height: 38px; font-size: 0.85rem;">İPTAL</button>
                 </div>
             </div>
         </div>
@@ -840,61 +840,66 @@
         <div id="settings-modal" class="star-gate-overlay hidden">
             <div class="star-gate-card sound-settings-card">
                 <h2 class="star-gate-title"><svg class="icon-svg"><use href="#icon-gear"></use></svg> AYARLAR</h2>
-                <div class="menu-settings" style="display: flex; flex-direction: column; gap: 15px; width: 100%; margin: 20px 0;">
-                    <div class="settings-control" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                        <span style="font-size: 0.95rem; color: var(--text-secondary); width: 72px; text-align: left; font-weight: 600;">MÜZİK</span>
-                        <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
-                            <button id="btn-menu-music" class="sound-toggle-mini-btn" type="button" aria-label="Müziği Aç/Kapat" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"><svg class="icon-svg" style="width: 16px; height: 16px;"><use href="#icon-music"></use></svg></button>
-                            <div class="slider-wrapper" style="flex: 1; max-width: 125px; display: flex; align-items: center; gap: 8px; min-width: 0;">
-                                <input type="range" id="slider-menu-music" class="volume-slider" min="0" max="100" value="50" style="height: 6px; flex: 1; min-width: 0; width: 100%;">
-                                <span id="menu-music-text" class="volume-val-text" style="font-size: 0.85rem; min-width: 35px;">50%</span>
+                <div class="menu-settings" style="margin: 15px 0;">
+                    <!-- Müzik Ayarı -->
+                    <div class="settings-control-row">
+                        <span class="settings-control-label">MÜZİK</span>
+                        <div class="settings-control-actions">
+                            <button id="btn-menu-music" class="sound-toggle-mini-btn" type="button" aria-label="Müziği Aç/Kapat"><svg class="icon-svg" style="width: 14px; height: 14px;"><use href="#icon-music"></use></svg></button>
+                            <div class="settings-slider-wrapper">
+                                <input type="range" id="slider-menu-music" class="volume-slider" min="0" max="100" value="50">
+                                <span id="menu-music-text" class="volume-val-text">50%</span>
                             </div>
                         </div>
                     </div>
-                    <div class="settings-control" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                        <span style="font-size: 0.95rem; color: var(--text-secondary); width: 72px; text-align: left; font-weight: 600;">EFEKTLER</span>
-                        <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
-                            <button id="btn-menu-sfx" class="sound-toggle-mini-btn" type="button" aria-label="Efektleri Aç/Kapat" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"><svg class="icon-svg" style="width: 16px; height: 16px;"><use href="#icon-volume"></use></svg></button>
-                            <div class="slider-wrapper" style="flex: 1; max-width: 125px; display: flex; align-items: center; gap: 8px; min-width: 0;">
-                                <input type="range" id="slider-menu-sfx" class="volume-slider" min="0" max="100" value="80" style="height: 6px; flex: 1; min-width: 0; width: 100%;">
-                                <span id="menu-sfx-text" class="volume-val-text" style="font-size: 0.85rem; min-width: 35px;">80%</span>
+
+                    <!-- Efekt Ayarı -->
+                    <div class="settings-control-row" style="margin-top: 10px;">
+                        <span class="settings-control-label">EFEKTLER</span>
+                        <div class="settings-control-actions">
+                            <button id="btn-menu-sfx" class="sound-toggle-mini-btn" type="button" aria-label="Efektleri Aç/Kapat"><svg class="icon-svg" style="width: 14px; height: 14px;"><use href="#icon-volume"></use></svg></button>
+                            <div class="settings-slider-wrapper">
+                                <input type="range" id="slider-menu-sfx" class="volume-slider" min="0" max="100" value="80">
+                                <span id="menu-sfx-text" class="volume-val-text">80%</span>
                             </div>
                         </div>
                     </div>
-                    <div class="settings-control" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                        <span style="font-size: 0.95rem; color: var(--text-secondary); width: 150px; text-align: left; font-weight: 600;">EKRAN TİTREŞİMİ</span>
-                        <div style="display: flex; align-items: center; gap: 8px; justify-content: flex-end;">
-                            <button id="btn-toggle-shake" class="sound-toggle-mini-btn" type="button" aria-label="Ekran Titreşimini Aç/Kapat" style="width: auto; padding: 0 12px; height: 32px; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 4px;">AÇIK</button>
+
+                    <!-- Ekran Titreşimi Ayarı -->
+                    <div class="settings-control-row" style="margin-top: 10px;">
+                        <span class="settings-control-label">EKRAN TİTREŞİMİ</span>
+                        <div class="settings-control-actions">
+                            <button id="btn-toggle-shake" class="sound-toggle-mini-btn toggle-text-btn" type="button" aria-label="Ekran Titreşimini Aç/Kapat">AÇIK</button>
                         </div>
                     </div>
+
                     <!-- Bulut Senkronizasyon Bölümü -->
-                    <div style="border-top: 1px dashed #334155; margin-top: 10px; padding-top: 15px; width: 100%; display: flex; flex-direction: column; gap: 10px; text-align: left;">
-                        <span style="font-size: 0.95rem; color: #38bdf8; font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
-                            <svg class="icon-svg" style="width: 16px; height: 16px; fill: currentColor;"><use href="#icon-portal"></use></svg> BULUT SENKRONİZASYONU
+                    <div class="cloud-sync-container">
+                        <span class="cloud-sync-title">
+                            <svg class="icon-svg" style="width: 14px; height: 14px; fill: currentColor;"><use href="#icon-portal"></use></svg> BULUT SENKRONİZASYONU
                         </span>
 
-                        <!-- Google ile Giriş Yap (Otomatik Bulut Kaydı) -->
-                        <div style="display: flex; flex-direction: column; gap: 6px; background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(56, 189, 248, 0.15); padding: 10px; border-radius: 8px;">
-                            <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 600;">OTOMATİK YEDEKLEME (GOOGLE)</span>
-                            <div id="google-signin-btn-container" style="display: flex; justify-content: center; margin: 4px 0; min-height: 40px; align-items: center;">
-                                <span style="font-size: 0.75rem; color: #64748b; padding: 6px;">Yükleniyor...</span>
+                        <div class="cloud-sync-card">
+                            <span class="cloud-sync-card-label">OTOMATİK YEDEKLEME (GOOGLE)</span>
+                            <div id="google-signin-btn-container" class="google-btn-slot">
+                                <span style="font-size: 0.72rem; color: #64748b;">Yükleniyor...</span>
                             </div>
-                            <span id="google-sync-status" style="font-size: 0.7rem; color: #a1a1aa; text-align: center; display: block;">Hesap bağlı değil (Yedekleme devre dışı)</span>
+                            <span id="google-sync-status" class="cloud-status-text">Hesap bağlı değil (Yedekleme devre dışı)</span>
                             
-                            <!-- Manuel Yükle / İndir Butonları (Giriş yapıldığında görünür) -->
-                            <div id="manual-sync-buttons" style="display: none; gap: 8px; margin-top: 6px; width: 100%;">
-                                <button id="btn-cloud-upload" class="sound-toggle-mini-btn" type="button" style="flex: 1; background: #047857; border: none; height: 28px; font-size: 0.75rem; font-weight: bold; color: #fff; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
-                                    📤 Buluta Yükle
+                            <!-- Manuel Yükle / İndir Butonları -->
+                            <div id="manual-sync-buttons" class="manual-sync-btn-grid">
+                                <button id="btn-cloud-upload" class="manual-sync-action-btn upload" type="button">
+                                    📤 Yükle
                                 </button>
-                                <button id="btn-cloud-download" class="sound-toggle-mini-btn" type="button" style="flex: 1; background: #0369a1; border: none; height: 28px; font-size: 0.75rem; font-weight: bold; color: #fff; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
-                                    📥 Buluttan İndir
+                                <button id="btn-cloud-download" class="manual-sync-action-btn download" type="button">
+                                    📥 İndir
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div style="display: flex; gap: 8px; width: 100%; margin-top: 10px;">
-                    <button id="btn-force-update-cache" class="menu-btn" style="flex: 1.5; background: #2563eb; border: none; font-size: 0.72rem; height: 36px; padding: 0 4px; color: #fff; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s;">GÜNCELLEMELERİ DENETLE</button>
+                <div style="display: flex; gap: 8px; width: 100%; margin-top: 10px; box-sizing: border-box; flex-shrink: 0;">
+                    <button id="btn-force-update-cache" class="menu-btn cache-update-btn" style="flex: 1.5; font-size: 0.7rem; height: 36px; margin: 0;">GÜNCELLEMELERİ DENETLE</button>
                     <button id="btn-close-settings" class="menu-btn primary-btn" style="flex: 0.9; height: 36px; margin: 0; font-size: 0.8rem;">KAPAT</button>
                 </div>
             </div>
@@ -1552,8 +1557,8 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v307"></script>
-    <script type="module" src="js/main.js?v=v307"></script>
+    <script src="js/controls_customizer.js?v=v308"></script>
+    <script type="module" src="js/main.js?v=v308"></script>
 </body>
 </html>
 
