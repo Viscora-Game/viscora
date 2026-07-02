@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v306';
-import { ViscosityList } from './viscosity.js?v=v306';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v306';
-import { CloudSaveManager } from './cloud_save.js?v=v306';
+import { audio } from './audio.js?v=v307';
+import { ViscosityList } from './viscosity.js?v=v307';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v307';
+import { CloudSaveManager } from './cloud_save.js?v=v307';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -4077,7 +4077,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v306`;
+                img.src = `assets/avatars/${av.id}.png?v=v307`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4137,7 +4137,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v306`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v307`;
             }
         };
         
@@ -4367,9 +4367,9 @@ export class UIManager {
                     if (day === 7) giftIcon = '#icon-box';
                     
                     box.innerHTML = `
-                        <div style="font-size: 0.6rem; color: #94a3b8; font-weight: bold; font-family: monospace;">${day}. GÜN</div>
-                        <svg class="icon-svg" style="width: 20px; height: 20px; margin: 4px 0; color: ${day === 7 ? '#fbbf24' : '#00f2fe'};"><use href="${giftIcon}"></use></svg>
-                        <div style="font-size: 0.65rem; font-weight: bold; color: ${stateClass === 'claimed' ? '#22c55e' : '#f1f5f9'};">${dailyRewardAmounts[day]} Kristal</div>
+                        <div class="reward-day-title">${day}. GÜN</div>
+                        <svg class="icon-svg" style="color: ${day === 7 ? '#fbbf24' : '#00f2fe'};"><use href="${giftIcon}"></use></svg>
+                        <div class="reward-day-amount" style="color: ${stateClass === 'claimed' ? '#22c55e' : '#f1f5f9'};">${dailyRewardAmounts[day]} Kristal</div>
                     `;
                     
                     dailyGrid.appendChild(box);

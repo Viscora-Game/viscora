@@ -1725,9 +1725,9 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     }
 
     #level-selector-wrapper {
-        gap: 0.6rem !important;
-        margin-bottom: 0.6rem !important;
-        max-height: 180px !important;
+        gap: 0.4rem !important;
+        margin-bottom: 0.4rem !important;
+        max-height: 195px !important;
         touch-action: pan-y !important;
         pointer-events: auto !important;
     }
@@ -1737,11 +1737,24 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     }
     
     .level-group-card {
-        padding: 0.6rem !important;
+        padding: 0.35rem 0.5rem !important;
+        border-radius: 10px !important;
     }
     
     .level-group-header {
-        margin-bottom: 0.5rem !important;
+        margin-bottom: 0.3rem !important;
+        padding-bottom: 0.2rem !important;
+    }
+
+    .level-group-title {
+        font-size: 0.76rem !important;
+        white-space: nowrap !important;
+        letter-spacing: 0.02rem !important;
+    }
+
+    .level-group-status {
+        font-size: 0.65rem !important;
+        white-space: nowrap !important;
     }
 
     .level-btn {
@@ -2352,7 +2365,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     }
     
     #start-screen #level-selector-wrapper {
-        max-height: 115px !important;
+        max-height: 135px !important;
     }
     
     .menu-btn {
@@ -3931,6 +3944,24 @@ button:hover .icon-svg,
     overflow: hidden;
 }
 
+.reward-day-title {
+    font-size: 0.62rem;
+    color: #94a3b8;
+    font-weight: bold;
+    font-family: monospace;
+}
+
+.daily-reward-box svg {
+    width: 20px;
+    height: 20px;
+    margin: 4px 0;
+}
+
+.reward-day-amount {
+    font-size: 0.68rem;
+    font-weight: bold;
+}
+
 .daily-reward-box.claimed {
     opacity: 0.6;
     border-color: rgba(34, 197, 94, 0.3);
@@ -3945,32 +3976,28 @@ button:hover .icon-svg,
 }
 
 .daily-reward-box.active::after {
-    content: 'AKTİF';
+    content: '●';
     position: absolute;
     top: 2px;
-    right: 2px;
-    font-size: 0.45rem;
+    right: 6px;
+    font-size: 0.65rem;
     color: #38bdf8;
-    font-weight: bold;
-    font-family: monospace;
-    letter-spacing: 0.5px;
-    background: rgba(56, 189, 248, 0.2);
-    padding: 1px 3px;
-    border-radius: 3px;
+    animation: reward-dot-pulse 1.5s infinite ease-in-out;
 }
 
 .daily-reward-box.claimed::after {
-    content: 'ALINDI';
+    content: '✓';
     position: absolute;
     top: 2px;
-    right: 2px;
-    font-size: 0.45rem;
+    right: 6px;
+    font-size: 0.78rem;
     color: #22c55e;
-    font-weight: bold;
-    font-family: monospace;
-    background: rgba(34, 197, 94, 0.2);
-    padding: 1px 3px;
-    border-radius: 3px;
+    font-weight: 900;
+}
+
+@keyframes reward-dot-pulse {
+    0%, 100% { opacity: 0.5; transform: scale(0.95); }
+    50% { opacity: 1; transform: scale(1.2); }
 }
 
 .daily-reward-box.locked {
@@ -4090,10 +4117,16 @@ button:hover .icon-svg,
         min-height: 52px !important;
         padding: 4px !important;
     }
+    .reward-day-title {
+        font-size: 0.55rem !important;
+    }
     .daily-reward-box svg {
-        width: 16px !important;
-        height: 16px !important;
-        margin: 2px 0 !important;
+        width: 14px !important;
+        height: 14px !important;
+        margin: 1px 0 !important;
+    }
+    .reward-day-amount {
+        font-size: 0.58rem !important;
     }
     .weekly-challenge-row {
         padding: 6px 8px !important;
