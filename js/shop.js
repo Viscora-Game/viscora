@@ -84,6 +84,30 @@ export const SHOP_ITEMS = [
         description: 'Kırmızı, yumuşak ve şenlikli noel şapkası.',
         config: { type: 'santa' }
     },
+    {
+        id: 'cyber_visor',
+        name: '🤖 Siber Vizör',
+        category: 'accessory',
+        price: 100,
+        description: 'Neon pembe ve mavi parlayan siberpunk gözlük/vizör.',
+        config: { type: 'cyber_visor' }
+    },
+    {
+        id: 'gaming_headset',
+        name: '🎧 RGB Oyuncu Kulaklığı',
+        category: 'accessory',
+        price: 150,
+        description: 'Yanal RGB ışık halkaları bulunan efor kulaklığı.',
+        config: { type: 'gaming_headset' }
+    },
+    {
+        id: 'cat_ears',
+        name: '🐱 Siber Kedi Kulakları',
+        category: 'accessory',
+        price: 100,
+        description: 'Yayıncıların favorisi neon ışıklı siber kulaklar.',
+        config: { type: 'cat_ears' }
+    },
 
     // Eyes
     {
