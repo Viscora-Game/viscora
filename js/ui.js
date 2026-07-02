@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v315';
-import { ViscosityList } from './viscosity.js?v=v315';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v315';
-import { CloudSaveManager } from './cloud_save.js?v=v315';
+import { audio } from './audio.js?v=v316';
+import { ViscosityList } from './viscosity.js?v=v316';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v316';
+import { CloudSaveManager } from './cloud_save.js?v=v316';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -1806,29 +1806,16 @@ export class UIManager {
                 ctx.stroke();
                 ctx.restore();
             } else if (activeEyes === 'cyber_matrix_eyes') {
-                const drawMatrixEye = (ex, ey) => {
-                    ctx.fillStyle = '#020617';
-                    ctx.strokeStyle = '#1e293b';
-                    ctx.lineWidth = 0.8;
-                    ctx.beginPath();
-                    if (ctx.roundRect) {
-                        ctx.roundRect(ex - 1.8, ey - 2.2, 3.6, 4.4, 0.8);
-                    } else {
-                        ctx.rect(ex - 1.8, ey - 2.2, 3.6, 4.4);
-                    }
-                    ctx.fill();
-                    ctx.stroke();
-
-                    ctx.save();
-                    ctx.shadowColor = '#22c55e';
-                    ctx.shadowBlur = 3;
-                    ctx.fillStyle = '#4ade80';
-                    const h1 = 1.5 + Math.floor(Math.sin(Date.now() * 0.01 + ex) * 1.0);
-                    ctx.fillRect(ex - 0.9, ey - 1.8, 0.7, h1);
-                    ctx.restore();
-                };
-                drawMatrixEye(eyeX - 4.5, eyeY);
-                drawMatrixEye(eyeX + 4.5, eyeY);
+                ctx.save();
+                ctx.fillStyle = '#22c55e';
+                ctx.shadowColor = '#22c55e';
+                ctx.shadowBlur = 6;
+                ctx.font = 'bold 7.5px monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('1', eyeX - 4.5, eyeY);
+                ctx.fillText('0', eyeX + 4.5, eyeY);
+                ctx.restore();
             } else if (activeEyes === 'targeting_eye') {
                 ctx.fillStyle = '#06b6d4';
                 ctx.shadowColor = '#00f2fe';
@@ -1873,9 +1860,12 @@ export class UIManager {
                 ctx.fill();
                 ctx.restore();
             } else if (activeEyes === 'pixel_glasses') {
-                ctx.fillStyle = '#0f172a';
-                ctx.strokeStyle = '#020617';
+                ctx.save();
+                ctx.fillStyle = 'rgba(6, 182, 212, 0.35)';
+                ctx.strokeStyle = '#00f2fe';
                 ctx.lineWidth = 0.8;
+                ctx.shadowColor = '#00f2fe';
+                ctx.shadowBlur = 3;
 
                 ctx.fillRect(eyeX - 7.5, eyeY - 2.2, 5.0, 3.2);
                 ctx.strokeRect(eyeX - 7.5, eyeY - 2.2, 5.0, 3.2);
@@ -1883,14 +1873,16 @@ export class UIManager {
                 ctx.fillRect(eyeX + 2.5, eyeY - 2.2, 5.0, 3.2);
                 ctx.strokeRect(eyeX + 2.5, eyeY - 2.2, 5.0, 3.2);
 
+                ctx.fillStyle = '#0891b2';
                 ctx.fillRect(eyeX - 2.5, eyeY - 1.5, 5.0, 1.2);
-
                 ctx.fillRect(eyeX - 9.0, eyeY - 1.5, 1.5, 1.2);
                 ctx.fillRect(eyeX + 7.5, eyeY - 1.5, 1.5, 1.2);
 
                 ctx.fillStyle = '#ffffff';
+                ctx.shadowBlur = 0;
                 ctx.fillRect(eyeX - 6.8, eyeY - 1.5, 1.0, 1.0);
                 ctx.fillRect(eyeX + 3.2, eyeY - 1.5, 1.0, 1.0);
+                ctx.restore();
             } else {
                 ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
@@ -2456,6 +2448,74 @@ export class UIManager {
                             }
                             ctx.stroke();
                         });
+                    } else if (item.id === 'lightning_trail') {
+                        const lightningGrad = ctx.createLinearGradient(8, 35, 72, 35);
+                        lightningGrad.addColorStop(0, 'rgba(168, 85, 247, 0.1)');
+                        lightningGrad.addColorStop(0.5, 'rgba(0, 242, 254, 0.85)');
+                        lightningGrad.addColorStop(1, 'rgba(139, 92, 246, 1)');
+                        ctx.strokeStyle = lightningGrad;
+                        ctx.lineWidth = 3.0;
+                        ctx.lineCap = 'round';
+                        ctx.shadowColor = '#00f2fe';
+                        ctx.shadowBlur = 10;
+                        ctx.beginPath();
+                        ctx.moveTo(points[0].x, points[0].y);
+                        for (let i = 1; i < points.length; i++) {
+                            const jaggedY = points[i].y + (i % 2 === 0 ? 3.5 : -3.5);
+                            ctx.lineTo(points[i].x, jaggedY);
+                        }
+                        ctx.stroke();
+                    } else if (item.id === 'toxic_trail') {
+                        const toxicGrad = ctx.createLinearGradient(8, 35, 72, 35);
+                        toxicGrad.addColorStop(0, 'rgba(34, 197, 94, 0.1)');
+                        toxicGrad.addColorStop(0.6, 'rgba(74, 222, 128, 0.65)');
+                        toxicGrad.addColorStop(1, 'rgba(21, 128, 61, 1)');
+                        ctx.strokeStyle = toxicGrad;
+                        ctx.lineWidth = 4.0;
+                        ctx.lineCap = 'round';
+                        ctx.shadowColor = '#22c55e';
+                        ctx.shadowBlur = 8;
+                        ctx.beginPath();
+                        ctx.moveTo(points[0].x, points[0].y);
+                        for (let i = 1; i < points.length; i++) {
+                            ctx.lineTo(points[i].x, points[i].y);
+                        }
+                        ctx.stroke();
+
+                        points.forEach((p, idx) => {
+                            if (idx % 4 === 0) {
+                                ctx.fillStyle = '#22c55e';
+                                ctx.shadowColor = '#4ade80';
+                                ctx.shadowBlur = 5;
+                                ctx.beginPath();
+                                ctx.arc(p.x, p.y - 3 - Math.random() * 5, 2.0 + Math.random() * 2.0, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                        });
+                    } else if (item.id === 'binary_trail') {
+                        const binaryGrad = ctx.createLinearGradient(8, 35, 72, 35);
+                        binaryGrad.addColorStop(0, 'rgba(34, 197, 94, 0.05)');
+                        binaryGrad.addColorStop(1, 'rgba(34, 197, 94, 0.4)');
+                        ctx.strokeStyle = binaryGrad;
+                        ctx.lineWidth = 2.0;
+                        ctx.lineCap = 'round';
+                        ctx.beginPath();
+                        ctx.moveTo(points[0].x, points[0].y);
+                        for (let i = 1; i < points.length; i++) {
+                            ctx.lineTo(points[i].x, points[i].y);
+                        }
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#22c55e';
+                        ctx.shadowColor = '#22c55e';
+                        ctx.shadowBlur = 4;
+                        ctx.font = 'bold 8px monospace';
+                        points.forEach((p, idx) => {
+                            if (idx % 3 === 0) {
+                                const char = idx % 2 === 0 ? '1' : '0';
+                                ctx.fillText(char, p.x - 2, p.y + (idx % 2 === 0 ? 5 : -5));
+                            }
+                        });
                     }
                     ctx.restore();
                     return; // Return early, don't render body/accessory/eyes on trail cards
@@ -2710,29 +2770,16 @@ export class UIManager {
                         ctx.stroke();
                         ctx.restore();
                     } else if (eyeStyle === 'cyber_matrix_eyes') {
-                        const drawMatrixEye = (ex, ey) => {
-                            ctx.fillStyle = '#020617';
-                            ctx.strokeStyle = '#1e293b';
-                            ctx.lineWidth = 0.8;
-                            ctx.beginPath();
-                            if (ctx.roundRect) {
-                                ctx.roundRect(ex - 1.8, ey - 2.2, 3.6, 4.4, 0.8);
-                            } else {
-                                ctx.rect(ex - 1.8, ey - 2.2, 3.6, 4.4);
-                            }
-                            ctx.fill();
-                            ctx.stroke();
-
-                            ctx.save();
-                            ctx.shadowColor = '#22c55e';
-                            ctx.shadowBlur = 3;
-                            ctx.fillStyle = '#4ade80';
-                            const h1 = 1.5 + Math.floor(Math.sin(Date.now() * 0.01 + ex) * 1.0);
-                            ctx.fillRect(ex - 0.9, ey - 1.8, 0.7, h1);
-                            ctx.restore();
-                        };
-                        drawMatrixEye(cx - 4.5, cy - 1);
-                        drawMatrixEye(cx + 4.5, cy - 1);
+                        ctx.save();
+                        ctx.fillStyle = '#22c55e';
+                        ctx.shadowColor = '#22c55e';
+                        ctx.shadowBlur = 6;
+                        ctx.font = 'bold 7.5px monospace';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('1', cx - 4.5, cy - 1);
+                        ctx.fillText('0', cx + 4.5, cy - 1);
+                        ctx.restore();
                     } else if (eyeStyle === 'targeting_eye') {
                         ctx.fillStyle = '#06b6d4';
                         ctx.shadowColor = '#00f2fe';
@@ -2777,9 +2824,12 @@ export class UIManager {
                         ctx.fill();
                         ctx.restore();
                     } else if (eyeStyle === 'pixel_glasses') {
-                        ctx.fillStyle = '#0f172a';
-                        ctx.strokeStyle = '#020617';
+                        ctx.save();
+                        ctx.fillStyle = 'rgba(6, 182, 212, 0.35)';
+                        ctx.strokeStyle = '#00f2fe';
                         ctx.lineWidth = 0.8;
+                        ctx.shadowColor = '#00f2fe';
+                        ctx.shadowBlur = 3;
 
                         ctx.fillRect(cx - 7.5, cy - 3.2, 5.0, 3.2);
                         ctx.strokeRect(cx - 7.5, cy - 3.2, 5.0, 3.2);
@@ -2787,14 +2837,16 @@ export class UIManager {
                         ctx.fillRect(cx + 2.5, cy - 3.2, 5.0, 3.2);
                         ctx.strokeRect(cx + 2.5, cy - 3.2, 5.0, 3.2);
 
+                        ctx.fillStyle = '#0891b2';
                         ctx.fillRect(cx - 2.5, cy - 2.5, 5.0, 1.2);
-
                         ctx.fillRect(cx - 9.0, cy - 2.5, 1.5, 1.2);
                         ctx.fillRect(cx + 7.5, cy - 2.5, 1.5, 1.2);
 
                         ctx.fillStyle = '#ffffff';
+                        ctx.shadowBlur = 0;
                         ctx.fillRect(cx - 6.8, cy - 2.5, 1.0, 1.0);
                         ctx.fillRect(cx + 3.2, cy - 2.5, 1.0, 1.0);
+                        ctx.restore();
                     } else {
                         // Varsayılan / Kızgın
                         ctx.fillStyle = '#ffffff';
@@ -4509,7 +4561,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v315`;
+                img.src = `assets/avatars/${av.id}.png?v=v316`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4551,7 +4603,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v315`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v316`;
             }
         };
         

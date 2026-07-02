@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v315';
-import { audio } from './audio.js?v=v315';
+import { ViscosityStates } from './viscosity.js?v=v316';
+import { audio } from './audio.js?v=v316';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -1712,34 +1712,17 @@ export class Player {
             ctx.quadraticCurveTo(this.x - 5.5 + dx, this.y + 7.5 + dy, this.x - 8.5 + dx, this.y + 4.5 + dy);
             ctx.fill();
         } else if (activeEyes === 'cyber_matrix_eyes') {
-            // Siber Matrix Gözleri (Karanlık yuvalar, yeşil parlayan piksel şeritleri)
-            const drawMatrixEye = (ex, ey) => {
-                ctx.fillStyle = '#020617';
-                ctx.strokeStyle = '#1e293b';
-                ctx.lineWidth = 1.0;
-                ctx.beginPath();
-                if (ctx.roundRect) {
-                    ctx.roundRect(ex - 2.5, ey - 3, 5, 6, 1.2);
-                } else {
-                    ctx.rect(ex - 2.5, ey - 3, 5, 6);
-                }
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.save();
-                ctx.shadowColor = '#22c55e';
-                ctx.shadowBlur = 4;
-                ctx.fillStyle = '#4ade80';
-                
-                const h1 = 2 + Math.floor(Math.sin(Date.now() * 0.01 + ex) * 1.5);
-                ctx.fillRect(ex - 1.2, ey - 2.5, 0.9, h1);
-                
-                const h2 = 2 + Math.floor(Math.cos(Date.now() * 0.015 + ex) * 1.5);
-                ctx.fillRect(ex + 0.3, ey - 1.8, 0.9, h2);
-                ctx.restore();
-            };
-            drawMatrixEye(this.x - 6 + dx, this.y - 3 + dy);
-            drawMatrixEye(this.x + 6 + dx, this.y - 3 + dy);
+            // Siber Matrix Gözleri (Sol "1", Sağ "0" parlayan yeşil karakterler)
+            ctx.save();
+            ctx.fillStyle = '#22c55e';
+            ctx.shadowColor = '#22c55e';
+            ctx.shadowBlur = 8;
+            ctx.font = 'bold 8.5px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('1', this.x - 6.2 + dx, this.y - 3.2 + dy);
+            ctx.fillText('0', this.x + 6.2 + dx, this.y - 3.2 + dy);
+            ctx.restore();
         } else if (activeEyes === 'targeting_eye') {
             // Terminatör Hedefleme Gözü (Asimetrik: Sol Mavi, Sağ Kırmızı Hedefleyici)
             ctx.fillStyle = '#06b6d4';
@@ -1785,10 +1768,13 @@ export class Player {
             ctx.fill();
             ctx.restore();
         } else if (activeEyes === 'pixel_glasses') {
-            // 8-Bit Retro Gözlük (Pixel Thug Life)
-            ctx.fillStyle = '#0f172a';
-            ctx.strokeStyle = '#020617';
+            // 8-Bit Retro Gözlük (Neon Saydam Camlar + Parlak Çerçeve)
+            ctx.save();
+            ctx.fillStyle = 'rgba(6, 182, 212, 0.35)';
+            ctx.strokeStyle = '#00f2fe';
             ctx.lineWidth = 1.0;
+            ctx.shadowColor = '#00f2fe';
+            ctx.shadowBlur = 4;
 
             ctx.fillRect(this.x - 10 + dx, this.y - 5.5 + dy, 6.8, 4.2);
             ctx.strokeRect(this.x - 10 + dx, this.y - 5.5 + dy, 6.8, 4.2);
@@ -1796,14 +1782,16 @@ export class Player {
             ctx.fillRect(this.x + 3.2 + dx, this.y - 5.5 + dy, 6.8, 4.2);
             ctx.strokeRect(this.x + 3.2 + dx, this.y - 5.5 + dy, 6.8, 4.2);
 
+            ctx.fillStyle = '#0891b2';
             ctx.fillRect(this.x - 3.2 + dx, this.y - 4.5 + dy, 6.4, 1.6);
-
             ctx.fillRect(this.x - 12 + dx, this.y - 4.5 + dy, 2.0, 1.6);
             ctx.fillRect(this.x + 10 + dx, this.y - 4.5 + dy, 2.0, 1.6);
 
             ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 0;
             ctx.fillRect(this.x - 9 + dx, this.y - 4.5 + dy, 1.5, 1.5);
             ctx.fillRect(this.x + 4.2 + dx, this.y - 4.5 + dy, 1.5, 1.5);
+            ctx.restore();
         } else if (activeEyes === 'cyber_visor') {
             // Siber Vizör (Neon Degrade + Siber Gövde)
             ctx.save();
