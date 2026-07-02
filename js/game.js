@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v314';
-import { Level } from './level.js?v=v314';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v314';
-import { UIManager } from './ui.js?v=v314';
-import { CloudSaveManager } from './cloud_save.js?v=v314';
-import { audio } from './audio.js?v=v314';
-import { LevelEditor } from './editor.js?v=v314';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v314';
+import { Player } from './player.js?v=v315';
+import { Level } from './level.js?v=v315';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v315';
+import { UIManager } from './ui.js?v=v315';
+import { CloudSaveManager } from './cloud_save.js?v=v315';
+import { audio } from './audio.js?v=v315';
+import { LevelEditor } from './editor.js?v=v315';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v315';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1040,9 +1040,30 @@ export class GameManager {
                 maxLife = 25 + Math.random() * 20;
                 vx = (Math.random() - 0.5) * 2.0;
                 vy = -2.2 - Math.random() * 2.8;
+            } else if (type === 'lightning') {
+                // Hızlı saçılan elektrik kıvılcımları
+                speed = 2.0 + Math.random() * 3.5;
+                size = 1.5 + Math.random() * 2.5;
+                maxLife = 12 + Math.random() * 10;
+                vx = Math.cos(angle) * speed;
+                vy = Math.sin(angle) * speed;
+            } else if (type === 'toxic') {
+                // Yavaş yükselen baloncuklar
+                speed = 0.3 + Math.random() * 0.8;
+                size = 3.5 + Math.random() * 4.5;
+                maxLife = 30 + Math.random() * 20;
+                vx = (Math.random() - 0.5) * 1.0;
+                vy = -speed - 0.2;
+            } else if (type === 'binary') {
+                // Süzülen dijital yağmur pikselleri
+                speed = 0.5 + Math.random() * 1.0;
+                size = 2.5 + Math.random() * 2.0;
+                maxLife = 25 + Math.random() * 15;
+                vx = (Math.random() - 0.5) * 0.4;
+                vy = -speed;
             }
 
-            this.particles.push({
+            const particle = {
                 x: x,
                 y: y,
                 vx: vx,
@@ -1053,7 +1074,11 @@ export class GameManager {
                 life: maxLife,
                 maxLife: maxLife,
                 type: type
-            });
+            };
+            if (type === 'binary') {
+                particle.char = Math.random() > 0.5 ? '1' : '0';
+            }
+            this.particles.push(particle);
         }
     }
 
@@ -1479,6 +1504,14 @@ export class GameManager {
                 p.size += 0.06; // Buhar hafifçe genişler
                 p.vx *= 0.94;
                 p.vy *= 0.94;
+            } else if (p.type === 'lightning') {
+                p.vx *= 0.90;
+                p.vy *= 0.90;
+            } else if (p.type === 'toxic') {
+                p.size += 0.03;
+                p.vx += Math.sin(p.life * 0.2) * 0.08;
+            } else if (p.type === 'binary') {
+                p.vy *= 0.98;
             }
         });
         
@@ -2145,15 +2178,59 @@ export class GameManager {
                 this.ctx.globalAlpha = prevAlpha;
             }
 
-            // Parçacıkları Çiz - Optimize edilmiş, save/restore kaldırıldı
+            // Parçacıkları Çiz - Optimize edilmiş, save/restore kaldırıldı (Özel tipler hariç)
             if (this.particles && this.particles.length > 0) {
                 const prevAlpha = this.ctx.globalAlpha;
                 this.particles.forEach(p => {
                     this.ctx.globalAlpha = p.alpha;
                     this.ctx.fillStyle = p.color;
-                    this.ctx.beginPath();
-                    this.ctx.arc(p.x - this.camera.x, p.y - this.camera.y, p.size, 0, Math.PI * 2);
-                    this.ctx.fill();
+                    
+                    if (p.type === 'lightning') {
+                        this.ctx.save();
+                        this.ctx.globalAlpha = p.alpha;
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.shadowColor = p.color;
+                        this.ctx.shadowBlur = 6;
+                        this.ctx.beginPath();
+                        const cx = p.x - this.camera.x;
+                        const cy = p.y - this.camera.y;
+                        this.ctx.moveTo(cx, cy - p.size);
+                        this.ctx.lineTo(cx + p.size * 0.7, cy);
+                        this.ctx.lineTo(cx, cy + p.size);
+                        this.ctx.lineTo(cx - p.size * 0.7, cy);
+                        this.ctx.closePath();
+                        this.ctx.fill();
+                        this.ctx.restore();
+                    } else if (p.type === 'toxic') {
+                        this.ctx.save();
+                        this.ctx.globalAlpha = p.alpha;
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.shadowColor = p.color;
+                        this.ctx.shadowBlur = 5;
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x - this.camera.x, p.y - this.camera.y, p.size, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+                        this.ctx.shadowBlur = 0;
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x - this.camera.x - p.size*0.3, p.y - this.camera.y - p.size*0.3, p.size*0.3, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        this.ctx.restore();
+                    } else if (p.type === 'binary') {
+                        this.ctx.save();
+                        this.ctx.globalAlpha = p.alpha;
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.font = `bold ${Math.floor(p.size * 1.8 + 6)}px monospace`;
+                        this.ctx.shadowColor = p.color;
+                        this.ctx.shadowBlur = 4;
+                        this.ctx.fillText(p.char || '0', p.x - this.camera.x - p.size/2, p.y - this.camera.y + p.size/2);
+                        this.ctx.restore();
+                    } else {
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x - this.camera.x, p.y - this.camera.y, p.size, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
                 });
                 this.ctx.globalAlpha = prevAlpha;
             }
@@ -2309,7 +2386,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v314', this.cssWidth - 10, 10);
+        this.ctx.fillText('v315', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {

@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v314';
-import { audio } from './audio.js?v=v314';
+import { ViscosityStates } from './viscosity.js?v=v315';
+import { audio } from './audio.js?v=v315';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -928,6 +928,18 @@ export class Player {
                         this.rainbowHue = (this.rainbowHue + 8) % 360;
                         trailColor = `hsl(${this.rainbowHue}, 100%, 60%)`;
                         trailType = 'trail';
+                    } else if (activeTrail === 'lightning_trail') {
+                        const colors = ['#a855f7', '#00f2fe', '#8b5cf6', '#ffffff'];
+                        trailColor = colors[Math.floor(Math.random() * colors.length)];
+                        trailType = 'lightning';
+                    } else if (activeTrail === 'toxic_trail') {
+                        const colors = ['#22c55e', '#4ade80', '#15803d', '#ffffff'];
+                        trailColor = colors[Math.floor(Math.random() * colors.length)];
+                        trailType = 'toxic';
+                    } else if (activeTrail === 'binary_trail') {
+                        const colors = ['#22c55e', '#16a34a', '#86efac'];
+                        trailColor = colors[Math.floor(Math.random() * colors.length)];
+                        trailType = 'binary';
                     }
                 }
             }
@@ -1699,6 +1711,142 @@ export class Player {
             ctx.quadraticCurveTo(this.x + 5.5 + dx, this.y + 7.5 + dy, this.x + dx, this.y + 6.0 + dy);
             ctx.quadraticCurveTo(this.x - 5.5 + dx, this.y + 7.5 + dy, this.x - 8.5 + dx, this.y + 4.5 + dy);
             ctx.fill();
+        } else if (activeEyes === 'cyber_matrix_eyes') {
+            // Siber Matrix Gözleri (Karanlık yuvalar, yeşil parlayan piksel şeritleri)
+            const drawMatrixEye = (ex, ey) => {
+                ctx.fillStyle = '#020617';
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 1.0;
+                ctx.beginPath();
+                if (ctx.roundRect) {
+                    ctx.roundRect(ex - 2.5, ey - 3, 5, 6, 1.2);
+                } else {
+                    ctx.rect(ex - 2.5, ey - 3, 5, 6);
+                }
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.save();
+                ctx.shadowColor = '#22c55e';
+                ctx.shadowBlur = 4;
+                ctx.fillStyle = '#4ade80';
+                
+                const h1 = 2 + Math.floor(Math.sin(Date.now() * 0.01 + ex) * 1.5);
+                ctx.fillRect(ex - 1.2, ey - 2.5, 0.9, h1);
+                
+                const h2 = 2 + Math.floor(Math.cos(Date.now() * 0.015 + ex) * 1.5);
+                ctx.fillRect(ex + 0.3, ey - 1.8, 0.9, h2);
+                ctx.restore();
+            };
+            drawMatrixEye(this.x - 6 + dx, this.y - 3 + dy);
+            drawMatrixEye(this.x + 6 + dx, this.y - 3 + dy);
+        } else if (activeEyes === 'targeting_eye') {
+            // Terminatör Hedefleme Gözü (Asimetrik: Sol Mavi, Sağ Kırmızı Hedefleyici)
+            ctx.fillStyle = '#06b6d4';
+            ctx.shadowColor = '#00f2fe';
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.arc(this.x - 6 + dx, this.y - 3 + dy, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(this.x - 7 + dx, this.y - 4 + dy, 1.0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.save();
+            ctx.shadowColor = '#ef4444';
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = '#b91c1c';
+            ctx.beginPath();
+            ctx.arc(this.x + 6 + dx, this.y - 3 + dy, 3.8, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.arc(this.x + 6 + dx, this.y - 3 + dy, 6.0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(this.x + 6 + dx - 7.5, this.y - 3 + dy);
+            ctx.lineTo(this.x + 6 + dx - 4.5, this.y - 3 + dy);
+            ctx.moveTo(this.x + 6 + dx + 4.5, this.y - 3 + dy);
+            ctx.lineTo(this.x + 6 + dx + 7.5, this.y - 3 + dy);
+            ctx.moveTo(this.x + 6 + dx, this.y - 3 + dy - 7.5);
+            ctx.lineTo(this.x + 6 + dx, this.y - 3 + dy - 4.5);
+            ctx.moveTo(this.x + 6 + dx, this.y - 3 + dy + 4.5);
+            ctx.lineTo(this.x + 6 + dx, this.y - 3 + dy + 7.5);
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 4;
+            ctx.beginPath();
+            ctx.arc(this.x + 6 + dx, this.y - 3 + dy, 1.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        } else if (activeEyes === 'pixel_glasses') {
+            // 8-Bit Retro Gözlük (Pixel Thug Life)
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = '#020617';
+            ctx.lineWidth = 1.0;
+
+            ctx.fillRect(this.x - 10 + dx, this.y - 5.5 + dy, 6.8, 4.2);
+            ctx.strokeRect(this.x - 10 + dx, this.y - 5.5 + dy, 6.8, 4.2);
+
+            ctx.fillRect(this.x + 3.2 + dx, this.y - 5.5 + dy, 6.8, 4.2);
+            ctx.strokeRect(this.x + 3.2 + dx, this.y - 5.5 + dy, 6.8, 4.2);
+
+            ctx.fillRect(this.x - 3.2 + dx, this.y - 4.5 + dy, 6.4, 1.6);
+
+            ctx.fillRect(this.x - 12 + dx, this.y - 4.5 + dy, 2.0, 1.6);
+            ctx.fillRect(this.x + 10 + dx, this.y - 4.5 + dy, 2.0, 1.6);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(this.x - 9 + dx, this.y - 4.5 + dy, 1.5, 1.5);
+            ctx.fillRect(this.x + 4.2 + dx, this.y - 4.5 + dy, 1.5, 1.5);
+        } else if (activeEyes === 'cyber_visor') {
+            // Siber Vizör (Neon Degrade + Siber Gövde)
+            ctx.save();
+            // Kafa bandı
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y - 3, this.radius - 1, Math.PI * 0.9, Math.PI * 0.1, true);
+            ctx.stroke();
+
+            // Vizör camı parlaması
+            ctx.shadowColor = '#00f2fe';
+            ctx.shadowBlur = 8;
+
+            // Yarı saydam neon vizör camı
+            const visorGrad = ctx.createLinearGradient(this.x - 11, this.y - 6, this.x + 11, this.y);
+            visorGrad.addColorStop(0, 'rgba(255, 0, 127, 0.85)'); // Neon Pembe
+            visorGrad.addColorStop(0.5, 'rgba(139, 92, 246, 0.85)'); // Mor geçiş
+            visorGrad.addColorStop(1, 'rgba(0, 242, 254, 0.85)'); // Neon Mavi
+
+            ctx.beginPath();
+            if (ctx.roundRect) {
+                ctx.roundRect(this.x - 11, this.y - 6.5, 22, 7.5, 3.5);
+            } else {
+                ctx.rect(this.x - 11, this.y - 6.5, 22, 7.5);
+            }
+            ctx.fillStyle = visorGrad;
+            ctx.fill();
+
+            // Kenarlık parlaması
+            ctx.strokeStyle = '#00f2fe';
+            ctx.lineWidth = 1.0;
+            ctx.stroke();
+
+            // Tarama Çizgisi (Scanline)
+            ctx.shadowBlur = 0; // Tarama çizgisinde gölge olmasın
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(this.x - 9, this.y - 2.8);
+            ctx.lineTo(this.x + 9, this.y - 2.8);
+            ctx.stroke();
+            ctx.restore();
         } else {
             // Varsayılan / Kızgın
             ctx.fillStyle = '#ffffff';
@@ -2087,49 +2235,6 @@ export class Player {
 
                 // Ponpon pamuğu (Uçta top pamuk)
                 drawFluffyPuff(topX + 11.5, topY - 12.5, 2.8, 2.8, 2.8);
-            } else if (activeAccessory === 'cyber_visor') {
-                // Siber Vizör (Neon Degrade + Siber Gövde)
-                ctx.save();
-                // Kafa bandı
-                ctx.strokeStyle = '#334155';
-                ctx.lineWidth = 2.5;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y - 3, this.radius - 1, Math.PI * 0.9, Math.PI * 0.1, true);
-                ctx.stroke();
-
-                // Vizör camı parlaması
-                ctx.shadowColor = '#00f2fe';
-                ctx.shadowBlur = 8;
-
-                // Yarı saydam neon vizör camı
-                const visorGrad = ctx.createLinearGradient(this.x - 11, this.y - 6, this.x + 11, this.y);
-                visorGrad.addColorStop(0, 'rgba(255, 0, 127, 0.85)'); // Neon Pembe
-                visorGrad.addColorStop(0.5, 'rgba(139, 92, 246, 0.85)'); // Mor geçiş
-                visorGrad.addColorStop(1, 'rgba(0, 242, 254, 0.85)'); // Neon Mavi
-
-                ctx.beginPath();
-                if (ctx.roundRect) {
-                    ctx.roundRect(this.x - 11, this.y - 6.5, 22, 7.5, 3.5);
-                } else {
-                    ctx.rect(this.x - 11, this.y - 6.5, 22, 7.5);
-                }
-                ctx.fillStyle = visorGrad;
-                ctx.fill();
-
-                // Kenarlık parlaması
-                ctx.strokeStyle = '#00f2fe';
-                ctx.lineWidth = 1.0;
-                ctx.stroke();
-
-                // Tarama Çizgisi (Scanline)
-                ctx.shadowBlur = 0; // Tarama çizgisinde gölge olmasın
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-                ctx.lineWidth = 0.5;
-                ctx.beginPath();
-                ctx.moveTo(this.x - 9, this.y - 2.8);
-                ctx.lineTo(this.x + 9, this.y - 2.8);
-                ctx.stroke();
-                ctx.restore();
             } else if (activeAccessory === 'gaming_headset') {
                 // RGB Oyuncu Kulaklığı (Siber Band + Yanal RGB Kupaları)
                 ctx.save();

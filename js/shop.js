@@ -42,6 +42,30 @@ export const SHOP_ITEMS = [
         description: 'Sürekli renk değiştiren büyüleyici gökkuşağı.',
         config: { color: 'rainbow', type: 'trail' }
     },
+    {
+        id: 'lightning_trail',
+        name: '⚡ Plazma Yıldırım İzi',
+        category: 'trail',
+        price: 120,
+        description: 'Arkada parlayan elektrik kıvılcımları ve yıldırımlar bırakır.',
+        config: { color: 'lightning', type: 'trail' }
+    },
+    {
+        id: 'toxic_trail',
+        name: '🧪 Siber Toksik İzi',
+        category: 'trail',
+        price: 110,
+        description: 'Yavaşça havaya süzülen parlayan yeşil toksik baloncuklar.',
+        config: { color: 'toxic', type: 'trail' }
+    },
+    {
+        id: 'binary_trail',
+        name: '💾 Matrix Veri İzi',
+        category: 'trail',
+        price: 130,
+        description: 'Ekranda süzülen parlayan dijital sıfırlar ve birler.',
+        config: { color: 'binary', type: 'trail' }
+    },
 
     // Accessories
     {
@@ -84,14 +108,7 @@ export const SHOP_ITEMS = [
         description: 'Kırmızı, yumuşak ve şenlikli noel şapkası.',
         config: { type: 'santa' }
     },
-    {
-        id: 'cyber_visor',
-        name: '🤖 Siber Vizör',
-        category: 'accessory',
-        price: 100,
-        description: 'Neon pembe ve mavi parlayan siberpunk gözlük/vizör.',
-        config: { type: 'cyber_visor' }
-    },
+
     {
         id: 'gaming_headset',
         name: '🎧 RGB Oyuncu Kulaklığı',
@@ -149,6 +166,38 @@ export const SHOP_ITEMS = [
         price: 100,
         description: 'Büyük burunlu ve bıyıklı eğlenceli gözlük.',
         config: { style: 'joke' }
+    },
+    {
+        id: 'cyber_matrix_eyes',
+        name: '💻 Matrix Kod Gözler',
+        category: 'eyes',
+        price: 50,
+        description: 'İçerisinde yeşil veri şeritleri akan siber gözler.',
+        config: { style: 'matrix' }
+    },
+    {
+        id: 'targeting_eye',
+        name: '🎯 Terminatör Göz',
+        category: 'eyes',
+        price: 60,
+        description: 'Tek taraflı lazer hedefleyicisi olan mekanik göz.',
+        config: { style: 'targeting' }
+    },
+    {
+        id: 'pixel_glasses',
+        name: '👾 8-Bit Retro Gözlük',
+        category: 'eyes',
+        price: 45,
+        description: 'Atari oyunlarından fırlamış ikonik retro gözlük.',
+        config: { style: 'pixel' }
+    },
+    {
+        id: 'cyber_visor',
+        name: '🤖 Siber Vizör',
+        category: 'eyes',
+        price: 100,
+        description: 'Neon pembe ve mavi parlayan siberpunk gözlük/vizör.',
+        config: { style: 'cyber_visor' }
     }
 ];
 
