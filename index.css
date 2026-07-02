@@ -3098,18 +3098,18 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 
 .shop-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+    gap: 12px;
     width: 100%;
     box-sizing: border-box;
-    padding: 6px;
+    padding: 4px;
 }
 
 .shop-item {
     background: linear-gradient(135deg, rgba(20, 20, 35, 0.75), rgba(10, 10, 20, 0.95));
     border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 18px;
-    padding: 22px 16px 18px 16px;
+    border-radius: 14px;
+    padding: 12px 10px 10px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -3117,51 +3117,51 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
     box-sizing: border-box;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
 
 .shop-item:hover {
     border-color: rgba(6, 182, 212, 0.35);
-    transform: translateY(-4px);
-    box-shadow: 0 12px 25px rgba(6, 182, 212, 0.16), 0 0 15px rgba(6, 182, 212, 0.05) inset;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(6, 182, 212, 0.16), 0 0 12px rgba(6, 182, 212, 0.05) inset;
 }
 
 .shop-item-preview-box {
-    width: 76px;
-    height: 76px;
-    margin-bottom: 14px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     background: radial-gradient(circle at center, rgba(30, 41, 59, 0.45), rgba(15, 23, 42, 0.75));
-    border-radius: 16px;
+    border-radius: 12px;
     border: 1px solid rgba(6, 182, 212, 0.18);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 8px rgba(6, 182, 212, 0.06) inset;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), 0 0 6px rgba(6, 182, 212, 0.06) inset;
     transition: all 0.25s ease;
 }
 
 .shop-item:hover .shop-item-preview-box {
     border-color: rgba(6, 182, 212, 0.5);
-    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.15), 0 0 12px rgba(6, 182, 212, 0.1) inset;
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.15), 0 0 10px rgba(6, 182, 212, 0.1) inset;
 }
 
 .shop-item-name {
-    font-size: 0.92rem;
+    font-size: 0.8rem;
     font-weight: 800;
     color: #ffffff;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     letter-spacing: 0.2px;
 }
 
 .shop-item-description {
-    font-size: 0.72rem;
+    font-size: 0.65rem;
     color: #94a3b8;
-    margin-bottom: 12px;
-    min-height: 32px;
-    line-height: 1.4;
+    margin-bottom: 8px;
+    min-height: 28px;
+    line-height: 1.35;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -3170,10 +3170,10 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 }
 
 .shop-item-price {
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     font-weight: 800;
     color: #f59e0b; /* Amber */
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -3182,10 +3182,10 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 
 .shop-item-btn {
     width: 100%;
-    padding: 9px 12px;
-    font-size: 0.78rem;
+    padding: 7px 10px;
+    font-size: 0.72rem;
     font-weight: 800;
-    border-radius: 30px; /* Rounded pill style */
+    border-radius: 20px; /* Rounded pill style */
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: inherit;
