@@ -786,9 +786,16 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                     existing_user['saveData'] = save_data
                 else:
                     db_save = existing_user.get('saveData', {})
-                    # Akıllı Birleştirme: Gelen veri ile sunucu verisini harmanla (hiçbir veri kaybolmasın)
-                    merged_save = merge_save_data(db_save, save_data)
-                    existing_user['saveData'] = merged_save
+                    db_time = int(db_save.get('lastSaveTime', 0) or 0)
+                    inc_time = int(save_data.get('lastSaveTime', 0) or 0)
+                    
+                    # Zaman Damgası Kontrolü (Last Write Wins): 
+                    # Hangi cihazda en son işlem/kayıt yapıldıysa onun verisi geçerli olur
+                    if inc_time >= db_time:
+                        existing_user['saveData'] = save_data
+                    else:
+                        # Sunucudaki veri daha yeni, gelen veriyi yoksay (mevcut db verisini koru)
+                        pass
                 existing_user['lastUpdated'] = datetime.now(timezone.utc).isoformat()
                 user_record = existing_user
             else:
