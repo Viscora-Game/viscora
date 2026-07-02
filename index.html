@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v304">
+    <link rel="stylesheet" href="index.css?v=v305">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -637,7 +637,7 @@
                     <span class="terminal-dot red"></span>
                     <span class="terminal-dot yellow"></span>
                     <span class="terminal-dot green"></span>
-                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v304</span>
+                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v305</span>
                 </div>
                 <div class="terminal-body">
                     <div id="terminal-text"></div>
@@ -732,7 +732,7 @@
                     
                     <!-- Oyuncu Profil Kartı (Karakter & Bakiye) -->
                     <div id="player-profile-widget">
-                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v304" alt="Avatar" />
+                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v305" alt="Avatar" />
                         <div id="profile-widget-name">Oyuncu</div>
                         <div class="profile-divider"></div>
                         <div class="profile-crystals">
@@ -1415,40 +1415,31 @@
 
         <!-- Kristal Dükkanı Ekranı (Crystal Shop Screen) -->
         <div id="shop-screen" class="screen hidden">
-            <div class="menu-card community-card animate-fade-in" style="max-width: 680px;">
-                <div class="community-header">
+            <div class="menu-card community-card animate-fade-in" style="max-width: 680px; padding: 1.5rem 1.8rem;">
+                <div class="community-header" style="margin-bottom: 15px;">
                     <h2><svg class="icon-svg"><use href="#icon-shop"></use></svg> KRİSTAL DÜKKANI</h2>
-                    <button id="btn-close-shop" class="close-btn" type="button" aria-label="Kapat" style="display: flex; align-items: center; justify-content: center;"><svg class="icon-svg" style="width: 14px; height: 14px;"><use href="#icon-close"></use></svg></button>
-                </div>
-                
-                <!-- Bakiye ve Bilgi alanı -->
-                <div class="shop-header-row" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 12px; box-sizing: border-box; flex-wrap: wrap; gap: 10px;">
-                    <div class="shop-balance-display" style="font-size: 1.1rem; font-weight: bold; color: #00f2fe; text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);">
-                        Bakiyeniz: <svg class="icon-svg icon-gem" style="width: 18px; height: 18px; vertical-align: middle;"><use href="#icon-gem"></use></svg> <span id="shop-crystal-balance">0</span> Kristal
+                    
+                    <!-- Compact Crystal Balance Badge in Header -->
+                    <div class="shop-balance-header-badge">
+                        <svg class="icon-svg icon-gem" style="width: 14px; height: 14px; fill: #00f2fe; filter: drop-shadow(0 0 4px #00f2fe);"><use href="#icon-gem"></use></svg>
+                        <span id="shop-crystal-balance">0</span>
                     </div>
-                    <div style="font-size: 0.8rem; color: #94a3b8; font-style: italic; max-width: 250px; text-align: right;">
-                        Canını da dolduran kristalleri topladıkça dükkanda harca!
-                    </div>
+                    
+                    <button id="btn-close-shop" class="close-btn" type="button" aria-label="Kapat" style="display: flex; align-items: center; justify-content: center; margin-left: 12px;"><svg class="icon-svg" style="width: 14px; height: 14px;"><use href="#icon-close"></use></svg></button>
                 </div>
 
-                <!-- Canlı Karakter Görünüm Önizleme -->
-                <div class="shop-preview-panel" style="display: flex; align-items: center; justify-content: center; gap: 15px; background: rgba(30, 30, 48, 0.4); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px; margin-bottom: 15px; box-sizing: border-box; width: 100%;">
-                    <div style="text-align: left; flex: 1;">
-                        <div style="font-size: 0.95rem; font-weight: bold; color: #f1f5f9; margin-bottom: 2px; display: flex; align-items: center; gap: 6px;"><svg class="icon-svg" style="width: 18px; height: 18px;"><use href="#icon-eye"></use></svg> Karakter Canlı Önizleme</div>
-                        <div style="font-size: 0.75rem; color: #94a3b8; line-height: 1.3;">
-                            Öğelerin üzerine gelerek (veya dokunarak) karakterinizde nasıl duracağını canlı olarak görün!
-                        </div>
+                <!-- Kategori Sekmeleri ve Canlı Önizleme Satırı -->
+                <div class="shop-tabs-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 18px; width: 100%; box-sizing: border-box;">
+                    <div class="shop-tabs" style="display: flex; gap: 8px; flex: 1; margin-bottom: 0;">
+                        <button class="community-tab-btn active" data-category="trail" type="button"><svg class="icon-svg"><use href="#icon-rainbow"></use></svg> İz Efekti</button>
+                        <button class="community-tab-btn" data-category="accessory" type="button"><svg class="icon-svg"><use href="#icon-hat"></use></svg> Aksesuar</button>
+                        <button class="community-tab-btn" data-category="eyes" type="button"><svg class="icon-svg"><use href="#icon-eye"></use></svg> Göz Stili</button>
                     </div>
-                    <div class="preview-avatar-container" style="position: relative; width: 70px; height: 70px; background: rgba(10, 10, 20, 0.6); border: 1.5px solid #00f2fe; box-shadow: 0 0 12px rgba(0,242,254,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: visible;">
-                        <canvas id="shop-preview-canvas" width="70" height="70" style="display: block; width: 70px; height: 70px;"></canvas>
+                    
+                    <!-- Dairesel Canlı Karakter Önizleme -->
+                    <div class="preview-avatar-container" style="position: relative; width: 50px; height: 50px; flex-shrink: 0; background: rgba(10, 10, 20, 0.65); border: 2px solid #00f2fe; box-shadow: 0 0 10px rgba(0,242,254,0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: visible;">
+                        <canvas id="shop-preview-canvas" width="70" height="70" style="display: block; width: 50px; height: 50px;"></canvas>
                     </div>
-                </div>
-
-                <!-- Kategori Sekmeleri -->
-                <div class="shop-tabs" style="display: flex; gap: 8px; width: 100%; margin-bottom: 20px; box-sizing: border-box;">
-                    <button class="community-tab-btn active" data-category="trail" type="button"><svg class="icon-svg"><use href="#icon-rainbow"></use></svg> İz Efekti</button>
-                    <button class="community-tab-btn" data-category="accessory" type="button"><svg class="icon-svg"><use href="#icon-hat"></use></svg> Aksesuar</button>
-                    <button class="community-tab-btn" data-category="eyes" type="button"><svg class="icon-svg"><use href="#icon-eye"></use></svg> Göz Stili</button>
                 </div>
 
                 <!-- Dükkan İçeriği Listesi -->
@@ -1557,8 +1548,8 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v304"></script>
-    <script type="module" src="js/main.js?v=v304"></script>
+    <script src="js/controls_customizer.js?v=v305"></script>
+    <script type="module" src="js/main.js?v=v305"></script>
 </body>
 </html>
 

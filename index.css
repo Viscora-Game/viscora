@@ -3260,6 +3260,23 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     background: rgba(255, 255, 255, 0.02) !important;
 }
 
+/* Compact Crystal Balance Badge in Header */
+.shop-balance-header-badge {
+    margin-left: auto;
+    background: rgba(0, 242, 254, 0.08);
+    border: 1px solid rgba(0, 242, 254, 0.35);
+    border-radius: 14px;
+    padding: 5px 12px;
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #00f2fe;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.12), 0 0 5px rgba(0, 242, 254, 0.05) inset;
+    flex-shrink: 0;
+}
+
 /* Custom previews for cosmetic elements in the shop card */
 .preview-trail-particle {
     width: 12px;
@@ -3466,41 +3483,25 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     #shop-screen .community-header h2 {
         font-size: 1rem !important;
     }
-    /* Bakiye satırı — bilgi metnini gizle */
-    #shop-screen .shop-header-row {
-        margin-bottom: 2px !important;
+    /* Compact Header Balance Badge in Header */
+    #shop-screen .shop-balance-header-badge {
+        font-size: 0.8rem !important;
+        padding: 3px 10px !important;
+    }
+    
+    #shop-screen .shop-tabs-row {
+        margin-bottom: 6px !important;
         flex-shrink: 0 !important;
-        flex-wrap: nowrap !important;
     }
-    #shop-screen .shop-header-row > div:last-child {
-        display: none !important;
+    
+    #shop-screen .preview-avatar-container {
+        width: 38px !important;
+        height: 38px !important;
     }
-    #shop-screen .shop-balance-display {
-        font-size: 0.9rem !important;
-    }
-    /* Önizleme paneli — sadece avatar, arka plan/kenarlık yok, sıfır padding */
-    #shop-screen .shop-preview-panel {
-        padding: 0 !important;
-        margin-bottom: 2px !important;
-        flex-shrink: 0 !important;
-        background: transparent !important;
-        border: none !important;
-        gap: 0 !important;
-        justify-content: flex-end !important;
-        width: auto !important;
-    }
-    /* Açıklama metnini gizle */
-    #shop-screen .shop-preview-panel > div:first-child {
-        display: none !important;
-    }
-    /* Avatar — 56px yatayda */
-    #shop-screen .shop-preview-panel .preview-avatar-container {
-        width: 56px !important;
-        height: 56px !important;
-    }
-    #shop-screen .shop-preview-panel .preview-avatar-container canvas {
-        width: 56px !important;
-        height: 56px !important;
+    
+    #shop-screen .preview-avatar-container canvas {
+        width: 38px !important;
+        height: 38px !important;
     }
     /* Tabs kompakt */
     #shop-screen .shop-tabs {
