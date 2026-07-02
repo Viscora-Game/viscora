@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v301">
+    <link rel="stylesheet" href="index.css?v=v302">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -637,7 +637,7 @@
                     <span class="terminal-dot red"></span>
                     <span class="terminal-dot yellow"></span>
                     <span class="terminal-dot green"></span>
-                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v301</span>
+                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v302</span>
                 </div>
                 <div class="terminal-body">
                     <div id="terminal-text"></div>
@@ -725,18 +725,21 @@
 
         <!-- Başlangıç Ekranı -->
         <div id="start-screen" class="screen active">
+            <!-- Oyuncu Profil Kartı (Global Sağ Üst Bar) -->
+            <div id="player-profile-widget" class="global-profile-bar">
+                <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v302" alt="Avatar" />
+                <div id="profile-widget-name">Oyuncu</div>
+                <div class="profile-divider"></div>
+                <div class="profile-crystals">
+                    <svg class="icon-svg icon-gem" style="width: 14px; height: 14px; margin-right: 4px; fill: #00f2fe; filter: drop-shadow(0 0 5px #00f2fe);"><use href="#icon-gem"></use></svg>
+                    <span id="menu-crystal-count">0</span>
+                </div>
+            </div>
+
             <div class="menu-card animate-fade-in">
                 <div class="brand">
-                    <!-- Oyuncu Profil Kartı (Kartın Üst Sağ Köşesinde, Markaya Göre Konumlandırılmış) -->
-                    <div id="player-profile-widget">
-                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v301" alt="Avatar" />
-                        <div id="profile-widget-name">Oyuncu</div>
-                    </div>
                     <h1 class="game-title">VISCORA</h1>
                     <div class="game-subtitle">VISCOUS ODYSSEY</div>
-                    <div class="crystal-balance-container" style="display: flex; align-items: center; justify-content: center; gap: 6px; margin: 8px 0; font-size: 0.95rem; font-weight: bold; color: #00f2fe; text-shadow: 0 0 10px rgba(0, 242, 254, 0.4);">
-                        <svg class="icon-svg icon-gem" style="width: 18px; height: 18px;"><use href="#icon-gem"></use></svg> <span id="menu-crystal-count">0</span> Kristal
-                    </div>
                 </div>
                 <!-- Üst Butonlar (Rehber ve Ses) -->
                 <div class="start-top-buttons" style="display: flex; gap: 8px; justify-content: center; margin-bottom: 0.7rem; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto;">
@@ -1554,8 +1557,8 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v301"></script>
-    <script type="module" src="js/main.js?v=v301"></script>
+    <script src="js/controls_customizer.js?v=v302"></script>
+    <script type="module" src="js/main.js?v=v302"></script>
 </body>
 </html>
 
