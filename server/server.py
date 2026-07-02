@@ -156,6 +156,17 @@ def get_user_by_id(user_id):
             return u
     return None
 
+def generate_signature_py(total, spent, owned_str):
+    salt = "ViscoraSecretSaltKey_2026_xYz"
+    string_val = f"{total}_{spent}_{owned_str}_{salt}"
+    hash1 = 5381
+    hash2 = 0
+    for char in string_val:
+        code = ord(char)
+        hash1 = ((hash1 << 5) + hash1 + code) & 0xFFFFFFFF
+        hash2 = (code + (hash2 << 6) + (hash2 << 16) - hash2) & 0xFFFFFFFF
+    return f"{hash1:x}{hash2:x}"
+
 def merge_save_data(db_save, incoming_save):
     if not db_save:
         return incoming_save or {}
@@ -164,57 +175,116 @@ def merge_save_data(db_save, incoming_save):
         
     merged = db_save.copy()
     
-    # 1. Kristaller ve Kozmetikler (Paket halinde: en yüksek toplam kristale sahip olan kazanır)
+    # 1. Kristaller ve Kozmetikler (En yüksek toplam kristale sahip olan kazanır)
     db_total = int(db_save.get('totalCrystals', 0) or 0)
     inc_total = int(incoming_save.get('totalCrystals', 0) or 0)
+    
+    # Her halükarda sahip olunan eşyaları birleştir (Böylece hiçbir cihazdaki eşya kaybolmaz)
+    db_items = db_save.get('ownedItems', [])
+    if isinstance(db_items, str):
+        try: db_items = json.loads(db_items)
+        except: db_items = []
+    if not isinstance(db_items, list):
+        db_items = []
+        
+    inc_items = incoming_save.get('ownedItems', [])
+    if isinstance(inc_items, str):
+        try: inc_items = json.loads(inc_items)
+        except: inc_items = []
+    if not isinstance(inc_items, list):
+        inc_items = []
+        
+    merged_items = list(set(db_items + inc_items))
+    for default_item in ['default_trail', 'default_accessory', 'default_eyes']:
+        if default_item not in merged_items:
+            merged_items.append(default_item)
+            
+    merged['ownedItems'] = merged_items
     
     if inc_total >= db_total:
         merged['totalCrystals'] = inc_total
         merged['spentCrystals'] = incoming_save.get('spentCrystals', 0)
-        if 'ownedItems' in incoming_save:
-            merged['ownedItems'] = incoming_save['ownedItems']
-        if 'balanceSig' in incoming_save:
-            merged['balanceSig'] = incoming_save['balanceSig']
+    else:
+        merged['totalCrystals'] = db_total
+        merged['spentCrystals'] = db_save.get('spentCrystals', 0)
+        
+    # Birleştirilmiş eşyalara göre yeni doğrulama imzasını üret
+    owned_str = json.dumps(merged['ownedItems'], separators=(',', ':'))
+    merged['balanceSig'] = generate_signature_py(merged['totalCrystals'], merged['spentCrystals'], owned_str)
             
     # 2. Bölüm İlerlemesi (En yüksek seviye kazanır)
     db_lvl = int(db_save.get('unlockedLevel', 1) or 1)
     inc_lvl = int(incoming_save.get('unlockedLevel', 1) or 1)
+    merged['unlockedLevel'] = max(db_lvl, inc_lvl)
+    
+    # Bölüm yıldızlarını akıllıca birleştir (her bölüm için en yüksek yıldız sayısını koru)
+    db_stars = db_save.get('stars', {}) or {}
+    if isinstance(db_stars, str):
+        try: db_stars = json.loads(db_stars)
+        except: db_stars = {}
+    if not isinstance(db_stars, dict):
+        db_stars = {}
+        
+    inc_stars = incoming_save.get('stars', {}) or {}
+    if isinstance(inc_stars, str):
+        try: inc_stars = json.loads(inc_stars)
+        except: inc_stars = {}
+    if not isinstance(inc_stars, dict):
+        inc_stars = {}
+        
+    merged_stars = {}
+    for lvl_str in set(list(db_stars.keys()) + list(inc_stars.keys())):
+        try:
+            merged_stars[lvl_str] = max(int(db_stars.get(lvl_str, 0)), int(inc_stars.get(lvl_str, 0)))
+        except:
+            merged_stars[lvl_str] = 0
+            
+    merged['stars'] = merged_stars
+    
     if inc_lvl >= db_lvl:
-        merged['unlockedLevel'] = inc_lvl
         if 'progress' in incoming_save:
             merged['progress'] = incoming_save['progress']
-        if 'stars' in incoming_save:
-            merged['stars'] = incoming_save['stars']
+    else:
+        if 'progress' in db_save:
+            merged['progress'] = db_save['progress']
             
     # 3. Editör Taslak Haritaları (Boş olmayanları koru)
     for i in range(1, 6):
         key = f'draftSlot{i}'
-        if key in incoming_save and incoming_save[key]:
-            merged[key] = incoming_save[key]
+        inc_slot = incoming_save.get(key)
+        db_slot = db_save.get(key)
+        if inc_slot:
+            merged[key] = inc_slot
+        elif db_slot:
+            merged[key] = db_slot
             
     # 4. Diğer Ayarlar ve Karakter Bilgileri (Boş olmayanları ez + Akıllı Zaman Damgası Koruması)
     db_profile_time = int(db_save.get('profileLastChanged', 0) or 0)
     inc_profile_time = int(incoming_save.get('profileLastChanged', 0) or 0)
     
-    # Eğer gelen cihazdaki profil değişikliği sunucudakinden daha yeniyse, ismi, avatarı ve aktif kozmetikleri güncelle
     if inc_profile_time >= db_profile_time:
         for key in ['avatar', 'authorName', 'activeTrail', 'activeAccessory', 'activeEyes', 'profileLastChanged']:
             if key in incoming_save:
                 val = incoming_save[key]
                 if val not in [None, ""]:
-                    # Varsayılan koruması (Ekstra Güvenlik)
                     if key == 'authorName' and val in ['Tasarımcı', 'Oyuncu', 'oyuncu'] and db_save.get('authorName') not in [None, "", 'Tasarımcı', 'Oyuncu', 'oyuncu']:
                         continue
                     if key == 'avatar' and val == 'slime_king' and db_save.get('avatar') not in [None, "", 'slime_king']:
                         continue
                     merged[key] = val
+    else:
+        for key in ['avatar', 'authorName', 'activeTrail', 'activeAccessory', 'activeEyes', 'profileLastChanged']:
+            if key in db_save:
+                merged[key] = db_save[key]
                     
     # Profil dışı diğer genel ayarları ve haftalık görevleri doğrudan eşitle
     for key in ['difficulty', 'customControls', 'likedMaps', 'dailyLastClaimDate', 'dailyStreak', 'activeSlot', 'weeklyProgress', 'weeklyClaimed', 'weeklyResetTime']:
-        if key in incoming_save:
-            val = incoming_save[key]
-            if val not in [None, "", [], {}]:
-                merged[key] = val
+        inc_val = incoming_save.get(key)
+        db_val = db_save.get(key)
+        if inc_val not in [None, "", [], {}]:
+            merged[key] = inc_val
+        elif db_val not in [None, "", [], {}]:
+            merged[key] = db_val
             
     return merged
 
