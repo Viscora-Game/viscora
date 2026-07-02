@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v303';
-import { ViscosityList } from './viscosity.js?v=v303';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v303';
-import { CloudSaveManager } from './cloud_save.js?v=v303';
+import { audio } from './audio.js?v=v304';
+import { ViscosityList } from './viscosity.js?v=v304';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v304';
+import { CloudSaveManager } from './cloud_save.js?v=v304';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -2861,13 +2861,17 @@ export class UIManager {
                     actionBtnHtml = `<button class="shop-item-btn buy" data-id="${item.id}">SATIN AL</button>`;
                 }
 
-                const priceDisplay = item.price > 0 ? `💎 ${item.price}` : 'Ücretsiz';
+                const priceDisplay = item.price > 0 
+                    ? `<svg class="icon-svg icon-gem" style="width: 14px; height: 14px; fill: #f59e0b; filter: drop-shadow(0 0 4px rgba(245,158,11,0.4)); vertical-align: middle; margin-right: 2px;"><use href="#icon-gem"></use></svg>${item.price}` 
+                    : 'Ücretsiz';
+
+                const cleanName = item.name.replace(/^[^\w\sıİöÖüÜçÇşŞğĞ]+/, '').trim();
 
                 card.innerHTML = `
                     <div class="shop-item-preview-box">
                         ${previewHtml}
                     </div>
-                    <div class="shop-item-name">${item.name}</div>
+                    <div class="shop-item-name">${cleanName}</div>
                     <div class="shop-item-description">${item.description}</div>
                     <div class="shop-item-price" style="${item.price === 0 ? 'color:#10b981;' : ''}">${priceDisplay}</div>
                     ${actionBtnHtml}
@@ -4073,7 +4077,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v303`;
+                img.src = `assets/avatars/${av.id}.png?v=v304`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4133,7 +4137,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v303`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v304`;
             }
         };
         

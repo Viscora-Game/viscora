@@ -3082,115 +3082,182 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 
 .shop-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 18px;
     width: 100%;
     box-sizing: border-box;
-    padding: 5px;
+    padding: 6px;
 }
 
 .shop-item {
-    background: rgba(15, 23, 42, 0.45);
-    border: 1.5px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
-    padding: 15px;
+    background: linear-gradient(135deg, rgba(20, 20, 35, 0.75), rgba(10, 10, 20, 0.95));
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 18px;
+    padding: 22px 16px 18px 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
     box-sizing: border-box;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .shop-item:hover {
-    border-color: rgba(6, 182, 212, 0.4);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.15);
+    border-color: rgba(6, 182, 212, 0.35);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(6, 182, 212, 0.16), 0 0 15px rgba(6, 182, 212, 0.05) inset;
 }
 
 .shop-item-preview-box {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 12px;
+    width: 76px;
+    height: 76px;
+    margin-bottom: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    background: rgba(255,255,255,0.02);
-    border-radius: 8px;
-    border: 1px dashed rgba(255,255,255,0.05);
+    background: radial-gradient(circle at center, rgba(30, 41, 59, 0.45), rgba(15, 23, 42, 0.75));
+    border-radius: 16px;
+    border: 1px solid rgba(6, 182, 212, 0.18);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 8px rgba(6, 182, 212, 0.06) inset;
+    transition: all 0.25s ease;
+}
+
+.shop-item:hover .shop-item-preview-box {
+    border-color: rgba(6, 182, 212, 0.5);
+    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.15), 0 0 12px rgba(6, 182, 212, 0.1) inset;
 }
 
 .shop-item-name {
-    font-size: 0.95rem;
-    font-weight: 700;
+    font-size: 0.92rem;
+    font-weight: 800;
     color: #ffffff;
     margin-bottom: 5px;
+    letter-spacing: 0.2px;
 }
 
 .shop-item-description {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: #94a3b8;
     margin-bottom: 12px;
     min-height: 32px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .shop-item-price {
-    font-size: 0.9rem;
-    font-weight: bold;
-    color: #fbbf24;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #f59e0b; /* Amber */
     margin-bottom: 12px;
     display: flex;
     align-items: center;
     gap: 4px;
+    letter-spacing: 0.5px;
 }
 
 .shop-item-btn {
     width: 100%;
-    padding: 8px 12px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    border-radius: 30px; /* Rounded pill style */
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: inherit;
     border: none;
     outline: none;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
 }
 
 .shop-item-btn.buy {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
+    background: linear-gradient(135deg, #00f2fe, #4facfe); /* Cyan-blue premium gradient */
     color: #ffffff;
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .shop-item-btn.buy:hover {
-    transform: scale(1.03);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.45);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(79, 172, 254, 0.45);
 }
 
 .shop-item-btn.equip {
-    background: rgba(6, 182, 212, 0.1);
-    border: 1px solid rgba(6, 182, 212, 0.3);
-    color: #22d3ee;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px solid rgba(6, 182, 212, 0.35);
+    color: #00f2fe;
 }
 
 .shop-item-btn.equip:hover {
-    background: rgba(6, 182, 212, 0.2);
+    background: rgba(6, 182, 212, 0.15);
     color: #ffffff;
+    border-color: rgba(6, 182, 212, 0.65);
 }
 
 .shop-item-btn.active {
     background: linear-gradient(135deg, #10b981, #059669);
     color: #ffffff;
     cursor: default;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
     border: none;
 }
 
 .shop-item.equipped {
-    border-color: rgba(16, 185, 129, 0.4);
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.55);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.16), 0 0 10px rgba(16, 185, 129, 0.08) inset;
+    background: linear-gradient(135deg, rgba(20, 35, 30, 0.8), rgba(10, 20, 15, 0.98));
+}
+
+/* Modern, Premium Shop Category Tabs */
+#shop-screen .shop-tabs {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 22px;
+    box-sizing: border-box;
+    background: rgba(15, 23, 42, 0.4);
+    padding: 5px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#shop-screen .community-tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    color: #94a3b8 !important;
+    border-radius: 10px !important;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: none !important;
+}
+
+#shop-screen .community-tab-btn.active {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(6, 182, 212, 0.05)) !important;
+    color: #00f2fe !important;
+    border-color: rgba(6, 182, 212, 0.35) !important;
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.08) !important;
+}
+
+#shop-screen .community-tab-btn:not(.active):hover {
+    color: #f1f5f9 !important;
+    background: rgba(255, 255, 255, 0.02) !important;
 }
 
 /* Custom previews for cosmetic elements in the shop card */
