@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v322';
-import { ViscosityList } from './viscosity.js?v=v322';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v322';
-import { CloudSaveManager } from './cloud_save.js?v=v322';
+import { audio } from './audio.js?v=v323';
+import { ViscosityList } from './viscosity.js?v=v323';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v323';
+import { CloudSaveManager } from './cloud_save.js?v=v323';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -4626,7 +4626,10 @@ export class UIManager {
             { id: 'crystal_shard', label: 'Kristal Canavar' },
             { id: 'ghost_orb', label: 'Hayalet Küre' },
             { id: 'tentacle_blob', label: 'Dokunaçlı Jöle' },
-            { id: 'shadow_artifact', label: 'Gölge Miğferi' }
+            { id: 'shadow_artifact', label: 'Gölge Miğferi' },
+            { id: 'cosmic_star', label: 'Kozmik Yıldız' },
+            { id: 'cyber_patrol', label: 'Siber Devriye' },
+            { id: 'molten_slime', label: 'Erimiş Jöle' }
         ];
         
         // Selected avatar state
@@ -4648,7 +4651,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v322`;
+                img.src = `assets/avatars/${av.id}.png?v=v323`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4690,7 +4693,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v322`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v323`;
             }
         };
         
