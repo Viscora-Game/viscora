@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v300';
-import { ViscosityList } from './viscosity.js?v=v300';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v300';
-import { CloudSaveManager } from './cloud_save.js?v=v300';
+import { audio } from './audio.js?v=v301';
+import { ViscosityList } from './viscosity.js?v=v301';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v301';
+import { CloudSaveManager } from './cloud_save.js?v=v301';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -1070,6 +1070,24 @@ export class UIManager {
             this.bindTouchClick(btnCodex, () => {
                 this.codexReferrer = 'start';
                 this.showScreen('codex');
+            });
+        }
+
+        // Hakkında Modalı Aç/Kapat (Google AdSense ve SEO Rehberi)
+        const linkAbout = document.getElementById('link-about-game');
+        const btnCloseAbout = document.getElementById('btn-close-about');
+        const aboutModal = document.getElementById('about-modal');
+
+        if (linkAbout && aboutModal) {
+            this.bindTouchClick(linkAbout, (e) => {
+                if (e) e.preventDefault();
+                aboutModal.classList.remove('hidden');
+            });
+        }
+
+        if (btnCloseAbout && aboutModal) {
+            this.bindTouchClick(btnCloseAbout, () => {
+                aboutModal.classList.add('hidden');
             });
         }
 
@@ -4055,7 +4073,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v300`;
+                img.src = `assets/avatars/${av.id}.png?v=v301`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4115,7 +4133,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v300`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v301`;
             }
         };
         
