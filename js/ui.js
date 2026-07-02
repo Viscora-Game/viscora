@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v323';
-import { ViscosityList } from './viscosity.js?v=v323';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v323';
-import { CloudSaveManager } from './cloud_save.js?v=v323';
+import { audio } from './audio.js?v=v324';
+import { ViscosityList } from './viscosity.js?v=v324';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v324';
+import { CloudSaveManager } from './cloud_save.js?v=v324';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -4631,9 +4631,19 @@ export class UIManager {
             { id: 'cyber_patrol', label: 'Siber Devriye' },
             { id: 'molten_slime', label: 'Erimiş Jöle' }
         ];
+
+        // Özel VIP Avatar Kontrolü (sudenazzyilmaz54@gmail.com)
+        const googleEmail = (localStorage.getItem('viscora_google_email') || '').trim().toLowerCase();
+        if (googleEmail === 'sudenazzyilmaz54@gmail.com') {
+            this.profileAvatars.push({ id: 'heart_hs', label: 'H&S Özel Kalp' });
+        }
         
         // Selected avatar state
         this.selectedAvatar = localStorage.getItem('viscora_avatar') || 'slime_king';
+        if (this.selectedAvatar === 'heart_hs' && googleEmail !== 'sudenazzyilmaz54@gmail.com') {
+            this.selectedAvatar = 'slime_king';
+            localStorage.setItem('viscora_avatar', 'slime_king');
+        }
         if (this.selectedAvatar.includes('🟢') || this.selectedAvatar.includes('🔵') || this.selectedAvatar.includes('🌸') || this.selectedAvatar.includes('🤖') || this.selectedAvatar.includes('👾') || this.selectedAvatar.includes('🚀')) {
             // Reset legacy emoji avatars to default new image avatar
             this.selectedAvatar = 'slime_king';
@@ -4651,7 +4661,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v323`;
+                img.src = `assets/avatars/${av.id}.png?v=v324`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4693,7 +4703,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v323`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v324`;
             }
         };
         
