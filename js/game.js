@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v329';
-import { Level } from './level.js?v=v329';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v329';
-import { UIManager } from './ui.js?v=v329';
-import { CloudSaveManager } from './cloud_save.js?v=v329';
-import { audio } from './audio.js?v=v329';
-import { LevelEditor } from './editor.js?v=v329';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v329';
+import { Player } from './player.js?v=v330';
+import { Level } from './level.js?v=v330';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v330';
+import { UIManager } from './ui.js?v=v330';
+import { CloudSaveManager } from './cloud_save.js?v=v330';
+import { audio } from './audio.js?v=v330';
+import { LevelEditor } from './editor.js?v=v330';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v330';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -693,9 +693,53 @@ export class GameManager {
     }
 
     /**
+     * Kolay modda oyuncuyu son ulaşılan checkpoint noktasında canlandırır.
+     */
+    respawnAtCheckpoint() {
+        this.state = 'PLAYING';
+        this.particles = [];
+        this.splatters = [];
+        
+        // Bölüm durumunu sıfırla ama checkpoint durumlarını koru
+        this.level.resetLevelRuntimeState(true);
+        this.initEnemies(this.currentLevel);
+        
+        let maxH = 3;
+        if (this.difficulty === 'easy') maxH = 3;
+        else if (this.difficulty === 'normal') maxH = 3;
+        else if (this.difficulty === 'hard') maxH = 2;
+        else if (this.difficulty === 'hardcore') maxH = 1;
+        
+        this.player.maxHealth = maxH;
+        this.player.health = maxH;
+        
+        // Son aktif checkpoint konumunda canlandır
+        this.player.respawn(this.checkpointX, this.checkpointY, maxH);
+        this.player.invulnerableFrames = 90; // 1.5 saniye doğma koruması
+        
+        this.ui.updateHUDHealth(this.player.health);
+        this.ui.updateHUDViscosity(this.player.viscosity);
+        this.emitParticles(this.checkpointX, this.checkpointY, 'shift', '#10b981', 30);
+        audio.playShift('LOW');
+        audio.resume();
+        this.lastTime = performance.now();
+        this.physicsAccumulator = 0;
+        
+        // Kamerayı anında yeni pozisyona eşitle
+        this.camera.x = this.player.x - this.cssWidth / 2;
+        this.camera.y = this.player.y - this.cssHeight / 1.38;
+        const minX = 0;
+        const maxX = this.level.width - this.cssWidth;
+        this.camera.x = Math.max(minX, Math.min(this.camera.x, maxX));
+        const minY = -350;
+        const maxY = this.level.height - this.cssHeight + 350;
+        this.camera.y = Math.max(minY, Math.min(this.camera.y, maxY));
+    }
+
+    /**
      * Oyunu Yeniden Başlatır (Ölüm veya Tekrar Oyna sonrası)
      */
-    restart() {
+    restart(fromPause = false) {
         // Her 3 ölümde bir ipucu göster (sayaç gameover geçişinde artırılıyor)
         if (this.levelDeaths % 3 === 0 && LEVEL_HINTS[this.currentLevel]) {
             this.hintTimer = this.hintMaxTime;
@@ -703,10 +747,16 @@ export class GameManager {
             this.hintTimer = 0;
         }
 
-        if (this.currentLevel === 999 && this.currentCustomLevelData) {
-            this.startCustomLevel(this.currentCustomLevelData);
+        if (this.difficulty === 'easy' && !fromPause) {
+            // Kolay modda ölüp yeniden dene denildiğinde son girilen checkpointten doğ
+            this.respawnAtCheckpoint();
         } else {
-            this.start(false);
+            // Diğer tüm durumlarda veya pause menüsünden yeniden başlatıldığında en baştan başla
+            if (this.currentLevel === 999 && this.currentCustomLevelData) {
+                this.startCustomLevel(this.currentCustomLevelData);
+            } else {
+                this.start(false);
+            }
         }
     }
 
@@ -2404,7 +2454,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v329', this.cssWidth - 10, 10);
+        this.ctx.fillText('v330', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {

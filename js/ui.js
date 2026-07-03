@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v329';
-import { ViscosityList } from './viscosity.js?v=v329';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v329';
-import { CloudSaveManager } from './cloud_save.js?v=v329';
+import { audio } from './audio.js?v=v330';
+import { ViscosityList } from './viscosity.js?v=v330';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v330';
+import { CloudSaveManager } from './cloud_save.js?v=v330';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -853,7 +853,7 @@ export class UIManager {
         // Duraklatma Ekranı - Yeniden Başlat
         this.bindTouchClick(document.getElementById('btn-restart-pause'), () => {
             this.showScreen('hud');
-            this.game.restart();
+            this.game.restart(true);
         });
 
         // Duraklatma Ekranı - Ana Menüye Dön
@@ -1027,7 +1027,7 @@ export class UIManager {
         // Bölüm Sonu Ekranı - Bölümü Tekrarla (Aynı Bölümü Yeniden Başlat)
         this.bindTouchClick(document.getElementById('btn-win-retry'), () => {
             this.showScreen('hud');
-            this.game.restart();
+            this.game.restart(true);
         });
 
         // Bölüm Sonu Ekranı - Ana Menüye Dön
@@ -4667,7 +4667,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v329`;
+                img.src = `assets/avatars/${av.id}.png?v=v330`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4709,7 +4709,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v329`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v330`;
             }
         };
         
