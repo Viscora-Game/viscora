@@ -36,7 +36,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v332">
+    <link rel="stylesheet" href="index.css?v=v333">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -679,7 +679,7 @@
                     <span class="terminal-dot red"></span>
                     <span class="terminal-dot yellow"></span>
                     <span class="terminal-dot green"></span>
-                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v332</span>
+                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v333</span>
                 </div>
                 <div class="terminal-body">
                     <div id="terminal-text"></div>
@@ -774,7 +774,7 @@
                     
                     <!-- Oyuncu Profil Kartı (Karakter & Bakiye) -->
                     <div id="player-profile-widget">
-                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v332" alt="Avatar" />
+                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v333" alt="Avatar" />
                         <div id="profile-widget-name">Oyuncu</div>
                         <div class="profile-divider"></div>
                         <div class="profile-crystals">
@@ -854,24 +854,79 @@
         <div id="profile-settings-modal" class="star-gate-overlay hidden">
             <div class="star-gate-card sound-settings-card" style="max-width: 380px; width: 92%;">
                 <h2 class="star-gate-title"><svg class="icon-svg"><use href="#icon-flask"></use></svg> OYUNCU PROFİLİ</h2>
-                <div class="menu-settings" style="margin: 15px 0;">
-                    <!-- Kullanıcı Adı Girişi -->
-                    <div class="settings-block">
-                        <span class="settings-block-title">KULLANICI ADI</span>
-                        <input type="text" id="profile-username-input" class="profile-input" placeholder="Adınızı girin..." maxlength="14" />
-                    </div>
-                    
-                    <!-- Avatar Seçimi -->
-                    <div class="settings-block" style="margin-top: 15px;">
-                        <span class="settings-block-title">AVATAR SEÇİN</span>
-                        <div id="profile-avatar-picker" class="avatar-picker-grid">
-                            <!-- Avatars will be generated here -->
+                
+                <!-- Profil Sekme Butonları -->
+                <div class="profile-tabs" style="display: flex; border-bottom: 2px solid rgba(255,255,255,0.1); margin-bottom: 12px; gap: 8px;">
+                    <button id="profile-tab-avatar" class="profile-tab-btn active" type="button" style="flex: 1; background: none; border: none; color: #00f2fe; font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; padding: 8px; cursor: pointer; border-bottom: 2px solid #00f2fe; margin-bottom: -2px; outline: none;">👤 AVATAR</button>
+                    <button id="profile-tab-badges" class="profile-tab-btn" type="button" style="flex: 1; background: none; border: none; color: #a1a1aa; font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600; padding: 8px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; outline: none;">🏆 ROZETLER</button>
+                </div>
+
+                <!-- Sekme İçeriği: Avatar -->
+                <div id="profile-pane-avatar" class="profile-pane">
+                    <div class="menu-settings" style="margin: 15px 0;">
+                        <!-- Kullanıcı Adı Girişi -->
+                        <div class="settings-block">
+                            <span class="settings-block-title">KULLANICI ADI</span>
+                            <input type="text" id="profile-username-input" class="profile-input" placeholder="Adınızı girin..." maxlength="14" />
+                        </div>
+                        
+                        <!-- Avatar Seçimi -->
+                        <div class="settings-block" style="margin-top: 15px;">
+                            <span class="settings-block-title">AVATAR SEÇİN</span>
+                            <div id="profile-avatar-picker" class="avatar-picker-grid">
+                                <!-- Avatars will be generated here -->
+                            </div>
                         </div>
                     </div>
                 </div>
+                
+                <!-- Sekme İçeriği: Rozetler -->
+                <div id="profile-pane-badges" class="profile-pane hidden" style="max-height: 270px; overflow-y: auto; padding-right: 4px; box-sizing: border-box; margin: 10px 0;">
+                    <div id="profile-badges-grid" class="badges-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <!-- Achievements will be generated here -->
+                    </div>
+                </div>
+
                 <div style="display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
                     <button id="btn-save-profile" class="menu-btn primary-btn" style="flex: 1; margin: 0; height: 38px; font-size: 0.85rem;">KAYDET</button>
                     <button id="btn-close-profile" class="menu-btn danger-btn" style="flex: 1; margin: 0; height: 38px; font-size: 0.85rem;">İPTAL</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rozet Detay Modalı -->
+        <div id="badge-detail-modal" class="star-gate-overlay hidden" style="z-index: 1100;">
+            <div class="star-gate-card sound-settings-card" style="max-width: 320px; width: 90%; text-align: center; padding: 25px 20px;">
+                <div id="badge-detail-img-container" class="badge-detail-glow-box" style="position: relative; width: 100px; height: 100px; margin: 0 auto 15px auto; border-radius: 50%; padding: 5px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0,242,254,0.3); border: 2px solid #00f2fe; background: rgba(15,23,42,0.8);">
+                    <img id="badge-detail-img" src="" style="width: 85px; height: 85px; object-fit: contain; border-radius: 50%;" />
+                </div>
+                <h3 id="badge-detail-title" style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; color: #00f2fe; text-shadow: 0 0 10px rgba(0,242,254,0.3); margin-bottom: 8px; margin-top: 0;">İlk Adımlar</h3>
+                <p id="badge-detail-desc" style="font-family: 'Inter', sans-serif; font-size: 0.8rem; color: #e2e8f0; line-height: 1.4; margin-bottom: 12px; margin-top: 0;">Sektör 01'i başarıyla tamamlayarak sisteme ilk adımını at.</p>
+                
+                <div id="badge-detail-progress-container" style="margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #a1a1aa; font-family: 'Inter', sans-serif; margin-bottom: 4px;">
+                        <span>İlerleme</span>
+                        <span id="badge-detail-progress-text">1 / 1</span>
+                    </div>
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;">
+                        <div id="badge-detail-progress-bar" style="width: 100%; height: 100%; background: linear-gradient(90deg, #00f2fe, #4facfe); transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+                
+                <div id="badge-detail-date" style="font-family: 'Inter', sans-serif; font-size: 0.72rem; color: #10b981; margin-bottom: 15px;">Açılış Tarihi: -</div>
+                <button id="btn-close-badge-detail" class="menu-btn primary-btn" style="margin: 0; width: 100%; height: 36px; font-size: 0.82rem;">KAPAT</button>
+            </div>
+        </div>
+
+        <!-- HUD Achievement Toast Notification -->
+        <div id="achievement-toast" class="achievement-toast-container hidden">
+            <div class="achievement-toast-card">
+                <div class="achievement-toast-icon-container">
+                    <img id="achievement-toast-icon" src="" />
+                </div>
+                <div class="achievement-toast-text-container">
+                    <span class="achievement-toast-label">🏆 BAŞARIM AÇILDI!</span>
+                    <span id="achievement-toast-title" class="achievement-toast-name">Başarım Adı</span>
                 </div>
             </div>
         </div>
@@ -1599,8 +1654,8 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v332"></script>
-    <script type="module" src="js/main.js?v=v332"></script>
+    <script src="js/controls_customizer.js?v=v333"></script>
+    <script type="module" src="js/main.js?v=v333"></script>
 </body>
 </html>
 

@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v332';
-import { ViscosityList } from './viscosity.js?v=v332';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v332';
-import { CloudSaveManager } from './cloud_save.js?v=v332';
+import { audio } from './audio.js?v=v333';
+import { ViscosityList } from './viscosity.js?v=v333';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v333';
+import { CloudSaveManager } from './cloud_save.js?v=v333';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -4671,7 +4671,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v332`;
+                img.src = `assets/avatars/${av.id}.png?v=v333`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4713,7 +4713,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v332`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v333`;
             }
         };
         
@@ -4798,12 +4798,241 @@ export class UIManager {
             });
         }
         
+        // Bind Profile Tabs
+        const tabAvatar = document.getElementById('profile-tab-avatar');
+        const tabBadges = document.getElementById('profile-tab-badges');
+        const paneAvatar = document.getElementById('profile-pane-avatar');
+        const paneBadges = document.getElementById('profile-pane-badges');
+
+        if (tabAvatar && tabBadges && paneAvatar && paneBadges) {
+            this.bindTouchClick(tabAvatar, () => {
+                tabAvatar.classList.add('active');
+                tabAvatar.style.color = '#00f2fe';
+                tabAvatar.style.borderBottomColor = '#00f2fe';
+                
+                tabBadges.classList.remove('active');
+                tabBadges.style.color = '#a1a1aa';
+                tabBadges.style.borderBottomColor = 'transparent';
+                
+                paneAvatar.classList.remove('hidden');
+                paneBadges.classList.add('hidden');
+            });
+
+            this.bindTouchClick(tabBadges, () => {
+                tabBadges.classList.add('active');
+                tabBadges.style.color = '#00f2fe';
+                tabBadges.style.borderBottomColor = '#00f2fe';
+                
+                tabAvatar.classList.remove('active');
+                tabAvatar.style.color = '#a1a1aa';
+                tabAvatar.style.borderBottomColor = 'transparent';
+                
+                paneBadges.classList.remove('hidden');
+                paneAvatar.classList.add('hidden');
+                
+                this.renderBadgesGrid();
+            });
+        }
+        
+        // Wrap openProfileModal with tab reset
+        const originalOpenProfileModal = openProfileModal;
+        openProfileModal = (isFirstTime = false) => {
+            originalOpenProfileModal(isFirstTime);
+            if (tabAvatar) {
+                // Reset active tab to avatar choice
+                tabAvatar.click();
+            }
+            this.renderBadgesGrid();
+        };
+
+        // Bind Widget Click again to ensure the wrapped openProfileModal is used
+        if (widget) {
+            this.bindTouchClick(widget, () => {
+                openProfileModal(false);
+            });
+        }
+        
         // Trigger First-time username prompt if not set
         if (!localStorage.getItem('viscora_username_set')) {
             setTimeout(() => {
                 openProfileModal(true);
             }, 800);
         }
+    }
+
+    renderBadgesGrid() {
+        const grid = document.getElementById('profile-badges-grid');
+        if (!grid) return;
+        
+        grid.innerHTML = '';
+        
+        let achievements = {};
+        try {
+            achievements = JSON.parse(localStorage.getItem('viscora_achievements') || '{}');
+        } catch(e) {
+            achievements = {};
+        }
+        if (!achievements) achievements = {};
+        
+        const badgesData = [
+            {
+                id: 'badge_first_steps',
+                title: 'İlk Adımlar',
+                desc: 'Sektör 01\'i (Bölüm 1) başarıyla tamamlayarak sisteme ilk adımını at.',
+                icon: 'assets/badges/badge_first_steps.png?v=v333',
+                target: 1,
+                getProgress: () => this.game.isLevelUnlocked(2) ? 1 : 0
+            },
+            {
+                id: 'badge_boss_1',
+                title: 'Bozucu Bükücü',
+                desc: 'Sektör 10\'da koruyucu protokol Visko-Bozucu\'yu etkisiz hale getir.',
+                icon: 'assets/badges/badge_boss_1.png?v=v333',
+                target: 1,
+                getProgress: () => this.game.isLevelUnlocked(11) ? 1 : 0
+            },
+            {
+                id: 'badge_star_collector',
+                title: 'Yıldız Avcısı',
+                desc: 'Seviyelerde toplam 30 yıldız toplayarak veri analizini tamamla.',
+                icon: 'assets/badges/badge_star_collector.png?v=v333',
+                target: 30,
+                getProgress: () => this.game.getTotalStars()
+            },
+            {
+                id: 'badge_form_shifter',
+                title: 'Form Değiştirici',
+                desc: 'Farklı engelleri aşmak için viskozite formlarını 100 kez değiştir.',
+                icon: 'assets/badges/badge_form_shifter.png?v=v333',
+                target: 100,
+                getProgress: () => parseInt(localStorage.getItem('viscora_stats_form_shifts')) || 0
+            },
+            {
+                id: 'badge_speedrun',
+                title: 'Hız Tutkunu',
+                desc: 'Herhangi bir ana kampanya seviyesini 15 saniyeden daha kısa sürede tamamla.',
+                icon: 'assets/badges/badge_speedrun.png?v=v333',
+                target: 1,
+                getProgress: () => achievements['badge_speedrun'] ? 1 : 0
+            },
+            {
+                id: 'badge_champion',
+                title: 'Sistem Kurtarıcısı',
+                desc: 'Sektör 30\'da ana çekirdeği virüsten arındırarak kampanyayı bitir.',
+                icon: 'assets/badges/badge_champion.png?v=v333',
+                target: 1,
+                getProgress: () => (this.game.isLevelUnlocked(30) && this.game.getStarsForLevel(30) > 0) ? 1 : 0
+            }
+        ];
+        
+        badgesData.forEach(badge => {
+            const isUnlocked = !!achievements[badge.id];
+            const currentProgress = badge.getProgress();
+            const pct = Math.min(100, Math.floor((currentProgress / badge.target) * 100));
+            
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = `badge-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+            card.dataset.badgeId = badge.id;
+            
+            card.innerHTML = `
+                <img src="${badge.icon}" alt="${badge.title}" />
+                <span class="badge-card-name">${badge.title}</span>
+                ${!isUnlocked ? `
+                <div class="badge-card-progress-bar-container">
+                    <div class="badge-card-progress-bar" style="width: ${pct}%;"></div>
+                </div>
+                ` : ''}
+            `;
+            
+            this.bindTouchClick(card, () => {
+                this.showBadgeDetail(badge, isUnlocked, currentProgress, achievements[badge.id]);
+            });
+            
+            grid.appendChild(card);
+        });
+    }
+
+    showBadgeDetail(badge, isUnlocked, currentProgress, unlockTime) {
+        const modal = document.getElementById('badge-detail-modal');
+        const img = document.getElementById('badge-detail-img');
+        const title = document.getElementById('badge-detail-title');
+        const desc = document.getElementById('badge-detail-desc');
+        const progressText = document.getElementById('badge-detail-progress-text');
+        const progressBar = document.getElementById('badge-detail-progress-bar');
+        const dateEl = document.getElementById('badge-detail-date');
+        const btnClose = document.getElementById('btn-close-badge-detail');
+        
+        if (!modal) return;
+        
+        if (img) img.src = badge.icon;
+        if (title) title.textContent = badge.title;
+        if (desc) desc.textContent = badge.desc;
+        
+        // Progress display
+        if (progressText) progressText.textContent = `${Math.min(badge.target, currentProgress)} / ${badge.target}`;
+        if (progressBar) {
+            const pct = Math.min(100, Math.floor((currentProgress / badge.target) * 100));
+            progressBar.style.width = `${pct}%`;
+        }
+        
+        // Date display
+        if (dateEl) {
+            if (isUnlocked) {
+                const date = new Date(unlockTime);
+                const dateStr = `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${date.getFullYear()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+                dateEl.textContent = `Açılış Tarihi: ${dateStr}`;
+                dateEl.style.color = '#10b981'; // green
+            } else {
+                dateEl.textContent = 'KİLİTLİ';
+                dateEl.style.color = '#ef4444'; // red
+            }
+        }
+        
+        if (btnClose) {
+            this.bindTouchClick(btnClose, () => {
+                modal.classList.add('hidden');
+            });
+        }
+        
+        modal.classList.remove('hidden');
+    }
+
+    showAchievementUnlockToast(badgeId) {
+        const badgesData = {
+            badge_first_steps: { title: 'İlk Adımlar', icon: 'assets/badges/badge_first_steps.png?v=v333' },
+            badge_boss_1: { title: 'Bozucu Bükücü', icon: 'assets/badges/badge_boss_1.png?v=v333' },
+            badge_star_collector: { title: 'Yıldız Avcısı', icon: 'assets/badges/badge_star_collector.png?v=v333' },
+            badge_form_shifter: { title: 'Form Değiştirici', icon: 'assets/badges/badge_form_shifter.png?v=v333' },
+            badge_speedrun: { title: 'Hız Tutkunu', icon: 'assets/badges/badge_speedrun.png?v=v333' },
+            badge_champion: { title: 'Sistem Kurtarıcısı', icon: 'assets/badges/badge_champion.png?v=v333' }
+        };
+        
+        const badge = badgesData[badgeId];
+        if (!badge) return;
+        
+        const toast = document.getElementById('achievement-toast');
+        const icon = document.getElementById('achievement-toast-icon');
+        const title = document.getElementById('achievement-toast-title');
+        
+        if (!toast) return;
+        
+        if (icon) icon.src = badge.icon;
+        if (title) title.textContent = badge.title;
+        
+        // Play victory/win sound effect
+        try {
+            audio.playWin();
+        } catch(e) {}
+        
+        toast.classList.remove('hidden');
+        
+        // Confetti!
+        this.triggerConfetti();
+        
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 4000);
     }
 
     triggerConfetti() {

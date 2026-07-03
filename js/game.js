@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v332';
-import { Level } from './level.js?v=v332';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v332';
-import { UIManager } from './ui.js?v=v332';
-import { CloudSaveManager } from './cloud_save.js?v=v332';
-import { audio } from './audio.js?v=v332';
-import { LevelEditor } from './editor.js?v=v332';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v332';
+import { Player } from './player.js?v=v333';
+import { Level } from './level.js?v=v333';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v333';
+import { UIManager } from './ui.js?v=v333';
+import { CloudSaveManager } from './cloud_save.js?v=v333';
+import { audio } from './audio.js?v=v333';
+import { LevelEditor } from './editor.js?v=v333';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v333';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1003,6 +1003,55 @@ export class GameManager {
         }
     }
 
+    checkForAchievement(badgeId) {
+        let achievements = {};
+        try {
+            achievements = JSON.parse(localStorage.getItem('viscora_achievements') || '{}');
+        } catch (e) {
+            achievements = {};
+        }
+        if (!achievements) achievements = {};
+
+        if (achievements[badgeId]) return false; // Zaten açılmış
+
+        let unlock = false;
+
+        if (badgeId === 'badge_first_steps') {
+            if (this.currentLevel === 1) unlock = true;
+        } else if (badgeId === 'badge_boss_1') {
+            if (this.currentLevel === 10) unlock = true;
+        } else if (badgeId === 'badge_champion') {
+            if (this.currentLevel === 30) unlock = true;
+        } else if (badgeId === 'badge_star_collector') {
+            if (this.getTotalStars() >= 30) unlock = true;
+        } else if (badgeId === 'badge_form_shifter') {
+            const shifts = parseInt(localStorage.getItem('viscora_stats_form_shifts')) || 0;
+            if (shifts >= 100) unlock = true;
+        } else if (badgeId === 'badge_speedrun') {
+            if (this.currentLevel !== 999 && this.currentLevel > 0 && this.gameTime && this.gameTime < 15) {
+                unlock = true;
+            }
+        }
+
+        if (unlock) {
+            achievements[badgeId] = Date.now();
+            localStorage.setItem('viscora_achievements', JSON.stringify(achievements));
+            
+            // UI üzerinde başarım kutusu göster
+            if (this.ui) {
+                this.ui.showAchievementUnlockToast(badgeId);
+            }
+            
+            // Hemen buluta kaydet (arka planda)
+            import('./cloud_save.js?v=v333').then(({ CloudSaveManager }) => {
+                CloudSaveManager.saveProgress(false).catch(err => console.warn("Achievement sync error:", err));
+            });
+            
+            return true;
+        }
+        return false;
+    }
+
     togglePause() {
         if (this.editor && this.editor.active) return; // Editör aktifken (Playtest dahil) duraklatmayı engelle
         if (this.state === 'PLAYING') {
@@ -1222,6 +1271,14 @@ export class GameManager {
         if (isCampaignLvl) {
             this.saveStarsForLevel(this.currentLevel, stars);
             this.submitCampaignScore(this.currentLevel, this.gameTime);
+            
+            // Başarımları Kontrol Et
+            this.checkForAchievement('badge_first_steps');
+            this.checkForAchievement('badge_boss_1');
+            this.checkForAchievement('badge_champion');
+            this.checkForAchievement('badge_speedrun');
+            this.checkForAchievement('badge_star_collector');
+            
             if (this.difficulty === 'hardcore' && this.ui) {
                 this.ui.updateWeeklyChallenge(2, 1);
             }
@@ -2459,7 +2516,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v332', this.cssWidth - 10, 10);
+        this.ctx.fillText('v333', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {

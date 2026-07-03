@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v332';
-import { audio } from './audio.js?v=v332';
+import { ViscosityStates } from './viscosity.js?v=v333';
+import { audio } from './audio.js?v=v333';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -118,6 +118,14 @@ export class Player {
         audio.playShift(stateId);
         audio.updateViscosityFilter(stateId);
         
+        // İstatistik Form Değiştirme Sayacını Artır
+        let shifts = parseInt(localStorage.getItem('viscora_stats_form_shifts')) || 0;
+        shifts++;
+        localStorage.setItem('viscora_stats_form_shifts', shifts.toString());
+        if (this.game) {
+            this.game.checkForAchievement('badge_form_shifter');
+        }
+        
         // Görsel parlama patlaması
         this.glowBoost = 20;
 
@@ -160,6 +168,15 @@ export class Player {
             this.health = 0;
             this.isDead = true;
             this.deathType = type;
+            
+            // İstatistik Ölüm Sayacını Artır
+            let totalDeaths = parseInt(localStorage.getItem('viscora_stats_deaths')) || 0;
+            totalDeaths++;
+            localStorage.setItem('viscora_stats_deaths', totalDeaths.toString());
+            if (this.game) {
+                this.game.checkForAchievement('badge_deaths');
+            }
+
             if (type === 'melt') {
                 this.meltTimer = 120; // 2 saniye toplam süre (erime + yerde yassı bekleme)
                 this.meltParticlesEmitted = false;
