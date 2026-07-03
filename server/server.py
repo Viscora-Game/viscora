@@ -319,6 +319,25 @@ def get_user_by_sync_code(code):
             return u
     return None
 
+def get_user_by_email(email):
+    if not email:
+        return None
+    email = str(email).strip().lower()
+    if mongo_users_collection is not None:
+        try:
+            res = mongo_users_collection.find_one({'googleEmail': email}, {'_id': False})
+            if res:
+                return res
+        except Exception as e:
+            print("MongoDB find_one by googleEmail error:", e)
+            
+    users = read_users_db()
+    for u in users:
+        u_email = u.get('googleEmail')
+        if u_email and str(u_email).strip().lower() == email:
+            return u
+    return None
+
 def save_user(user_data):
     if mongo_users_collection is not None:
         try:
@@ -855,6 +874,71 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header('Content-Type', 'application/json; charset=utf-8')
                 self.end_headers()
                 self.wfile.write(json.dumps({'error': 'Geçersiz veya bulunamayan kurtarma kodu.'}, ensure_ascii=False).encode('utf-8'))
+            return
+        # Admin: E-postaya Elmas Gönder/Ekle: POST /api/admin/add-crystals
+        if path == '/api/admin/add-crystals':
+            email = body.get('email')
+            count = body.get('count', 0)
+            secret = body.get('secret')
+            
+            if secret != "ViscoraSecretAdminKey_2026":
+                self.send_response(403)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': 'Yetkisiz erişim.'}, ensure_ascii=False).encode('utf-8'))
+                return
+                
+            if not email or count <= 0:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': 'Geçersiz email veya elmas adedi.'}, ensure_ascii=False).encode('utf-8'))
+                return
+                
+            user_record = get_user_by_email(email)
+            if not user_record:
+                self.send_response(404)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': 'Belirtilen e-postaya ait kayıt bulunamadı.'}, ensure_ascii=False).encode('utf-8'))
+                return
+                
+            save_data = user_record.get('saveData', {})
+            
+            # Elmas adetlerini güncelle
+            total = int(save_data.get('totalCrystals', 0) or 0) + count
+            spent = int(save_data.get('spentCrystals', 0) or 0)
+            
+            save_data['totalCrystals'] = total
+            
+            # Yeni imza ve zaman damgası oluştur
+            import time
+            owned_items = save_data.get('ownedItems', ['default_trail', 'default_accessory', 'default_eyes'])
+            owned_str = json.dumps(owned_items) if isinstance(owned_items, list) else str(owned_items)
+            
+            sig = generate_signature_py(total, spent, owned_str)
+            save_data['balanceSig'] = sig
+            
+            # Zaman damgasını ve lastSaveTime güncelle (Last Write Wins tetiklemesi için)
+            now_ms = int(time.time() * 1000)
+            save_data['lastSaveTime'] = now_ms
+            
+            user_record['saveData'] = save_data
+            user_record['lastUpdated'] = datetime.now(timezone.utc).isoformat()
+            
+            if save_user(user_record):
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'status': 'success',
+                    'message': f'{email} hesabına {count} elmas başarıyla eklendi.',
+                    'totalCrystals': total,
+                    'lastSaveTime': now_ms
+                }, ensure_ascii=False).encode('utf-8'))
+            else:
+                self.send_response(500)
+                self.end_headers()
             return
 
         # Google Giriş ve Senkronizasyon: POST /api/user/google_auth
