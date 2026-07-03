@@ -875,6 +875,52 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({'error': 'Geçersiz veya bulunamayan kurtarma kodu.'}, ensure_ascii=False).encode('utf-8'))
             return
+        # Admin: E-posta Arama: POST /api/admin/search-users
+        if path == '/api/admin/search-users':
+            query = body.get('query', '')
+            secret = body.get('secret')
+            
+            if secret != "ViscoraSecretAdminKey_2026":
+                self.send_response(403)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': 'Yetkisiz erişim.'}, ensure_ascii=False).encode('utf-8'))
+                return
+                
+            matched_users = []
+            if mongo_users_collection is not None:
+                try:
+                    # Case-insensitive regex search in MongoDB
+                    cursor = mongo_users_collection.find(
+                        {'googleEmail': {'$regex': query, '$options': 'i'}}, 
+                        {'_id': False}
+                    )
+                    matched_users = list(cursor)
+                except Exception as e:
+                    print("MongoDB search error:", e)
+            else:
+                users = read_users_db()
+                for u in users:
+                    u_email = u.get('googleEmail')
+                    if u_email and query.lower() in str(u_email).lower():
+                        matched_users.append(u)
+                        
+            # Return list of emails and details
+            results = []
+            for u in matched_users:
+                results.append({
+                    'email': u.get('googleEmail'),
+                    'userId': u.get('userId'),
+                    'syncCode': u.get('syncCode'),
+                    'totalCrystals': u.get('saveData', {}).get('totalCrystals', 0)
+                })
+                
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps({'results': results}, ensure_ascii=False).encode('utf-8'))
+            return
+
         # Admin: E-postaya Elmas Gönder/Ekle: POST /api/admin/add-crystals
         if path == '/api/admin/add-crystals':
             email = body.get('email')
