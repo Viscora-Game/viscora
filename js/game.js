@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v335';
-import { Level } from './level.js?v=v335';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v335';
-import { UIManager } from './ui.js?v=v335';
-import { CloudSaveManager } from './cloud_save.js?v=v335';
-import { audio } from './audio.js?v=v335';
-import { LevelEditor } from './editor.js?v=v335';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v335';
+import { Player } from './player.js?v=v336';
+import { Level } from './level.js?v=v336';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v336';
+import { UIManager } from './ui.js?v=v336';
+import { CloudSaveManager } from './cloud_save.js?v=v336';
+import { audio } from './audio.js?v=v336';
+import { LevelEditor } from './editor.js?v=v336';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v336';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1043,7 +1043,7 @@ export class GameManager {
             }
             
             // Hemen buluta kaydet (arka planda)
-            import('./cloud_save.js?v=v335').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v336').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Achievement sync error:", err));
             });
             
@@ -2516,7 +2516,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v335', this.cssWidth - 10, 10);
+        this.ctx.fillText('v336', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
