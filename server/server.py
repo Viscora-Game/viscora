@@ -175,6 +175,30 @@ def merge_save_data(db_save, incoming_save):
         
     merged = db_save.copy()
     
+    # Achievements ve İstatistik Birleştirme
+    db_ach = db_save.get('achievements', {})
+    inc_ach = incoming_save.get('achievements', {})
+    if isinstance(db_ach, str):
+        try: db_ach = json.loads(db_ach)
+        except: db_ach = {}
+    if isinstance(inc_ach, str):
+        try: inc_ach = json.loads(inc_ach)
+        except: inc_ach = {}
+    if not isinstance(db_ach, dict): db_ach = {}
+    if not isinstance(inc_ach, dict): inc_ach = {}
+    
+    merged_ach = db_ach.copy()
+    merged_ach.update(inc_ach)
+    merged['achievements'] = merged_ach
+    
+    db_deaths = int(db_save.get('statsDeaths', 0) or 0)
+    inc_deaths = int(incoming_save.get('statsDeaths', 0) or 0)
+    merged['statsDeaths'] = max(db_deaths, inc_deaths)
+    
+    db_shifts = int(db_save.get('statsFormShifts', 0) or 0)
+    inc_shifts = int(incoming_save.get('statsFormShifts', 0) or 0)
+    merged['statsFormShifts'] = max(db_shifts, inc_shifts)
+    
     # 1. Kristaller ve Kozmetikler (En yüksek toplam kristale sahip olan kazanır)
     db_total = int(db_save.get('totalCrystals', 0) or 0)
     inc_total = int(incoming_save.get('totalCrystals', 0) or 0)
