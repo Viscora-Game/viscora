@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v330';
-import { Level } from './level.js?v=v330';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v330';
-import { UIManager } from './ui.js?v=v330';
-import { CloudSaveManager } from './cloud_save.js?v=v330';
-import { audio } from './audio.js?v=v330';
-import { LevelEditor } from './editor.js?v=v330';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v330';
+import { Player } from './player.js?v=v331';
+import { Level } from './level.js?v=v331';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v331';
+import { UIManager } from './ui.js?v=v331';
+import { CloudSaveManager } from './cloud_save.js?v=v331';
+import { audio } from './audio.js?v=v331';
+import { LevelEditor } from './editor.js?v=v331';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v331';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -711,10 +711,10 @@ export class GameManager {
         else if (this.difficulty === 'hardcore') maxH = 1;
         
         this.player.maxHealth = maxH;
-        this.player.health = maxH;
+        this.player.health = 1;
         
-        // Son aktif checkpoint konumunda canlandır
-        this.player.respawn(this.checkpointX, this.checkpointY, maxH);
+        // Son aktif checkpoint konumunda 1 can ile canlandır
+        this.player.respawn(this.checkpointX, this.checkpointY, 1);
         this.player.invulnerableFrames = 90; // 1.5 saniye doğma koruması
         
         this.ui.updateHUDHealth(this.player.health);
@@ -2454,7 +2454,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v330', this.cssWidth - 10, 10);
+        this.ctx.fillText('v331', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
