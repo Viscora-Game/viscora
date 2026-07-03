@@ -960,7 +960,15 @@ class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
             # Yeni imza ve zaman damgası oluştur
             import time
             owned_items = save_data.get('ownedItems', ['default_trail', 'default_accessory', 'default_eyes'])
-            owned_str = json.dumps(owned_items) if isinstance(owned_items, list) else str(owned_items)
+            if isinstance(owned_items, str):
+                try:
+                    owned_items = json.loads(owned_items)
+                except:
+                    pass
+            if not isinstance(owned_items, list):
+                owned_items = ['default_trail', 'default_accessory', 'default_eyes']
+            
+            owned_str = json.dumps(owned_items, separators=(',', ':'))
             
             sig = generate_signature_py(total, spent, owned_str)
             save_data['balanceSig'] = sig
