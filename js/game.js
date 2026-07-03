@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v336';
-import { Level } from './level.js?v=v336';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v336';
-import { UIManager } from './ui.js?v=v336';
-import { CloudSaveManager } from './cloud_save.js?v=v336';
-import { audio } from './audio.js?v=v336';
-import { LevelEditor } from './editor.js?v=v336';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v336';
+import { Player } from './player.js?v=v337';
+import { Level } from './level.js?v=v337';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v337';
+import { UIManager } from './ui.js?v=v337';
+import { CloudSaveManager } from './cloud_save.js?v=v337';
+import { audio } from './audio.js?v=v337';
+import { LevelEditor } from './editor.js?v=v337';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v337';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1043,13 +1043,60 @@ export class GameManager {
             }
             
             // Hemen buluta kaydet (arka planda)
-            import('./cloud_save.js?v=v336').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v337').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Achievement sync error:", err));
             });
             
             return true;
         }
         return false;
+    }
+
+    verifyRetrospectiveAchievements() {
+        let achievements = {};
+        try {
+            achievements = JSON.parse(localStorage.getItem('viscora_achievements') || '{}');
+        } catch (e) {
+            achievements = {};
+        }
+        if (!achievements) achievements = {};
+
+        let changed = false;
+
+        // 1. İlk Adımlar (Bölüm 1 bittiyse -> Bölüm 2 açık demektir)
+        const isLvl2Unlocked = this.ui ? this.ui.isLevelUnlocked(2) : (this.unlockedLevel >= 2);
+        if (!achievements['badge_first_steps'] && isLvl2Unlocked) {
+            achievements['badge_first_steps'] = Date.now();
+            changed = true;
+        }
+
+        // 2. Bozucu Bükücü (Bölüm 10 bittiyse -> Bölüm 11 açık demektir)
+        const isLvl11Unlocked = this.ui ? this.ui.isLevelUnlocked(11) : (this.unlockedLevel >= 11);
+        if (!achievements['badge_boss_1'] && isLvl11Unlocked) {
+            achievements['badge_boss_1'] = Date.now();
+            changed = true;
+        }
+
+        // 3. Yıldız Avcısı (Toplam Yıldız >= 30)
+        if (!achievements['badge_star_collector'] && this.getTotalStars() >= 30) {
+            achievements['badge_star_collector'] = Date.now();
+            changed = true;
+        }
+
+        // 4. Sistem Kurtarıcısı (Bölüm 30 bittiyse -> Bölüm 30 yıldız sayısı > 0)
+        const hasLevel30Stars = this.getStarsForLevel(30) > 0;
+        if (!achievements['badge_champion'] && hasLevel30Stars) {
+            achievements['badge_champion'] = Date.now();
+            changed = true;
+        }
+
+        if (changed) {
+            localStorage.setItem('viscora_achievements', JSON.stringify(achievements));
+            // Arka planda buluta kaydet
+            import('./cloud_save.js?v=v337').then(({ CloudSaveManager }) => {
+                CloudSaveManager.saveProgress(false).catch(err => console.warn("Retrospective sync error:", err));
+            });
+        }
     }
 
     togglePause() {
@@ -2516,7 +2563,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v336', this.cssWidth - 10, 10);
+        this.ctx.fillText('v337', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
