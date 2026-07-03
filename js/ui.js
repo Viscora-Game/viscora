@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v331';
-import { ViscosityList } from './viscosity.js?v=v331';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v331';
-import { CloudSaveManager } from './cloud_save.js?v=v331';
+import { audio } from './audio.js?v=v332';
+import { ViscosityList } from './viscosity.js?v=v332';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v332';
+import { CloudSaveManager } from './cloud_save.js?v=v332';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -462,11 +462,24 @@ export class UIManager {
             }
         });
 
-        // Collect all level buttons references dynamically
+        // Collect all level buttons references dynamically and bind touch/click events
         this.levelButtons = [];
         for (let i = 0; i <= 100; i++) {
             const btn = document.getElementById(`btn-level-${i}`);
-            if (btn) this.levelButtons.push(btn);
+            if (btn) {
+                this.levelButtons.push(btn);
+                const lvlNum = i;
+                this.bindTouchClick(btn, () => {
+                    // Yıldız kapısı kontrolü
+                    const canSelect = this.isLevelUnlocked(lvlNum);
+                    if (canSelect) {
+                        this.selectLevel(lvlNum);
+                    } else if (lvlNum % 10 === 0 && lvlNum > 0) {
+                        // Boss level kilitli: modal göster
+                        this.showStarGateModal(lvlNum);
+                    }
+                });
+            }
         }
     }
 
@@ -1040,20 +1053,7 @@ export class UIManager {
             this.game.goToMenu();
         });
 
-        // Bölüm Seçim Butonları
-        this.levelButtons.forEach((btn) => {
-            const lvlNum = parseInt(btn.id.replace('btn-level-', ''));
-            this.bindTouchClick(btn, () => {
-                // Yıldız kapısı kontrolü
-                const canSelect = this.isLevelUnlocked(lvlNum);
-                if (canSelect) {
-                    this.selectLevel(lvlNum);
-                } else if (lvlNum % 10 === 0 && lvlNum > 0) {
-                    // Boss level kilitli: modal göster
-                    this.showStarGateModal(lvlNum);
-                }
-            });
-        });
+
 
         // Yıldız Kapısı Modalı Kapat
         this.bindTouchClick(document.getElementById('btn-close-star-gate'), () => {
@@ -4239,6 +4239,10 @@ export class UIManager {
      * Ekranda belirtilen paneli açar, diğerlerini kapatır
      */
     showScreen(screenName) {
+        if (screenName === 'level-select' || screenName === 'start') {
+            this.buildLevelSelectionUI();
+        }
+        
         // Tüm ekranları gizle
         Object.keys(this.screens).forEach(key => {
             this.screens[key].classList.add('hidden');
@@ -4378,7 +4382,7 @@ export class UIManager {
                     card.classList.remove('locked');
                     card.classList.add('unlocked');
                     const statusEl = card.querySelector('.level-group-status');
-                    if (statusEl && statusEl.innerHTML.includes('🔒')) {
+                    if (statusEl) {
                         const endLvl = groupId === 2 ? 20 : 30;
                         statusEl.innerHTML = `Bölüm ${startLvl}-${endLvl}`;
                     }
@@ -4667,7 +4671,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v331`;
+                img.src = `assets/avatars/${av.id}.png?v=v332`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4709,7 +4713,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v331`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v332`;
             }
         };
         
@@ -4903,15 +4907,8 @@ export class UIManager {
             } else if (lastClaim === today) {
                 nextClaimableDay = streak;
                 canClaimToday = false;
-            } else if (lastClaim === yesterday) {
-                if (streak >= 7) {
-                    nextClaimableDay = 1;
-                } else {
-                    nextClaimableDay = streak + 1;
-                }
-                canClaimToday = true;
             } else {
-                nextClaimableDay = 1;
+                nextClaimableDay = streak >= 7 ? 1 : streak + 1;
                 canClaimToday = true;
             }
 
@@ -5078,12 +5075,7 @@ export class UIManager {
                     return;
                 }
                 
-                let nextStreak = 1;
-                if (lastClaim === yesterday) {
-                    nextStreak = streak >= 7 ? 1 : streak + 1;
-                } else {
-                    nextStreak = 1;
-                }
+                let nextStreak = streak >= 7 ? 1 : streak + 1;
 
                 const rewardAmount = dailyRewardAmounts[nextStreak];
                 if (window.shopManager) {
