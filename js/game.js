@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v343';
-import { Level } from './level.js?v=v343';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v343';
-import { UIManager } from './ui.js?v=v343';
-import { CloudSaveManager } from './cloud_save.js?v=v343';
-import { audio } from './audio.js?v=v343';
-import { LevelEditor } from './editor.js?v=v343';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v343';
+import { Player } from './player.js?v=v344';
+import { Level } from './level.js?v=v344';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v344';
+import { UIManager } from './ui.js?v=v344';
+import { CloudSaveManager } from './cloud_save.js?v=v344';
+import { audio } from './audio.js?v=v344';
+import { LevelEditor } from './editor.js?v=v344';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v344';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -718,6 +718,11 @@ export class GameManager {
         const startHealth = isAtSpawn ? maxH : 1;
         this.player.health = startHealth;
         
+        // Eğer hiçbir checkpointe girmeden öldüyse (en baştan doğuyorsa) süreyi sıfırla
+        if (isAtSpawn) {
+            this.gameTime = 0;
+        }
+        
         // Son aktif checkpoint veya spawn konumunda canlandır
         this.player.respawn(this.checkpointX, this.checkpointY, startHealth);
         this.player.invulnerableFrames = 90; // 1.5 saniye doğma koruması
@@ -1044,7 +1049,7 @@ export class GameManager {
             }
             
             // Hemen buluta kaydet (arka planda)
-            import('./cloud_save.js?v=v343').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v344').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Achievement sync error:", err));
             });
             
@@ -1094,7 +1099,7 @@ export class GameManager {
         if (changed) {
             localStorage.setItem('viscora_achievements', JSON.stringify(achievements));
             // Arka planda buluta kaydet
-            import('./cloud_save.js?v=v343').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v344').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Retrospective sync error:", err));
             });
         }
@@ -2564,7 +2569,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v343', this.cssWidth - 10, 10);
+        this.ctx.fillText('v344', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
