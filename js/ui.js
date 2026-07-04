@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v340';
-import { ViscosityList } from './viscosity.js?v=v340';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v340';
-import { CloudSaveManager } from './cloud_save.js?v=v340';
+import { audio } from './audio.js?v=v341';
+import { ViscosityList } from './viscosity.js?v=v341';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v341';
+import { CloudSaveManager } from './cloud_save.js?v=v341';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -4721,7 +4721,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v340`;
+                img.src = `assets/avatars/${av.id}.png?v=v341`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4763,7 +4763,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v340`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v341`;
             }
         };
         
@@ -4934,7 +4934,7 @@ export class UIManager {
                 id: 'badge_first_steps',
                 title: 'İlk Adımlar',
                 desc: 'Sektör 01\'i (Bölüm 1) başarıyla tamamlayarak sisteme ilk adımını at.',
-                icon: 'assets/badges/badge_first_steps.png?v=v340',
+                icon: 'assets/badges/badge_first_steps.png?v=v341',
                 target: 1,
                 getProgress: () => this.isLevelUnlocked(2) ? 1 : 0
             },
@@ -4942,7 +4942,7 @@ export class UIManager {
                 id: 'badge_boss_1',
                 title: 'Bozucu Bükücü',
                 desc: 'Sektör 10\'da koruyucu protokol Visko-Bozucu\'yu etkisiz hale getir.',
-                icon: 'assets/badges/badge_boss_1.png?v=v340',
+                icon: 'assets/badges/badge_boss_1.png?v=v341',
                 target: 1,
                 getProgress: () => this.isLevelUnlocked(11) ? 1 : 0
             },
@@ -4950,7 +4950,7 @@ export class UIManager {
                 id: 'badge_star_collector',
                 title: 'Yıldız Avcısı',
                 desc: 'Seviyelerde toplam 30 yıldız toplayarak veri analizini tamamla.',
-                icon: 'assets/badges/badge_star_collector.png?v=v340',
+                icon: 'assets/badges/badge_star_collector.png?v=v341',
                 target: 30,
                 getProgress: () => this.game.getTotalStars()
             },
@@ -4958,7 +4958,7 @@ export class UIManager {
                 id: 'badge_form_shifter',
                 title: 'Form Değiştirici',
                 desc: 'Farklı engelleri aşmak için viskozite formlarını 100 kez değiştir.',
-                icon: 'assets/badges/badge_form_shifter.png?v=v340',
+                icon: 'assets/badges/badge_form_shifter.png?v=v341',
                 target: 100,
                 getProgress: () => parseInt(localStorage.getItem('viscora_stats_form_shifts')) || 0
             },
@@ -4966,7 +4966,7 @@ export class UIManager {
                 id: 'badge_speedrun',
                 title: 'Hız Tutkunu',
                 desc: 'Herhangi bir ana kampanya seviyesini 15 saniyeden daha kısa sürede tamamla.',
-                icon: 'assets/badges/badge_speedrun.png?v=v340',
+                icon: 'assets/badges/badge_speedrun.png?v=v341',
                 target: 1,
                 getProgress: () => achievements['badge_speedrun'] ? 1 : 0
             },
@@ -4974,7 +4974,7 @@ export class UIManager {
                 id: 'badge_champion',
                 title: 'Sistem Kurtarıcısı',
                 desc: 'Sektör 30\'da ana çekirdeği virüsten arındırarak kampanyayı bitir.',
-                icon: 'assets/badges/badge_champion.png?v=v340',
+                icon: 'assets/badges/badge_champion.png?v=v341',
                 target: 1,
                 getProgress: () => (this.isLevelUnlocked(30) && this.game.getStarsForLevel(30) > 0) ? 1 : 0
             }
@@ -5055,12 +5055,12 @@ export class UIManager {
 
     showAchievementUnlockToast(badgeId) {
         const badgesData = {
-            badge_first_steps: { title: 'İlk Adımlar', icon: 'assets/badges/badge_first_steps.png?v=v340' },
-            badge_boss_1: { title: 'Bozucu Bükücü', icon: 'assets/badges/badge_boss_1.png?v=v340' },
-            badge_star_collector: { title: 'Yıldız Avcısı', icon: 'assets/badges/badge_star_collector.png?v=v340' },
-            badge_form_shifter: { title: 'Form Değiştirici', icon: 'assets/badges/badge_form_shifter.png?v=v340' },
-            badge_speedrun: { title: 'Hız Tutkunu', icon: 'assets/badges/badge_speedrun.png?v=v340' },
-            badge_champion: { title: 'Sistem Kurtarıcısı', icon: 'assets/badges/badge_champion.png?v=v340' }
+            badge_first_steps: { title: 'İlk Adımlar', icon: 'assets/badges/badge_first_steps.png?v=v341' },
+            badge_boss_1: { title: 'Bozucu Bükücü', icon: 'assets/badges/badge_boss_1.png?v=v341' },
+            badge_star_collector: { title: 'Yıldız Avcısı', icon: 'assets/badges/badge_star_collector.png?v=v341' },
+            badge_form_shifter: { title: 'Form Değiştirici', icon: 'assets/badges/badge_form_shifter.png?v=v341' },
+            badge_speedrun: { title: 'Hız Tutkunu', icon: 'assets/badges/badge_speedrun.png?v=v341' },
+            badge_champion: { title: 'Sistem Kurtarıcısı', icon: 'assets/badges/badge_champion.png?v=v341' }
         };
         
         const badge = badgesData[badgeId];
