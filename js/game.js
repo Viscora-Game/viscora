@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v344';
-import { Level } from './level.js?v=v344';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v344';
-import { UIManager } from './ui.js?v=v344';
-import { CloudSaveManager } from './cloud_save.js?v=v344';
-import { audio } from './audio.js?v=v344';
-import { LevelEditor } from './editor.js?v=v344';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v344';
+import { Player } from './player.js?v=v345';
+import { Level } from './level.js?v=v345';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v345';
+import { UIManager } from './ui.js?v=v345';
+import { CloudSaveManager } from './cloud_save.js?v=v345';
+import { audio } from './audio.js?v=v345';
+import { LevelEditor } from './editor.js?v=v345';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v345';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1049,7 +1049,7 @@ export class GameManager {
             }
             
             // Hemen buluta kaydet (arka planda)
-            import('./cloud_save.js?v=v344').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v345').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Achievement sync error:", err));
             });
             
@@ -1099,7 +1099,7 @@ export class GameManager {
         if (changed) {
             localStorage.setItem('viscora_achievements', JSON.stringify(achievements));
             // Arka planda buluta kaydet
-            import('./cloud_save.js?v=v344').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v345').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Retrospective sync error:", err));
             });
         }
@@ -2569,7 +2569,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v344', this.cssWidth - 10, 10);
+        this.ctx.fillText('v345', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {

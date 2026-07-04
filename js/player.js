@@ -1,5 +1,5 @@
-import { ViscosityStates } from './viscosity.js?v=v344';
-import { audio } from './audio.js?v=v344';
+import { ViscosityStates } from './viscosity.js?v=v345';
+import { audio } from './audio.js?v=v345';
 
 export class Player {
     constructor(x, y, game = null) {
@@ -826,7 +826,8 @@ export class Player {
         }
 
         // Ölüm çukuru tespiti (Lava/Asit nehrine temas)
-        if (this.y + this.radius >= level.height - 35) {
+        // Görsel lava çizgisi height-35'te çizilir, hasar oyuncunun gerçekten lavaya değdiğinde tetiklenir
+        if (this.y + this.radius >= level.height - 15) {
             if (!this.isDead) {
                 // Alt kısımda katı bir platform üzerinde durup durmadığımızı kontrol et
                 let standingOnPlatform = false;
@@ -848,7 +849,7 @@ export class Player {
 
                 if (!standingOnPlatform) {
                     // Snap to surface and stop velocity
-                    this.y = level.height - 35 - this.radius;
+                    this.y = level.height - 15 - this.radius;
                     this.vx = 0;
                     this.vy = 0;
 
