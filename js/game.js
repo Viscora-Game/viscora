@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v339';
-import { Level } from './level.js?v=v339';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v339';
-import { UIManager } from './ui.js?v=v339';
-import { CloudSaveManager } from './cloud_save.js?v=v339';
-import { audio } from './audio.js?v=v339';
-import { LevelEditor } from './editor.js?v=v339';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v339';
+import { Player } from './player.js?v=v340';
+import { Level } from './level.js?v=v340';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v340';
+import { UIManager } from './ui.js?v=v340';
+import { CloudSaveManager } from './cloud_save.js?v=v340';
+import { audio } from './audio.js?v=v340';
+import { LevelEditor } from './editor.js?v=v340';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v340';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -745,9 +745,6 @@ export class GameManager {
      * Oyunu Yeniden Başlatır (Ölüm veya Tekrar Oyna sonrası)
      */
     restart(fromPause = false) {
-        // Her yeniden başlatmada süreyi sıfırla
-        this.gameTime = 0;
-
         // Her 3 ölümde bir ipucu göster (sayaç gameover geçişinde artırılıyor)
         if (this.levelDeaths % 3 === 0 && LEVEL_HINTS[this.currentLevel]) {
             this.hintTimer = this.hintMaxTime;
@@ -756,10 +753,11 @@ export class GameManager {
         }
 
         if (this.difficulty === 'easy' && !fromPause) {
-            // Kolay modda ölüp yeniden dene denildiğinde son girilen checkpointten doğ
+            // Kolay modda ölüp yeniden dene denildiğinde son girilen checkpointten doğ (Süre sıfırlanmaz)
             this.respawnAtCheckpoint();
         } else {
-            // Diğer tüm durumlarda veya pause menüsünden yeniden başlatıldığında en baştan başla
+            // Diğer tüm durumlarda veya pause menüsünden yeniden başlatıldığında en baştan başla (Süre sıfırlanır)
+            this.gameTime = 0;
             if (this.currentLevel === 999 && this.currentCustomLevelData) {
                 this.startCustomLevel(this.currentCustomLevelData);
             } else {
@@ -1046,7 +1044,7 @@ export class GameManager {
             }
             
             // Hemen buluta kaydet (arka planda)
-            import('./cloud_save.js?v=v339').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v340').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Achievement sync error:", err));
             });
             
@@ -1096,7 +1094,7 @@ export class GameManager {
         if (changed) {
             localStorage.setItem('viscora_achievements', JSON.stringify(achievements));
             // Arka planda buluta kaydet
-            import('./cloud_save.js?v=v339').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v340').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Retrospective sync error:", err));
             });
         }
@@ -2566,7 +2564,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v339', this.cssWidth - 10, 10);
+        this.ctx.fillText('v340', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
