@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v345';
+import { audio } from './audio.js?v=v346';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -49,6 +49,25 @@ export class Enemy {
                 color: '#eab308'
             });
         }
+
+        // Düşman öldürme istatistiği takibi (Devriye veya Jel Takipçi)
+        try {
+            if (this.constructor.name === 'GelChaser') {
+                let gelKills = parseInt(localStorage.getItem('viscora_stats_gel_kills')) || 0;
+                gelKills++;
+                localStorage.setItem('viscora_stats_gel_kills', gelKills.toString());
+                if (window.gameInstance && gelKills >= 50) {
+                    window.gameInstance.checkForAchievement('badge_gel_killer');
+                }
+            } else {
+                let patrolKills = parseInt(localStorage.getItem('viscora_stats_patrol_kills')) || 0;
+                patrolKills++;
+                localStorage.setItem('viscora_stats_patrol_kills', patrolKills.toString());
+                if (window.gameInstance && patrolKills >= 50) {
+                    window.gameInstance.checkForAchievement('badge_patrol_killer');
+                }
+            }
+        } catch(e) {}
 
         if (this.isSpawnedByBoss && window.gameInstance && window.gameInstance.boss && typeof window.gameInstance.boss.onSpawnedEnemyDefeated === 'function') {
             window.gameInstance.boss.onSpawnedEnemyDefeated(this);
@@ -891,6 +910,16 @@ export class TractorUFO {
                 color: '#eab308'
             });
         }
+
+        // UFO öldürme istatistiği takibi
+        try {
+            let ufoKills = parseInt(localStorage.getItem('viscora_stats_ufo_kills')) || 0;
+            ufoKills++;
+            localStorage.setItem('viscora_stats_ufo_kills', ufoKills.toString());
+            if (window.gameInstance && ufoKills >= 20) {
+                window.gameInstance.checkForAchievement('badge_ufo_killer');
+            }
+        } catch(e) {}
     }
 
     update(level, player, emitParticles) {
@@ -1114,6 +1143,16 @@ export class SweeperUFO {
                 color: '#eab308'
             });
         }
+
+        // UFO öldürme istatistiği takibi
+        try {
+            let ufoKills = parseInt(localStorage.getItem('viscora_stats_ufo_kills')) || 0;
+            ufoKills++;
+            localStorage.setItem('viscora_stats_ufo_kills', ufoKills.toString());
+            if (window.gameInstance && ufoKills >= 20) {
+                window.gameInstance.checkForAchievement('badge_ufo_killer');
+            }
+        } catch(e) {}
     }
 
     update(level, player, emitParticles) {

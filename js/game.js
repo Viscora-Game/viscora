@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v345';
-import { Level } from './level.js?v=v345';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v345';
-import { UIManager } from './ui.js?v=v345';
-import { CloudSaveManager } from './cloud_save.js?v=v345';
-import { audio } from './audio.js?v=v345';
-import { LevelEditor } from './editor.js?v=v345';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v345';
+import { Player } from './player.js?v=v346';
+import { Level } from './level.js?v=v346';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v346';
+import { UIManager } from './ui.js?v=v346';
+import { CloudSaveManager } from './cloud_save.js?v=v346';
+import { audio } from './audio.js?v=v346';
+import { LevelEditor } from './editor.js?v=v346';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v346';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1037,6 +1037,25 @@ export class GameManager {
             if (this.currentLevel !== 999 && this.currentLevel > 0 && this.gameTime && this.gameTime < 15) {
                 unlock = true;
             }
+        } else if (badgeId === 'badge_90_stars') {
+            if (this.getTotalStars() >= 90) unlock = true;
+        } else if (badgeId === 'badge_all_bosses') {
+            const isLvl11Unlocked = this.ui ? this.ui.isLevelUnlocked(11) : (this.unlockedLevel >= 11);
+            const isLvl21Unlocked = this.ui ? this.ui.isLevelUnlocked(21) : (this.unlockedLevel >= 21);
+            const hasLevel30Stars = this.getStarsForLevel(30) > 0;
+            if (isLvl11Unlocked && isLvl21Unlocked && hasLevel30Stars) unlock = true;
+        } else if (badgeId === 'badge_patrol_killer') {
+            const kills = parseInt(localStorage.getItem('viscora_stats_patrol_kills')) || 0;
+            if (kills >= 50) unlock = true;
+        } else if (badgeId === 'badge_gel_killer') {
+            const kills = parseInt(localStorage.getItem('viscora_stats_gel_kills')) || 0;
+            if (kills >= 50) unlock = true;
+        } else if (badgeId === 'badge_ufo_killer') {
+            const kills = parseInt(localStorage.getItem('viscora_stats_ufo_kills')) || 0;
+            if (kills >= 20) unlock = true;
+        } else if (badgeId === 'badge_crystal_spender') {
+            const spent = parseInt(localStorage.getItem('viscora_spent_crystals')) || 0;
+            if (spent >= 500) unlock = true;
         }
 
         if (unlock) {
@@ -1049,7 +1068,7 @@ export class GameManager {
             }
             
             // Hemen buluta kaydet (arka planda)
-            import('./cloud_save.js?v=v345').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v346').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Achievement sync error:", err));
             });
             
@@ -1096,10 +1115,51 @@ export class GameManager {
             changed = true;
         }
 
+        // 5. Veri Ustası (Toplam Yıldız >= 90)
+        if (!achievements['badge_90_stars'] && this.getTotalStars() >= 90) {
+            achievements['badge_90_stars'] = Date.now();
+            changed = true;
+        }
+
+        // 6. Protokol Kırıcı (3 boss da yenildi)
+        const isLvl21Unlocked = this.ui ? this.ui.isLevelUnlocked(21) : (this.unlockedLevel >= 21);
+        if (!achievements['badge_all_bosses'] && isLvl11Unlocked && isLvl21Unlocked && hasLevel30Stars) {
+            achievements['badge_all_bosses'] = Date.now();
+            changed = true;
+        }
+
+        // 7. Devriye Avcısı (50 devriye öldürme)
+        const patrolKills = parseInt(localStorage.getItem('viscora_stats_patrol_kills')) || 0;
+        if (!achievements['badge_patrol_killer'] && patrolKills >= 50) {
+            achievements['badge_patrol_killer'] = Date.now();
+            changed = true;
+        }
+
+        // 8. Jel Temizleyici (50 jel takipçi öldürme)
+        const gelKills = parseInt(localStorage.getItem('viscora_stats_gel_kills')) || 0;
+        if (!achievements['badge_gel_killer'] && gelKills >= 50) {
+            achievements['badge_gel_killer'] = Date.now();
+            changed = true;
+        }
+
+        // 9. Hava Savunması (20 UFO öldürme)
+        const ufoKills = parseInt(localStorage.getItem('viscora_stats_ufo_kills')) || 0;
+        if (!achievements['badge_ufo_killer'] && ufoKills >= 20) {
+            achievements['badge_ufo_killer'] = Date.now();
+            changed = true;
+        }
+
+        // 10. Kristal Baronu (500 kristal harcama)
+        const spentCrystals = parseInt(localStorage.getItem('viscora_spent_crystals')) || 0;
+        if (!achievements['badge_crystal_spender'] && spentCrystals >= 500) {
+            achievements['badge_crystal_spender'] = Date.now();
+            changed = true;
+        }
+
         if (changed) {
             localStorage.setItem('viscora_achievements', JSON.stringify(achievements));
             // Arka planda buluta kaydet
-            import('./cloud_save.js?v=v345').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v346').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Retrospective sync error:", err));
             });
         }
@@ -1331,6 +1391,12 @@ export class GameManager {
             this.checkForAchievement('badge_champion');
             this.checkForAchievement('badge_speedrun');
             this.checkForAchievement('badge_star_collector');
+            this.checkForAchievement('badge_90_stars');
+            this.checkForAchievement('badge_all_bosses');
+            this.checkForAchievement('badge_patrol_killer');
+            this.checkForAchievement('badge_gel_killer');
+            this.checkForAchievement('badge_ufo_killer');
+            this.checkForAchievement('badge_crystal_spender');
             
             if (this.difficulty === 'hardcore' && this.ui) {
                 this.ui.updateWeeklyChallenge(2, 1);
@@ -2569,7 +2635,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v345', this.cssWidth - 10, 10);
+        this.ctx.fillText('v346', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
