@@ -1,6 +1,6 @@
-import { GameManager } from './game.js?v=v351';
-import { audio } from './audio.js?v=v351';
-import { CloudSaveManager } from './cloud_save.js?v=v351';
+import { GameManager } from './game.js?v=v352';
+import { audio } from './audio.js?v=v352';
+import { CloudSaveManager } from './cloud_save.js?v=v352';
 
 const initGame = () => {
     // Otomatik Bulut Eşitlemesi (Startup Sync): Oyuncu bağlıysa başlangıçta en güncel veriyi çek

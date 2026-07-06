@@ -3,9 +3,9 @@
  * An interactive, visual level designer for Viscora.
  * Activated by appending ?editor=true to the URL.
  */
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v351';
-import { audio } from './audio.js?v=v351';
-import { LevelGenerator } from './generator.js?v=v351';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v352';
+import { audio } from './audio.js?v=v352';
+import { LevelGenerator } from './generator.js?v=v352';
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -784,6 +784,17 @@ export class LevelEditor {
                 </div>
             </div>
 
+            <!-- Dosya İşlemleri -->
+            <div class="editor-section" style="border-bottom: 1px solid rgba(168, 85, 247, 0.2); padding-bottom: 12px;">
+                <div class="section-lbl" style="color: #c084fc; display: flex; align-items: center; gap: 5px; margin-bottom: 8px;">
+                    <svg class="icon-svg" style="width: 12px; height: 12px; margin: 0;"><use href="#icon-book"></use></svg> DOSYA İŞLEMLERİ
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                    <button class="editor-btn" id="editor-file-export-btn" style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 11px; background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.35);"><svg class="icon-svg" style="width: 12px; height: 12px; margin: 0; fill: currentColor;"><use href="#icon-book"></use></svg> DOSYA YAZDIR</button>
+                    <button class="editor-btn" id="editor-file-import-btn" style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 11px; background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.35);"><svg class="icon-svg" style="width: 12px; height: 12px; margin: 0; fill: currentColor;"><use href="#icon-portal"></use></svg> DOSYA YÜKLE</button>
+                </div>
+            </div>
+
             <!-- Rastgele Bölüm Üretici -->
             <div class="editor-section" style="border-bottom: 1px solid rgba(217, 70, 239, 0.2); padding-bottom: 15px;">
                 <div class="section-lbl" style="color: #d946ef; display: flex; align-items: center; gap: 5px;">
@@ -1131,6 +1142,78 @@ export class LevelEditor {
             showConfirmModal('Editörden çıkıp ana menüye dönmek istiyor musunuz? Kaydedilmemiş değişiklikler kaybolabilir.', () => {
                 this.exitEditorToMenu();
             });
+        });
+
+        // Dosya İşlemleri Butonları
+        document.getElementById('editor-file-export-btn').addEventListener('click', () => {
+            try {
+                const exportObj = this.getLevelDataObj();
+                const jsonStr = JSON.stringify(exportObj, null, 4);
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const nameEl = document.getElementById('editor-level-name');
+                const levelName = (nameEl ? nameEl.value.trim() : 'adsiz_bolum') || 'adsiz_bolum';
+                a.href = url;
+                a.download = `${levelName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_level.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error("File export error:", err);
+                alert("Dosya yazdırma hatası: " + err.message);
+            }
+        });
+
+        document.getElementById('editor-file-import-btn').addEventListener('click', () => {
+            try {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        try {
+                            const data = JSON.parse(event.target.result);
+                            // Basic validation check
+                            if (data.spawn && data.portal && (data.platforms || data.hazards)) {
+                                this.game.level.loadLevel(data, true);
+                                this.saveToLocalStorage();
+                                this.updateInspector();
+                                this.updateCapacityUI();
+                                
+                                // Update form inputs to match loaded level metadata
+                                const nameEl = document.getElementById('editor-level-name');
+                                if (nameEl) nameEl.value = data.name || 'İthal Bölüm';
+                                
+                                const authorEl = document.getElementById('editor-author-name');
+                                if (authorEl) authorEl.value = data.authorName || 'Bilinmeyen';
+                                
+                                const widthEl = document.getElementById('editor-level-width');
+                                if (widthEl) widthEl.value = data.levelWidth || 2000;
+                                
+                                const heightEl = document.getElementById('editor-level-height');
+                                if (heightEl) heightEl.value = data.levelHeight || 800;
+                                
+                                alert('Bölüm dosyası başarıyla yüklendi!');
+                            } else {
+                                alert('Geçersiz veya uyumsuz Viscora bölüm dosyası yapısı.');
+                            }
+                        } catch (err) {
+                            console.error("JSON parse or load error:", err);
+                            alert('Dosya okuma veya JSON ayrıştırma hatası.');
+                        }
+                    };
+                    reader.readAsText(file);
+                };
+                input.click();
+            } catch (err) {
+                console.error("File import dialog error:", err);
+                alert("Dosya yükleme penceresi açılamadı: " + err.message);
+            }
         });
 
         // Rastgele Seviye Üretme Butonu

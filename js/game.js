@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v351';
-import { Level } from './level.js?v=v351';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v351';
-import { UIManager } from './ui.js?v=v351';
-import { CloudSaveManager } from './cloud_save.js?v=v351';
-import { audio } from './audio.js?v=v351';
-import { LevelEditor } from './editor.js?v=v351';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v351';
+import { Player } from './player.js?v=v352';
+import { Level } from './level.js?v=v352';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v352';
+import { UIManager } from './ui.js?v=v352';
+import { CloudSaveManager } from './cloud_save.js?v=v352';
+import { audio } from './audio.js?v=v352';
+import { LevelEditor } from './editor.js?v=v352';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v352';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -592,6 +592,11 @@ export class GameManager {
             this.rewardedSkipUsed = false;
         }
         this.level.loadLevel(this.currentLevel);
+        if (this.level && this.level.themeId) {
+            audio.setTheme(this.level.themeId);
+        } else {
+            audio.setTheme('default');
+        }
         this.initBackgroundCells(); // Refresh theme-specific decoration layout for this level
         this.initEnemies(this.currentLevel);
         const mappedLvl = this.getMappedLevel();
@@ -672,6 +677,11 @@ export class GameManager {
         this.enemies = []; // Önceki bölümden kalan düşmanları temizle
         this.levelCardTimer = 0; // No level title card for custom maps
         this.level.loadLevel(levelData);
+        if (this.level && this.level.themeId) {
+            audio.setTheme(this.level.themeId);
+        } else {
+            audio.setTheme('default');
+        }
         this.initEnemies(this.currentLevel);
         this.initBackgroundCells(); // Generate standard decorations
         let maxH = 3;
@@ -1068,7 +1078,7 @@ export class GameManager {
             }
             
             // Hemen buluta kaydet (arka planda)
-            import('./cloud_save.js?v=v351').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v352').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Achievement sync error:", err));
             });
             
@@ -1159,7 +1169,7 @@ export class GameManager {
         if (changed) {
             localStorage.setItem('viscora_achievements', JSON.stringify(achievements));
             // Arka planda buluta kaydet
-            import('./cloud_save.js?v=v351').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v352').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Retrospective sync error:", err));
             });
         }
@@ -1241,6 +1251,13 @@ export class GameManager {
                 maxLife = 35 + Math.random() * 20;
                 vx = Math.cos(angle) * speed;
                 vy = Math.sin(angle) * speed;
+            } else if (type === 'jelly_pop') {
+                // Slime patlama parçacığı
+                speed = 2.0 + Math.random() * 6.5;
+                size = 3.5 + Math.random() * 6.5;
+                maxLife = 40 + Math.random() * 25;
+                vx = Math.cos(angle) * speed;
+                vy = Math.sin(angle) * speed - 1.5; // Fırlama yönünü yukarı meyilli yapalım
             } else if (type === 'trail') {
                 // Arkada kalan yavaş sönen damla
                 speed = 0.1 + Math.random() * 0.5;
@@ -1731,6 +1748,10 @@ export class GameManager {
             // Sıvı parçacıkları yavaşça süzülür
             if (p.type === 'trail') {
                 p.vy += 0.01; // Hafif yerçekimi
+            } else if (p.type === 'jelly_pop') {
+                p.vy += 0.22; // Yerçekimi
+                p.vx *= 0.98; // Hava sürtünmesi
+                p.vy *= 0.98;
             } else if (p.type === 'smoke') {
                 p.size += 0.12; // Duman genişler
                 p.vx *= 0.95;   // Sürtünme
@@ -1860,7 +1881,7 @@ export class GameManager {
             } else {
                 // Tek seferlik ölüm patlaması (eğer önceden yapılmadıysa)
                 if (!this.player.deathSplashDone) {
-                    this.emitParticles(this.player.x, this.player.y, 'enemy_pop', this.player.viscosity.color, 35);
+                    this.emitParticles(this.player.x, this.player.y, 'jelly_pop', this.player.viscosity.color, 45);
                     this.shakeCamera(18, 25);
                     if (navigator.vibrate) navigator.vibrate(120);
                     this.player.deathSplashDone = true;
@@ -2475,6 +2496,27 @@ export class GameManager {
                         this.ctx.shadowBlur = 4;
                         this.ctx.fillText(p.char || '0', p.x - this.camera.x - p.size/2, p.y - this.camera.y + p.size/2);
                         this.ctx.restore();
+                    } else if (p.type === 'jelly_pop') {
+                        // Slime patlama parçacığı: Parlak jöle damlası ve specular parıltı
+                        const cx = p.x - this.camera.x;
+                        const cy = p.y - this.camera.y;
+                        this.ctx.save();
+                        this.ctx.globalAlpha = p.alpha;
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.shadowColor = p.color;
+                        this.ctx.shadowBlur = 6;
+                        
+                        this.ctx.beginPath();
+                        this.ctx.arc(cx, cy, p.size, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        // 3D Specular Highlight (İç beyaz yansıma halkası)
+                        this.ctx.shadowBlur = 0;
+                        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+                        this.ctx.beginPath();
+                        this.ctx.arc(cx - p.size * 0.3, cy - p.size * 0.3, p.size * 0.25, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        this.ctx.restore();
                     } else {
                         this.ctx.beginPath();
                         this.ctx.arc(p.x - this.camera.x, p.y - this.camera.y, p.size, 0, Math.PI * 2);
@@ -2635,7 +2677,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v351', this.cssWidth - 10, 10);
+        this.ctx.fillText('v352', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {

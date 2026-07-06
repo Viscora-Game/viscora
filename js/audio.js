@@ -34,6 +34,7 @@ class AudioManager {
             [98.00,  146.83, 196.00, 246.94]  // G2, D3, G3, B3
         ];
         this.currentChordIndex = 0;
+        this.bpm = 128;
     }
 
     /**
@@ -744,6 +745,40 @@ class AudioManager {
     }
 
     /**
+     * Set dynamic BGM theme configurations based on level themeId
+     */
+    setTheme(themeId) {
+        if (themeId === 'magma_core') {
+            // Darker, heavier chords: Dmin7 - Bbmaj7 - Gmin9 - A7
+            this.chords = [
+                [73.42, 110.00, 146.83, 174.61],  // D2, A2, D3, F3
+                [116.54, 146.83, 174.61, 233.08], // Bb2, D3, F3, Bb3
+                [98.00, 130.81, 164.81, 196.00],  // G2, C3, E3, G3
+                [110.00, 138.59, 164.81, 220.00]  // A2, C#3, E3, A3
+            ];
+            this.bpm = 106; // Slower, heavier magma feel
+        } else if (themeId === 'neon_sewer') {
+            // Cyber, energetic: Amin7 - Fmaj7 - Cmaj7 - Em7
+            this.chords = [
+                [110.00, 130.81, 164.81, 196.00], // A2, C3, E3, G3
+                [87.31, 130.81, 174.61, 218.08],  // F2, C3, F3, A3
+                [130.81, 164.81, 196.00, 246.94], // C3, E3, G3, B3
+                [164.81, 196.00, 246.94, 329.63]  // E3, G3, B3, E4
+            ];
+            this.bpm = 136; // Faster, cyberpunk neon feel
+        } else {
+            // Default ambient chords (original Cmaj7 - Am9 - Fmaj7 - G6/9)
+            this.chords = [
+                [130.81, 164.81, 196.00, 246.94], // C3, E3, G3, B3
+                [110.00, 146.83, 164.81, 220.00], // A2, D3, E3, A3
+                [87.31,  130.81, 174.61, 218.08], // F2, C3, F3, A3
+                [98.00,  146.83, 196.00, 246.94]  // G2, D3, G3, B3
+            ];
+            this.bpm = 128; // Standard ambient
+        }
+    }
+
+    /**
      * Start procedural ambient background music
      */
     startMusic() {
@@ -760,11 +795,7 @@ class AudioManager {
             this.currentStep = 0;
             this.nextNoteTime = this.ctx.currentTime;
 
-            const bpm = 128;
-            const beatDur = 60 / bpm; // 0.46875s
-            const sixteenthDur = beatDur / 4; // 0.1171875s
-            
-            // Pad chord is scheduled every 8 beats (3.75 seconds)
+            // Pad chord is scheduled every 8 beats
             let lastPadTime = 0;
 
             const scheduleNextStep = () => {
@@ -775,12 +806,18 @@ class AudioManager {
                 
                 const time = this.nextNoteTime;
 
-                // 1. Pad Chords (every 3.75 seconds)
-                if (time - lastPadTime >= 3.75 || lastPadTime === 0) {
+                // Dynamically evaluate tempo and durations based on current this.bpm
+                const bpm = this.bpm || 128;
+                const beatDur = 60 / bpm;
+                const sixteenthDur = beatDur / 4;
+                const padDur = beatDur * 8;
+
+                // 1. Pad Chords (every padDur seconds)
+                if (time - lastPadTime >= padDur || lastPadTime === 0) {
                     lastPadTime = time;
                     this.currentChordIndex = (this.currentChordIndex + 1) % this.chords.length;
                     
-                    const duration = 3.75;
+                    const duration = padDur;
                     const padGain = this.ctx.createGain();
                     padGain.gain.setValueAtTime(0, time);
                     padGain.connect(this.musicVolume);
