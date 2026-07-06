@@ -1,12 +1,15 @@
-import http.server
 import json
 import os
 import random
 import urllib.parse
 import urllib.request
 import threading
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
+
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 PORT = int(os.environ.get('PORT', 8080))
 DB_FILE = os.path.join(os.path.dirname(__file__), 'db_maps.json')
@@ -15,7 +18,6 @@ DB_FILE = os.path.join(os.path.dirname(__file__), 'db_maps.json')
 maps_db_lock = threading.Lock()
 users_db_lock = threading.Lock()
 campaign_db_lock = threading.Lock()
-
 
 # Veritabanını hazırla
 if not os.path.exists(DB_FILE):
@@ -28,6 +30,7 @@ mongo_collection = None
 mongo_users_collection = None
 mongo_error = None
 mongo_db_name = None
+mongo_db = None
 
 if MONGO_URI:
     try:
@@ -70,6 +73,7 @@ if MONGO_URI:
         print("MongoDB bağlantı hatası, yerel JSON dosyasına geçiliyor:", e)
         mongo_collection = None
         mongo_users_collection = None
+
 DB_USERS_FILE = os.path.join(os.path.dirname(__file__), 'db_users.json')
 if not os.path.exists(DB_USERS_FILE):
     with open(DB_USERS_FILE, 'w', encoding='utf-8') as f:
@@ -479,7 +483,6 @@ def is_offensive(text):
         'â': 'a', 'î': 'i', 'û': 'u'
     }
     # Leet speak / rakam-harf karışımı normalizasyonu (ör: s1k → sik, @m → am)
-    # Not: 2 → 'iki' (Türkçe) kısalmaları özel olarak ele alınıyor
     leet_map = {
         '0': 'o', '1': 'i', '3': 'e', '4': 'a',
         '5': 's', '7': 't', '@': 'a', '$': 's', '!': 'i', '|': 'i'
@@ -501,19 +504,15 @@ def is_offensive(text):
         norm = norm.replace(k, v)
 
     short_bad = {
-        # Türkçe — tek başına engellenmeli
         'amk', 'aq', 'sik', 'am', 'got', 'pic', 'oc', 'pust',
         'akp', 'chp', 'mhp', 'hdp', 'rte', 'feto',
         'bok', 'ibne', 'gavat', 'gavad', 'gerzek', 'angut',
-        # İngilizce — tek başına engellenmeli
         'ass', 'shit', 'cunt', 'dick', 'cock', 'slut', 'nigga',
         'bastard', 'fag', 'boner', 'cum', 'rape',
-        # Sayı bypass’ları (s2m = sikim, 2 = iki anlamında)
         's2m', 's2k', 's2ks', 'am2', 'g2t'
     }
 
     long_bad = {
-        # Türkçe — alt kelime olarak da engellenmeli
         'yarrak', 'yarak', 'assak', 'tasak', 'tassak', 'dassak', 'dasak', 'orospu', 'siktir', 'pezevenk', 'kahpe',
         'amcik', 'kaltak', 'erdogan', 'pkk',
         'kilicdaroglu', 'imamoglu', 'ataturk',
@@ -522,7 +521,6 @@ def is_offensive(text):
         'sikem', 'siker', 'siktim', 'sikcem', 'sikicem', 'sikik',
         'sikisler', 'soktum', 'sokar',
         'otuzbir', 'altmisdokuz', 'masturbasyon',
-        # ooguz/turkce-kufur-karaliste kaynağından eklenenler
         'dalyarak', 'dalyarrak', 'dangalak', 'fahise',
         'gerizekal', 'gerzekl',
         'ananin', 'ananisi', 'ananiko',
@@ -531,15 +529,12 @@ def is_offensive(text):
         'amina', 'aminako', 'aminakoy',
         'boklu', 'boktan', 'bokbok', 'bombok',
         'orosbuc', 'orospuc',
-        # İngilizce — alt kelime olarak da engellenmeli
         'fuck', 'bitch', 'asshole', 'motherfuck', 'nigger', 'faggot',
         'whore', 'porn', 'dildo', 'fucker', 'fuckin', 'goddamn',
         'pussy', 'rapist', 'pedophil', 'pedofil', 'meme'
     }
 
-
     def _check(t):
-        """Verilen normalize metni kelime listelerine karşı kontrol eder."""
         words = re.findall(r'[a-z]+', t)
         for w in words:
             if w in short_bad or w in long_bad:
@@ -557,25 +552,20 @@ def is_offensive(text):
         return False
 
     def _collapse(t):
-        """Arka arkaya gelen aynı harfleri teke indirir: siikim → sikim."""
         return re.sub(r'(.)\1+', r'\1', t)
 
     def _sanitize_bypass(t):
-        """Sayı bypass'larını harf karşılıklarına çevirir (ör: s2m -> sikim, g2t -> got)."""
         t = t.replace('s2', 'siki')
         t = t.replace('g2', 'go')
         t = t.replace('am2', 'am')
         return t
 
-    # 4 farklı versiyonu kontrol et:
-    # 1) Normal  2) Boşluksuz (s i k → sik)  3) Tekrar temizlenmiş (siikim → sikim)  4) Her ikisi
     no_space = re.sub(r'\s+', '', norm)
     for v in [norm, no_space, _collapse(norm), _collapse(no_space)]:
         if _check(_sanitize_bypass(v)):
             return True
 
     return False
-
 
 def validate_level_limits(level_data):
     if not isinstance(level_data, dict):
@@ -625,7 +615,6 @@ def validate_level_limits(level_data):
     if len(enemies) > 40:
         return f"En fazla 40 adet düşman yerleştirilebilir. (Girilen: {len(enemies)})"
 
-    # Dekorasyon yazı kutularını küfür filtresiyle tara
     decorations = level_data.get('decorations', [])
     for deco in decorations:
         if deco.get('type') == 'textbox' and is_offensive(deco.get('text', '')):
@@ -633,935 +622,10 @@ def validate_level_limits(level_data):
 
     return None
 
-class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
-    def address_string(self):
-        # Yüksek eşzamanlılıkta (load spike) gecikmeye yol açan reverse DNS aramasını devre dışı bırakır
-        return self.client_address[0]
-
-    def log_message(self, format, *args):
-        # Konsola log yazma (I/O) darboğazını engellemek için HTTP istek loglamasını es geçiyoruz
-        pass
-
-    def __init__(self, *args, **kwargs):
-        # Statik dosyaları projenin ana klasöründen (server klasörünün bir üstü) sun
-        root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-        super().__init__(*args, directory=root_dir, **kwargs)
-
-    def end_headers(self):
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
-        self.send_header('Pragma', 'no-cache')
-        self.send_header('Expires', '0')
-        super().end_headers()
-
-    def do_OPTIONS(self):
-        self.send_response(200)
-        self.end_headers()
-
-    def do_GET(self):
-        parsed_url = urllib.parse.urlparse(self.path)
-        path = parsed_url.path
-        query = urllib.parse.parse_qs(parsed_url.query)
-
-        if path == '/api/debug_users':
-            users = read_users_db()
-            debug_info = []
-            for u in users:
-                debug_info.append({
-                    'userId': u.get('userId'),
-                    'googleEmail': u.get('googleEmail'),
-                    'syncCode': u.get('syncCode'),
-                    'totalCrystals': u.get('saveData', {}).get('totalCrystals'),
-                    'spentCrystals': u.get('saveData', {}).get('spentCrystals'),
-                    'avatar': u.get('saveData', {}).get('avatar'),
-                    'authorName': u.get('saveData', {}).get('authorName'),
-                    'lastUpdated': u.get('lastUpdated')
-                })
-            self.send_response(200)
-            self.send_header('Content-Type', 'application/json; charset=utf-8')
-            self.end_headers()
-            self.wfile.write(json.dumps(debug_info, ensure_ascii=False).encode('utf-8'))
-            return
-
-        if path == '/api/levels':
-            db = read_db()
-            sort_type = query.get('sort', ['new'])[0]
-            user_id = query.get('userId', [''])[0]
-
-            # 24 saat boyunca oynanmayan haritaları sahibinden gizle, 30 gün boyunca hiç oynanmamışsa kalıcı sil
-            response_db = []
-            cleaned_db = []
-            db_changed = False
-            now = datetime.now(timezone.utc)
-
-            for level in db:
-                played_str = level.get('lastPlayedAt') or level.get('createdAt')
-                try:
-                    played_time = datetime.fromisoformat(played_str)
-                    if played_time.tzinfo is None:
-                        played_time = played_time.replace(tzinfo=timezone.utc)
-                    age_seconds = (now - played_time).total_seconds()
-                except Exception:
-                    age_seconds = 0
-
-                creator_id = level.get('creatorId', '')
-                likes = level.get('likes', 0)
-                allowed_age_seconds = 86400 + (likes * 12 * 3600)
-                is_immortal = likes >= 50
-
-                # Kalıcı Silme: 50 beğeni altındaysa ve son oynanıştan itibaren 30 gün geçmişse db'den tamamen kaldır (Sahibi dahil)
-                if not is_immortal and age_seconds > allowed_age_seconds + (30 * 86400):
-                    db_changed = True
-                    continue # db_maps.json'a dahil etme
-
-                cleaned_db.append(level)
-
-                # Yanıt Filtreleme: Süre dolmadıysa, ebediyse VEYA istek atan kişi bölümün yaratıcısıysa göster
-                if is_immortal or age_seconds <= allowed_age_seconds or creator_id == user_id:
-                    response_db.append(level)
-
-            if db_changed:
-                write_db(cleaned_db)
-
-            # En çok beğeni alan en üstte olacak şekilde sırala (beğeni sayıları eşitse en son eklenen en üstte olur)
-            if sort_type == 'popular':
-                response_db.sort(key=lambda x: (x.get('likes', 0), x.get('createdAt', '')), reverse=True)
-            else:
-                response_db.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
-
-            self.send_response(200)
-            self.send_header('Content-Type', 'application/json; charset=utf-8')
-            self.end_headers()
-            self.wfile.write(json.dumps(response_db, ensure_ascii=False).encode('utf-8'))
-        elif path == '/api/status':
-            self.send_response(200)
-            self.send_header('Content-Type', 'application/json; charset=utf-8')
-            self.end_headers()
-            
-            masked_uri = None
-            if MONGO_URI:
-                try:
-                    parsed = urllib.parse.urlparse(MONGO_URI)
-                    if parsed.password:
-                        # Replace the password in the netloc
-                        netloc_parts = parsed.netloc.split('@')
-                        if len(netloc_parts) > 1:
-                            creds = netloc_parts[0].split(':')
-                            user = creds[0]
-                            netloc_parts[0] = f"{user}:***"
-                        new_netloc = '@'.join(netloc_parts)
-                        masked_uri = parsed._replace(netloc=new_netloc).geturl()
-                    else:
-                        masked_uri = parsed.geturl()
-                except Exception as parse_err:
-                    masked_uri = f"Error parsing URI: {str(parse_err)}"
-                    
-            status_data = {
-                "mongodb_connected": mongo_collection is not None,
-                "mongodb_db_name": mongo_db_name,
-                "mongodb_error": mongo_error,
-                "mongodb_uri_configured": MONGO_URI is not None,
-                "mongodb_uri_masked": masked_uri,
-                "server_time_utc": datetime.now(timezone.utc).isoformat(),
-                "git_commit": os.environ.get('RENDER_GIT_COMMIT', 'unknown'),
-                "environment_keys": list(os.environ.keys())
-            }
-            self.wfile.write(json.dumps(status_data, ensure_ascii=False).encode('utf-8'))
-        elif path.startswith('/api/campaign/') and path.endswith('/leaderboard'):
-            parts = path.split('/')
-            if len(parts) >= 4:
-                try:
-                    level_num = int(parts[3])
-                except ValueError:
-                    self.send_response(400)
-                    self.end_headers()
-                    return
-                
-                user_id = query.get('userId', [''])[0]
-                
-                db = read_campaign_db()
-                found = None
-                for item in db:
-                    if item.get('levelNumber') == level_num:
-                        found = item
-                        break
-                
-                all_scores = found.get('scores', []) if found else []
-                all_scores = sorted(all_scores, key=lambda s: s['time'])
-                
-                # Top 3 leaderboard
-                top_3 = []
-                for idx, s in enumerate(all_scores[:3]):
-                    top_3.append({
-                        'username': s.get('username', 'Anonim'),
-                        'time': s.get('time'),
-                        'medal': 'gold' if idx == 0 else ('silver' if idx == 1 else 'bronze')
-                    })
-                
-                # Find personal stats
-                rank = None
-                percentile = None
-                personal_best = None
-                total_players = len(all_scores)
-                
-                if user_id:
-                    for idx, s in enumerate(all_scores):
-                        if s.get('userId') == user_id:
-                            rank = idx + 1
-                            personal_best = s.get('time')
-                            break
-                    if rank is not None and total_players > 0:
-                        percentile = round((rank / total_players) * 100, 1)
-                
-                res_data = {
-                    'leaderboard': top_3,
-                    'rank': rank,
-                    'totalPlayers': total_players,
-                    'percentile': percentile,
-                    'personalBest': personal_best
-                }
-                
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps(res_data, ensure_ascii=False).encode('utf-8'))
-                return
-        else:
-            # Diğer tüm istekleri (index.html, js/, css/ vb.) standart SimpleHTTPRequestHandler ile sun
-            super().do_GET()
-
-    def do_POST(self):
-        parsed_url = urllib.parse.urlparse(self.path)
-        path = parsed_url.path
-        query = urllib.parse.parse_qs(parsed_url.query)
-
-        # Content length oku
-        content_length = int(self.headers.get('Content-Length', 0))
-        post_data = self.rfile.read(content_length)
-
-        body = {}
-        if content_length > 0:
-            try:
-                body = json.loads(post_data.decode('utf-8'))
-            except Exception as e:
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write('{"error": "Geçersiz JSON verisi."}'.encode('utf-8'))
-                return
-
-
-        # Bulut Kayıt Senkronizasyonu: POST /api/user/sync
-        if path == '/api/user/sync':
-            user_id = body.get('userId')
-            save_data = body.get('saveData')
-            
-            if not user_id or not isinstance(save_data, dict):
-                self.send_response(400)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({'error': 'userId ve saveData gereklidir.'}, ensure_ascii=False).encode('utf-8'))
-                return
-                
-            # İsmini/yapımcı adını filtrele (eğer data içinde varsa)
-            author_name = save_data.get('authorName', '')
-            if author_name and is_offensive(author_name):
-                self.send_response(400)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({'error': 'Tasarımcı adı uygunsuz içerik içeremez.'}, ensure_ascii=False).encode('utf-8'))
-                return
-                
-            force = body.get('force', False)
-            existing_user = get_user_by_id(user_id)
-            if existing_user:
-                if force:
-                    # Zorla Yükleme: Sunucudaki veriyi tamamen ez
-                    existing_user['saveData'] = save_data
-                else:
-                    db_save = existing_user.get('saveData', {})
-                    db_time = int(db_save.get('lastSaveTime', 0) or 0)
-                    inc_time = int(save_data.get('lastSaveTime', 0) or 0)
-                    
-                    # Zaman Damgası Kontrolü (Last Write Wins): 
-                    # Hangi cihazda en son işlem/kayıt yapıldıysa onun verisi geçerli olur
-                    if inc_time >= db_time:
-                        existing_user['saveData'] = save_data
-                    else:
-                        # Sunucudaki veri daha yeni, gelen veriyi yoksay (mevcut db verisini koru)
-                        pass
-                existing_user['lastUpdated'] = datetime.now(timezone.utc).isoformat()
-                user_record = existing_user
-            else:
-                # Yeni kullanıcı, 6 haneli syncCode üret (ör: R8F9T2)
-                # Benzersiz olana kadar dene
-                import string
-                chars = string.ascii_uppercase + string.digits
-                sync_code = ''.join(random.choices(chars, k=6))
-                while get_user_by_sync_code(sync_code) is not None:
-                    sync_code = ''.join(random.choices(chars, k=6))
-                    
-                user_record = {
-                    'userId': user_id,
-                    'syncCode': sync_code,
-                    'saveData': save_data,
-                    'lastUpdated': datetime.now(timezone.utc).isoformat()
-                }
-                
-            if save_user(user_record):
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({
-                    'status': 'success',
-                    'syncCode': user_record['syncCode'],
-                    'saveData': user_record['saveData'],
-                    'lastUpdated': user_record['lastUpdated']
-                }, ensure_ascii=False).encode('utf-8'))
-            else:
-                self.send_response(500)
-                self.end_headers()
-            return
-
-        # Bulut Kayıt Geri Yükleme: POST /api/user/restore
-        if path == '/api/user/restore':
-            sync_code = body.get('syncCode')
-            if not sync_code:
-                self.send_response(400)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({'error': 'syncCode gereklidir.'}, ensure_ascii=False).encode('utf-8'))
-                return
-                
-            user_record = get_user_by_sync_code(sync_code)
-            if user_record:
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({
-                    'status': 'success',
-                    'userId': user_record['userId'],
-                    'saveData': user_record['saveData'],
-                    'lastUpdated': user_record['lastUpdated']
-                }, ensure_ascii=False).encode('utf-8'))
-            else:
-                self.send_response(404)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({'error': 'Geçersiz veya bulunamayan kurtarma kodu.'}, ensure_ascii=False).encode('utf-8'))
-            return
-        # Admin: E-posta Arama: POST /api/admin/search-users
-        if path == '/api/admin/search-users':
-            query = body.get('query', '')
-            secret = body.get('secret')
-            
-            if secret != "ViscoraSecretAdminKey_2026":
-                self.send_response(403)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({'error': 'Yetkisiz erişim.'}, ensure_ascii=False).encode('utf-8'))
-                return
-                
-            matched_users = []
-            if mongo_users_collection is not None:
-                try:
-                    # Case-insensitive regex search in MongoDB
-                    cursor = mongo_users_collection.find(
-                        {'googleEmail': {'$regex': query, '$options': 'i'}}, 
-                        {'_id': False}
-                    )
-                    matched_users = list(cursor)
-                except Exception as e:
-                    print("MongoDB search error:", e)
-            else:
-                users = read_users_db()
-                for u in users:
-                    u_email = u.get('googleEmail')
-                    if u_email and query.lower() in str(u_email).lower():
-                        matched_users.append(u)
-                        
-            # Return list of emails and details
-            results = []
-            for u in matched_users:
-                results.append({
-                    'email': u.get('googleEmail'),
-                    'userId': u.get('userId'),
-                    'syncCode': u.get('syncCode'),
-                    'totalCrystals': u.get('saveData', {}).get('totalCrystals', 0)
-                })
-                
-            self.send_response(200)
-            self.send_header('Content-Type', 'application/json; charset=utf-8')
-            self.end_headers()
-            self.wfile.write(json.dumps({'results': results}, ensure_ascii=False).encode('utf-8'))
-            return
-
-        # Admin: E-postaya Elmas Gönder/Ekle: POST /api/admin/add-crystals
-        if path == '/api/admin/add-crystals':
-            email = body.get('email')
-            count = body.get('count', 0)
-            secret = body.get('secret')
-            
-            if secret != "ViscoraSecretAdminKey_2026":
-                self.send_response(403)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({'error': 'Yetkisiz erişim.'}, ensure_ascii=False).encode('utf-8'))
-                return
-                
-            if not email or count <= 0:
-                self.send_response(400)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({'error': 'Geçersiz email veya elmas adedi.'}, ensure_ascii=False).encode('utf-8'))
-                return
-                
-            user_record = get_user_by_email(email)
-            if not user_record:
-                self.send_response(404)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({'error': 'Belirtilen e-postaya ait kayıt bulunamadı.'}, ensure_ascii=False).encode('utf-8'))
-                return
-                
-            save_data = user_record.get('saveData', {})
-            
-            # Elmas adetlerini güncelle
-            total = int(save_data.get('totalCrystals', 0) or 0) + count
-            spent = int(save_data.get('spentCrystals', 0) or 0)
-            
-            save_data['totalCrystals'] = total
-            
-            # Yeni imza ve zaman damgası oluştur
-            import time
-            owned_items = save_data.get('ownedItems', ['default_trail', 'default_accessory', 'default_eyes'])
-            if isinstance(owned_items, str):
-                try:
-                    owned_items = json.loads(owned_items)
-                except:
-                    pass
-            if not isinstance(owned_items, list):
-                owned_items = ['default_trail', 'default_accessory', 'default_eyes']
-            
-            owned_str = json.dumps(owned_items, separators=(',', ':'))
-            
-            sig = generate_signature_py(total, spent, owned_str)
-            save_data['balanceSig'] = sig
-            
-            # Zaman damgasını ve lastSaveTime güncelle (Last Write Wins tetiklemesi için)
-            now_ms = int(time.time() * 1000)
-            save_data['lastSaveTime'] = now_ms
-            
-            user_record['saveData'] = save_data
-            user_record['lastUpdated'] = datetime.now(timezone.utc).isoformat()
-            
-            if save_user(user_record):
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({
-                    'status': 'success',
-                    'message': f'{email} hesabına {count} elmas başarıyla eklendi.',
-                    'totalCrystals': total,
-                    'lastSaveTime': now_ms
-                }, ensure_ascii=False).encode('utf-8'))
-            else:
-                self.send_response(500)
-                self.end_headers()
-            return
-
-        # Google Giriş ve Senkronizasyon: POST /api/user/google_auth
-        if path == '/api/user/google_auth':
-            id_token = body.get('idToken')
-            current_user_id = body.get('currentUserId')
-            
-            if not id_token:
-                self.send_response(400)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({'error': 'idToken gereklidir.'}, ensure_ascii=False).encode('utf-8'))
-                return
-                
-            # Google'ın tokeninfo API'si ile token doğrula
-            try:
-                verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
-                req = urllib.request.Request(verify_url, method="GET")
-                with urllib.request.urlopen(req) as resp:
-                    token_info = json.loads(resp.read().decode('utf-8'))
-                    
-                google_id = token_info.get('sub')
-                email = token_info.get('email')
-                
-                if not google_id:
-                    raise Exception("Geçersiz token.")
-            except Exception as e:
-                self.send_response(400)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({'error': f'Google doğrulaması başarısız: {str(e)}'}, ensure_ascii=False).encode('utf-8'))
-                return
-                
-            # Google ID ile kayıtlı kullanıcı ara
-            user_record = get_user_by_google_id(google_id)
-            
-            if user_record:
-                # Kullanıcı bulundu! Kayıtlı veriyi geri yükle
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({
-                    'status': 'success',
-                    'userId': user_record['userId'],
-                    'syncCode': user_record.get('syncCode'),
-                    'saveData': user_record['saveData'],
-                    'lastUpdated': user_record['lastUpdated']
-                }, ensure_ascii=False).encode('utf-8'))
-            else:
-                # Yeni Google kullanıcısı. Mevcut yerel ilerlemeyi bağla
-                linked = False
-                if current_user_id:
-                    anon_user = get_user_by_id(current_user_id)
-                    if anon_user:
-                        anon_user['googleId'] = google_id
-                        anon_user['googleEmail'] = email
-                        anon_user['lastUpdated'] = datetime.now(timezone.utc).isoformat()
-                        save_user(anon_user)
-                        user_record = anon_user
-                        linked = True
-                        
-                if not linked:
-                    # Yeni bir kullanıcı oluştur
-                    import string
-                    import time
-                    import uuid
-                    chars = string.ascii_uppercase + string.digits
-                    sync_code = ''.join(random.choices(chars, k=6))
-                    while get_user_by_sync_code(sync_code) is not None:
-                        sync_code = ''.join(random.choices(chars, k=6))
-                        
-                    user_record = {
-                        'userId': 'user_' + str(uuid.uuid4())[:8] + '_' + str(int(time.time())),
-                        'googleId': google_id,
-                        'googleEmail': email,
-                        'syncCode': sync_code,
-                        'saveData': {},
-                        'lastUpdated': datetime.now(timezone.utc).isoformat()
-                    }
-                    save_user(user_record)
-                    
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({
-                    'status': 'success',
-                    'userId': user_record['userId'],
-                    'syncCode': user_record['syncCode'],
-                    'saveData': user_record['saveData'],
-                    'lastUpdated': user_record['lastUpdated']
-                }, ensure_ascii=False).encode('utf-8'))
-            return
-
-        # 1. Yeni seviye yayınlama: POST /api/levels
-        if path == '/api/levels':
-            name = body.get('name')
-            author = body.get('author')
-            creator_id = body.get('creatorId', '')
-            data = body.get('data')
-
-            if not name or not author or not data:
-                self.send_response(400)
-                self.end_headers()
-                self.wfile.write('{"error": "Harita adı, yapımcı ve harita verileri zorunludur."}'.encode('utf-8'))
-                return
-
-            validation_error = validate_level_limits(data)
-            if validation_error:
-                self.send_response(400)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({'error': validation_error}, ensure_ascii=False).encode('utf-8'))
-                return
-
-            if is_offensive(name) or is_offensive(author):
-                self.send_response(400)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write('{"error": "Bölüm adı veya yapımcı adı uygunsuz/siyasi içerik içeremez."}'.encode('utf-8'))
-                return
-
-            db = read_db()
-            
-            # Bölüm adı çakışması kontrolü
-            for level in db:
-                if level.get('name', '').strip().lower() == name.strip().lower():
-                    self.send_response(409) # 409 Conflict
-                    self.send_header('Content-Type', 'application/json; charset=utf-8')
-                    self.end_headers()
-                    self.wfile.write('{"error": "Bu bölüm adı zaten mevcut."}'.encode('utf-8'))
-                    return
-
-            new_level = {
-                'id': f'map_{int(datetime.now(timezone.utc).timestamp() * 1000)}_{random.randint(100, 999)}',
-                'name': name.strip(),
-                'author': author.strip(),
-                'creatorId': creator_id,
-                'data': data,
-                'likes': 0,
-                'tags': body.get('tags', []),
-                'createdAt': datetime.now(timezone.utc).isoformat(),
-                'lastPlayedAt': datetime.now(timezone.utc).isoformat()
-            }
-            db.append(new_level)
-
-            if write_db(db):
-                self.send_response(201)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps(new_level, ensure_ascii=False).encode('utf-8'))
-            else:
-                self.send_response(500)
-                self.end_headers()
-                self.wfile.write('{"error": "Harita kaydedilemedi."}'.encode('utf-8'))
-
-        # 2. Harita beğenme: POST /api/levels/<id>/like
-        elif path.startswith('/api/levels/') and path.endswith('/like'):
-            # ID ayıkla
-            parts = path.split('/')
-            if len(parts) >= 4:
-                level_id = parts[3]
-                db = read_db()
-                found = None
-                for level in db:
-                    if level['id'] == level_id:
-                        level['likes'] = level.get('likes', 0) + 1
-                        found = level
-                        break
-
-                if found:
-                    if write_db(db):
-                        self.send_response(200)
-                        self.send_header('Content-Type', 'application/json; charset=utf-8')
-                        self.end_headers()
-                        self.wfile.write(json.dumps(found, ensure_ascii=False).encode('utf-8'))
-                    else:
-                        self.send_response(500)
-                        self.end_headers()
-                        self.wfile.write('{"error": "Beğeni kaydedilemedi."}'.encode('utf-8'))
-                else:
-                    self.send_response(404)
-                    self.end_headers()
-                    self.wfile.write('{"error": "Harita bulunamadı."}'.encode('utf-8'))
-            else:
-                self.send_response(400)
-                self.end_headers()
-
-        # 3. Harita oynanma/tıklanma zamanı güncelleme: POST /api/levels/<id>/play
-        elif path.startswith('/api/levels/') and path.endswith('/play'):
-            parts = path.split('/')
-            if len(parts) >= 4:
-                level_id = parts[3]
-                user_id = query.get('userId', [''])[0]
-                db = read_db()
-                found = None
-                for level in db:
-                    if level['id'] == level_id:
-                        # Kendi haritasını oynarken süreyi sıfırlayamasın/uzatamasın
-                        if level.get('creatorId') != user_id:
-                            level['lastPlayedAt'] = datetime.now(timezone.utc).isoformat()
-                        found = level
-                        break
-
-                if found:
-                    if write_db(db):
-                        self.send_response(200)
-                        self.send_header('Content-Type', 'application/json; charset=utf-8')
-                        self.end_headers()
-                        self.wfile.write('{"status": "ok"}'.encode('utf-8'))
-                    else:
-                        self.send_response(500)
-                        self.end_headers()
-                else:
-                    self.send_response(404)
-                    self.end_headers()
-
-        # 3.5. Harita derece kaydetme: POST /api/levels/<id>/score
-        elif path.startswith('/api/levels/') and path.endswith('/score'):
-            parts = path.split('/')
-            if len(parts) >= 4:
-                level_id = parts[3]
-                username = body.get('username')
-                score_time = body.get('time')
-
-                if not username or score_time is None:
-                    self.send_response(400)
-                    self.send_header('Content-Type', 'application/json; charset=utf-8')
-                    self.end_headers()
-                    self.wfile.write('{"error": "Kullanıcı adı ve süre zorunludur."}'.encode('utf-8'))
-                    return
-
-                try:
-                    score_time = float(score_time)
-                except ValueError:
-                    self.send_response(400)
-                    self.send_header('Content-Type', 'application/json; charset=utf-8')
-                    self.end_headers()
-                    self.wfile.write('{"error": "Geçersiz süre değeri."}'.encode('utf-8'))
-                    return
-
-                if score_time <= 0:
-                    self.send_response(400)
-                    self.send_header('Content-Type', 'application/json; charset=utf-8')
-                    self.end_headers()
-                    self.wfile.write('{"error": "Süre 0\'dan büyük olmalıdır."}'.encode('utf-8'))
-                    return
-
-                if is_offensive(username):
-                    self.send_response(400)
-                    self.send_header('Content-Type', 'application/json; charset=utf-8')
-                    self.end_headers()
-                    self.wfile.write('{"error": "Kullanıcı adı uygunsuz içerik içeremez."}'.encode('utf-8'))
-                    return
-
-                db = read_db()
-                found = None
-                for level in db:
-                    if level['id'] == level_id:
-                        found = level
-                        break
-
-                if found:
-                    if 'scores' not in found:
-                        found['scores'] = []
-
-                    # Aynı kullanıcının eski derecesi varsa kontrol et ve güncelle
-                    existing_score = None
-                    for s in found['scores']:
-                        if s.get('username', '').lower().strip() == username.strip().lower():
-                            existing_score = s
-                            break
-
-                    if existing_score:
-                        if score_time < existing_score['time']:
-                            existing_score['time'] = score_time
-                            existing_score['date'] = datetime.now(timezone.utc).isoformat()
-                    else:
-                        found['scores'].append({
-                            'username': username.strip(),
-                            'time': score_time,
-                            'date': datetime.now(timezone.utc).isoformat()
-                        })
-
-                    # Süreye göre küçükten büyüğe sırala ve en iyi 5 dereceyi tut
-                    found['scores'] = sorted(found['scores'], key=lambda s: s['time'])[:5]
-
-                    if write_db(db):
-                        self.send_response(200)
-                        self.send_header('Content-Type', 'application/json; charset=utf-8')
-                        self.end_headers()
-                        self.wfile.write(json.dumps(found, ensure_ascii=False).encode('utf-8'))
-                    else:
-                        self.send_response(500)
-                        self.end_headers()
-                else:
-                    self.send_response(404)
-                    self.end_headers()
-
-        # 4. Harita güncelleme: POST /api/levels/<id>/update
-        elif path.startswith('/api/levels/') and path.endswith('/update'):
-            parts = path.split('/')
-            if len(parts) >= 4:
-                level_id = parts[3]
-                creator_id = body.get('creatorId', '')
-                new_data = body.get('data')
-                new_name = body.get('name')
-                
-                if not new_data:
-                    self.send_response(400)
-                    self.end_headers()
-                    self.wfile.write('{"error": "Güncellenecek veri bulunamadı."}'.encode('utf-8'))
-                    return
-                    
-                validation_error = validate_level_limits(new_data)
-                if validation_error:
-                    self.send_response(400)
-                    self.send_header('Content-Type', 'application/json; charset=utf-8')
-                    self.end_headers()
-                    self.wfile.write(json.dumps({'error': validation_error}, ensure_ascii=False).encode('utf-8'))
-                    return
-                    
-                db = read_db()
-                found = None
-                for level in db:
-                    if level['id'] == level_id:
-                        found = level
-                        break
-                        
-                if found:
-                    # Sahibi kontrolü
-                    if found.get('creatorId') != creator_id:
-                        self.send_response(403)
-                        self.send_header('Content-Type', 'application/json; charset=utf-8')
-                        self.end_headers()
-                        self.wfile.write('{"error": "Bu bölümü güncelleme izniniz yok."}'.encode('utf-8'))
-                        return
-                    
-                    # Eğer isim değiştiyse ve çakışma varsa kontrol et
-                    if new_name and new_name.strip().lower() != found.get('name', '').strip().lower():
-                        if is_offensive(new_name):
-                            self.send_response(400)
-                            self.send_header('Content-Type', 'application/json; charset=utf-8')
-                            self.end_headers()
-                            self.wfile.write('{"error": "Bölüm adı uygunsuz/siyasi içerik içeremez."}'.encode('utf-8'))
-                            return
-                        for level in db:
-                            if level['id'] != level_id and level.get('name', '').strip().lower() == new_name.strip().lower():
-                                self.send_response(409)
-                                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                                self.end_headers()
-                                self.wfile.write('{"error": "Bu bölüm adı zaten mevcut."}'.encode('utf-8'))
-                                return
-                        found['name'] = new_name.strip()
-                        
-                    found['data'] = new_data
-                    if 'tags' in body:
-                        found['tags'] = body.get('tags', [])
-                    
-                    if write_db(db):
-                        self.send_response(200)
-                        self.send_header('Content-Type', 'application/json; charset=utf-8')
-                        self.end_headers()
-                        self.wfile.write(json.dumps(found, ensure_ascii=False).encode('utf-8'))
-                    else:
-                        self.send_response(500)
-                        self.end_headers()
-                else:
-                    self.send_response(404)
-                    self.end_headers()
-                    self.wfile.write('{"error": "Harita bulunamadı."}'.encode('utf-8'))
-            else:
-                self.send_response(400)
-                self.end_headers()
-        elif path.startswith('/api/campaign/') and path.endswith('/score'):
-            parts = path.split('/')
-            if len(parts) >= 4:
-                try:
-                    level_num = int(parts[3])
-                except ValueError:
-                    self.send_response(400)
-                    self.end_headers()
-                    return
-                
-                user_id = body.get('userId')
-                username = body.get('username')
-                score_time = body.get('time')
-                
-                if not user_id or not username or score_time is None:
-                    self.send_response(400)
-                    self.send_header('Content-Type', 'application/json; charset=utf-8')
-                    self.end_headers()
-                    self.wfile.write('{"error": "Kullanıcı ID, adı ve süre zorunludur."}'.encode('utf-8'))
-                    return
-                
-                try:
-                    score_time = float(score_time)
-                except ValueError:
-                    self.send_response(400)
-                    self.end_headers()
-                    return
-                
-                if score_time <= 0:
-                    self.send_response(400)
-                    self.end_headers()
-                    return
-                
-                if is_offensive(username):
-                    self.send_response(400)
-                    self.send_header('Content-Type', 'application/json; charset=utf-8')
-                    self.end_headers()
-                    self.wfile.write('{"error": "Kullanıcı adı uygunsuz içerik içeremez."}'.encode('utf-8'))
-                    return
-
-                db = read_campaign_db()
-                found = None
-                for item in db:
-                    if item.get('levelNumber') == level_num:
-                        found = item
-                        break
-                
-                if not found:
-                    found = {'levelNumber': level_num, 'scores': []}
-                    db.append(found)
-                
-                # Check for existing user score
-                existing = None
-                for s in found['scores']:
-                    if s.get('userId') == user_id:
-                        existing = s
-                        break
-                
-                if existing:
-                    existing['username'] = username.strip()
-                    if score_time < existing['time']:
-                        existing['time'] = score_time
-                        existing['date'] = datetime.now(timezone.utc).isoformat()
-                else:
-                    found['scores'].append({
-                        'userId': user_id,
-                        'username': username.strip(),
-                        'time': score_time,
-                        'date': datetime.now(timezone.utc).isoformat()
-                    })
-                
-                write_campaign_db(db)
-                
-                # Recalculate stats
-                all_scores = sorted(found['scores'], key=lambda s: s['time'])
-                top_3 = []
-                for idx, s in enumerate(all_scores[:3]):
-                    top_3.append({
-                        'username': s.get('username', 'Anonim'),
-                        'time': s.get('time'),
-                        'medal': 'gold' if idx == 0 else ('silver' if idx == 1 else 'bronze')
-                    })
-                
-                rank = None
-                personal_best = None
-                total_players = len(all_scores)
-                for idx, s in enumerate(all_scores):
-                    if s.get('userId') == user_id:
-                        rank = idx + 1
-                        personal_best = s.get('time')
-                        break
-                
-                percentile = round((rank / total_players) * 100, 1) if rank else 100.0
-                
-                res_data = {
-                    'success': True,
-                    'leaderboard': top_3,
-                    'rank': rank,
-                    'totalPlayers': total_players,
-                    'percentile': percentile,
-                    'personalBest': personal_best
-                }
-                
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps(res_data, ensure_ascii=False).encode('utf-8'))
-                return
-            else:
-                self.send_response(400)
-                self.end_headers()
-        else:
-            self.send_response(404)
-            self.end_headers()
-
 def sanitize_existing_db():
     db = read_db()
     original_len = len(db)
     
-    # Belirli uygunsuz haritayı sil
     db = [level for level in db if level.get('id') != 'map_1782506417393_451']
     modified = len(db) < original_len
     if modified:
@@ -1572,21 +636,18 @@ def sanitize_existing_db():
         author = level.get('author', '')
         scores = level.get('scores', [])
         
-        # Harita adını kontrol et
         if is_offensive(name):
             new_name = "".join(random.choices("0123456789", k=8))
             print(f"Renaming offensive map name '{name}' to '{new_name}'")
             level['name'] = new_name
             modified = True
             
-        # Yapımcı adını kontrol et
         if is_offensive(author):
             new_author = "".join(random.choices("0123456789", k=8))
             print(f"Renaming offensive author '{author}' to '{new_author}'")
             level['author'] = new_author
             modified = True
             
-        # Skorları kontrol et
         for score in scores:
             username = score.get('username', '')
             if is_offensive(username):
@@ -1598,42 +659,654 @@ def sanitize_existing_db():
     if modified:
         write_db(db)
         print("Existing offensive names sanitized in the database successfully.")
-    else:
-        print("No offensive names found in the database.")
 
-class ThreadPoolHTTPServer(http.server.HTTPServer):
-    """
-    İstekleri ThreadPoolExecutor kullanarak eşzamanlı ve iş parçacığı havuzu
-    sınırları dahilinde (max_workers=150) işleyen özel HTTPServer sınıfı.
-    Bu sayede yüksek eşzamanlılıkta OS thread sınırı aşılmadan verimli çalışır.
-    """
-    request_queue_size = 1024 # TCP backlog kuyruk boyutu (Öntanımlı olan 5 çok küçüktü, 1024 yapıldı)
+# FastAPI Uygulaması
+app = FastAPI(title="Viscora API Server", docs_url=None, redoc_url=None)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.executor = ThreadPoolExecutor(max_workers=150)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    def process_request(self, request, client_address):
-        self.executor.submit(self.process_request_thread, request, client_address)
-
-    def process_request_thread(self, request, client_address):
-        try:
-            self.finish_request(request, client_address)
-        except Exception as e:
-            self.handle_error(request, client_address)
-        finally:
-            self.shutdown_request(request)
-
-def run_server():
+@app.on_event("startup")
+async def startup_event():
     sanitize_existing_db()
-    server_address = ('', PORT)
-    httpd = ThreadPoolHTTPServer(server_address, APIRequestHandler)
-    print(f"Viscora API Sunucusu (Eşzamanlı/Thread-Pooled) {PORT} portunda başarıyla başlatıldı.")
+
+@app.get("/api/debug_users")
+async def get_debug_users():
+    users = read_users_db()
+    debug_info = []
+    for u in users:
+        debug_info.append({
+            'userId': u.get('userId'),
+            'googleEmail': u.get('googleEmail'),
+            'syncCode': u.get('syncCode'),
+            'totalCrystals': u.get('saveData', {}).get('totalCrystals'),
+            'spentCrystals': u.get('saveData', {}).get('spentCrystals'),
+            'avatar': u.get('saveData', {}).get('avatar'),
+            'authorName': u.get('saveData', {}).get('authorName'),
+            'lastUpdated': u.get('lastUpdated')
+        })
+    return debug_info
+
+@app.get("/api/levels")
+async def get_levels(sort: str = 'new', userId: str = ''):
+    db = read_db()
+    response_db = []
+    cleaned_db = []
+    db_changed = False
+    now = datetime.now(timezone.utc)
+
+    for level in db:
+        played_str = level.get('lastPlayedAt') or level.get('createdAt')
+        try:
+            played_time = datetime.fromisoformat(played_str)
+            if played_time.tzinfo is None:
+                played_time = played_time.replace(tzinfo=timezone.utc)
+            age_seconds = (now - played_time).total_seconds()
+        except Exception:
+            age_seconds = 0
+
+        creator_id = level.get('creatorId', '')
+        likes = level.get('likes', 0)
+        allowed_age_seconds = 86400 + (likes * 12 * 3600)
+        is_immortal = likes >= 50
+
+        # Kalıcı Silme: 50 beğeni altındaysa ve son oynanıştan itibaren 30 gün geçmişse db'den kaldır
+        if not is_immortal and age_seconds > allowed_age_seconds + (30 * 86400):
+            db_changed = True
+            continue
+
+        cleaned_db.append(level)
+
+        if is_immortal or age_seconds <= allowed_age_seconds or creator_id == userId:
+            response_db.append(level)
+
+    if db_changed:
+        write_db(cleaned_db)
+
+    if sort == 'popular':
+        response_db.sort(key=lambda x: (x.get('likes', 0), x.get('createdAt', '')), reverse=True)
+    else:
+        response_db.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
+
+    return response_db
+
+@app.get("/api/status")
+async def get_status():
+    masked_uri = None
+    if MONGO_URI:
+        try:
+            parsed = urllib.parse.urlparse(MONGO_URI)
+            if parsed.password:
+                netloc_parts = parsed.netloc.split('@')
+                if len(netloc_parts) > 1:
+                    creds = netloc_parts[0].split(':')
+                    user = creds[0]
+                    netloc_parts[0] = f"{user}:***"
+                new_netloc = '@'.join(netloc_parts)
+                masked_uri = parsed._replace(netloc=new_netloc).geturl()
+            else:
+                masked_uri = parsed.geturl()
+        except Exception as parse_err:
+            masked_uri = f"Error parsing URI: {str(parse_err)}"
+            
+    return {
+        "mongodb_connected": mongo_collection is not None,
+        "mongodb_db_name": mongo_db_name,
+        "mongodb_error": mongo_error,
+        "mongodb_uri_configured": MONGO_URI is not None,
+        "mongodb_uri_masked": masked_uri,
+        "server_time_utc": datetime.now(timezone.utc).isoformat(),
+        "git_commit": os.environ.get('RENDER_GIT_COMMIT', 'unknown'),
+        "environment_keys": list(os.environ.keys())
+    }
+
+@app.get("/api/campaign/{level_num}/leaderboard")
+async def get_campaign_leaderboard(level_num: int, userId: str = ''):
+    db = read_campaign_db()
+    found = None
+    for item in db:
+        if item.get('levelNumber') == level_num:
+            found = item
+            break
+            
+    all_scores = found.get('scores', []) if found else []
+    all_scores = sorted(all_scores, key=lambda s: s['time'])
+    
+    top_3 = []
+    for idx, s in enumerate(all_scores[:3]):
+        top_3.append({
+            'username': s.get('username', 'Anonim'),
+            'time': s.get('time'),
+            'medal': 'gold' if idx == 0 else ('silver' if idx == 1 else 'bronze')
+        })
+    
+    rank = None
+    percentile = None
+    personal_best = None
+    total_players = len(all_scores)
+    
+    if userId:
+        for idx, s in enumerate(all_scores):
+            if s.get('userId') == userId:
+                rank = idx + 1
+                personal_best = s.get('time')
+                break
+        if rank is not None and total_players > 0:
+            percentile = round((rank / total_players) * 100, 1)
+            
+    return {
+        'leaderboard': top_3,
+        'rank': rank,
+        'totalPlayers': total_players,
+        'percentile': percentile,
+        'personalBest': personal_best
+    }
+
+@app.post("/api/user/sync")
+async def post_user_sync(request: Request):
+    body = await request.json()
+    user_id = body.get('userId')
+    save_data = body.get('saveData')
+    
+    if not user_id or not isinstance(save_data, dict):
+        return JSONResponse(status_code=400, content={'error': 'userId ve saveData gereklidir.'})
+        
+    author_name = save_data.get('authorName', '')
+    if author_name and is_offensive(author_name):
+        return JSONResponse(status_code=400, content={'error': 'Tasarımcı adı uygunsuz içerik içeremez.'})
+        
+    force = body.get('force', False)
+    existing_user = get_user_by_id(user_id)
+    if existing_user:
+        if force:
+            existing_user['saveData'] = save_data
+        else:
+            db_save = existing_user.get('saveData', {})
+            db_time = int(db_save.get('lastSaveTime', 0) or 0)
+            inc_time = int(save_data.get('lastSaveTime', 0) or 0)
+            
+            if inc_time >= db_time:
+                existing_user['saveData'] = save_data
+        existing_user['lastUpdated'] = datetime.now(timezone.utc).isoformat()
+        user_record = existing_user
+    else:
+        import string
+        chars = string.ascii_uppercase + string.digits
+        sync_code = ''.join(random.choices(chars, k=6))
+        while get_user_by_sync_code(sync_code) is not None:
+            sync_code = ''.join(random.choices(chars, k=6))
+            
+        user_record = {
+            'userId': user_id,
+            'syncCode': sync_code,
+            'saveData': save_data,
+            'lastUpdated': datetime.now(timezone.utc).isoformat()
+        }
+        
+    if save_user(user_record):
+        return {
+            'status': 'success',
+            'syncCode': user_record['syncCode'],
+            'saveData': user_record['saveData'],
+            'lastUpdated': user_record['lastUpdated']
+        }
+    else:
+        return JSONResponse(status_code=500, content={'error': 'Veritabanına kaydedilemedi.'})
+
+@app.post("/api/user/restore")
+async def post_user_restore(request: Request):
+    body = await request.json()
+    sync_code = body.get('syncCode')
+    if not sync_code:
+        return JSONResponse(status_code=400, content={'error': 'syncCode gereklidir.'})
+        
+    user_record = get_user_by_sync_code(sync_code)
+    if user_record:
+        return {
+            'status': 'success',
+            'userId': user_record['userId'],
+            'saveData': user_record['saveData'],
+            'lastUpdated': user_record['lastUpdated']
+        }
+    else:
+        return JSONResponse(status_code=404, content={'error': 'Geçersiz veya bulunamayan kurtarma kodu.'})
+
+@app.post("/api/admin/search-users")
+async def post_admin_search_users(request: Request):
+    body = await request.json()
+    query = body.get('query', '')
+    secret = body.get('secret')
+    
+    if secret != "ViscoraSecretAdminKey_2026":
+        return JSONResponse(status_code=403, content={'error': 'Yetkisiz erişim.'})
+        
+    matched_users = []
+    if mongo_users_collection is not None:
+        try:
+            cursor = mongo_users_collection.find(
+                {'googleEmail': {'$regex': query, '$options': 'i'}}, 
+                {'_id': False}
+            )
+            matched_users = list(cursor)
+        except Exception as e:
+            print("MongoDB search error:", e)
+    else:
+        users = read_users_db()
+        for u in users:
+            u_email = u.get('googleEmail')
+            if u_email and query.lower() in str(u_email).lower():
+                matched_users.append(u)
+                
+    results = []
+    for u in matched_users:
+        results.append({
+            'email': u.get('googleEmail'),
+            'userId': u.get('userId'),
+            'syncCode': u.get('syncCode'),
+            'totalCrystals': u.get('saveData', {}).get('totalCrystals', 0)
+        })
+        
+    return {'results': results}
+
+@app.post("/api/admin/add-crystals")
+async def post_admin_add_crystals(request: Request):
+    body = await request.json()
+    email = body.get('email')
+    count = body.get('count', 0)
+    secret = body.get('secret')
+    
+    if secret != "ViscoraSecretAdminKey_2026":
+        return JSONResponse(status_code=403, content={'error': 'Yetkisiz erişim.'})
+        
+    if not email or count <= 0:
+        return JSONResponse(status_code=400, content={'error': 'Geçersiz email veya elmas adedi.'})
+        
+    user_record = get_user_by_email(email)
+    if not user_record:
+        return JSONResponse(status_code=404, content={'error': 'Belirtilen e-postaya ait kayıt bulunamadı.'})
+        
+    save_data = user_record.get('saveData', {})
+    total = int(save_data.get('totalCrystals', 0) or 0) + count
+    spent = int(save_data.get('spentCrystals', 0) or 0)
+    
+    save_data['totalCrystals'] = total
+    
+    import time
+    owned_items = save_data.get('ownedItems', ['default_trail', 'default_accessory', 'default_eyes'])
+    if isinstance(owned_items, str):
+        try: owned_items = json.loads(owned_items)
+        except: pass
+    if not isinstance(owned_items, list):
+        owned_items = ['default_trail', 'default_accessory', 'default_eyes']
+    
+    owned_str = json.dumps(owned_items, separators=(',', ':'))
+    sig = generate_signature_py(total, spent, owned_str)
+    save_data['balanceSig'] = sig
+    
+    now_ms = int(time.time() * 1000)
+    save_data['lastSaveTime'] = now_ms
+    user_record['saveData'] = save_data
+    user_record['lastUpdated'] = datetime.now(timezone.utc).isoformat()
+    
+    if save_user(user_record):
+        return {
+            'status': 'success',
+            'message': f'{email} hesabına {count} elmas başarıyla eklendi.',
+            'totalCrystals': total,
+            'lastSaveTime': now_ms
+        }
+    else:
+        return JSONResponse(status_code=500, content={'error': 'Elmas eklenemedi.'})
+
+@app.post("/api/user/google_auth")
+async def post_user_google_auth(request: Request):
+    body = await request.json()
+    id_token = body.get('idToken')
+    current_user_id = body.get('currentUserId')
+    
+    if not id_token:
+        return JSONResponse(status_code=400, content={'error': 'idToken gereklidir.'})
+        
     try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print("\nSunucu durduruldu.")
-        httpd.server_close()
+        verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
+        req = urllib.request.Request(verify_url, method="GET")
+        with urllib.request.urlopen(req) as resp:
+            token_info = json.loads(resp.read().decode('utf-8'))
+            
+        google_id = token_info.get('sub')
+        email = token_info.get('email')
+        
+        if not google_id:
+            raise Exception("Geçersiz token.")
+    except Exception as e:
+        return JSONResponse(status_code=400, content={'error': f'Google doğrulaması başarısız: {str(e)}'})
+        
+    user_record = get_user_by_google_id(google_id)
+    if user_record:
+        return {
+            'status': 'success',
+            'userId': user_record['userId'],
+            'syncCode': user_record.get('syncCode'),
+            'saveData': user_record['saveData'],
+            'lastUpdated': user_record['lastUpdated']
+        }
+    else:
+        linked = False
+        if current_user_id:
+            anon_user = get_user_by_id(current_user_id)
+            if anon_user:
+                anon_user['googleId'] = google_id
+                anon_user['googleEmail'] = email
+                anon_user['lastUpdated'] = datetime.now(timezone.utc).isoformat()
+                save_user(anon_user)
+                user_record = anon_user
+                linked = True
+                
+        if not linked:
+            import string
+            import time
+            import uuid
+            chars = string.ascii_uppercase + string.digits
+            sync_code = ''.join(random.choices(chars, k=6))
+            while get_user_by_sync_code(sync_code) is not None:
+                sync_code = ''.join(random.choices(chars, k=6))
+                
+            user_record = {
+                'userId': 'user_' + str(uuid.uuid4())[:8] + '_' + str(int(time.time())),
+                'googleId': google_id,
+                'googleEmail': email,
+                'syncCode': sync_code,
+                'saveData': {},
+                'lastUpdated': datetime.now(timezone.utc).isoformat()
+            }
+            save_user(user_record)
+            
+        return {
+            'status': 'success',
+            'userId': user_record['userId'],
+            'syncCode': user_record['syncCode'],
+            'saveData': user_record['saveData'],
+            'lastUpdated': user_record['lastUpdated']
+        }
+
+@app.post("/api/levels")
+async def post_publish_level(request: Request):
+    body = await request.json()
+    name = body.get('name')
+    author = body.get('author')
+    creator_id = body.get('creatorId', '')
+    data = body.get('data')
+    
+    if not name or not author or not data:
+        return JSONResponse(status_code=400, content={'error': 'Harita adı, yapımcı ve harita verileri zorunludur.'})
+        
+    validation_error = validate_level_limits(data)
+    if validation_error:
+        return JSONResponse(status_code=400, content={'error': validation_error})
+        
+    if is_offensive(name) or is_offensive(author):
+        return JSONResponse(status_code=400, content={'error': 'Bölüm adı veya yapımcı adı uygunsuz/siyasi içerik içeremez.'})
+        
+    db = read_db()
+    for level in db:
+        if level.get('name', '').strip().lower() == name.strip().lower():
+            return JSONResponse(status_code=409, content={'error': 'Bu bölüm adı zaten mevcut.'})
+            
+    new_level = {
+        'id': f'map_{int(datetime.now(timezone.utc).timestamp() * 1000)}_{random.randint(100, 999)}',
+        'name': name.strip(),
+        'author': author.strip(),
+        'creatorId': creator_id,
+        'data': data,
+        'likes': 0,
+        'tags': body.get('tags', []),
+        'createdAt': datetime.now(timezone.utc).isoformat(),
+        'lastPlayedAt': datetime.now(timezone.utc).isoformat()
+    }
+    db.append(new_level)
+    
+    if write_db(db):
+        return JSONResponse(status_code=201, content=new_level)
+    else:
+        return JSONResponse(status_code=500, content={'error': 'Harita kaydedilemedi.'})
+
+@app.post("/api/levels/{level_id}/like")
+async def post_like_level(level_id: str):
+    db = read_db()
+    found = None
+    for level in db:
+        if level['id'] == level_id:
+            level['likes'] = level.get('likes', 0) + 1
+            found = level
+            break
+            
+    if found:
+        if write_db(db):
+            return found
+        else:
+            return JSONResponse(status_code=500, content={'error': 'Beğeni kaydedilemedi.'})
+    else:
+        return JSONResponse(status_code=404, content={'error': 'Harita bulunamadı.'})
+
+@app.post("/api/levels/{level_id}/play")
+async def post_play_level(level_id: str, request: Request):
+    userId = request.query_params.get('userId', '')
+    db = read_db()
+    found = None
+    for level in db:
+        if level['id'] == level_id:
+            if level.get('creatorId') != userId:
+                level['lastPlayedAt'] = datetime.now(timezone.utc).isoformat()
+            found = level
+            break
+            
+    if found:
+        if write_db(db):
+            return {'status': 'ok'}
+        else:
+            return JSONResponse(status_code=500, content={'error': 'Oynanma kaydedilemedi.'})
+    else:
+        return JSONResponse(status_code=404, content={'error': 'Harita bulunamadı.'})
+
+@app.post("/api/levels/{level_id}/score")
+async def post_level_score(level_id: str, request: Request):
+    body = await request.json()
+    username = body.get('username')
+    score_time = body.get('time')
+    
+    if not username or score_time is None:
+        return JSONResponse(status_code=400, content={'error': 'Kullanıcı adı ve süre zorunludur.'})
+        
+    try:
+        score_time = float(score_time)
+    except ValueError:
+        return JSONResponse(status_code=400, content={'error': 'Geçersiz süre değeri.'})
+        
+    if score_time <= 0:
+        return JSONResponse(status_code=400, content={'error': "Süre 0'dan büyük olmalıdır."})
+        
+    if is_offensive(username):
+        return JSONResponse(status_code=400, content={'error': 'Kullanıcı adı uygunsuz içerik içeremez.'})
+        
+    db = read_db()
+    found = None
+    for level in db:
+        if level['id'] == level_id:
+            found = level
+            break
+            
+    if found:
+        if 'scores' not in found:
+            found['scores'] = []
+            
+        existing_score = None
+        for s in found['scores']:
+            if s.get('username', '').lower().strip() == username.strip().lower():
+                existing_score = s
+                break
+                
+        if existing_score:
+            if score_time < existing_score['time']:
+                existing_score['time'] = score_time
+                existing_score['date'] = datetime.now(timezone.utc).isoformat()
+        else:
+            found['scores'].append({
+                'username': username.strip(),
+                'time': score_time,
+                'date': datetime.now(timezone.utc).isoformat()
+            })
+            
+        found['scores'] = sorted(found['scores'], key=lambda s: s['time'])[:5]
+        
+        if write_db(db):
+            return found
+        else:
+            return JSONResponse(status_code=500, content={'error': 'Skor kaydedilemedi.'})
+    else:
+        return JSONResponse(status_code=404, content={'error': 'Harita bulunamadı.'})
+
+@app.post("/api/levels/{level_id}/update")
+async def post_update_level(level_id: str, request: Request):
+    body = await request.json()
+    creator_id = body.get('creatorId', '')
+    new_data = body.get('data')
+    new_name = body.get('name')
+    
+    if not new_data:
+        return JSONResponse(status_code=400, content={'error': 'Güncellenecek veri bulunamadı.'})
+        
+    validation_error = validate_level_limits(new_data)
+    if validation_error:
+        return JSONResponse(status_code=400, content={'error': validation_error})
+        
+    db = read_db()
+    found = None
+    for level in db:
+        if level['id'] == level_id:
+            found = level
+            break
+            
+    if found:
+        if found.get('creatorId') != creator_id:
+            return JSONResponse(status_code=403, content={'error': 'Bu bölümü güncelleme izniniz yok.'})
+            
+        if new_name and new_name.strip().lower() != found.get('name', '').strip().lower():
+            if is_offensive(new_name):
+                return JSONResponse(status_code=400, content={'error': 'Bölüm adı uygunsuz/siyasi içerik içeremez.'})
+            for level in db:
+                if level['id'] != level_id and level.get('name', '').strip().lower() == new_name.strip().lower():
+                    return JSONResponse(status_code=409, content={'error': 'Bu bölüm adı zaten mevcut.'})
+            found['name'] = new_name.strip()
+            
+        found['data'] = new_data
+        if 'tags' in body:
+            found['tags'] = body.get('tags', [])
+            
+        if write_db(db):
+            return found
+        else:
+            return JSONResponse(status_code=500, content={'error': 'Harita güncellenemedi.'})
+    else:
+        return JSONResponse(status_code=404, content={'error': 'Harita bulunamadı.'})
+
+@app.post("/api/campaign/{level_num}/score")
+async def post_campaign_score(level_num: int, request: Request):
+    body = await request.json()
+    user_id = body.get('userId')
+    username = body.get('username')
+    score_time = body.get('time')
+    
+    if not user_id or not username or score_time is None:
+        return JSONResponse(status_code=400, content={'error': 'Kullanıcı ID, adı ve süre zorunludur.'})
+        
+    try:
+        score_time = float(score_time)
+    except ValueError:
+        return JSONResponse(status_code=400, content={'error': 'Geçersiz süre değeri.'})
+        
+    if score_time <= 0:
+        return JSONResponse(status_code=400, content={'error': "Süre 0'dan büyük olmalıdır."})
+        
+    if is_offensive(username):
+        return JSONResponse(status_code=400, content={'error': 'Kullanıcı adı uygunsuz içerik içeremez.'})
+        
+    db = read_campaign_db()
+    found = None
+    for item in db:
+        if item.get('levelNumber') == level_num:
+            found = item
+            break
+            
+    if not found:
+        found = {'levelNumber': level_num, 'scores': []}
+        db.append(found)
+        
+    existing = None
+    for s in found['scores']:
+        if s.get('userId') == user_id:
+            existing = s
+            break
+            
+    if existing:
+        existing['username'] = username.strip()
+        if score_time < existing['time']:
+            existing['time'] = score_time
+            existing['date'] = datetime.now(timezone.utc).isoformat()
+    else:
+        found['scores'].append({
+            'userId': user_id,
+            'username': username.strip(),
+            'time': score_time,
+            'date': datetime.now(timezone.utc).isoformat()
+        })
+        
+    write_campaign_db(db)
+    
+    all_scores = sorted(found['scores'], key=lambda s: s['time'])
+    top_3 = []
+    for idx, s in enumerate(all_scores[:3]):
+        top_3.append({
+            'username': s.get('username', 'Anonim'),
+            'time': s.get('time'),
+            'medal': 'gold' if idx == 0 else ('silver' if idx == 1 else 'bronze')
+        })
+        
+    rank = None
+    personal_best = None
+    total_players = len(all_scores)
+    for idx, s in enumerate(all_scores):
+        if s.get('userId') == user_id:
+            rank = idx + 1
+            personal_best = s.get('time')
+            break
+            
+    percentile = round((rank / total_players) * 100, 1) if rank else 100.0
+    
+    return {
+        'success': True,
+        'leaderboard': top_3,
+        'rank': rank,
+        'totalPlayers': total_players,
+        'percentile': percentile,
+        'personalBest': personal_best
+    }
+
+# Statik Dosyaları Sunma (Wildcard fallback en sonda tanımlanmalıdır)
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+app.mount("/", StaticFiles(directory=root_dir, html=True), name="static")
 
 if __name__ == '__main__':
-    run_server()
+    import uvicorn
+    import sys
+    
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    if current_dir not in sys.path:
+        sys.path.insert(0, current_dir)
+        
+    print(f"Viscora API Sunucusu (FastAPI/Uvicorn) {PORT} portunda başlatılıyor...")
+    uvicorn.run("server:app", host="0.0.0.0", port=PORT, log_level="warning")
