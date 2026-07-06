@@ -80,6 +80,36 @@ if not os.path.exists(DB_CAMPAIGN_FILE):
     with open(DB_CAMPAIGN_FILE, 'w', encoding='utf-8') as f:
         json.dump([], f, indent=2)
 
+# Otomatik Veri Göçü (Local JSON -> MongoDB)
+if MONGO_URI and mongo_collection is not None:
+    try:
+        # 1. Haritalar Göçü
+        if os.path.exists(DB_FILE):
+            with open(DB_FILE, 'r', encoding='utf-8') as f:
+                local_maps = json.load(f)
+            if local_maps and mongo_collection.count_documents({}) == 0:
+                print(f"Yerel haritalar ({len(local_maps)} adet) MongoDB'ye aktarılıyor...")
+                mongo_collection.insert_many(local_maps)
+        
+        # 2. Kullanıcılar Göçü
+        if os.path.exists(DB_USERS_FILE):
+            with open(DB_USERS_FILE, 'r', encoding='utf-8') as f:
+                local_users = json.load(f)
+            if local_users and mongo_users_collection.count_documents({}) == 0:
+                print(f"Yerel kullanıcılar ({len(local_users)} adet) MongoDB'ye aktarılıyor...")
+                mongo_users_collection.insert_many(local_users)
+                
+        # 3. Kampanya Skorları Göçü
+        if os.path.exists(DB_CAMPAIGN_FILE):
+            with open(DB_CAMPAIGN_FILE, 'r', encoding='utf-8') as f:
+                local_scores = json.load(f)
+            mongo_scores_coll = mongo_db['campaign_scores']
+            if local_scores and mongo_scores_coll.count_documents({}) == 0:
+                print(f"Yerel kampanya skorları ({len(local_scores)} adet) MongoDB'ye aktarılıyor...")
+                mongo_scores_coll.insert_many(local_scores)
+    except Exception as migration_error:
+        print("Yerel verileri MongoDB'ye göçürme sırasında hata oluştu:", migration_error)
+
 def read_campaign_db():
     if mongo_collection is not None:
         try:
