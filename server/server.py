@@ -1,3 +1,26 @@
+import sys
+import subprocess
+import site
+
+# Self-healing package bootstrap for Render/production environments
+try:
+    import fastapi
+    import uvicorn
+except ImportError:
+    print("Gerekli modüller (fastapi, uvicorn) bulunamadı. Çalışma zamanında kuruluyor...")
+    try:
+        cmd = [sys.executable, "-m", "pip", "install", "--user", "--break-system-packages", "fastapi", "uvicorn[standard]", "pymongo", "dnspython"]
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        if res.returncode != 0:
+            cmd = [sys.executable, "-m", "pip", "install", "fastapi", "uvicorn[standard]", "pymongo", "dnspython"]
+            res = subprocess.run(cmd, capture_output=True, text=True)
+        
+        user_site = site.getusersitepackages()
+        if user_site not in sys.path:
+            sys.path.append(user_site)
+    except Exception as e:
+        print("Çalışma zamanında paket kurulum hatası:", e)
+
 import json
 import os
 import random
