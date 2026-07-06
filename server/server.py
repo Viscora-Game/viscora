@@ -4,10 +4,18 @@ import os
 import random
 import urllib.parse
 import urllib.request
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
 PORT = int(os.environ.get('PORT', 8080))
 DB_FILE = os.path.join(os.path.dirname(__file__), 'db_maps.json')
+
+# Veritabanı kilitleme nesneleri (Eşzamanlı okuma/yazma güvenliği için)
+maps_db_lock = threading.Lock()
+users_db_lock = threading.Lock()
+campaign_db_lock = threading.Lock()
+
 
 # Veritabanını hazırla
 if not os.path.exists(DB_FILE):
@@ -80,12 +88,13 @@ def read_campaign_db():
         except Exception as e:
             print("MongoDB campaign scores okuma hatası, yerel JSON dosyasına geçiliyor:", e)
 
-    try:
-        with open(DB_CAMPAIGN_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception as e:
-        print("Campaign scores veritabanı okuma hatası:", e)
-        return []
+    with campaign_db_lock:
+        try:
+            with open(DB_CAMPAIGN_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print("Campaign scores veritabanı okuma hatası:", e)
+            return []
 
 def write_campaign_db(data):
     if mongo_collection is not None:
@@ -100,13 +109,14 @@ def write_campaign_db(data):
         except Exception as e:
             print("MongoDB campaign scores yazma hatası, yerel JSON dosyasına geçiliyor:", e)
 
-    try:
-        with open(DB_CAMPAIGN_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-        return True
-    except Exception as e:
-        print("Campaign scores veritabanı yazma hatası:", e)
-        return False
+    with campaign_db_lock:
+        try:
+            with open(DB_CAMPAIGN_FILE, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            return True
+        except Exception as e:
+            print("Campaign scores veritabanı yazma hatası:", e)
+            return False
 
 def read_users_db():
     if mongo_users_collection is not None:
@@ -115,12 +125,13 @@ def read_users_db():
         except Exception as e:
             print("MongoDB users okuma hatası, yerel JSON dosyasına geçiliyor:", e)
 
-    try:
-        with open(DB_USERS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception as e:
-        print("Users veritabanı okuma hatası:", e)
-        return []
+    with users_db_lock:
+        try:
+            with open(DB_USERS_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print("Users veritabanı okuma hatası:", e)
+            return []
 
 def write_users_db(data):
     if mongo_users_collection is not None:
@@ -133,13 +144,14 @@ def write_users_db(data):
         except Exception as e:
             print("MongoDB users yazma hatası, yerel JSON dosyasına geçiliyor:", e)
 
-    try:
-        with open(DB_USERS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-        return True
-    except Exception as e:
-        print("Users veritabanı yazma hatası:", e)
-        return False
+    with users_db_lock:
+        try:
+            with open(DB_USERS_FILE, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            return True
+        except Exception as e:
+            print("Users veritabanı yazma hatası:", e)
+            return False
 
 def get_user_by_id(user_id):
     if mongo_users_collection is not None:
@@ -390,12 +402,13 @@ def read_db():
         except Exception as e:
             print("MongoDB okuma hatası, yerel JSON dosyasına geçiliyor:", e)
 
-    try:
-        with open(DB_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception as e:
-        print("Veritabanı okuma hatası:", e)
-        return []
+    with maps_db_lock:
+        try:
+            with open(DB_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print("Veritabanı okuma hatası:", e)
+            return []
 
 def write_db(data):
     if mongo_collection is not None:
@@ -412,13 +425,14 @@ def write_db(data):
         except Exception as e:
             print("MongoDB yazma hatası, yerel JSON dosyasına geçiliyor:", e)
 
-    try:
-        with open(DB_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-        return True
-    except Exception as e:
-        print("Veritabanı yazma hatası:", e)
-        return False
+    with maps_db_lock:
+        try:
+            with open(DB_FILE, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            return True
+        except Exception as e:
+            print("Veritabanı yazma hatası:", e)
+            return False
 
 import re
 
@@ -590,6 +604,14 @@ def validate_level_limits(level_data):
     return None
 
 class APIRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def address_string(self):
+        # Yüksek eşzamanlılıkta (load spike) gecikmeye yol açan reverse DNS aramasını devre dışı bırakır
+        return self.client_address[0]
+
+    def log_message(self, format, *args):
+        # Konsola log yazma (I/O) darboğazını engellemek için HTTP istek loglamasını es geçiyoruz
+        pass
+
     def __init__(self, *args, **kwargs):
         # Statik dosyaları projenin ana klasöründen (server klasörünün bir üstü) sun
         root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -1549,11 +1571,34 @@ def sanitize_existing_db():
     else:
         print("No offensive names found in the database.")
 
+class ThreadPoolHTTPServer(http.server.HTTPServer):
+    """
+    İstekleri ThreadPoolExecutor kullanarak eşzamanlı ve iş parçacığı havuzu
+    sınırları dahilinde (max_workers=150) işleyen özel HTTPServer sınıfı.
+    Bu sayede yüksek eşzamanlılıkta OS thread sınırı aşılmadan verimli çalışır.
+    """
+    request_queue_size = 1024 # TCP backlog kuyruk boyutu (Öntanımlı olan 5 çok küçüktü, 1024 yapıldı)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.executor = ThreadPoolExecutor(max_workers=150)
+
+    def process_request(self, request, client_address):
+        self.executor.submit(self.process_request_thread, request, client_address)
+
+    def process_request_thread(self, request, client_address):
+        try:
+            self.finish_request(request, client_address)
+        except Exception as e:
+            self.handle_error(request, client_address)
+        finally:
+            self.shutdown_request(request)
+
 def run_server():
     sanitize_existing_db()
     server_address = ('', PORT)
-    httpd = http.server.HTTPServer(server_address, APIRequestHandler)
-    print(f"Viscora API Sunucusu {PORT} portunda başarıyla başlatıldı.")
+    httpd = ThreadPoolHTTPServer(server_address, APIRequestHandler)
+    print(f"Viscora API Sunucusu (Eşzamanlı/Thread-Pooled) {PORT} portunda başarıyla başlatıldı.")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
