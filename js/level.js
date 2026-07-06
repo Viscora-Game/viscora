@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v350';
-import { THEMES } from './generator.js?v=v350';
+import { audio } from './audio.js?v=v351';
+import { THEMES } from './generator.js?v=v351';
 
 /**
  * Viscora Level Design & Manager
@@ -64,7 +64,7 @@ export class Level {
         } else if (originalLevelNumber === 21) {
             data = {
                 "serverLevelId": "map_1782162169371_168",
-                "name": "SİBER GİRİŞİ",
+                "name": "TERMAL YARIK",
                 "tags": [],
                 "themeId": "neon_sewer",
                 "levelWidth": 4000,
@@ -781,7 +781,7 @@ export class Level {
         } else if (originalLevelNumber === 22) {
             data = {
                 "serverLevelId": null,
-                "name": "MİKROÇİP LABİRENTİ",
+                "name": "ERİMİŞ LABİRENT",
                 "tags": [],
                 "themeId": "magma_core",
                 "levelWidth": 3700,
@@ -1387,7 +1387,7 @@ export class Level {
         } else if (originalLevelNumber === 23) {
             data = {
     "serverLevelId": "map_1782252999210_418",
-    "name": "PORTAL BAĞLANTISI",
+    "name": "MAGMATİK PORTAL",
     "tags": [],
     "themeId": "neon_sewer",
     "levelWidth": 3300,
@@ -2013,7 +2013,7 @@ export class Level {
         } else if (originalLevelNumber === 24) {
             data = {
     "serverLevelId": "map_1782504984558_865",
-    "name": "KRONO TETİKLEYİCİ",
+    "name": "KRONO-PLAZMA TETİKLEYİCİ",
     "tags": [],
     "themeId": "magma_core",
     "levelWidth": 3000,
@@ -2623,7 +2623,7 @@ export class Level {
         } else if (originalLevelNumber === 25) {
             data = {
                 "serverLevelId": "map_1782592093910_575",
-                "name": "YERÇEKİMİ BOŞLUĞU",
+                "name": "ERİMİŞ GEÇİT",
                 "tags": [],
                 "themeId": "magma_core",
                 "levelWidth": 3750,
@@ -2708,7 +2708,7 @@ export class Level {
         } else if (originalLevelNumber === 26) {
             data = {
                 "serverLevelId": "map_1782593523989_489",
-                "name": "KARA DÜŞMAN ALANI",
+                "name": "SİBER BÖLGE",
                 "tags": [],
                 "themeId": "neon_sewer",
                 "levelWidth": 4800,
@@ -3011,7 +3011,7 @@ export class Level {
         } else if (originalLevelNumber === 29) {
             data = {
                 "serverLevelId": null,
-                "name": "SİBER KANALİZASYON II",
+                "name": "SİBER MATRİS",
                 "tags": [],
                 "themeId": "neon_sewer",
                 "levelWidth": 4400,
@@ -3167,7 +3167,7 @@ export class Level {
         } else if (originalLevelNumber === 30) {
             data = {
                 "serverLevelId": null,
-                "name": "SON GETİREN",
+                "name": "KIYAMET ÇEKİRDEĞİ",
                 "tags": [],
                 "themeId": "magma_core",
                 "levelWidth": 3500,

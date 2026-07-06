@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v350';
-import { Level } from './level.js?v=v350';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v350';
-import { UIManager } from './ui.js?v=v350';
-import { CloudSaveManager } from './cloud_save.js?v=v350';
-import { audio } from './audio.js?v=v350';
-import { LevelEditor } from './editor.js?v=v350';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v350';
+import { Player } from './player.js?v=v351';
+import { Level } from './level.js?v=v351';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v351';
+import { UIManager } from './ui.js?v=v351';
+import { CloudSaveManager } from './cloud_save.js?v=v351';
+import { audio } from './audio.js?v=v351';
+import { LevelEditor } from './editor.js?v=v351';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v351';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -20,25 +20,25 @@ const LEVEL_NAMES = [
     "KİMYASAL REAKTÖR",
     "KOZMİK ÇEKİRDEK",
     "ÖLÜMCÜL BASINÇ ODASI",
-    "SİBER VERİ AKIŞI",
+    "TOKSİK REAKTÖR AKIŞI",
     "TOKSİK PORTAL AĞI",
-    "HAVALANDIRMA ŞAFTI",
-    "ASİT KANALLARI",
-    "MEKANİK KORİDORLAR",
+    "VOLKANİK DEHLİZ",
+    "TERMAL KORİDOR",
+    "KOZMİK DEHLİZLER",
     "KONTAMİNASYON ODASI",
     "FİLTRELEME TESİSİ",
-    "SİBER KANALİZASYON",
+    "NEON AYNALAR",
     "VISCOREX REAKTÖRÜ",
-    "SİBER VERİ AKIŞI: SİBER GİRİŞİ",
-    "SİBER VERİ AKIŞI: MİKROÇİP LABİRENTİ",
-    "SİBER VERİ AKIŞI: PORTAL BAĞLANTISI",
-    "SİBER VERİ AKIŞI: KRONO TETİKLEYİCİ",
-    "SİBER VERİ AKIŞI: YERÇEKİMİ BOŞLUĞU",
-    "SİBER VERİ AKIŞI: KARA DÜŞMAN ALANI",
-    "SİBER VERİ AKIŞI: LAZER KAFESİ",
-    "SİBER VERİ AKIŞI: KOD DEPOSU",
-    "SİBER VERİ AKIŞI: SİBER KANALİZASYON II",
-    "SİBER VERİ AKIŞI: SON GETİREN"
+    "TERMAL YARIK",
+    "ERİMİŞ LABİRENT",
+    "MAGMATİK PORTAL",
+    "KRONO-PLAZMA TETİKLEYİCİ",
+    "ERİMİŞ GEÇİT",
+    "VOLKANİK HÜCRE",
+    "TERMAL SAVUNMA HATTI",
+    "MAGMATİK REAKTÖR",
+    "ERİMİŞ DEHLİZ",
+    "APOKALİPTİK ÇEKİRDEK"
 ];
 
 // Bölüm bazlı bağlamsal ipuçları — ilk kez tanıtılan mekanikler için kısa yardım metinleri
@@ -1068,7 +1068,7 @@ export class GameManager {
             }
             
             // Hemen buluta kaydet (arka planda)
-            import('./cloud_save.js?v=v350').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v351').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Achievement sync error:", err));
             });
             
@@ -1159,7 +1159,7 @@ export class GameManager {
         if (changed) {
             localStorage.setItem('viscora_achievements', JSON.stringify(achievements));
             // Arka planda buluta kaydet
-            import('./cloud_save.js?v=v350').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v351').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Retrospective sync error:", err));
             });
         }
@@ -2635,7 +2635,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v350', this.cssWidth - 10, 10);
+        this.ctx.fillText('v351', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
