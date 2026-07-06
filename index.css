@@ -4682,12 +4682,22 @@ button:hover .icon-svg,
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
+/* Global Gizleme Sınıfı */
+.hidden {
+    display: none !important;
+}
+
 .profile-pane.hidden {
     display: none !important;
 }
 
 /* Çevrimdışı Mod Durum Göstergesi */
 .offline-badge {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 99999;
+    margin: 0;
     display: inline-flex;
     align-items: center;
     background: rgba(239, 68, 68, 0.15);
@@ -4698,12 +4708,19 @@ button:hover .icon-svg,
     font-weight: 700;
     padding: 4px 10px;
     border-radius: 8px;
-    margin-top: 10px;
     letter-spacing: 0.08em;
     text-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
     box-shadow: 0 0 12px rgba(239, 68, 68, 0.15), inset 0 0 6px rgba(239, 68, 68, 0.05);
-    align-self: center;
     transition: opacity 0.3s ease;
+}
+
+@media (max-width: 600px) or (max-height: 480px) {
+    .offline-badge {
+        top: 8px;
+        right: 8px;
+        font-size: 0.65rem;
+        padding: 3px 8px;
+    }
 }
 
 .offline-dot {
