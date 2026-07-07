@@ -1,4 +1,4 @@
-import { audio } from './audio.js?v=v353';
+import { audio } from './audio.js?v=v354';
 
 export class Enemy {
     constructor(x, y, rangeX = 150, speed = 1.2, isVertical = false, color = '#f43f5e') {
@@ -1407,5 +1407,6 @@ export class SweeperUFO {
 }
 
 export default Enemy;
+
 
 

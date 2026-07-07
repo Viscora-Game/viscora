@@ -266,3 +266,4 @@ export class CloudSaveManager {
         return { success: false, error: 'Bilinmeyen hata.' };
     }
 }
+

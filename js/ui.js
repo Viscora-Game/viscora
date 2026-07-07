@@ -1,7 +1,102 @@
-import { audio } from './audio.js?v=v353';
-import { ViscosityList } from './viscosity.js?v=v353';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v353';
-import { CloudSaveManager } from './cloud_save.js?v=v353';
+import { audio } from './audio.js?v=v354';
+import { ViscosityList } from './viscosity.js?v=v354';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v354';
+import { CloudSaveManager } from './cloud_save.js?v=v354';
+
+const TRANSLATIONS = {
+    tr: {
+        "btn-codex": "<svg class=\"icon-svg\"><use href=\"#icon-book\"></use></svg> Rehber",
+        "btn-settings": "<svg class=\"icon-svg\"><use href=\"#icon-gear\"></use></svg> Ayarlar",
+        "inst-or": "veya",
+        "inst-move": "Hareket et",
+        "inst-jump": "Zıpla",
+        "inst-shift": "Viskozite Değiştir (Sıvı/Katı)",
+        "diff-title": "<svg class=\"icon-svg\"><use href=\"#icon-gear\"></use></svg> ZORLUK DERECESİ",
+        "diff-easy": "<span class=\"dot dot-easy\"></span> KOLAY <span class=\"diff-sub\">3 Can + Checkpoint</span>",
+        "diff-normal": "<span class=\"dot dot-normal\"></span> NORMAL <span class=\"diff-sub\">3 Can</span>",
+        "diff-hard": "<span class=\"dot dot-hard\"></span> ZOR <span class=\"diff-sub\">2 Can</span>",
+        "diff-hardcore": "<span class=\"dot dot-hardcore\"></span> HARDCORE <span class=\"diff-sub\">1 Can</span>",
+        "btn-play": "OYNA",
+        "btn-community-full": "<svg class=\"icon-svg\"><use href=\"#icon-globe\"></use></svg> TOPLULUK SUNUCULARI",
+        "btn-community-short": "<svg class=\"icon-svg\"><use href=\"#icon-globe\"></use></svg> TOPLULUK",
+        "btn-shop-full": "<svg class=\"icon-svg\"><use href=\"#icon-shop\"></use></svg> KRİSTAL DÜKKANI",
+        "btn-shop-short": "<svg class=\"icon-svg\"><use href=\"#icon-shop\"></use></svg> DÜKKAN",
+        "btn-rewards-full": "<svg class=\"icon-svg\"><use href=\"#icon-gift\"></use></svg> SİBER ÖDÜLLER",
+        "btn-rewards-short": "<svg class=\"icon-svg\"><use href=\"#icon-gift\"></use></svg> ÖDÜLLER",
+        "settings-title": "<svg class=\"icon-svg\"><use href=\"#icon-gear\"></use></svg> AYARLAR",
+        "settings-music": "MÜZİK",
+        "settings-sfx": "EFEKTLER",
+        "settings-shake": "EKRAN TİTREŞİMİ",
+        "settings-lang": "DİL / LANGUAGE",
+        "settings-cloud-label": "OTOMATİK YEDEKLEME (GOOGLE)",
+        "settings-cloud-status": "Hesap bağlı değil (Yedekleme devre dışı)",
+        "settings-cloud-upload": "📤 Yükle",
+        "settings-cloud-download": "📥 İndir",
+        "settings-check-updates": "GÜNCELLEMELERİ DENETLE",
+        "close": "KAPAT",
+        "loading": "Yükleniyor...",
+        "pause-title": "OYUN DURDURULDU",
+        "resume": "DEVAM ET",
+        "codex-btn-pause": "<svg class=\"icon-svg\"><use href=\"#icon-book\"></use></svg> NESNE REHBERİ",
+        "restart": "YENİDEN BAŞLAT",
+        "return-main": "<svg class=\"icon-svg\"><use href=\"#icon-home\"></use></svg> ANA MENÜYE DÖN",
+        "win-title": "BÖLÜM TAMAMLANDI!",
+        "win-subtitle": "Viscora güvenli bölgeye ulaştı.",
+        "win-time-label": "Süre: ",
+        "win-crystals-label": "Kristaller: ",
+        "records-title": "BÖLÜM REKORLARI",
+        "replay": "TEKRAR OYNA",
+        "retry-lvl": "BÖLÜMÜ TEKRARLA",
+        "gameover-title": "VISCORA DAĞILDI",
+        "gameover-subtitle": "Hücre bütünlüğü korunamadı."
+    },
+    en: {
+        "btn-codex": "<svg class=\"icon-svg\"><use href=\"#icon-book\"></use></svg> Codex",
+        "btn-settings": "<svg class=\"icon-svg\"><use href=\"#icon-gear\"></use></svg> Settings",
+        "inst-or": "or",
+        "inst-move": "Move",
+        "inst-jump": "Jump",
+        "inst-shift": "Change Viscosity (Liquid/Solid)",
+        "diff-title": "<svg class=\"icon-svg\"><use href=\"#icon-gear\"></use></svg> DIFFICULTY LEVEL",
+        "diff-easy": "<span class=\"dot dot-easy\"></span> EASY <span class=\"diff-sub\">3 Lives + Checkpoint</span>",
+        "diff-normal": "<span class=\"dot dot-normal\"></span> NORMAL <span class=\"diff-sub\">3 Lives</span>",
+        "diff-hard": "<span class=\"dot dot-hard\"></span> HARD <span class=\"diff-sub\">2 Lives</span>",
+        "diff-hardcore": "<span class=\"dot dot-hardcore\"></span> HARDCORE <span class=\"diff-sub\">1 Life</span>",
+        "btn-play": "PLAY",
+        "btn-community-full": "<svg class=\"icon-svg\"><use href=\"#icon-globe\"></use></svg> COMMUNITY SERVERS",
+        "btn-community-short": "<svg class=\"icon-svg\"><use href=\"#icon-globe\"></use></svg> COMMUNITY",
+        "btn-shop-full": "<svg class=\"icon-svg\"><use href=\"#icon-shop\"></use></svg> CRYSTAL SHOP",
+        "btn-shop-short": "<svg class=\"icon-svg\"><use href=\"#icon-shop\"></use></svg> SHOP",
+        "btn-rewards-full": "<svg class=\"icon-svg\"><use href=\"#icon-gift\"></use></svg> CYBER REWARDS",
+        "btn-rewards-short": "<svg class=\"icon-svg\"><use href=\"#icon-gift\"></use></svg> REWARDS",
+        "settings-title": "<svg class=\"icon-svg\"><use href=\"#icon-gear\"></use></svg> SETTINGS",
+        "settings-music": "MUSIC",
+        "settings-sfx": "EFFECTS",
+        "settings-shake": "SCREEN SHAKE",
+        "settings-lang": "LANGUAGE / DİL",
+        "settings-cloud-label": "AUTO BACKUP (GOOGLE)",
+        "settings-cloud-status": "No account linked (Backup disabled)",
+        "settings-cloud-upload": "📤 Upload",
+        "settings-cloud-download": "📥 Download",
+        "settings-check-updates": "CHECK FOR UPDATES",
+        "close": "CLOSE",
+        "loading": "Loading...",
+        "pause-title": "GAME PAUSED",
+        "resume": "RESUME",
+        "codex-btn-pause": "<svg class=\"icon-svg\"><use href=\"#icon-book\"></use></svg> ITEM CODEX",
+        "restart": "RESTART",
+        "return-main": "<svg class=\"icon-svg\"><use href=\"#icon-home\"></use></svg> MAIN MENU",
+        "win-title": "SECTOR COMPLETED!",
+        "win-subtitle": "Viscora reached the safe zone.",
+        "win-time-label": "Time: ",
+        "win-crystals-label": "Crystals: ",
+        "records-title": "SECTOR RECORDS",
+        "replay": "REPLAY",
+        "retry-lvl": "RETRY LEVEL",
+        "gameover-title": "SYSTEM CRASHED",
+        "gameover-subtitle": "Cell integrity could not be maintained."
+    }
+};
 
 const API_BASE = 'https://viscora.onrender.com';
 
@@ -159,8 +254,8 @@ export class UIManager {
             }, 1000);
         }
 
-        // Build the level selection UI
-        this.buildLevelSelectionUI();
+        // Initialize language (this will automatically build level selection UI as well)
+        this.initLanguage();
 
         // Kurulumlar
         this.initInputListeners();
@@ -231,6 +326,16 @@ export class UIManager {
         window.addEventListener('online', updateOnlineStatus);
         window.addEventListener('offline', updateOnlineStatus);
         setTimeout(updateOnlineStatus, 500); // Check shortly after DOM setup
+
+        // Global button click sound effect hook
+        document.addEventListener('click', (e) => {
+            const button = e.target.closest('button, .clickable, .avatar-option, .shop-item-card, .level-btn, [role="button"]');
+            if (button && !button.disabled && !button.classList.contains('disabled')) {
+                if (typeof audio !== 'undefined' && typeof audio.playClick === 'function') {
+                    audio.playClick();
+                }
+            }
+        });
     }
 
     /**
@@ -488,18 +593,44 @@ export class UIManager {
         let html = '';
 
 
+        // Localized Group titles and status texts
+        const lang = this.currentLanguage || 'tr';
+        const titles = {
+            tr: {
+                1: '<svg class="icon-svg"><use href="#icon-run"></use></svg> İLK ADIMLAR',
+                2: '<svg class="icon-svg"><use href="#icon-flask"></use></svg> TOKSİK HÜCRE',
+                3: '<svg class="icon-svg"><use href="#icon-portal"></use></svg> KOZMİK ÇEKİRDEK'
+            },
+            en: {
+                1: '<svg class="icon-svg"><use href="#icon-run"></use></svg> FIRST STEPS',
+                2: '<svg class="icon-svg"><use href="#icon-flask"></use></svg> TOXIC CELL',
+                3: '<svg class="icon-svg"><use href="#icon-portal"></use></svg> COSMIC CORE'
+            }
+        };
+
+        const statusTexts = {
+            tr: {
+                locked: 'Kilitli <svg class="icon-svg" style="width: 12px; height: 12px; margin-left: 4px; margin-right: 0; vertical-align: middle;"><use href="#icon-lock"></use></svg>',
+                level: (start, end) => `Bölüm ${start}-${end}`
+            },
+            en: {
+                locked: 'Locked <svg class="icon-svg" style="width: 12px; height: 12px; margin-left: 4px; margin-right: 0; vertical-align: middle;"><use href="#icon-lock"></use></svg>',
+                level: (start, end) => `Level ${start}-${end}`
+            }
+        };
+
         // Group metadata
         const groups = [
-            { id: 1, title: '<svg class="icon-svg"><use href="#icon-run"></use></svg> İLK ADIMLAR', start: 1, end: 10, class: "group-1" },
-            { id: 2, title: '<svg class="icon-svg"><use href="#icon-flask"></use></svg> TOKSİK HÜCRE', start: 11, end: 20, class: "group-2" },
-            { id: 3, title: '<svg class="icon-svg"><use href="#icon-portal"></use></svg> KOZMİK ÇEKİRDEK', start: 21, end: 30, class: "group-3" }
+            { id: 1, title: titles[lang][1], start: 1, end: 10, class: "group-1" },
+            { id: 2, title: titles[lang][2], start: 11, end: 20, class: "group-2" },
+            { id: 3, title: titles[lang][3], start: 21, end: 30, class: "group-3" }
         ];
 
         groups.forEach(g => {
             const isCollapsed = g.id !== activeGroupIndex;
             const collapseClass = isCollapsed ? 'collapsed' : '';
             const isGroupUnlocked = g.id === 1 || this.devMode || this.isLevelUnlocked(g.start);
-            const statusText = isGroupUnlocked ? `Bölüm ${g.start}-${g.end}` : 'Kilitli <svg class="icon-svg" style="width: 12px; height: 12px; margin-left: 4px; margin-right: 0; vertical-align: middle;"><use href="#icon-lock"></use></svg>';
+            const statusText = isGroupUnlocked ? statusTexts[lang].level(g.start, g.end) : statusTexts[lang].locked;
             const unlockedClass = isGroupUnlocked ? 'unlocked' : 'locked';
             const disabledAttr = isGroupUnlocked ? '' : 'disabled';
 
@@ -1124,6 +1255,15 @@ export class UIManager {
         if (btnToggleShakePause) this.bindTouchClick(btnToggleShakePause, handleShakeToggle);
 
         updateShakeUI();
+
+        // Dil Seçimi Ayarı
+        const btnToggleLang = document.getElementById('btn-toggle-lang');
+        if (btnToggleLang) {
+            this.bindTouchClick(btnToggleLang, () => {
+                const nextLang = this.currentLanguage === 'tr' ? 'en' : 'tr';
+                this.applyLanguage(nextLang);
+            });
+        }
 
         // Ödüllü Reklam: Devam Et (Checkpoint'ten Full Canla)
         this.bindTouchClick(document.getElementById('btn-rewarded-continue'), () => {
@@ -4346,6 +4486,50 @@ export class UIManager {
     }
 
     /**
+     * Dil ayarlarını başlatır (tarayıcı diline veya kayıtlı dile göre)
+     */
+    initLanguage() {
+        let savedLang = localStorage.getItem('viscora_language');
+        if (!savedLang) {
+            const browserLang = navigator.language || navigator.userLanguage || '';
+            savedLang = browserLang.startsWith('tr') ? 'tr' : 'en';
+        }
+        this.currentLanguage = savedLang;
+        this.applyLanguage(savedLang);
+    }
+
+    /**
+     * Belirtilen dili tüm data-translate elemanlarına uygular
+     */
+    applyLanguage(lang) {
+        this.currentLanguage = lang;
+        localStorage.setItem('viscora_language', lang);
+
+        // Update all data-translate elements
+        const elements = document.querySelectorAll('[data-translate]');
+        elements.forEach(el => {
+            const key = el.getAttribute('data-translate');
+            if (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) {
+                const translation = TRANSLATIONS[lang][key];
+                if (translation.includes('<svg') || translation.includes('<span')) {
+                    el.innerHTML = translation;
+                } else {
+                    el.textContent = translation;
+                }
+            }
+        });
+
+        // Update Language Button label
+        const btnToggleLang = document.getElementById('btn-toggle-lang');
+        if (btnToggleLang) {
+            btnToggleLang.textContent = lang === 'tr' ? 'TÜRKÇE' : 'ENGLISH';
+        }
+
+        // Rebuild level selection to reflect chapter name translations
+        this.buildLevelSelectionUI();
+    }
+
+    /**
      * Ekranda belirtilen paneli açar, diğerlerini kapatır
      */
     showScreen(screenName, pushToHistory = true) {
@@ -4800,7 +4984,7 @@ export class UIManager {
                 
                 // Add image
                 const img = document.createElement('img');
-                img.src = `assets/avatars/${av.id}.png?v=v353`;
+                img.src = `assets/avatars/${av.id}.png?v=v354`;
                 img.style.width = '42px';
                 img.style.height = '42px';
                 img.style.objectFit = 'contain';
@@ -4842,7 +5026,7 @@ export class UIManager {
             const widgetAvatar = document.getElementById('profile-widget-avatar');
             if (widgetName) widgetName.textContent = currentName;
             if (widgetAvatar) {
-                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v353`;
+                widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v354`;
             }
         };
         
@@ -5013,7 +5197,7 @@ export class UIManager {
                 id: 'badge_first_steps',
                 title: 'İlk Adımlar',
                 desc: 'Sektör 01\'i (Bölüm 1) başarıyla tamamlayarak sisteme ilk adımını at.',
-                icon: 'assets/badges/badge_first_steps.png?v=v353',
+                icon: 'assets/badges/badge_first_steps.png?v=v354',
                 target: 1,
                 getProgress: () => this.isLevelUnlocked(2) ? 1 : 0
             },
@@ -5021,7 +5205,7 @@ export class UIManager {
                 id: 'badge_boss_1',
                 title: 'Bozucu Bükücü',
                 desc: 'Sektör 10\'da koruyucu protokol Visko-Bozucu\'yu etkisiz hale getir.',
-                icon: 'assets/badges/badge_boss_1.png?v=v353',
+                icon: 'assets/badges/badge_boss_1.png?v=v354',
                 target: 1,
                 getProgress: () => this.isLevelUnlocked(11) ? 1 : 0
             },
@@ -5029,7 +5213,7 @@ export class UIManager {
                 id: 'badge_star_collector',
                 title: 'Yıldız Avcısı',
                 desc: 'Seviyelerde toplam 30 yıldız toplayarak veri analizini tamamla.',
-                icon: 'assets/badges/badge_star_collector.png?v=v353',
+                icon: 'assets/badges/badge_star_collector.png?v=v354',
                 target: 30,
                 getProgress: () => this.game.getTotalStars()
             },
@@ -5037,7 +5221,7 @@ export class UIManager {
                 id: 'badge_form_shifter',
                 title: 'Form Değiştirici',
                 desc: 'Farklı engelleri aşmak için viskozite formlarını 100 kez değiştir.',
-                icon: 'assets/badges/badge_form_shifter.png?v=v353',
+                icon: 'assets/badges/badge_form_shifter.png?v=v354',
                 target: 100,
                 getProgress: () => parseInt(localStorage.getItem('viscora_stats_form_shifts')) || 0
             },
@@ -5045,7 +5229,7 @@ export class UIManager {
                 id: 'badge_speedrun',
                 title: 'Hız Tutkunu',
                 desc: 'Herhangi bir ana kampanya seviyesini 15 saniyeden daha kısa sürede tamamla.',
-                icon: 'assets/badges/badge_speedrun.png?v=v353',
+                icon: 'assets/badges/badge_speedrun.png?v=v354',
                 target: 1,
                 getProgress: () => achievements['badge_speedrun'] ? 1 : 0
             },
@@ -5053,7 +5237,7 @@ export class UIManager {
                 id: 'badge_champion',
                 title: 'Sistem Kurtarıcısı',
                 desc: 'Sektör 30\'da ana çekirdeği virüsten arındırarak kampanyayı bitir.',
-                icon: 'assets/badges/badge_champion.png?v=v353',
+                icon: 'assets/badges/badge_champion.png?v=v354',
                 target: 1,
                 getProgress: () => (this.isLevelUnlocked(30) && this.game.getStarsForLevel(30) > 0) ? 1 : 0
             },
@@ -5061,7 +5245,7 @@ export class UIManager {
                 id: 'badge_90_stars',
                 title: 'Veri Ustası',
                 desc: 'Tüm sektörlerde toplam 90 yıldız toplayarak veri tabanı analizini tamamla.',
-                icon: 'assets/badges/badge_90_stars.png?v=v353',
+                icon: 'assets/badges/badge_90_stars.png?v=v354',
                 target: 90,
                 getProgress: () => this.game.getTotalStars()
             },
@@ -5069,7 +5253,7 @@ export class UIManager {
                 id: 'badge_all_bosses',
                 title: 'Protokol Kırıcı',
                 desc: 'Üç koruyucu protokolü de (Sektör 10, 20, 30) etkisiz hale getir.',
-                icon: 'assets/badges/badge_all_bosses.png?v=v353',
+                icon: 'assets/badges/badge_all_bosses.png?v=v354',
                 target: 3,
                 getProgress: () => {
                     let count = 0;
@@ -5083,7 +5267,7 @@ export class UIManager {
                 id: 'badge_patrol_killer',
                 title: 'Devriye Avcısı',
                 desc: 'Sistemdeki 50 devriye birimini etkisiz hale getirerek güvenlik ağını çökert.',
-                icon: 'assets/badges/badge_patrol_killer.png?v=v353',
+                icon: 'assets/badges/badge_patrol_killer.png?v=v354',
                 target: 50,
                 getProgress: () => parseInt(localStorage.getItem('viscora_stats_patrol_kills')) || 0
             },
@@ -5091,7 +5275,7 @@ export class UIManager {
                 id: 'badge_gel_killer',
                 title: 'Jel Temizleyici',
                 desc: 'Seni takip eden 50 jel takipçi birimini yok ederek bölgeyi temizle.',
-                icon: 'assets/badges/badge_gel_killer.png?v=v353',
+                icon: 'assets/badges/badge_gel_killer.png?v=v354',
                 target: 50,
                 getProgress: () => parseInt(localStorage.getItem('viscora_stats_gel_kills')) || 0
             },
@@ -5099,7 +5283,7 @@ export class UIManager {
                 id: 'badge_ufo_killer',
                 title: 'Hava Savunması',
                 desc: '20 UFO keşif birimini düşürerek hava üstünlüğünü ele geçir.',
-                icon: 'assets/badges/badge_ufo_killer.png?v=v353',
+                icon: 'assets/badges/badge_ufo_killer.png?v=v354',
                 target: 20,
                 getProgress: () => parseInt(localStorage.getItem('viscora_stats_ufo_kills')) || 0
             },
@@ -5107,7 +5291,7 @@ export class UIManager {
                 id: 'badge_crystal_spender',
                 title: 'Kristal Baronu',
                 desc: 'Markette toplam 500 kristal harcayarak koleksiyonunu genişlet.',
-                icon: 'assets/badges/badge_crystal_spender.png?v=v353',
+                icon: 'assets/badges/badge_crystal_spender.png?v=v354',
                 target: 500,
                 getProgress: () => parseInt(localStorage.getItem('viscora_spent_crystals')) || 0
             }
@@ -5188,18 +5372,18 @@ export class UIManager {
 
     showAchievementUnlockToast(badgeId) {
         const badgesData = {
-            badge_first_steps: { title: 'İlk Adımlar', icon: 'assets/badges/badge_first_steps.png?v=v353' },
-            badge_boss_1: { title: 'Bozucu Bükücü', icon: 'assets/badges/badge_boss_1.png?v=v353' },
-            badge_star_collector: { title: 'Yıldız Avcısı', icon: 'assets/badges/badge_star_collector.png?v=v353' },
-            badge_form_shifter: { title: 'Form Değiştirici', icon: 'assets/badges/badge_form_shifter.png?v=v353' },
-            badge_speedrun: { title: 'Hız Tutkunu', icon: 'assets/badges/badge_speedrun.png?v=v353' },
-            badge_champion: { title: 'Sistem Kurtarıcısı', icon: 'assets/badges/badge_champion.png?v=v353' },
-            badge_90_stars: { title: 'Veri Ustası', icon: 'assets/badges/badge_90_stars.png?v=v353' },
-            badge_all_bosses: { title: 'Protokol Kırıcı', icon: 'assets/badges/badge_all_bosses.png?v=v353' },
-            badge_patrol_killer: { title: 'Devriye Avcısı', icon: 'assets/badges/badge_patrol_killer.png?v=v353' },
-            badge_gel_killer: { title: 'Jel Temizleyici', icon: 'assets/badges/badge_gel_killer.png?v=v353' },
-            badge_ufo_killer: { title: 'Hava Savunması', icon: 'assets/badges/badge_ufo_killer.png?v=v353' },
-            badge_crystal_spender: { title: 'Kristal Baronu', icon: 'assets/badges/badge_crystal_spender.png?v=v353' }
+            badge_first_steps: { title: 'İlk Adımlar', icon: 'assets/badges/badge_first_steps.png?v=v354' },
+            badge_boss_1: { title: 'Bozucu Bükücü', icon: 'assets/badges/badge_boss_1.png?v=v354' },
+            badge_star_collector: { title: 'Yıldız Avcısı', icon: 'assets/badges/badge_star_collector.png?v=v354' },
+            badge_form_shifter: { title: 'Form Değiştirici', icon: 'assets/badges/badge_form_shifter.png?v=v354' },
+            badge_speedrun: { title: 'Hız Tutkunu', icon: 'assets/badges/badge_speedrun.png?v=v354' },
+            badge_champion: { title: 'Sistem Kurtarıcısı', icon: 'assets/badges/badge_champion.png?v=v354' },
+            badge_90_stars: { title: 'Veri Ustası', icon: 'assets/badges/badge_90_stars.png?v=v354' },
+            badge_all_bosses: { title: 'Protokol Kırıcı', icon: 'assets/badges/badge_all_bosses.png?v=v354' },
+            badge_patrol_killer: { title: 'Devriye Avcısı', icon: 'assets/badges/badge_patrol_killer.png?v=v354' },
+            badge_gel_killer: { title: 'Jel Temizleyici', icon: 'assets/badges/badge_gel_killer.png?v=v354' },
+            badge_ufo_killer: { title: 'Hava Savunması', icon: 'assets/badges/badge_ufo_killer.png?v=v354' },
+            badge_crystal_spender: { title: 'Kristal Baronu', icon: 'assets/badges/badge_crystal_spender.png?v=v354' }
         };
         
         const badge = badgesData[badgeId];
@@ -5529,5 +5713,6 @@ export class UIManager {
     }
 }
 export default UIManager;
+
 
 

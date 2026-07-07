@@ -1,4 +1,4 @@
-import { CloudSaveManager } from './cloud_save.js?v=v353';
+import { CloudSaveManager } from './cloud_save.js?v=v354';
 
 export const SHOP_ITEMS = [
     // Trails
@@ -388,5 +388,6 @@ export const shopManager = new ShopManager();
 // Expose to window for access from non-module scripts or rendering context
 window.shopManager = shopManager;
 window.SHOP_ITEMS = SHOP_ITEMS;
+
 
 

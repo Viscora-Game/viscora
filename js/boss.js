@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v353';
-import { Enemy, GelChaser } from './enemies.js?v=v353';
+import { audio } from './audio.js?v=v354';
+import { Enemy, GelChaser } from './enemies.js?v=v354';
 
 export class Boss {
     constructor(x, y) {
@@ -2659,6 +2659,7 @@ export class UfoBoss extends Boss {
         ctx.restore();
     }
 }
+
 
 
 

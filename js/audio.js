@@ -1364,6 +1364,33 @@ class AudioManager {
         }
     }
 
+    playClick() {
+        try {
+            if (!this.ctx || this.isMuted || this.isSfxMuted || this.sfxVolumeLevel === 0) return;
+            this.resume();
+
+            const now = this.ctx.currentTime;
+            
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
+
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+            osc.connect(gain);
+            gain.connect(this.sfxVolume);
+
+            osc.start(now);
+            osc.stop(now + 0.08);
+        } catch (e) {
+            console.error("Error playing UI click SFX:", e);
+        }
+    }
+
     playSystemAlert() {
         try {
             if (!this.ctx || this.isMuted || this.isSfxMuted || this.sfxVolumeLevel === 0) return;
@@ -1539,5 +1566,6 @@ if (typeof window !== 'undefined') {
     window.addEventListener('touchend', globalUnlock, { capture: true, passive: true });
     window.addEventListener('click', globalUnlock, { capture: true });
 }
+
 
 

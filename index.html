@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v353">
+    <link rel="stylesheet" href="index.css?v=v354">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -670,7 +670,7 @@
                     <span class="terminal-dot red"></span>
                     <span class="terminal-dot yellow"></span>
                     <span class="terminal-dot green"></span>
-                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v353</span>
+                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v354</span>
                 </div>
                 <div class="terminal-body">
                     <div id="terminal-text"></div>
@@ -765,7 +765,7 @@
                     
                     <!-- Oyuncu Profil Kartı (Karakter & Bakiye) -->
                     <div id="player-profile-widget">
-                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v353" alt="Avatar" />
+                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v354" alt="Avatar" />
                         <div id="profile-widget-name">Oyuncu</div>
                         <div class="profile-divider"></div>
                         <div class="profile-crystals">
@@ -776,50 +776,50 @@
                 </div>
                 <!-- Üst Butonlar (Rehber ve Ses) -->
                 <div class="start-top-buttons" style="display: flex; gap: 8px; justify-content: center; margin-bottom: 0.7rem; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto;">
-                    <button id="btn-codex" class="codex-btn" type="button" aria-label="Nesne Rehberi" title="Nesne ve Canavar Rehberi" style="margin: 0; flex: 1;"><svg class="icon-svg"><use href="#icon-book"></use></svg> Rehber</button>
-                    <button id="btn-open-settings" class="codex-btn" type="button" aria-label="Ayarlar" title="Oyun Ayarları ve Bulut Senkronizasyonu" style="margin: 0; flex: 1;"><svg class="icon-svg"><use href="#icon-gear"></use></svg> Ayarlar</button>
+                    <button id="btn-codex" class="codex-btn" type="button" aria-label="Nesne Rehberi" title="Nesne ve Canavar Rehberi" style="margin: 0; flex: 1;" data-translate="btn-codex"><svg class="icon-svg"><use href="#icon-book"></use></svg> Rehber</button>
+                    <button id="btn-open-settings" class="codex-btn" type="button" aria-label="Ayarlar" title="Oyun Ayarları ve Bulut Senkronizasyonu" style="margin: 0; flex: 1;" data-translate="btn-settings"><svg class="icon-svg"><use href="#icon-gear"></use></svg> Ayarlar</button>
                 </div>
                 <div class="instructions">
                     <div class="inst-item">
                         <span class="key">A / D</span>
-                        <span class="inst-or">veya</span>
+                        <span class="inst-or" data-translate="inst-or">veya</span>
                         <span class="key">← / →</span>
-                        <span class="inst-label">Hareket et</span>
+                        <span class="inst-label" data-translate="inst-move">Hareket et</span>
                     </div>
                     <div class="inst-item">
                         <span class="key">W / BOŞLUK</span>
-                        <span class="inst-label">Zıpla</span>
+                        <span class="inst-label" data-translate="inst-jump">Zıpla</span>
                     </div>
                     <div class="inst-item">
                         <span class="key">SHIFT / E</span>
-                        <span class="inst-label">Viskozite Değiştir (Sıvı/Katı)</span>
+                        <span class="inst-label" data-translate="inst-shift">Viskozite Değiştir (Sıvı/Katı)</span>
                     </div>
                 </div>
                 <!-- Zorluk Derecesi Seçimi -->
                 <div class="difficulty-container">
-                    <span class="difficulty-title"><svg class="icon-svg"><use href="#icon-gear"></use></svg> ZORLUK DERECESİ</span>
+                    <span class="difficulty-title" data-translate="diff-title"><svg class="icon-svg"><use href="#icon-gear"></use></svg> ZORLUK DERECESİ</span>
                     <div class="difficulty-buttons">
-                        <button type="button" class="diff-btn" data-diff="easy"><span class="dot dot-easy"></span> KOLAY <span class="diff-sub">3 Can + Checkpoint</span></button>
-                        <button type="button" class="diff-btn active" data-diff="normal"><span class="dot dot-normal"></span> NORMAL <span class="diff-sub">3 Can</span></button>
-                        <button type="button" class="diff-btn" data-diff="hard"><span class="dot dot-hard"></span> ZOR <span class="diff-sub">2 Can</span></button>
-                        <button type="button" class="diff-btn" data-diff="hardcore"><span class="dot dot-hardcore"></span> HARDCORE <span class="diff-sub">1 Can</span></button>
+                        <button type="button" class="diff-btn" data-diff="easy" data-translate="diff-easy"><span class="dot dot-easy"></span> KOLAY <span class="diff-sub">3 Can + Checkpoint</span></button>
+                        <button type="button" class="diff-btn active" data-diff="normal" data-translate="diff-normal"><span class="dot dot-normal"></span> NORMAL <span class="diff-sub">3 Can</span></button>
+                        <button type="button" class="diff-btn" data-diff="hard" data-translate="diff-hard"><span class="dot dot-hard"></span> ZOR <span class="diff-sub">2 Can</span></button>
+                        <button type="button" class="diff-btn" data-diff="hardcore" data-diff-hardcore data-translate="diff-hardcore"><span class="dot dot-hardcore"></span> HARDCORE <span class="diff-sub">1 Can</span></button>
                     </div>
                 </div>
                 <!-- Bölüm Seçimi (Grup Tasarımı) -->
                 <div id="level-selector-wrapper"></div>
                 <div class="menu-actions-wrapper" style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 320px; margin: 10px auto 0 auto;">
-                    <button id="btn-play" class="menu-btn primary-btn" style="margin-top: 0;">OYNA</button>
+                    <button id="btn-play" class="menu-btn primary-btn" style="margin-top: 0;" data-translate="btn-play">OYNA</button>
                     <button id="btn-community" class="menu-btn secondary-btn" type="button" style="margin-top: 0;">
-                        <span class="full-text"><svg class="icon-svg"><use href="#icon-globe"></use></svg> TOPLULUK SUNUCULARI</span>
-                        <span class="short-text"><svg class="icon-svg"><use href="#icon-globe"></use></svg> TOPLULUK</span>
+                        <span class="full-text" data-translate="btn-community-full"><svg class="icon-svg"><use href="#icon-globe"></use></svg> TOPLULUK SUNUCULARI</span>
+                        <span class="short-text" data-translate="btn-community-short"><svg class="icon-svg"><use href="#icon-globe"></use></svg> TOPLULUK</span>
                     </button>
                     <button id="btn-shop" class="menu-btn secondary-btn" type="button" style="margin-top: 0;">
-                        <span class="full-text"><svg class="icon-svg"><use href="#icon-shop"></use></svg> KRİSTAL DÜKKANI</span>
-                        <span class="short-text"><svg class="icon-svg"><use href="#icon-shop"></use></svg> DÜKKAN</span>
+                        <span class="full-text" data-translate="btn-shop-full"><svg class="icon-svg"><use href="#icon-shop"></use></svg> KRİSTAL DÜKKANI</span>
+                        <span class="short-text" data-translate="btn-shop-short"><svg class="icon-svg"><use href="#icon-shop"></use></svg> DÜKKAN</span>
                     </button>
                     <button id="btn-rewards" class="menu-btn secondary-btn" type="button" style="margin-top: 0;">
-                        <span class="full-text"><svg class="icon-svg"><use href="#icon-gift"></use></svg> SİBER ÖDÜLLER</span>
-                        <span class="short-text"><svg class="icon-svg"><use href="#icon-gift"></use></svg> ÖDÜLLER</span>
+                        <span class="full-text" data-translate="btn-rewards-full"><svg class="icon-svg"><use href="#icon-gift"></use></svg> SİBER ÖDÜLLER</span>
+                        <span class="short-text" data-translate="btn-rewards-short"><svg class="icon-svg"><use href="#icon-gift"></use></svg> ÖDÜLLER</span>
                     </button>
                 </div>
                 <!-- Start Screen Footer with links -->
@@ -925,11 +925,11 @@
         <!-- Ses Ayarları Modalı -->
         <div id="settings-modal" class="star-gate-overlay hidden">
             <div class="star-gate-card sound-settings-card">
-                <h2 class="star-gate-title"><svg class="icon-svg"><use href="#icon-gear"></use></svg> AYARLAR</h2>
+                <h2 class="star-gate-title" data-translate="settings-title"><svg class="icon-svg"><use href="#icon-gear"></use></svg> AYARLAR</h2>
                 <div class="menu-settings" style="margin: 15px 0;">
                     <!-- Müzik Ayarı -->
                     <div class="settings-control-row">
-                        <span class="settings-control-label">MÜZİK</span>
+                        <span class="settings-control-label" data-translate="settings-music">MÜZİK</span>
                         <div class="settings-control-actions">
                             <button id="btn-menu-music" class="sound-toggle-mini-btn" type="button" aria-label="Müziği Aç/Kapat"><svg class="icon-svg" style="width: 14px; height: 14px;"><use href="#icon-music"></use></svg></button>
                             <div class="settings-slider-wrapper">
@@ -941,7 +941,7 @@
 
                     <!-- Efekt Ayarı -->
                     <div class="settings-control-row" style="margin-top: 10px;">
-                        <span class="settings-control-label">EFEKTLER</span>
+                        <span class="settings-control-label" data-translate="settings-sfx">EFEKTLER</span>
                         <div class="settings-control-actions">
                             <button id="btn-menu-sfx" class="sound-toggle-mini-btn" type="button" aria-label="Efektleri Aç/Kapat"><svg class="icon-svg" style="width: 14px; height: 14px;"><use href="#icon-volume"></use></svg></button>
                             <div class="settings-slider-wrapper">
@@ -953,9 +953,17 @@
 
                     <!-- Ekran Titreşimi Ayarı -->
                     <div class="settings-control-row" style="margin-top: 10px;">
-                        <span class="settings-control-label">EKRAN TİTREŞİMİ</span>
+                        <span class="settings-control-label" data-translate="settings-shake">EKRAN TİTREŞİMİ</span>
                         <div class="settings-control-actions">
                             <button id="btn-toggle-shake" class="sound-toggle-mini-btn toggle-text-btn" type="button" aria-label="Ekran Titreşimini Aç/Kapat">AÇIK</button>
+                        </div>
+                    </div>
+
+                    <!-- Dil Ayarı -->
+                    <div class="settings-control-row" style="margin-top: 10px;">
+                        <span class="settings-control-label" data-translate="settings-lang">DİL / LANGUAGE</span>
+                        <div class="settings-control-actions">
+                            <button id="btn-toggle-lang" class="sound-toggle-mini-btn toggle-text-btn" type="button" aria-label="Dil Değiştir">TÜRKÇE</button>
                         </div>
                     </div>
 
@@ -966,18 +974,18 @@
                         </span>
 
                         <div class="cloud-sync-card">
-                            <span class="cloud-sync-card-label">OTOMATİK YEDEKLEME (GOOGLE)</span>
+                            <span class="cloud-sync-card-label" data-translate="settings-cloud-label">OTOMATİK YEDEKLEME (GOOGLE)</span>
                             <div id="google-signin-btn-container" class="google-btn-slot">
-                                <span style="font-size: 0.72rem; color: #64748b;">Yükleniyor...</span>
+                                <span style="font-size: 0.72rem; color: #64748b;" data-translate="loading">Yükleniyor...</span>
                             </div>
-                            <span id="google-sync-status" class="cloud-status-text">Hesap bağlı değil (Yedekleme devre dışı)</span>
+                            <span id="google-sync-status" class="cloud-status-text" data-translate="settings-cloud-status">Hesap bağlı değil (Yedekleme devre dışı)</span>
                             
                             <!-- Manuel Yükle / İndir Butonları -->
                             <div id="manual-sync-buttons" class="manual-sync-btn-grid">
-                                <button id="btn-cloud-upload" class="manual-sync-action-btn upload" type="button">
+                                <button id="btn-cloud-upload" class="manual-sync-action-btn upload" type="button" data-translate="settings-cloud-upload">
                                     📤 Yükle
                                 </button>
-                                <button id="btn-cloud-download" class="manual-sync-action-btn download" type="button">
+                                <button id="btn-cloud-download" class="manual-sync-action-btn download" type="button" data-translate="settings-cloud-download">
                                     📥 İndir
                                 </button>
                             </div>
@@ -985,8 +993,8 @@
                     </div>
                 </div>
                 <div style="display: flex; gap: 8px; width: 100%; margin-top: 10px; box-sizing: border-box; flex-shrink: 0;">
-                    <button id="btn-force-update-cache" class="menu-btn cache-update-btn" style="flex: 1.5; font-size: 0.7rem; height: 36px; margin: 0;">GÜNCELLEMELERİ DENETLE</button>
-                    <button id="btn-close-settings" class="menu-btn primary-btn" style="flex: 0.9; height: 36px; margin: 0; font-size: 0.8rem;">KAPAT</button>
+                    <button id="btn-force-update-cache" class="menu-btn cache-update-btn" style="flex: 1.5; font-size: 0.7rem; height: 36px; margin: 0;" data-translate="settings-check-updates">GÜNCELLEMELERİ DENETLE</button>
+                    <button id="btn-close-settings" class="menu-btn primary-btn" style="flex: 0.9; height: 36px; margin: 0; font-size: 0.8rem;" data-translate="close">KAPAT</button>
                 </div>
             </div>
         </div>
@@ -1142,14 +1150,14 @@
         <!-- Duraklatma Ekranı -->
         <div id="pause-screen" class="screen hidden">
             <div class="menu-card">
-                <h2>OYUN DURDURULDU</h2>
+                <h2 data-translate="pause-title">OYUN DURDURULDU</h2>
                 <div class="menu-options">
-                    <button id="btn-resume" class="menu-btn primary-btn">DEVAM ET</button>
-                    <button id="btn-codex-pause" class="menu-btn secondary-btn"><svg class="icon-svg"><use href="#icon-book"></use></svg> NESNE REHBERİ</button>
-                    <button id="btn-restart-pause" class="menu-btn secondary-btn">YENİDEN BAŞLAT</button>
+                    <button id="btn-resume" class="menu-btn primary-btn" data-translate="resume">DEVAM ET</button>
+                    <button id="btn-codex-pause" class="menu-btn secondary-btn" data-translate="codex-btn-pause"><svg class="icon-svg"><use href="#icon-book"></use></svg> NESNE REHBERİ</button>
+                    <button id="btn-restart-pause" class="menu-btn secondary-btn" data-translate="restart">YENİDEN BAŞLAT</button>
                     <div class="menu-settings" style="display: flex; flex-direction: column; gap: 8px; width: 100%; margin: 10px 0;">
                         <div class="settings-control inline-settings" style="display: flex; align-items: center; justify-content: space-between;">
-                            <span style="font-size: 0.85rem; color: var(--text-secondary); width: 80px; text-align: left;">MÜZİK</span>
+                            <span style="font-size: 0.85rem; color: var(--text-secondary); width: 80px; text-align: left;" data-translate="settings-music">MÜZİK</span>
                             <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
                                 <button id="btn-pause-music" class="sound-toggle-mini-btn" type="button" aria-label="Müziği Aç/Kapat" style="display: flex; align-items: center; justify-content: center;"><svg class="icon-svg" style="width: 14px; height: 14px;"><use href="#icon-music"></use></svg></button>
                                 <div class="slider-wrapper" style="flex: 1; max-width: 140px; min-width: 0;">
@@ -1159,7 +1167,7 @@
                             </div>
                         </div>
                         <div class="settings-control inline-settings" style="display: flex; align-items: center; justify-content: space-between;">
-                            <span style="font-size: 0.85rem; color: var(--text-secondary); width: 80px; text-align: left;">EFEKTLER</span>
+                            <span style="font-size: 0.85rem; color: var(--text-secondary); width: 80px; text-align: left;" data-translate="settings-sfx">EFEKTLER</span>
                             <div style="display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end;">
                                 <button id="btn-pause-sfx" class="sound-toggle-mini-btn" type="button" aria-label="Efektleri Aç/Kapat" style="display: flex; align-items: center; justify-content: center;"><svg class="icon-svg" style="width: 14px; height: 14px;"><use href="#icon-volume"></use></svg></button>
                                 <div class="slider-wrapper" style="flex: 1; max-width: 140px; min-width: 0;">
@@ -1169,13 +1177,13 @@
                             </div>
                         </div>
                         <div class="settings-control inline-settings" style="display: flex; align-items: center; justify-content: space-between;">
-                            <span style="font-size: 0.85rem; color: var(--text-secondary); width: 120px; text-align: left;">EKRAN TİTREŞİMİ</span>
+                            <span style="font-size: 0.85rem; color: var(--text-secondary); width: 120px; text-align: left;" data-translate="settings-shake">EKRAN TİTREŞİMİ</span>
                             <div style="display: flex; align-items: center; gap: 8px; justify-content: flex-end;">
                                 <button id="btn-toggle-shake-pause" class="sound-toggle-mini-btn" type="button" aria-label="Ekran Titreşimini Aç/Kapat" style="width: auto; padding: 0 12px; height: 32px; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 4px;">AÇIK</button>
                             </div>
                         </div>
                     </div>
-                    <button id="btn-main-menu" class="menu-btn danger-btn"><svg class="icon-svg"><use href="#icon-home"></use></svg> ANA MENÜYE DÖN</button>
+                    <button id="btn-main-menu" class="menu-btn danger-btn" data-translate="return-main"><svg class="icon-svg"><use href="#icon-home"></use></svg> ANA MENÜYE DÖN</button>
                 </div>
             </div>
         </div>
@@ -1183,8 +1191,8 @@
         <!-- Bölüm Sonu / Başarı Ekranı -->
         <div id="win-screen" class="screen hidden">
             <div class="menu-card pulse-border">
-                <h2 id="win-title" class="win-title">BÖLÜM TAMAMLANDI!</h2>
-                <p>Viscora güvenli bölgeye ulaştı.</p>
+                <h2 id="win-title" class="win-title" data-translate="win-title">BÖLÜM TAMAMLANDI!</h2>
+                <p data-translate="win-subtitle">Viscora güvenli bölgeye ulaştı.</p>
                 <!-- Yıldız Gösterimi: 3 yıldız, kazanılmayanlar içi boş -->
                 <div id="win-stars-display" class="win-stars-display">
                     <span id="win-star-1" class="win-star">☆</span>
@@ -1192,13 +1200,13 @@
                     <span id="win-star-3" class="win-star">☆</span>
                 </div>
                 <div class="win-stats">
-                    <div>Süre: <span id="win-time">00:00</span></div>
-                    <div id="win-crystals-container" style="display:none; margin-top: 8px;">Kristaller: <span id="win-crystals">0 / 0</span><span id="win-crystals-perfect" style="color: #10b981; font-weight: bold; margin-left: 5px;"></span></div>
+                    <div data-translate="win-time-label">Süre: <span id="win-time">00:00</span></div>
+                    <div id="win-crystals-container" style="display:none; margin-top: 8px;" data-translate="win-crystals-label">Kristaller: <span id="win-crystals">0 / 0</span><span id="win-crystals-perfect" style="color: #10b981; font-weight: bold; margin-left: 5px;"></span></div>
                     <div id="win-deaths-container" style="margin-top: 8px;"><span id="win-deaths-text"></span></div>
                 </div>
                 <!-- Liderlik Tablosu & Yüzdelik Dilim -->
                 <div id="win-leaderboard-container" style="margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px;">
-                    <span style="font-size: 0.85rem; color: #38bdf8; font-weight: bold; letter-spacing: 0.5px;">BÖLÜM REKORLARI</span>
+                    <span style="font-size: 0.85rem; color: #38bdf8; font-weight: bold; letter-spacing: 0.5px;" data-translate="records-title">BÖLÜM REKORLARI</span>
                     <div id="win-leaderboard-list" style="display: flex; flex-direction: column; gap: 4px; width: 100%; max-width: 220px; font-size: 0.8rem; font-family: monospace;">
                         <!-- Top 3 scores will load here -->
                     </div>
@@ -1206,20 +1214,20 @@
                         <!-- Percentile text -->
                     </div>
                 </div>
-                <button id="btn-next" class="menu-btn primary-btn">TEKRAR OYNA</button>
-                <button id="btn-win-retry" class="menu-btn secondary-btn">BÖLÜMÜ TEKRARLA</button>
-                <button id="btn-main-menu-win" class="menu-btn danger-btn"><svg class="icon-svg"><use href="#icon-home"></use></svg> ANA MENÜYE DÖN</button>
+                <button id="btn-next" class="menu-btn primary-btn" data-translate="replay">TEKRAR OYNA</button>
+                <button id="btn-win-retry" class="menu-btn secondary-btn" data-translate="retry-lvl">BÖLÜMÜ TEKRARLA</button>
+                <button id="btn-main-menu-win" class="menu-btn danger-btn" data-translate="return-main"><svg class="icon-svg"><use href="#icon-home"></use></svg> ANA MENÜYE DÖN</button>
             </div>
         </div>
 
         <!-- Oyun Bitti Ekranı -->
         <div id="gameover-screen" class="screen hidden">
             <div class="menu-card hazard-border">
-                <h2 class="gameover-title">VISCORA DAĞILDI</h2>
-                <p>Hücre bütünlüğü korunamadı.</p>
+                <h2 class="gameover-title" data-translate="gameover-title">VISCORA DAĞILDI</h2>
+                <p data-translate="gameover-subtitle">Hücre bütünlüğü korunamadı.</p>
                 <!-- Liderlik Tablosu (Ölüm Ekranı) -->
                 <div id="gameover-leaderboard-container" style="margin-top: 15px; margin-bottom: 10px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px;">
-                    <span style="font-size: 0.85rem; color: #f43f5e; font-weight: bold; letter-spacing: 0.5px;">BÖLÜM REKORLARI</span>
+                    <span style="font-size: 0.85rem; color: #f43f5e; font-weight: bold; letter-spacing: 0.5px;" data-translate="records-title">BÖLÜM REKORLARI</span>
                     <div id="gameover-leaderboard-list" style="display: flex; flex-direction: column; gap: 4px; width: 100%; max-width: 220px; font-size: 0.8rem; font-family: monospace;">
                         <!-- Top 3 scores will load here -->
                     </div>
@@ -1650,9 +1658,10 @@
     </div>
 
     <!-- Modüllerimizin Yükleneceği Dosya -->
-    <script src="js/controls_customizer.js?v=v353"></script>
-    <script type="module" src="js/main.js?v=v353"></script>
+    <script src="js/controls_customizer.js?v=v354"></script>
+    <script type="module" src="js/main.js?v=v354"></script>
 </body>
 </html>
+
 
 
