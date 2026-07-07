@@ -1319,8 +1319,20 @@ async def post_campaign_score(level_num: int, request: Request):
         'personalBest': personal_best
     }
 
-# Statik Dosyaları Sunma (Wildcard fallback en sonda tanımlanmalıdır)
+# Statik Dosya Kök Dizini
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+# Hesap Silme Sayfası (Google Play Policy)
+@app.get("/delete-account.html")
+@app.get("/delete-account")
+async def delete_account_page():
+    from fastapi.responses import FileResponse
+    file_path = os.path.join(root_dir, 'delete-account.html')
+    if os.path.exists(file_path):
+        return FileResponse(file_path, media_type='text/html')
+    return JSONResponse({'detail': 'Not Found'}, status_code=404)
+
+# Statik Dosyaları Sunma (Wildcard fallback en sonda tanımlanmalıdır)
 app.mount("/", StaticFiles(directory=root_dir, html=True), name="static")
 
 if __name__ == '__main__':
