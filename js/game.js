@@ -270,28 +270,8 @@ export class GameManager {
             });
         }
         
-        // 2. Ön plandan geçen büyük dikey borular (Vertical pipes)
-        const numPipes = Math.max(1, Math.floor(levelW / 750));
-        for (let i = 0; i < numPipes; i++) {
-            this.fgElements.push({
-                type: 'pipe_vertical',
-                x: 300 + i * 750 + Math.random() * 250,
-                y: -50,
-                w: 18 + Math.random() * 14,
-                h: levelH + 100,
-                parallax: 1.25
-            });
-        }
-
-        // 3. Ön plandan geçen büyük yatay borular (Horizontal pipes)
-        this.fgElements.push({
-            type: 'pipe_horizontal',
-            x: -100,
-            y: 40 + Math.random() * 60,
-            w: levelW + 200,
-            h: 18,
-            parallax: 1.2
-        });
+        // 2. Ön plandan geçen büyük dikey borular kaldırıldı
+        // 3. Ön plandan geçen büyük yatay borular kaldırıldı
         
         // 4. Ön planda uçuşan büyük bulanık toz/gaz zerreleri (Blurry dust motes)
         for (let i = 0; i < 15; i++) {
@@ -1394,7 +1374,8 @@ export class GameManager {
      * Bölüm kazanıldığında win ekranını hazırlar ve gösterir
      */
     _showWinScreen() {
-        document.getElementById('win-time').textContent = this.timeString;
+        const winTimeEl = document.getElementById('win-time');
+        if (winTimeEl) winTimeEl.textContent = this.timeString;
 
         // Yıldızları Hesapla, Kaydet ve Göster (3 yıldız her zaman gösterilir)
         const stars = this.calculateStars();
@@ -1520,11 +1501,15 @@ export class GameManager {
             CloudSaveManager.saveProgress();
             this.ui.updateLevelButtonsUI();
 
-            document.getElementById('win-title').textContent = `BÖLÜM ${this.currentLevel} TAMAMLANDI!`;
-            document.getElementById('btn-next').textContent = "SONRAKİ BÖLÜM";
+            const winTitleEl = document.getElementById('win-title');
+            const btnNextEl = document.getElementById('btn-next');
+            if (winTitleEl) winTitleEl.textContent = `BÖLÜM ${this.currentLevel} TAMAMLANDI!`;
+            if (btnNextEl) btnNextEl.textContent = "SONRAKİ BÖLÜM";
         } else {
-            document.getElementById('win-title').textContent = "TEBRİKLER, OYUNU BİTİRDİNİZ!";
-            document.getElementById('btn-next').textContent = "EN BAŞTAN OYNA";
+            const winTitleEl = document.getElementById('win-title');
+            const btnNextEl = document.getElementById('btn-next');
+            if (winTitleEl) winTitleEl.textContent = "TEBRİKLER, OYUNU BİTİRDİNİZ!";
+            if (btnNextEl) btnNextEl.textContent = "EN BAŞTAN OYNA";
         }
         // Esprili ölüm sayacı mesajı
         const deathEl = document.getElementById('win-deaths-text');
@@ -1679,7 +1664,7 @@ export class GameManager {
 
         // Update tutorial ghosts if level 0
         if (this.currentLevel === 0 && this.tutorialGhosts) {
-            this.tutorialGhosts.forEach(g => g.update(this.player.x));
+            this.tutorialGhosts.forEach(g => g.update(this.player));
         }
         
         // Ekran flaş sayacı güncelleme
@@ -3881,8 +3866,18 @@ class TutorialGhost {
         this.delayTimer = 0;
     }
 
-    update(playerX) {
-        if (playerX >= this.triggerXMin && playerX <= this.triggerXMax) {
+    update(player) {
+        if (!player) return;
+        
+        // Hologram pad is centered at keyframes[0].x on floor level y: 460
+        const padX = this.keyframes[0].x;
+        const dist = Math.abs(player.x - padX);
+        const distY = Math.abs(player.y - 442);
+        
+        // Touch check: Player is close enough to the hologram pad
+        const playerOnPad = dist < 45 && distY < 45;
+
+        if (playerOnPad) {
             this.active = true;
         } else {
             this.active = false;
@@ -3942,63 +3937,138 @@ class TutorialGhost {
     }
 
     draw(ctx, camera) {
-        if (!this.active || this.delayTimer > 0) return;
-
         ctx.save();
         if (camera) {
             ctx.translate(-camera.x, -camera.y);
         }
-        ctx.globalAlpha = 0.45;
 
-        let color = '#10b981';
-        if (this.currentViscosity === 'LOW') color = '#06b6d4';
-        if (this.currentViscosity === 'HIGH') color = '#d946ef';
+        // Determine base color & label
+        let padColor = '#10b981';
+        let padLabel = '🟢 YOL GÖSTERİCİ';
+        if (this.triggerXMin === 600) {
+            padColor = '#06b6d4';
+            padLabel = '🔵 SIVI KILAVUZU';
+        } else if (this.triggerXMin === 1200) {
+            padColor = '#d946ef';
+            padLabel = '🟣 JEL KILAVUZU';
+        }
 
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 12;
+        const padX = this.keyframes[0].x;
+        const padY = 460;
 
-        ctx.fillStyle = color;
+        // Draw Hologram Pad (slow pulse effect)
+        const pulse = 1 + Math.sin(Date.now() * 0.005) * 0.08;
+        const activeAlpha = this.active && this.delayTimer === 0 ? 0.7 : 0.28;
+        
+        ctx.globalAlpha = activeAlpha;
+        ctx.strokeStyle = padColor;
+        ctx.shadowColor = padColor;
+        ctx.shadowBlur = this.active && this.delayTimer === 0 ? 12 : 5;
+        ctx.lineWidth = 2.5;
+
+        // Draw ellipse on floor
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
+        if (ctx.ellipse) {
+            ctx.ellipse(padX, padY, 24 * pulse, 6 * pulse, 0, 0, Math.PI * 2);
+        } else {
+            ctx.arc(padX, padY, 20, 0, Math.PI * 2);
+        }
+        ctx.stroke();
+
+        // Draw glowing light beam going up
+        const rColor = hexToRgba(padColor, 0.35);
+        const rColorHalf = hexToRgba(padColor, 0.15);
+        const grad = ctx.createLinearGradient(padX, padY, padX, padY - 80);
+        grad.addColorStop(0, rColor);
+        grad.addColorStop(0.5, rColorHalf);
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(padX - 22 * pulse, padY);
+        ctx.lineTo(padX - 12, padY - 80);
+        ctx.lineTo(padX + 12, padY - 80);
+        ctx.lineTo(padX + 22 * pulse, padY);
+        ctx.closePath();
         ctx.fill();
 
-        ctx.fillStyle = '#ffffff';
+        // Draw pad floating label
         ctx.shadowBlur = 0;
-        ctx.beginPath();
-        ctx.arc(this.x - 5, this.y - 2, 3, 0, Math.PI * 2);
-        ctx.arc(this.x + 5, this.y - 2, 3, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.font = 'bold 10px "Outfit", sans-serif';
+        ctx.fillStyle = padColor;
+        ctx.textAlign = 'center';
+        ctx.fillText(padLabel, padX, padY - 90);
 
-        ctx.fillStyle = '#0a0a0f';
-        ctx.beginPath();
-        ctx.arc(this.x - 5, this.y - 2, 1, 0, Math.PI * 2);
-        ctx.arc(this.x + 5, this.y - 2, 1, 0, Math.PI * 2);
-        ctx.fill();
+        // Draw ghost itself if active
+        if (this.active && this.delayTimer === 0) {
+            ctx.globalAlpha = 0.55;
+            let color = '#10b981';
+            if (this.currentViscosity === 'LOW') color = '#06b6d4';
+            if (this.currentViscosity === 'HIGH') color = '#d946ef';
 
-        if (this.currentKey) {
-            ctx.font = '900 11px monospace';
-            ctx.textAlign = 'center';
-            const textWidth = ctx.measureText(this.currentKey).width;
-            ctx.fillStyle = 'rgba(10, 10, 15, 0.8)';
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 1.5;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 12;
+
+            ctx.fillStyle = color;
             ctx.beginPath();
-            
-            // roundRect fallback just in case
-            if (ctx.roundRect) {
-                ctx.roundRect(this.x - textWidth/2 - 5, this.y - 41, textWidth + 10, 16, 4);
-            } else {
-                ctx.rect(this.x - textWidth/2 - 5, this.y - 41, textWidth + 10, 16);
-            }
+            ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
             ctx.fill();
-            ctx.stroke();
 
             ctx.fillStyle = '#ffffff';
-            ctx.fillText(this.currentKey, this.x, this.y - 29);
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.arc(this.x - 5, this.y - 2, 3, 0, Math.PI * 2);
+            ctx.arc(this.x + 5, this.y - 2, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#0a0a0f';
+            ctx.beginPath();
+            ctx.arc(this.x - 5, this.y - 2, 1, 0, Math.PI * 2);
+            ctx.arc(this.x + 5, this.y - 2, 1, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (this.currentKey) {
+                ctx.font = 'bold 13px "Outfit", sans-serif';
+                ctx.textAlign = 'center';
+                const textWidth = ctx.measureText(this.currentKey).width;
+                const padH = 12;
+                const boxW = textWidth + padH * 2;
+                const boxH = 22;
+                const bx = this.x - boxW / 2;
+                const by = this.y - 52;
+                
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 10;
+                
+                ctx.fillStyle = 'rgba(8, 8, 12, 0.95)';
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                if (ctx.roundRect) {
+                    ctx.roundRect(bx, by, boxW, boxH, 6);
+                } else {
+                    ctx.rect(bx, by, boxW, boxH);
+                }
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 13px "Outfit", sans-serif';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.currentKey, this.x, by + boxH / 2);
+            }
         }
 
         ctx.restore();
     }
+}
+
+function hexToRgba(hex, alpha) {
+    if (hex === '#10b981') return `rgba(16, 185, 129, ${alpha})`;
+    if (hex === '#06b6d4') return `rgba(6, 182, 212, ${alpha})`;
+    if (hex === '#d946ef') return `rgba(217, 70, 239, ${alpha})`;
+    return `rgba(255, 255, 255, ${alpha})`;
 }
 
 export default GameManager;

@@ -4205,8 +4205,8 @@ export class Level {
                 { "x": 1560, "y": 100, "w": 240, "h": 40, "type": "normal" },
                 // Oda 4 Zemin (tüm Oda 4 boyunca devam eden düz zemin)
                 { "x": 1800, "y": 460, "w": 620, "h": 140, "type": "normal" },
-                // Oda 4 Dar geçit tavanı (eğilme gerektiren tavan bloğu)
-                { "x": 1860, "y": 0, "w": 160, "h": 430, "type": "normal" }
+                // Oda 4 Dar geçit tavanı (eğilme gerektiren, yukarı sıçramayı önlemek için y:-500'e uzatıldı)
+                { "x": 1860, "y": -500, "w": 160, "h": 930, "type": "normal" }
             ];
 
             this.hazards = [
@@ -4269,14 +4269,14 @@ export class Level {
                 },
                 // Oda 3 Bilgi Kutusu
                 {
-                    "x": 1320, "y": 280, "w": 220, "h": 80,
+                    "x": 1300, "y": 280, "w": 220, "h": 80,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
                     "text": "SHIFT butonu ile JEL (Pembe) moda geç ve yapışkan duvara temas et. YUKARI butonu ile yukarı tırman!",
                     "color": "#06b6d4"
                 },
                 // Oda 4 Bilgi Kutusu
                 {
-                    "x": 1780, "y": 260, "w": 220, "h": 80,
+                    "x": 1580, "y": 15, "w": 260, "h": 75,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
                     "text": "SHIFT butonu ile NORMAL (Yeşil) moda dön ve AŞAĞI butonu ile eğilerek dar geçitten geç. Şaltere ulaşıp lazeri kapat!",
                     "color": "#06b6d4"
