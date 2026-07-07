@@ -272,24 +272,31 @@
                 cacheBtn.style.fontWeight = 'bold';
                 cacheBtn.style.marginTop = '15px';
                 cacheBtn.style.display = 'block';
+                function reloadWithCacheBuster() {
+                    var cleanUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
+                    window.location.href = cleanUrl + '?cb=' + Date.now();
+                }
+
                 cacheBtn.onclick = function() {
                     if ('serviceWorker' in navigator) {
                         navigator.serviceWorker.getRegistrations().then(function(regs) {
-                            for (let r of regs) {
-                                r.unregister();
+                            var promises = [];
+                            for (var i = 0; i < regs.length; i++) {
+                                promises.push(regs[i].unregister());
                             }
+                            return Promise.all(promises);
                         }).then(function() {
                             return caches.keys().then(function(keys) {
-                                return Promise.all(keys.map(k => caches.delete(k)));
+                                return Promise.all(keys.map(function(k) { return caches.delete(k); }));
                             });
                         }).then(function() {
-                            window.location.reload(true);
+                            reloadWithCacheBuster();
                         }).catch(function(err) {
                             alert("Önbellek temizlenemedi: " + err);
-                            window.location.reload(true);
+                            reloadWithCacheBuster();
                         });
                     } else {
-                        window.location.reload(true);
+                        reloadWithCacheBuster();
                     }
                 };
                 div.appendChild(cacheBtn);
