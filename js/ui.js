@@ -5538,9 +5538,17 @@ export class UIManager {
             } else if (lastClaim === today) {
                 nextClaimableDay = streak;
                 canClaimToday = false;
-            } else {
+            } else if (lastClaim === yesterday) {
                 nextClaimableDay = streak >= 7 ? 1 : streak + 1;
                 canClaimToday = true;
+            } else {
+                // Gün kaçırılmış! Seriyi sıfırla, sıradaki ödül 1. Gün
+                nextClaimableDay = 1;
+                canClaimToday = true;
+                if (streak !== 0) {
+                    streak = 0;
+                    localStorage.setItem('viscora_daily_streak', '0');
+                }
             }
 
             if (dailyGrid) {
@@ -5665,6 +5673,9 @@ export class UIManager {
                         
                         this.showGlobalToast(`Tebrikler! ${rewardAmt} Kristal haftalık ödülünüz alındı.`, true);
                         updateRewardsPanel();
+
+                        // Buluta anında kaydet ve eşitle
+                        CloudSaveManager.saveProgress().catch(err => console.warn("Haftalık ödül bulut eşitleme hatası:", err));
                     });
                 });
             }
@@ -5706,7 +5717,14 @@ export class UIManager {
                     return;
                 }
                 
-                let nextStreak = streak >= 7 ? 1 : streak + 1;
+                let nextStreak = 1;
+                if (lastClaim === '') {
+                    nextStreak = 1;
+                } else if (lastClaim === yesterday) {
+                    nextStreak = streak >= 7 ? 1 : streak + 1;
+                } else {
+                    nextStreak = 1; // Gün kaçırılmışsa seriyi 1'den başlat
+                }
 
                 const rewardAmount = dailyRewardAmounts[nextStreak];
                 if (window.shopManager) {
@@ -5720,6 +5738,9 @@ export class UIManager {
                 
                 this.triggerConfetti();
                 updateRewardsPanel();
+                
+                // Buluta anında kaydet ve eşitle
+                CloudSaveManager.saveProgress().catch(err => console.warn("Günlük ödül bulut eşitleme hatası:", err));
             });
         }
     }

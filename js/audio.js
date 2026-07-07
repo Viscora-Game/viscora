@@ -225,8 +225,7 @@ class AudioManager {
         try {
             if (this.musicVolume && this.ctx) {
                 const targetGain = this.isMusicMuted ? 0 : (this.musicVolumeLevel * 0.55);
-                this.musicVolume.gain.setValueAtTime(targetGain, this.ctx.currentTime);
-                this.musicVolume.gain.value = targetGain;
+                this.musicVolume.gain.linearRampToValueAtTime(targetGain, this.ctx.currentTime + 0.05);
             }
             if (prevVolume === 0 && this.musicVolumeLevel > 0 && !this.isMusicMuted && this.playChordRef && this.musicPlaying) {
                 this.playChordRef();
@@ -249,8 +248,7 @@ class AudioManager {
         try {
             if (this.sfxVolume && this.ctx) {
                 const targetGain = this.isSfxMuted ? 0 : (this.sfxVolumeLevel * 1.0);
-                this.sfxVolume.gain.setValueAtTime(targetGain, this.ctx.currentTime);
-                this.sfxVolume.gain.value = targetGain;
+                this.sfxVolume.gain.linearRampToValueAtTime(targetGain, this.ctx.currentTime + 0.05);
             }
         } catch (e) {
             console.error("Error setting SFX volume:", e);
@@ -267,8 +265,7 @@ class AudioManager {
         try {
             if (this.musicVolume && this.ctx) {
                 const targetGain = this.isMusicMuted ? 0 : (this.musicVolumeLevel * 0.55);
-                this.musicVolume.gain.setValueAtTime(targetGain, this.ctx.currentTime);
-                this.musicVolume.gain.value = targetGain;
+                this.musicVolume.gain.linearRampToValueAtTime(targetGain, this.ctx.currentTime + 0.05);
             }
             if (!this.isMusicMuted && this.musicVolumeLevel > 0 && this.playChordRef && this.musicPlaying) {
                 this.playChordRef();
@@ -288,8 +285,7 @@ class AudioManager {
         try {
             if (this.sfxVolume && this.ctx) {
                 const targetGain = this.isSfxMuted ? 0 : (this.sfxVolumeLevel * 1.0);
-                this.sfxVolume.gain.setValueAtTime(targetGain, this.ctx.currentTime);
-                this.sfxVolume.gain.value = targetGain;
+                this.sfxVolume.gain.linearRampToValueAtTime(targetGain, this.ctx.currentTime + 0.05);
             }
         } catch (e) {
             console.error("Error toggling SFX mute:", e);
@@ -743,39 +739,7 @@ class AudioManager {
         }
     }
 
-    /**
-     * Set dynamic BGM theme configurations based on level themeId
-     */
-    setTheme(themeId) {
-        if (themeId === 'magma_core') {
-            // Darker, heavier chords: Dmin7 - Bbmaj7 - Gmin9 - A7
-            this.chords = [
-                [73.42, 110.00, 146.83, 174.61],  // D2, A2, D3, F3
-                [116.54, 146.83, 174.61, 233.08], // Bb2, D3, F3, Bb3
-                [98.00, 130.81, 164.81, 196.00],  // G2, C3, E3, G3
-                [110.00, 138.59, 164.81, 220.00]  // A2, C#3, E3, A3
-            ];
-            this.bpm = 106; // Slower, heavier magma feel
-        } else if (themeId === 'neon_sewer') {
-            // Cyber, energetic: Amin7 - Fmaj7 - Cmaj7 - Em7
-            this.chords = [
-                [110.00, 130.81, 164.81, 196.00], // A2, C3, E3, G3
-                [87.31, 130.81, 174.61, 218.08],  // F2, C3, F3, A3
-                [130.81, 164.81, 196.00, 246.94], // C3, E3, G3, B3
-                [164.81, 196.00, 246.94, 329.63]  // E3, G3, B3, E4
-            ];
-            this.bpm = 136; // Faster, cyberpunk neon feel
-        } else {
-            // Default ambient chords (original Cmaj7 - Am9 - Fmaj7 - G6/9)
-            this.chords = [
-                [130.81, 164.81, 196.00, 246.94], // C3, E3, G3, B3
-                [110.00, 146.83, 164.81, 220.00], // A2, D3, E3, A3
-                [87.31,  130.81, 174.61, 218.08], // F2, C3, F3, A3
-                [98.00,  146.83, 196.00, 246.94]  // G2, D3, G3, B3
-            ];
-            this.bpm = 128; // Standard ambient
-        }
-    }
+
 
     /**
      * Start procedural ambient background music
@@ -864,10 +828,11 @@ class AudioManager {
 
                     gainNode.gain.setValueAtTime(0, time);
                     gainNode.gain.linearRampToValueAtTime(0.32, time + 0.003);
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.20);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
+                    gainNode.gain.linearRampToValueAtTime(0, time + 0.20); // Absolute zero
 
                     osc.start(time);
-                    osc.stop(time + 0.25);
+                    osc.stop(time + 0.21);
                 }
 
                 // 3. Off-beat Hi-Hat (on step 2 of every beat)
@@ -891,14 +856,15 @@ class AudioManager {
                         const gainNode = this.ctx.createGain();
                         gainNode.gain.setValueAtTime(0, time);
                         gainNode.gain.linearRampToValueAtTime(0.035, time + 0.003);
-                        gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.045);
+                        gainNode.gain.linearRampToValueAtTime(0, time + 0.05); // Absolute zero
 
                         source.connect(filter);
                         filter.connect(gainNode);
                         gainNode.connect(this.musicVolume);
 
                         source.start(time);
-                        source.stop(time + 0.07);
+                        source.stop(time + 0.06);
                     }
                 }
 
@@ -924,14 +890,15 @@ class AudioManager {
                     const velocity = (this.currentStep % 4 === 0) ? 0.08 : 0.05;
                     gainNode.gain.setValueAtTime(0, time);
                     gainNode.gain.linearRampToValueAtTime(velocity, time + 0.004);
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, time + sixteenthDur * 0.9);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, time + sixteenthDur * 0.85);
+                    gainNode.gain.linearRampToValueAtTime(0, time + sixteenthDur * 0.90); // Absolute zero
 
                     osc.connect(filter);
                     filter.connect(gainNode);
                     gainNode.connect(this.musicVolume);
 
                     osc.start(time);
-                    osc.stop(time + sixteenthDur * 0.9 + 0.02);
+                    osc.stop(time + sixteenthDur * 0.92);
                 }
 
                 // 5. Arpeggiated Neon Lead
@@ -950,14 +917,15 @@ class AudioManager {
 
                     gainNode.gain.setValueAtTime(0, time);
                     gainNode.gain.linearRampToValueAtTime(0.02, time + 0.002);
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, time + sixteenthDur * 1.2);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, time + sixteenthDur * 1.15);
+                    gainNode.gain.linearRampToValueAtTime(0, time + sixteenthDur * 1.20); // Absolute zero
 
                     osc.connect(filter);
                     filter.connect(gainNode);
                     gainNode.connect(this.musicVolume);
 
                     osc.start(time);
-                    osc.stop(time + sixteenthDur * 1.2 + 0.02);
+                    osc.stop(time + sixteenthDur * 1.22);
                 }
 
                 // 6. Liquid Bubble plops (low probability, on step boundaries)
@@ -978,13 +946,14 @@ class AudioManager {
                     pGain.gain.setValueAtTime(0, time);
                     pGain.gain.linearRampToValueAtTime(0.012, time + 0.004);
                     pGain.gain.exponentialRampToValueAtTime(0.001, time + 0.20);
+                    pGain.gain.linearRampToValueAtTime(0, time + 0.22); // Absolute zero
 
                     pOsc.connect(pFilter);
                     pFilter.connect(pGain);
                     pGain.connect(this.musicVolume);
 
                     pOsc.start(time);
-                    pOsc.stop(time + 0.25);
+                    pOsc.stop(time + 0.24);
                 }
 
                 // Advance step
