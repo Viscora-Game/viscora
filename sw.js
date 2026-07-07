@@ -20,6 +20,8 @@ const ASSETS = [
   './js/shop.js?v=v356',
   './privacy.html?v=v356',
   './terms.html?v=v356',
+  './assets/audio/menu_theme.mp3?v=v356',
+  './assets/audio/game_theme.mp3?v=v356',
   './assets/dragon_head.png',
   './assets/flamethrower.png',
   './assets/avatars/slime_king.png?v=v356',

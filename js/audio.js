@@ -26,6 +26,12 @@ class AudioManager {
         this.musicPlaying = false;
         this.volumeLevel = 0.8;
         
+        // Statik/Hazır müzik için değişkenler
+        this.isStaticAudioMode = false;
+        this.currentAudioElement = null;
+        this.audioSourceNode = null;
+        this.currentThemeId = 'default';
+
         // Ambient chord progression: Cmaj7 - Am9 - Fmaj7 - G6/9
         this.chords = [
             [130.81, 164.81, 196.00, 246.94], // C3, E3, G3, B3
@@ -730,7 +736,6 @@ class AudioManager {
 
                 osc.connect(gain);
                 gain.connect(this.sfxVolume);
-
                 osc.start(now + timeOffset);
                 osc.stop(now + timeOffset + 0.45);
             });
@@ -739,21 +744,102 @@ class AudioManager {
         }
     }
 
-
-
     /**
-     * Start procedural ambient background music
+     * Start background music (Static MP3 with real-time filtering, or Procedural fallback)
      */
     startMusic() {
         try {
-            if (this.musicPlaying && this.musicIntervalId) return;
             this.init(); // Auto init if not done
+            this.musicPlaying = true;
             
+            // Choose static theme based on the current themeId
+            let staticUrl = '';
+            if (this.currentThemeId === 'default') {
+                staticUrl = 'assets/audio/menu_theme.mp3';
+            } else {
+                staticUrl = 'assets/audio/game_theme.mp3';
+            }
+
+            this.playStaticBGM(staticUrl);
+        } catch (e) {
+            console.error("Error starting music:", e);
+            this.startProceduralMusic();
+        }
+    }
+
+    /**
+     * Play static BGM routed through Web Audio API for real-time filtering
+     */
+    playStaticBGM(url) {
+        try {
+            this.init(); // Ensure Web Audio context is initialized
+
+            // Stop procedural loop if running
             if (this.musicIntervalId) {
                 clearInterval(this.musicIntervalId);
                 this.musicIntervalId = null;
             }
-            
+
+            // Stop any active static BGM
+            this.stopStaticBGM();
+
+            this.isStaticAudioMode = true;
+            this.musicPlaying = true;
+
+            const audioEl = new Audio();
+            audioEl.src = url + '?v=v356';
+            audioEl.loop = true;
+            audioEl.crossOrigin = "anonymous";
+
+            // Route HTML5 Audio through our Web Audio volume node!
+            // This lets static MP3 music enjoy real-time lowpass filtering when jelly is viscous!
+            const source = this.ctx.createMediaElementSource(audioEl);
+            source.connect(this.musicVolume);
+
+            this.currentAudioElement = audioEl;
+            this.audioSourceNode = source;
+
+            // Trigger play (handles browser autoplay permission blockages gracefully)
+            const playPromise = audioEl.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(err => {
+                    console.warn("Static audio autoplay blocked, will play on next user gesture:", err);
+                });
+            }
+        } catch (e) {
+            console.warn("Failed to play static BGM, falling back to procedural synth:", e);
+            this.startProceduralMusic();
+        }
+    }
+
+    /**
+     * Stop and cleanup static BGM audio element and nodes
+     */
+    stopStaticBGM() {
+        if (this.currentAudioElement) {
+            try {
+                this.currentAudioElement.pause();
+                this.currentAudioElement.src = "";
+                this.currentAudioElement.load();
+            } catch (e) {}
+            this.currentAudioElement = null;
+        }
+        if (this.audioSourceNode) {
+            try {
+                this.audioSourceNode.disconnect();
+            } catch (e) {}
+            this.audioSourceNode = null;
+        }
+        this.isStaticAudioMode = false;
+    }
+
+    /**
+     * Start procedural synthesizer loop (fallback/custom modes)
+     */
+    startProceduralMusic() {
+        try {
+            if (this.musicIntervalId) return;
+            this.isStaticAudioMode = false;
             this.musicPlaying = true;
             this.currentStep = 0;
             this.nextNoteTime = this.ctx.currentTime;
@@ -766,7 +852,6 @@ class AudioManager {
                 
                 // Get current chord
                 const currentChord = this.chords[this.currentChordIndex];
-                
                 const time = this.nextNoteTime;
 
                 // Dynamically evaluate tempo and durations based on current this.bpm
@@ -818,176 +903,113 @@ class AudioManager {
 
                 // 2. Techno Kick (every 4 steps / quarter note)
                 if (this.currentStep % 4 === 0) {
-                    const osc = this.ctx.createOscillator();
-                    const gainNode = this.ctx.createGain();
-                    osc.connect(gainNode);
-                    gainNode.connect(this.musicVolume);
-
-                    osc.frequency.setValueAtTime(150, time);
-                    osc.frequency.exponentialRampToValueAtTime(45, time + 0.10);
-
-                    gainNode.gain.setValueAtTime(0, time);
-                    gainNode.gain.linearRampToValueAtTime(0.32, time + 0.003);
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
-                    gainNode.gain.linearRampToValueAtTime(0, time + 0.20); // Absolute zero
-
-                    osc.start(time);
-                    osc.stop(time + 0.21);
-                }
-
-                // 3. Off-beat Hi-Hat (on step 2 of every beat)
-                if (this.currentStep % 4 === 2) {
-                    if (!this.noiseBuffer && this.ctx) {
-                        const bufferSize = this.ctx.sampleRate * 0.15;
-                        this.noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-                        const data = this.noiseBuffer.getChannelData(0);
-                        for (let j = 0; j < bufferSize; j++) {
-                            data[j] = Math.random() * 2 - 1;
-                        }
-                    }
-                    if (this.noiseBuffer) {
-                        const source = this.ctx.createBufferSource();
-                        source.buffer = this.noiseBuffer;
-
-                        const filter = this.ctx.createBiquadFilter();
-                        filter.type = 'highpass';
-                        filter.frequency.setValueAtTime(8000, time);
-
-                        const gainNode = this.ctx.createGain();
-                        gainNode.gain.setValueAtTime(0, time);
-                        gainNode.gain.linearRampToValueAtTime(0.035, time + 0.003);
-                        gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.045);
-                        gainNode.gain.linearRampToValueAtTime(0, time + 0.05); // Absolute zero
-
-                        source.connect(filter);
-                        filter.connect(gainNode);
-                        gainNode.connect(this.musicVolume);
-
-                        source.start(time);
-                        source.stop(time + 0.06);
-                    }
-                }
-
-                // 4. Acid Bassline
-                const bassPattern = [
-                    1, 1, 2, 0,  1, 1, 2, 1.5,
-                    1, 1, 2, 0,  1, 2, 1.5, 2
-                ];
-                const patternVal = bassPattern[this.currentStep % 16];
-                if (patternVal > 0) {
-                    const rootFreq = currentChord[0] / 2;
-                    const osc = this.ctx.createOscillator();
-                    const filter = this.ctx.createBiquadFilter();
-                    const gainNode = this.ctx.createGain();
-
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(rootFreq * patternVal, time);
-
-                    filter.type = 'lowpass';
-                    filter.frequency.setValueAtTime(500, time);
-                    filter.frequency.exponentialRampToValueAtTime(110, time + sixteenthDur * 0.85);
-
-                    const velocity = (this.currentStep % 4 === 0) ? 0.08 : 0.05;
-                    gainNode.gain.setValueAtTime(0, time);
-                    gainNode.gain.linearRampToValueAtTime(velocity, time + 0.004);
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, time + sixteenthDur * 0.85);
-                    gainNode.gain.linearRampToValueAtTime(0, time + sixteenthDur * 0.90); // Absolute zero
-
-                    osc.connect(filter);
-                    filter.connect(gainNode);
-                    gainNode.connect(this.musicVolume);
-
-                    osc.start(time);
-                    osc.stop(time + sixteenthDur * 0.92);
-                }
-
-                // 5. Arpeggiated Neon Lead
-                if (this.currentStep % 3 === 0 && this.currentStep % 4 !== 0) {
-                    const chordNote = currentChord[this.currentStep % currentChord.length];
-                    const osc = this.ctx.createOscillator();
-                    const filter = this.ctx.createBiquadFilter();
-                    const gainNode = this.ctx.createGain();
-
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(chordNote * 4, time);
-
-                    filter.type = 'lowpass';
-                    filter.frequency.setValueAtTime(1200, time);
-                    filter.frequency.exponentialRampToValueAtTime(350, time + sixteenthDur * 0.7);
-
-                    gainNode.gain.setValueAtTime(0, time);
-                    gainNode.gain.linearRampToValueAtTime(0.02, time + 0.002);
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, time + sixteenthDur * 1.15);
-                    gainNode.gain.linearRampToValueAtTime(0, time + sixteenthDur * 1.20); // Absolute zero
-
-                    osc.connect(filter);
-                    filter.connect(gainNode);
-                    gainNode.connect(this.musicVolume);
-
-                    osc.start(time);
-                    osc.stop(time + sixteenthDur * 1.22);
-                }
-
-                // 6. Liquid Bubble plops (low probability, on step boundaries)
-                if (Math.random() < 0.08) {
-                    const noteFreq = currentChord[Math.floor(Math.random() * currentChord.length)] * 4;
-                    const pOsc = this.ctx.createOscillator();
-                    const pFilter = this.ctx.createBiquadFilter();
-                    const pGain = this.ctx.createGain();
-
-                    pOsc.type = 'sine';
-                    pOsc.frequency.setValueAtTime(noteFreq, time);
+                    const kickOsc = this.ctx.createOscillator();
+                    const kickGain = this.ctx.createGain();
                     
-                    pFilter.type = 'peaking';
-                    pFilter.Q.setValueAtTime(12, time);
-                    pFilter.frequency.setValueAtTime(2000, time);
-                    pFilter.frequency.exponentialRampToValueAtTime(180, time + 0.12);
-
-                    pGain.gain.setValueAtTime(0, time);
-                    pGain.gain.linearRampToValueAtTime(0.012, time + 0.004);
-                    pGain.gain.exponentialRampToValueAtTime(0.001, time + 0.20);
-                    pGain.gain.linearRampToValueAtTime(0, time + 0.22); // Absolute zero
-
-                    pOsc.connect(pFilter);
-                    pFilter.connect(pGain);
-                    pGain.connect(this.musicVolume);
-
-                    pOsc.start(time);
-                    pOsc.stop(time + 0.24);
+                    kickOsc.connect(kickGain);
+                    kickGain.connect(this.musicVolume);
+                    
+                    kickOsc.frequency.setValueAtTime(150, time);
+                    kickOsc.frequency.exponentialRampToValueAtTime(0.01, time + 0.12);
+                    
+                    kickGain.gain.setValueAtTime(0.24, time);
+                    // Rüzgarlı çıtırtıyı önlemek için durdurmadan önce sesi sıfıra indiriyoruz
+                    kickGain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+                    kickGain.gain.linearRampToValueAtTime(0, time + 0.125);
+                    
+                    kickOsc.start(time);
+                    kickOsc.stop(time + 0.13);
                 }
 
-                // Advance step
-                this.currentStep = (this.currentStep + 1) % 32;
+                // 3. Hi-Hats (every off-beat sixteenth note)
+                if (this.currentStep % 4 === 2) {
+                    if (this.noiseBuffer) {
+                        const hatSource = this.ctx.createBufferSource();
+                        hatSource.buffer = this.noiseBuffer;
+                        
+                        const hatFilter = this.ctx.createBiquadFilter();
+                        hatFilter.type = 'highpass';
+                        hatFilter.frequency.setValueAtTime(7000, time);
+                        
+                        const hatGain = this.ctx.createGain();
+                        hatGain.gain.setValueAtTime(0.015, time);
+                        // Çıtırtıyı önlemek için durdurmadan önce sesi sıfıra indiriyoruz
+                        hatGain.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+                        hatGain.gain.linearRampToValueAtTime(0, time + 0.055);
+                        
+                        hatSource.connect(hatFilter);
+                        hatFilter.connect(hatGain);
+                        hatGain.connect(this.musicVolume);
+                        
+                        hatSource.start(time);
+                        hatSource.stop(time + 0.06);
+                    }
+                }
+
+                // 4. Synth Bass (simple driving 16th notes based on root of current chord)
+                if (this.currentStep % 2 === 0) {
+                    const bassOsc = this.ctx.createOscillator();
+                    const bassGain = this.ctx.createGain();
+                    bassOsc.type = 'sawtooth';
+                    
+                    const rootFreq = currentChord[0] * 0.5; // octave down
+                    bassOsc.frequency.setValueAtTime(rootFreq, time);
+                    
+                    bassOsc.connect(bassGain);
+                    bassGain.connect(this.musicVolume);
+                    
+                    bassGain.gain.setValueAtTime(0.045, time);
+                    // Çıtırtıyı önlemek için durdurmadan önce sesi sıfıra indiriyoruz
+                    bassGain.gain.exponentialRampToValueAtTime(0.001, time + sixteenthDur * 0.9);
+                    bassGain.gain.linearRampToValueAtTime(0, time + sixteenthDur * 0.95);
+                    
+                    bassOsc.start(time);
+                    bassOsc.stop(time + sixteenthDur);
+                }
+
+                // 5. Synth Lead Melody (semi-randomized scale notes, mostly active in game state)
+                if (this.currentThemeId !== 'default' && Math.random() < 0.28 && this.currentStep % 2 === 1) {
+                    const scale = [0, 2, 4, 7, 9, 11]; // Pentatonic major relative
+                    const randomInterval = scale[Math.floor(Math.random() * scale.length)];
+                    const rootFreq = currentChord[1] * 2.0; // Two octaves up
+                    const noteFreq = rootFreq * Math.pow(2, randomInterval / 12);
+                    
+                    const leadOsc = this.ctx.createOscillator();
+                    const leadGain = this.ctx.createGain();
+                    
+                    leadOsc.type = 'triangle';
+                    leadOsc.frequency.setValueAtTime(noteFreq, time);
+                    
+                    leadOsc.connect(leadGain);
+                    leadGain.connect(this.musicVolume);
+                    
+                    leadGain.gain.setValueAtTime(0.015, time);
+                    // Çıtırtıyı önlemek için durdurmadan önce sesi sıfıra indiriyoruz
+                    leadGain.gain.exponentialRampToValueAtTime(0.001, time + beatDur * 0.45);
+                    leadGain.gain.linearRampToValueAtTime(0, time + beatDur * 0.49);
+                    
+                    leadOsc.start(time);
+                    leadOsc.stop(time + beatDur * 0.5);
+                }
+
+                this.currentStep = (this.currentStep + 1) % 16;
                 this.nextNoteTime += sixteenthDur;
             };
 
             const scheduler = () => {
-                if (!this.musicPlaying || !this.ctx) return;
-                if (document.hidden) return; // Tab is in background, do not schedule or resume!
-                
-                // If context is suspended, resume it and wait
-                if (this.ctx.state === 'suspended') {
-                    this.resume();
-                    return;
-                }
-                
-                // While there are notes to play before the lookahead time
                 while (this.nextNoteTime < this.ctx.currentTime + 0.12) {
                     scheduleNextStep();
                 }
             };
 
-            this.playChordRef = scheduler; // Store scheduler reference
-
             this.resume().then(() => {
-                // Set start time slightly in the future to avoid scheduling past events
                 this.nextNoteTime = this.ctx.currentTime + 0.05;
                 scheduler();
                 this.musicIntervalId = setInterval(scheduler, 35); // Check every 35ms
             });
 
         } catch (e) {
-            console.error("Error starting music:", e);
+            console.error("Error starting procedural BGM:", e);
         }
     }
 
@@ -996,12 +1018,12 @@ class AudioManager {
      */
     stopMusic() {
         try {
-            if (!this.musicPlaying) return;
             this.musicPlaying = false;
             if (this.musicIntervalId) {
                 clearInterval(this.musicIntervalId);
                 this.musicIntervalId = null;
             }
+            this.stopStaticBGM();
         } catch (e) {
             console.error("Error stopping music:", e);
         }
@@ -1012,6 +1034,9 @@ class AudioManager {
      */
     setTheme(themeId) {
         try {
+            this.currentThemeId = themeId;
+
+            // Update procedural chords for backup synthesizer
             if (themeId === 'toxic_lab') {
                 this.chords = [
                     [174.61, 220.00, 261.63, 329.63], // Fmaj7 (F3, A3, C4, E4)
@@ -1045,6 +1070,23 @@ class AudioManager {
             
             if (this.currentChordIndex >= this.chords.length) {
                 this.currentChordIndex = 0;
+            }
+
+            // If music is actively playing, trigger the theme song switch
+            if (this.musicPlaying) {
+                let staticUrl = '';
+                if (themeId === 'default') {
+                    staticUrl = 'assets/audio/menu_theme.mp3';
+                } else {
+                    staticUrl = 'assets/audio/game_theme.mp3';
+                }
+
+                // If already playing this track, don't restart it
+                if (this.isStaticAudioMode && this.currentAudioElement && this.currentAudioElement.src.includes(staticUrl)) {
+                    return;
+                }
+
+                this.playStaticBGM(staticUrl);
             }
         } catch (e) {
             console.error("Error setting audio theme:", e);
