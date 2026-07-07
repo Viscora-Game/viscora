@@ -3844,19 +3844,22 @@ export class GameManager {
                 { t: 120, x: 1420, y: 440, viscosity: 'NORMAL', key: null }
             ], 600, 1100),
 
-            // 3. Pembe Hayalet (duvar tırmanma + yeşil eğilme) — yapışkan duvara tırmanır, sonra eğilerek dar geçitten geçer
+            // 3. Pembe Hayalet (duvar tırmanma + yeşil eğilme + şalter)
             new TutorialGhost([
                 { t: 0,   x: 1350, y: 440, viscosity: 'NORMAL', key: null },
-                { t: 15,  x: 1450, y: 440, viscosity: 'NORMAL', key: null },
-                { t: 25,  x: 1500, y: 440, viscosity: 'HIGH',   key: 'SHIFT' },
-                { t: 40,  x: 1550, y: 380, viscosity: 'HIGH',   key: 'JUMP' },
-                { t: 50,  x: 1560, y: 350, viscosity: 'HIGH',   key: null },
-                { t: 80,  x: 1560, y: 140, viscosity: 'HIGH',   key: 'UP' },
-                { t: 95,  x: 1620, y: 100, viscosity: 'HIGH',   key: 'JUMP' },
-                { t: 105, x: 1680, y: 100, viscosity: 'NORMAL', key: 'SHIFT' },
-                { t: 115, x: 1720, y: 415, viscosity: 'NORMAL', key: 'DOWN' },
-                { t: 140, x: 1850, y: 415, viscosity: 'NORMAL', key: 'RIGHT' },
-                { t: 155, x: 1900, y: 440, viscosity: 'NORMAL', key: null }
+                { t: 15,  x: 1460, y: 440, viscosity: 'NORMAL', key: 'SAĞ OK' },
+                { t: 25,  x: 1480, y: 440, viscosity: 'HIGH',   key: 'SHIFT' },
+                { t: 40,  x: 1530, y: 390, viscosity: 'HIGH',   key: 'ZIPLA' },
+                { t: 50,  x: 1560, y: 360, viscosity: 'HIGH',   key: null },
+                { t: 80,  x: 1560, y: 140, viscosity: 'HIGH',   key: 'YUKARI OK' },
+                { t: 95,  x: 1620, y: 80,  viscosity: 'HIGH',   key: 'ZIPLA' },
+                { t: 105, x: 1720, y: 80,  viscosity: 'NORMAL', key: 'SHIFT' },
+                { t: 115, x: 1800, y: 440, viscosity: 'NORMAL', key: null },
+                { t: 125, x: 1840, y: 440, viscosity: 'NORMAL', key: 'AŞAĞI OK' },
+                { t: 155, x: 2020, y: 440, viscosity: 'NORMAL', key: 'SAĞ OK' },
+                { t: 165, x: 2050, y: 440, viscosity: 'NORMAL', key: null }, // Şaltere basış
+                { t: 180, x: 2120, y: 440, viscosity: 'NORMAL', key: null },
+                { t: 200, x: 2300, y: 440, viscosity: 'NORMAL', key: null }  // Portala giriş
             ], 1200, 1600)
         ];
     }

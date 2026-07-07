@@ -4203,11 +4203,10 @@ export class Level {
                 { "x": 1560, "y": 100, "w": 40, "h": 500, "type": "sticky", "sticky": true },
                 // Oda 3 Üst platform (duvarın üstü)
                 { "x": 1560, "y": 100, "w": 240, "h": 40, "type": "normal" },
-                // Oda 3 Dar geçit tavanı (eğilme gerektiren)
-                { "x": 1700, "y": 100, "w": 160, "h": 40, "type": "normal" },
-                { "x": 1700, "y": 430, "w": 160, "h": 170, "type": "normal" },
-                // Oda 4 Zemin ve Portal alanı
-                { "x": 1860, "y": 460, "w": 560, "h": 140, "type": "normal" }
+                // Oda 4 Zemin (tüm Oda 4 boyunca devam eden düz zemin)
+                { "x": 1800, "y": 460, "w": 620, "h": 140, "type": "normal" },
+                // Oda 4 Dar geçit tavanı (eğilme gerektiren tavan bloğu)
+                { "x": 1860, "y": 0, "w": 160, "h": 430, "type": "normal" }
             ];
 
             this.hazards = [
@@ -4215,14 +4214,18 @@ export class Level {
                 { "x": 1020, "y": 500, "w": 280, "h": 100, "type": "acid" }
             ];
 
-            this.gates = [];
+            this.gates = [
+                // Oda 4 Çıkış Kapısı (Sarı lazer)
+                { "x": 2180, "y": 260, "w": 20, "h": 200, "type": "yellowLaser", "id": 312, "disabled": false }
+            ];
 
             this.movingPlatforms = [];
             
             this.collectibles = [
                 { x: 460, y: 350, color: '#eab308', collected: false },
                 { x: 1160, y: 350, color: '#eab308', collected: false },
-                { x: 1780, y: 80, color: '#eab308', collected: false }
+                { x: 1780, y: 50, color: '#eab308', collected: false },
+                { x: 2100, y: 410, color: '#eab308', collected: false }
             ];
             
             this.pressurePlates = [];
@@ -4234,7 +4237,10 @@ export class Level {
             
             this.bouncePads = [];
 
-            this.levers = [];
+            this.levers = [
+                // Sarı lazeri açacak şalter
+                { x: 2050, y: 428, w: 32, h: 32, activated: false, linkedGateId: 312, cooldown: 0 }
+            ];
             this.buttons = [];
             this.fallingBlockTraps = [];
 
@@ -4251,28 +4257,28 @@ export class Level {
                 {
                     "x": 60, "y": 280, "w": 280, "h": 80,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
-                    "text": "Hoş Geldin! A/D ile hareket et, W veya SPACE ile zıpla. Yeşil hayaleti takip et!",
+                    "text": "Hoş Geldin! SOL/SAĞ butonları ile hareket et, ZIPLAMA butonu ile zıpla. Yeşil hayaleti takip et!",
                     "color": "#06b6d4"
                 },
                 // Oda 2 Bilgi Kutusu
                 {
                     "x": 580, "y": 280, "w": 280, "h": 80,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
-                    "text": "Asit havuzunu aşmak için SHIFT ile SIVI (Mavi) moda geç, havada tekrar zıplayarak ÇİFT ZIPLA!",
+                    "text": "Asit havuzunu aşmak için SHIFT butonu ile SIVI (Mavi) moda geç, havada tekrar zıplayarak ÇİFT ZIPLA!",
                     "color": "#06b6d4"
                 },
                 // Oda 3 Bilgi Kutusu
                 {
                     "x": 1320, "y": 280, "w": 220, "h": 80,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
-                    "text": "SHIFT ile JEL (Pembe) moda geç ve yapışkan duvara temas et. W ile yukarı tırman!",
+                    "text": "SHIFT butonu ile JEL (Pembe) moda geç ve yapışkan duvara temas et. YUKARI butonu ile yukarı tırman!",
                     "color": "#06b6d4"
                 },
-                // Oda 3b Bilgi Kutusu (dar geçit)
+                // Oda 4 Bilgi Kutusu
                 {
-                    "x": 1620, "y": 20, "w": 200, "h": 60,
+                    "x": 1780, "y": 260, "w": 220, "h": 80,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
-                    "text": "SHIFT ile NORMAL (Yeşil) moda dön ve S tuşuyla eğil. Dar geçitten geç!",
+                    "text": "SHIFT butonu ile NORMAL (Yeşil) moda dön ve AŞAĞI butonu ile eğilerek dar geçitten geç. Şaltere ulaşıp lazeri kapat!",
                     "color": "#06b6d4"
                 }
             ];
