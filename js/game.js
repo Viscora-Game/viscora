@@ -1211,7 +1211,7 @@ export class GameManager {
         this.splatters = [];
         this.boss = null;
         this.enemies = [];
-        audio.stopMusic();
+        audio.setTheme('default');
         
         if (this.isCommunityPlay) {
             this.isCommunityPlay = false;

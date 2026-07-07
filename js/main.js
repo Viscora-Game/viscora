@@ -51,6 +51,8 @@ const initGame = () => {
     const unlockAudio = () => {
         audio.init();
         audio.unlock();
+        audio.setTheme('default');
+        audio.startMusic();
         removeSplash(); // Dokunulduğunda splash'ı hemen geç
         
         // Dinleyicileri temizle
