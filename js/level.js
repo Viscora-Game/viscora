@@ -4181,7 +4181,10 @@ export class Level {
         if (campaignThemeId) {
             this.theme = THEMES.find(t => t.id === campaignThemeId) || null;
         } else {
-         if (levelNumber === 0) {
+            this.theme = null;
+        }
+
+        if (levelNumber === 0) {
 // ═══════════════════════════════════════════════
             // BÖLÜM 0: EĞİTİM LABORATUVARI — İlk Adımlar
             // ═══════════════════════════════════════════════
