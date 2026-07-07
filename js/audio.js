@@ -134,7 +134,6 @@ class AudioManager {
                 });
             }
 
-            console.log("Viscora Audio Engine Initialized successfully.");
         } catch (e) {
             console.error("Web Audio API not supported on this browser:", e);
         }
@@ -1044,8 +1043,6 @@ class AudioManager {
      */
     setTheme(themeId) {
         try {
-            console.log("Audio Theme Switched to:", themeId);
-            
             if (themeId === 'toxic_lab') {
                 this.chords = [
                     [174.61, 220.00, 261.63, 329.63], // Fmaj7 (F3, A3, C4, E4)

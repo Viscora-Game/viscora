@@ -11,7 +11,6 @@ const initGame = () => {
                 const hasUpdated = localStorage.getItem('viscora_last_save_time_updated') === 'true';
                 if (hasUpdated) {
                     localStorage.removeItem('viscora_last_save_time_updated');
-                    console.log("Daha güncel bir bulut kaydı bulundu, oyun yenileniyor...");
                     window.location.reload();
                 }
             }

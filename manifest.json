@@ -1,6 +1,10 @@
 {
   "name": "Viscora: Viscosity Platformer",
   "short_name": "Viscora",
+  "description": "Sıvı fiziğiyle hareket eden bir slime olarak tehlikeli bölümleri geç, düşmanlardan kaç ve boss'ları yen! Topluluk haritaları oluştur ve paylaş.",
+  "lang": "tr",
+  "id": "/",
+  "categories": ["games", "entertainment"],
   "start_url": "./index.html",
   "scope": "./",
   "display": "fullscreen",
@@ -26,5 +30,3 @@
     }
   ]
 }
-
-

@@ -1454,7 +1454,6 @@ export class GameManager {
                 return res.json();
             })
             .then(updatedLevel => {
-                console.log("Skor başarıyla kaydedildi:", updatedLevel);
                 if (this.ui) {
                     this.ui.updateLevelScores(levelId, updatedLevel.scores);
                 }

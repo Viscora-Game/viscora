@@ -1,27 +1,18 @@
 <!DOCTYPE html>
 <html lang="tr" style="background-color: #0a0a0f;">
 <head>
-    <!-- JS Hata Yakalayıcı ve Gösterici -->
+    <!-- JS Hata Yakalayıcı (sadece ?debug modunda görünür) -->
     <script>
-        window.addEventListener('error', function(e) {
-            const errDiv = document.createElement('div');
-            errDiv.style.position = 'fixed';
-            errDiv.style.top = '10px';
-            errDiv.style.left = '10px';
-            errDiv.style.right = '10px';
-            errDiv.style.backgroundColor = 'rgba(220, 38, 38, 0.95)';
-            errDiv.style.color = '#fff';
-            errDiv.style.padding = '15px';
-            errDiv.style.borderRadius = '8px';
-            errDiv.style.zIndex = '999999';
-            errDiv.style.fontFamily = 'monospace';
-            errDiv.style.fontSize = '12px';
-            errDiv.style.whiteSpace = 'pre-wrap';
-            errDiv.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.5)';
-            errDiv.innerHTML = '<strong>[JS HATA]</strong> ' + e.message + '\nDosya: ' + e.filename + '\nSatır: ' + e.lineno + ':' + e.colno + '\nStack:\n' + (e.error ? e.error.stack : 'N/A');
-            document.documentElement.appendChild(errDiv);
-        });
+        if (location.search.includes('debug')) {
+            window.addEventListener('error', function(e) {
+                const errDiv = document.createElement('div');
+                errDiv.style.cssText = 'position:fixed;top:10px;left:10px;right:10px;background:rgba(220,38,38,.95);color:#fff;padding:15px;border-radius:8px;z-index:999999;font-family:monospace;font-size:12px;white-space:pre-wrap;box-shadow:0 10px 15px -3px rgba(0,0,0,.5)';
+                errDiv.innerHTML = '<strong>[JS HATA]</strong> ' + e.message + '\nDosya: ' + e.filename + '\nSatır: ' + e.lineno + ':' + e.colno + '\nStack:\n' + (e.error ? e.error.stack : 'N/A');
+                document.documentElement.appendChild(errDiv);
+            });
+        }
     </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Viscora - 2D Physics Mobile Platformer</title>

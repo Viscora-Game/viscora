@@ -99,7 +99,6 @@ export class CloudSaveManager {
 
             const sig = this.generateSignature(total, spent, ownedStr);
             localStorage.setItem('viscora_balance_sig', sig);
-            console.log('Regenerated validation signature for restored crystal balance:', sig);
         }
 
         return true;
@@ -141,10 +140,8 @@ export class CloudSaveManager {
                 if (res.saveData && Object.keys(res.saveData).length > 0) {
                     this.applySaveData(res.saveData);
                 }
-                console.log('Cloud sync successful. SyncCode:', res.syncCode);
                 return { success: true, syncCode: res.syncCode, lastUpdated: res.lastUpdated };
             } else if (res.status === 'conflict') {
-                console.log('Cloud sync conflict: Server has better progress. Restoring server progress.');
                 this.applySaveData(res.saveData);
                 if (res.syncCode) {
                     localStorage.setItem('viscora_sync_code', res.syncCode);

@@ -5526,7 +5526,6 @@ export class UIManager {
 
         progress[id] = (progress[id] || 0) + amount;
         localStorage.setItem('viscora_weekly_progress', JSON.stringify(progress));
-        console.log(`Weekly Challenge ${id} progress updated. Current:`, progress[id]);
     }
 }
 export default UIManager;
