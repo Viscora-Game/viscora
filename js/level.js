@@ -4255,28 +4255,28 @@ export class Level {
             this.decorations = [
                 // Oda 1 Bilgi Kutusu
                 {
-                    "x": 60, "y": 280, "w": 280, "h": 80,
+                    "x": 80, "y": 140, "w": 240, "h": 85,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
                     "text": "Hoş Geldin! SOL/SAĞ butonları ile hareket et, ZIPLAMA butonu ile zıpla. Yeşil hayaleti takip et!",
                     "color": "#06b6d4"
                 },
                 // Oda 2 Bilgi Kutusu
                 {
-                    "x": 580, "y": 280, "w": 280, "h": 80,
+                    "x": 650, "y": 140, "w": 240, "h": 85,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
                     "text": "Asit havuzunu aşmak için SHIFT butonu ile SIVI (Mavi) moda geç, havada tekrar zıplayarak ÇİFT ZIPLA!",
                     "color": "#06b6d4"
                 },
                 // Oda 3 Bilgi Kutusu
                 {
-                    "x": 1300, "y": 280, "w": 220, "h": 80,
+                    "x": 1325, "y": 140, "w": 210, "h": 85,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
                     "text": "SHIFT butonu ile JEL (Pembe) moda geç ve yapışkan duvara temas et. YUKARI butonu ile yukarı tırman!",
                     "color": "#06b6d4"
                 },
                 // Oda 4 Bilgi Kutusu
                 {
-                    "x": 1580, "y": 15, "w": 260, "h": 75,
+                    "x": 1810, "y": 200, "w": 260, "h": 95,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
                     "text": "SHIFT butonu ile NORMAL (Yeşil) moda dön ve AŞAĞI butonu ile eğilerek dar geçitten geç. Şaltere ulaşıp lazeri kapat!",
                     "color": "#06b6d4"
