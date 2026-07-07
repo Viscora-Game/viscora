@@ -4194,62 +4194,52 @@ export class Level {
             this.spawnY = 380;
 
             this.platforms = [
-                // Oda 1 Zeminleri
+                // Oda 1 Zeminleri (yürüme + zıplama)
                 { "x": 0, "y": 460, "w": 400, "h": 140, "type": "normal" },
                 { "x": 520, "y": 460, "w": 500, "h": 140, "type": "normal" },
-                // Oda 2 Zeminleri
-                { "x": 1300, "y": 460, "w": 250, "h": 140, "type": "normal" },
-                // Oda 3 Yüksek Duvar ve Üst Platform
-                { "x": 1550, "y": 160, "w": 40, "h": 440, "type": "normal" },
-                { "x": 1720, "y": 0, "w": 40, "h": 460, "type": "normal" },
-                { "x": 1550, "y": 160, "w": 500, "h": 40, "type": "normal" },
-                // Oda 4 Tavan ve Zemin
-                { "x": 2050, "y": 40, "w": 200, "h": 40, "type": "normal" },
-                { "x": 2050, "y": 460, "w": 370, "h": 140, "type": "normal" },
-                { "x": 2150, "y": 200, "w": 30, "h": 260, "type": "normal" }
+                // Oda 2 Zeminleri (çift zıplama)
+                { "x": 1300, "y": 460, "w": 260, "h": 140, "type": "normal" },
+                // Oda 3 Yapışkan Duvar (tırmanma)
+                { "x": 1560, "y": 100, "w": 40, "h": 500, "type": "sticky", "sticky": true },
+                // Oda 3 Üst platform (duvarın üstü)
+                { "x": 1560, "y": 100, "w": 240, "h": 40, "type": "normal" },
+                // Oda 3 Dar geçit tavanı (eğilme gerektiren)
+                { "x": 1700, "y": 100, "w": 160, "h": 40, "type": "normal" },
+                { "x": 1700, "y": 430, "w": 160, "h": 170, "type": "normal" },
+                // Oda 4 Zemin ve Portal alanı
+                { "x": 1860, "y": 460, "w": 560, "h": 140, "type": "normal" }
             ];
 
             this.hazards = [
-                // Oda 1 Engeli
-                { "x": 420, "y": 560, "w": 80, "h": 40, "type": "spike", "direction": "up" },
-                // Oda 2 Asit Havuzu
-                { "x": 1020, "y": 460, "w": 280, "h": 70, "type": "acid" }
+                // Oda 2 Asit Havuzu (çift zıplama ile aşılacak)
+                { "x": 1020, "y": 500, "w": 280, "h": 100, "type": "acid" }
             ];
 
-            this.gates = [
-                // Oda 4 Çıkış Kapısı
-                { "x": 2280, "y": 260, "w": 20, "h": 200, "type": "yellowLaser", "id": 312, "disabled": false }
-            ];
+            this.gates = [];
 
             this.movingPlatforms = [];
             
             this.collectibles = [
                 { x: 460, y: 350, color: '#eab308', collected: false },
-                { x: 1160, y: 250, color: '#eab308', collected: false },
-                { x: 2110, y: 100, color: '#eab308', collected: false }
+                { x: 1160, y: 350, color: '#eab308', collected: false },
+                { x: 1780, y: 80, color: '#eab308', collected: false }
             ];
             
-            this.pressurePlates = [
-                // Oda 4 Kapı Açma Butonu
-                { x: 2210, y: 455, w: 40, h: 10, activated: false, linkedGateId: 312 }
-            ];
+            this.pressurePlates = [];
             
             this.pushBlocks = [];
             this.conveyors = [];
             this.teleportPairs = [];
             this.enemies = [];
             
-            this.bouncePads = [
-                // Oda 4 Tavana Fırlatma Pedi
-                { "x": 2080, "y": 440, "w": 50, "h": 20, "force": 14, "active": false, "timer": 0 }
-            ];
+            this.bouncePads = [];
 
             this.levers = [];
             this.buttons = [];
             this.fallingBlockTraps = [];
 
             this.portal = {
-                "x": 2340,
+                "x": 2300,
                 "y": 380,
                 "w": 60,
                 "h": 80,
@@ -4259,30 +4249,30 @@ export class Level {
             this.decorations = [
                 // Oda 1 Bilgi Kutusu
                 {
-                    "x": 60, "y": 220, "w": 280, "h": 100,
+                    "x": 60, "y": 280, "w": 280, "h": 80,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
-                    "text": "Viscora Laboratuvarına Hoş Geldin! Hareket etmek için A/D veya Yön Tuşlarını, zıplamak için W veya SPACE kullan.",
+                    "text": "Hoş Geldin! A/D ile hareket et, W veya SPACE ile zıpla. Yeşil hayaleti takip et!",
                     "color": "#06b6d4"
                 },
                 // Oda 2 Bilgi Kutusu
                 {
-                    "x": 580, "y": 220, "w": 280, "h": 100,
+                    "x": 580, "y": 280, "w": 280, "h": 80,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
-                    "text": "Geniş çukurları aşmak için SHIFT tuşuna basarak SIVI (Mavi) moda geç ve havada zıplama tuşuna tekrar basarak ÇİFT ZIPLA!",
+                    "text": "Asit havuzunu aşmak için SHIFT ile SIVI (Mavi) moda geç, havada tekrar zıplayarak ÇİFT ZIPLA!",
                     "color": "#06b6d4"
                 },
                 // Oda 3 Bilgi Kutusu
                 {
-                    "x": 1320, "y": 220, "w": 220, "h": 100,
+                    "x": 1320, "y": 280, "w": 220, "h": 80,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
-                    "text": "Yüksek engelleri aşmak için SHIFT tuşuna basarak JEL (Mor) moda geç ve duvara temas et. W tuşuyla yukarı tırmanabilirsin!",
+                    "text": "SHIFT ile JEL (Pembe) moda geç ve yapışkan duvara temas et. W ile yukarı tırman!",
                     "color": "#06b6d4"
                 },
-                // Oda 4 Bilgi Kutusu
+                // Oda 3b Bilgi Kutusu (dar geçit)
                 {
-                    "x": 1780, "y": 40, "w": 240, "h": 100,
+                    "x": 1620, "y": 20, "w": 200, "h": 60,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
-                    "text": "Aşağıdaki zıplama pedi seni yukarı fırlatacak. Havada JEL (Mor) moda geçip tavana yapış ve sağdaki kapıyı açacak butona ulaş!",
+                    "text": "SHIFT ile NORMAL (Yeşil) moda dön ve S tuşuyla eğil. Dar geçitten geç!",
                     "color": "#06b6d4"
                 }
             ];

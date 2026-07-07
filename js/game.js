@@ -3822,40 +3822,42 @@ export class GameManager {
 
     initTutorialGhosts() {
         this.tutorialGhosts = [
-            // 1. Sıvı Çift Zıplama Hayaleti (Mavi modla çukuru çift zıplama ile aşar)
+            // 1. YEŞİL Hayalet (NORMAL mod) — yürü ve zıpla, çukuru normal zıplamayla aş
             new TutorialGhost([
-                { t: 0, x: 260, y: 440, viscosity: 'NORMAL', key: null },
-                { t: 30, x: 360, y: 440, viscosity: 'NORMAL', key: null },
-                { t: 40, x: 390, y: 440, viscosity: 'LOW', key: 'SHIFT' },
-                { t: 55, x: 460, y: 340, viscosity: 'LOW', key: 'JUMP' },
-                { t: 70, x: 560, y: 240, viscosity: 'LOW', key: 'JUMP' },
-                { t: 95, x: 720, y: 440, viscosity: 'LOW', key: null },
-                { t: 110, x: 780, y: 440, viscosity: 'NORMAL', key: null }
-            ], 200, 420),
+                { t: 0,   x: 200, y: 440, viscosity: 'NORMAL', key: null },
+                { t: 30,  x: 340, y: 440, viscosity: 'NORMAL', key: 'RIGHT' },
+                { t: 45,  x: 390, y: 440, viscosity: 'NORMAL', key: 'JUMP' },
+                { t: 60,  x: 470, y: 340, viscosity: 'NORMAL', key: null },
+                { t: 80,  x: 550, y: 440, viscosity: 'NORMAL', key: null },
+                { t: 100, x: 650, y: 440, viscosity: 'NORMAL', key: null }
+            ], 60, 500),
 
-            // 2. Jel Duvar Tırmanma Hayaleti (Mor modla duvara yapışır ve tırmanır)
+            // 2. MAVİ Hayalet (LOW/Sıvı mod) — asit havuzunu çift zıplama ile aş
             new TutorialGhost([
-                { t: 0, x: 1040, y: 440, viscosity: 'NORMAL', key: null },
-                { t: 20, x: 1100, y: 440, viscosity: 'NORMAL', key: null },
-                { t: 30, x: 1130, y: 440, viscosity: 'HIGH', key: 'SHIFT' },
-                { t: 45, x: 1200, y: 340, viscosity: 'HIGH', key: 'JUMP' },
-                { t: 55, x: 1200, y: 310, viscosity: 'HIGH', key: null },
-                { t: 85, x: 1200, y: 160, viscosity: 'HIGH', key: 'UP' },
-                { t: 105, x: 1240, y: 140, viscosity: 'HIGH', key: 'JUMP' },
-                { t: 120, x: 1300, y: 140, viscosity: 'NORMAL', key: null }
-            ], 980, 1180),
+                { t: 0,   x: 800, y: 440, viscosity: 'NORMAL', key: null },
+                { t: 20,  x: 900, y: 440, viscosity: 'NORMAL', key: null },
+                { t: 35,  x: 960, y: 440, viscosity: 'LOW',    key: 'SHIFT' },
+                { t: 50,  x: 1020, y: 340, viscosity: 'LOW',   key: 'JUMP' },
+                { t: 70,  x: 1120, y: 280, viscosity: 'LOW',   key: 'JUMP' },
+                { t: 95,  x: 1300, y: 440, viscosity: 'LOW',   key: null },
+                { t: 110, x: 1380, y: 440, viscosity: 'NORMAL', key: 'SHIFT' },
+                { t: 120, x: 1420, y: 440, viscosity: 'NORMAL', key: null }
+            ], 600, 1100),
 
-            // 3. Jel Tavan Tutunma Hayaleti (Padden fırlayıp tavana yapışır, kayarak butona basar)
+            // 3. Pembe Hayalet (duvar tırmanma + yeşil eğilme) — yapışkan duvara tırmanır, sonra eğilerek dar geçitten geçer
             new TutorialGhost([
-                { t: 0, x: 1520, y: 140, viscosity: 'NORMAL', key: null },
-                { t: 20, x: 1600, y: 440, viscosity: 'NORMAL', key: null },
-                { t: 40, x: 1600, y: 60, viscosity: 'NORMAL', key: null },
-                { t: 50, x: 1600, y: 40, viscosity: 'HIGH', key: 'SHIFT' },
-                { t: 90, x: 1800, y: 40, viscosity: 'HIGH', key: 'RIGHT' },
-                { t: 100, x: 1800, y: 240, viscosity: 'NORMAL', key: 'SHIFT' },
-                { t: 110, x: 1830, y: 440, viscosity: 'NORMAL', key: null },
-                { t: 130, x: 1950, y: 440, viscosity: 'NORMAL', key: null }
-            ], 1400, 1680)
+                { t: 0,   x: 1350, y: 440, viscosity: 'NORMAL', key: null },
+                { t: 15,  x: 1450, y: 440, viscosity: 'NORMAL', key: null },
+                { t: 25,  x: 1500, y: 440, viscosity: 'HIGH',   key: 'SHIFT' },
+                { t: 40,  x: 1550, y: 380, viscosity: 'HIGH',   key: 'JUMP' },
+                { t: 50,  x: 1560, y: 350, viscosity: 'HIGH',   key: null },
+                { t: 80,  x: 1560, y: 140, viscosity: 'HIGH',   key: 'UP' },
+                { t: 95,  x: 1620, y: 100, viscosity: 'HIGH',   key: 'JUMP' },
+                { t: 105, x: 1680, y: 100, viscosity: 'NORMAL', key: 'SHIFT' },
+                { t: 115, x: 1720, y: 415, viscosity: 'NORMAL', key: 'DOWN' },
+                { t: 140, x: 1850, y: 415, viscosity: 'NORMAL', key: 'RIGHT' },
+                { t: 155, x: 1900, y: 440, viscosity: 'NORMAL', key: null }
+            ], 1200, 1600)
         ];
     }
 }
