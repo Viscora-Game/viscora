@@ -1,5 +1,5 @@
-import { audio } from './audio.js?v=v354';
-import { THEMES } from './generator.js?v=v354';
+import { audio } from './audio.js?v=v355';
+import { THEMES } from './generator.js?v=v355';
 
 /**
  * Viscora Level Design & Manager
@@ -4181,10 +4181,7 @@ export class Level {
         if (campaignThemeId) {
             this.theme = THEMES.find(t => t.id === campaignThemeId) || null;
         } else {
-            this.theme = null;
-        }
-
-        if (levelNumber === 0) {
+         if (levelNumber === 0) {
 // ═══════════════════════════════════════════════
             // BÖLÜM 0: EĞİTİM LABORATUVARI — İlk Adımlar
             // ═══════════════════════════════════════════════
@@ -4194,635 +4191,98 @@ export class Level {
             this.spawnY = 380;
 
             this.platforms = [
-                {
-                                "x": 0,
-                                "y": 460,
-                                "w": 1200,
-                                "h": 140,
-                                "type": "normal"
-                },
-                {
-                                "x": 1560,
-                                "y": 320,
-                                "w": 120,
-                                "h": 40,
-                                "type": "normal"
-                },
-                {
-                                "x": 300,
-                                "y": 200,
-                                "w": 140,
-                                "h": 40,
-                                "type": "normal"
-                },
-                {
-                                "x": 1720,
-                                "y": 220,
-                                "w": 440,
-                                "h": 40,
-                                "type": "normal"
-                },
-                {
-                                "x": 2080,
-                                "y": 340,
-                                "w": 60,
-                                "h": 20,
-                                "type": "normal"
-                },
-                {
-                                "x": 1520,
-                                "y": 120,
-                                "w": 60,
-                                "h": 20,
-                                "type": "normal"
-                },
-                {
-                                "x": 1340,
-                                "y": 40,
-                                "w": 60,
-                                "h": 20,
-                                "type": "normal"
-                },
-                {
-                                "x": 1020,
-                                "y": -20,
-                                "w": 240,
-                                "h": 40,
-                                "type": "normal"
-                },
-                {
-                                "x": 580,
-                                "y": 240,
-                                "w": 60,
-                                "h": 20,
-                                "type": "normal"
-                },
-                {
-                                "x": 760,
-                                "y": 140,
-                                "w": 60,
-                                "h": 20,
-                                "type": "normal"
-                },
-                {
-                                "x": 640,
-                                "y": 40,
-                                "w": 60,
-                                "h": 20,
-                                "type": "normal"
-                },
-                {
-                                "x": 820,
-                                "y": -20,
-                                "w": 60,
-                                "h": 20,
-                                "type": "normal"
-                },
-                {
-                                "x": 2300,
-                                "y": 40,
-                                "w": 120,
-                                "h": 40,
-                                "type": "normal"
-                },
-                {
-                                "x": 2300,
-                                "y": 160,
-                                "w": 120,
-                                "h": 40,
-                                "type": "normal"
-                },
-                {
-                                "x": 2180,
-                                "y": 120,
-                                "w": 140,
-                                "h": 40,
-                                "type": "normal"
-                },
-                {
-                                "x": 2220,
-                                "y": 80,
-                                "w": 100,
-                                "h": 15,
-                                "type": "normal"
-                }
-];
+                // Oda 1 Zeminleri
+                { "x": 0, "y": 460, "w": 400, "h": 140, "type": "normal" },
+                { "x": 520, "y": 460, "w": 500, "h": 140, "type": "normal" },
+                // Oda 2 Zeminleri
+                { "x": 1300, "y": 460, "w": 250, "h": 140, "type": "normal" },
+                // Oda 3 Yüksek Duvar ve Üst Platform
+                { "x": 1550, "y": 160, "w": 40, "h": 440, "type": "normal" },
+                { "x": 1720, "y": 0, "w": 40, "h": 460, "type": "normal" },
+                { "x": 1550, "y": 160, "w": 500, "h": 40, "type": "normal" },
+                // Oda 4 Tavan ve Zemin
+                { "x": 2050, "y": 40, "w": 200, "h": 40, "type": "normal" },
+                { "x": 2050, "y": 460, "w": 370, "h": 140, "type": "normal" },
+                { "x": 2150, "y": 200, "w": 30, "h": 260, "type": "normal" }
+            ];
 
             this.hazards = [
-                {
-                                "x": 460,
-                                "y": 440,
-                                "w": 60,
-                                "h": 20,
-                                "type": "spike",
-                                "direction": "up"
-                },
-                {
-                                "x": 820,
-                                "y": 440,
-                                "w": 60,
-                                "h": 20,
-                                "type": "spike",
-                                "direction": "up"
-                },
-                {
-                                "x": 1060,
-                                "y": 440,
-                                "w": 60,
-                                "h": 20,
-                                "type": "spike",
-                                "direction": "up"
-                },
-                {
-                                "x": 1000,
-                                "y": 440,
-                                "w": 60,
-                                "h": 20,
-                                "type": "spike",
-                                "direction": "up"
-                },
-                {
-                                "x": 300,
-                                "y": 180,
-                                "w": 60,
-                                "h": 20,
-                                "type": "spike",
-                                "direction": "up"
-                },
-                {
-                                "x": 380,
-                                "y": 180,
-                                "w": 60,
-                                "h": 20,
-                                "type": "spike",
-                                "direction": "up"
-                },
-                {
-                                "x": 1880,
-                                "y": 200,
-                                "w": 60,
-                                "h": 20,
-                                "type": "spike",
-                                "direction": "up"
-                },
-                {
-                                "x": 1960,
-                                "y": 200,
-                                "w": 60,
-                                "h": 20,
-                                "type": "spike",
-                                "direction": "up"
-                },
-                {
-                                "x": 1200,
-                                "y": 460,
-                                "w": 420,
-                                "h": 70,
-                                "type": "acid"
-                },
-                {
-                                "x": 2260,
-                                "y": 460,
-                                "w": 155,
-                                "h": 70,
-                                "type": "acid"
-                }
-];
+                // Oda 1 Engeli
+                { "x": 420, "y": 560, "w": 80, "h": 40, "type": "spike", "direction": "up" },
+                // Oda 2 Asit Havuzu
+                { "x": 1020, "y": 460, "w": 280, "h": 70, "type": "acid" }
+            ];
 
             this.gates = [
-                {
-                                "x": 1940,
-                                "y": -60,
-                                "w": 20,
-                                "h": 260,
-                                "type": "yellowLaser",
-                                "id": 312,
-                                "disabled": false
-                }
-];
-
-            this.movingPlatforms = [
-                {
-                                "startX": 1340,
-                                "startY": 380,
-                                "targetX": 1353,
-                                "targetY": 380,
-                                "x": 1340,
-                                "y": 380,
-                                "w": 100,
-                                "h": 20,
-                                "type": "moving",
-                                "speed": 0.015,
-                                "dir": 1,
-                                "progress": 0
-                }
-];
-
-            this.collectibles = [
-                { x: 400, y: 350, color: '#eab308', collected: false },
-                { x: 1200, y: 150, color: '#eab308', collected: false },
-                { x: 2100, y: 250, color: '#eab308', collected: false }
+                // Oda 4 Çıkış Kapısı
+                { "x": 2280, "y": 260, "w": 20, "h": 200, "type": "yellowLaser", "id": 312, "disabled": false }
             ];
-            this.pressurePlates = [];
+
+            this.movingPlatforms = [];
+            
+            this.collectibles = [
+                { x: 460, y: 350, color: '#eab308', collected: false },
+                { x: 1160, y: 250, color: '#eab308', collected: false },
+                { x: 2110, y: 100, color: '#eab308', collected: false }
+            ];
+            
+            this.pressurePlates = [
+                // Oda 4 Kapı Açma Butonu
+                { x: 2210, y: 455, w: 40, h: 10, activated: false, linkedGateId: 312 }
+            ];
+            
             this.pushBlocks = [];
             this.conveyors = [];
             this.teleportPairs = [];
-
-            this.enemies = [
-                {
-                                "x": 960,
-                                "y": 420,
-                                "rangeX": 120,
-                                "speed": 1.2,
-                                "isVertical": false,
-                                "color": "#f43f5e"
-                },
-                {
-                                "x": 680,
-                                "y": 400,
-                                "rangeX": 180,
-                                "speed": 2,
-                                "isVertical": false,
-                                "color": "#eab308"
-                },
-                {
-                                "x": 1280,
-                                "y": 320,
-                                "rangeX": 120,
-                                "speed": 1.2,
-                                "isVertical": true,
-                                "color": "#06b6d4"
-                },
-                {
-                                "x": 1620,
-                                "y": 240,
-                                "rangeX": 180,
-                                "speed": 2,
-                                "isVertical": false,
-                                "color": "#eab308"
-                }
-];
-
+            this.enemies = [];
+            
             this.bouncePads = [
-                {
-                                "x": 340,
-                                "y": 440,
-                                "w": 50,
-                                "h": 20,
-                                "force": 12,
-                                "active": false,
-                                "timer": 0
-                }
-];
+                // Oda 4 Tavana Fırlatma Pedi
+                { "x": 2080, "y": 440, "w": 50, "h": 20, "force": 14, "active": false, "timer": 0 }
+            ];
 
-            this.levers = [
-                {
-                                "x": 1100,
-                                "y": -40,
-                                "w": 32,
-                                "h": 32,
-                                "linkedGateId": 312,
-                                "cooldown": 0
-                }
-];
+            this.levers = [];
             this.buttons = [];
-
-            this.fallingBlockTraps = [
-                {
-                                "startX": 340,
-                                "startY": 240,
-                                "x": 340,
-                                "y": 240,
-                                "w": 60,
-                                "h": 60,
-                                "state": "idle",
-                                "vy": 0,
-                                "timer": 0
-                }
-];
+            this.fallingBlockTraps = [];
 
             this.portal = {
                 "x": 2340,
-                "y": 80,
+                "y": 380,
                 "w": 60,
                 "h": 80,
                 "angle": 0
-};
+            };
 
             this.decorations = [
+                // Oda 1 Bilgi Kutusu
                 {
-                                "x": 40,
-                                "y": 120,
-                                "w": 200,
-                                "h": 100,
-                                "type": "textbox",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "ÖĞRETİCİ BÖLÜME HOŞGELDİNİZ !  Viskozite \" E \" ile değiştirilecek bunu sana hatırlatıcam :D ",
-                                "color": "#06b6d4"
+                    "x": 60, "y": 220, "w": 280, "h": 100,
+                    "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
+                    "text": "Viscora Laboratuvarına Hoş Geldin! Hareket etmek için A/D veya Yön Tuşlarını, zıplamak için W veya SPACE kullan.",
+                    "color": "#06b6d4"
                 },
+                // Oda 2 Bilgi Kutusu
                 {
-                                "x": 320,
-                                "y": 80,
-                                "w": 100,
-                                "h": 80,
-                                "type": "textbox",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "zamanlama önemli",
-                                "color": "#06b6d4"
+                    "x": 580, "y": 220, "w": 280, "h": 100,
+                    "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
+                    "text": "Geniş çukurları aşmak için SHIFT tuşuna basarak SIVI (Mavi) moda geç ve havada zıplama tuşuna tekrar basarak ÇİFT ZIPLA!",
+                    "color": "#06b6d4"
                 },
+                // Oda 3 Bilgi Kutusu
                 {
-                                "x": 980,
-                                "y": 120,
-                                "w": 200,
-                                "h": 60,
-                                "type": "textbox",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "Her zaman birden fazla yol bulabilirsiniz !",
-                                "color": "#06b6d4"
+                    "x": 1320, "y": 220, "w": 220, "h": 100,
+                    "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
+                    "text": "Yüksek engelleri aşmak için SHIFT tuşuna basarak JEL (Mor) moda geç ve duvara temas et. W tuşuyla yukarı tırmanabilirsin!",
+                    "color": "#06b6d4"
                 },
+                // Oda 4 Bilgi Kutusu
                 {
-                                "x": 580,
-                                "y": 480,
-                                "w": 200,
-                                "h": 80,
-                                "type": "textbox",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "Kafalarına basarak dikenli topları öldürebilirsin !",
-                                "color": "#06b6d4"
-                },
-                {
-                                "x": 1760,
-                                "y": 360,
-                                "w": 200,
-                                "h": 80,
-                                "type": "textbox",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "Hareketli platformlara her zaman dikkat etmeyi unutma !",
-                                "color": "#06b6d4"
-                },
-                {
-                                "x": 1620,
-                                "y": -100,
-                                "w": 200,
-                                "h": 100,
-                                "type": "textbox",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "Şalterler ile bölümlerdeki Sarı Lazer Kapıları açabilirsiniz , aksi halde canınız epey yanıcaktır ...",
-                                "color": "#06b6d4"
-                },
-                {
-                                "x": 2300,
-                                "y": 160,
-                                "w": 40,
-                                "h": 40,
-                                "type": "gear",
-                                "rotation": 7.560000000000018,
-                                "startRotation": 7.560000000000018,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 2180,
-                                "y": 120,
-                                "w": 40,
-                                "h": 40,
-                                "type": "gear",
-                                "rotation": 7.560000000000018,
-                                "startRotation": 7.560000000000018,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 2300,
-                                "y": 40,
-                                "w": 40,
-                                "h": 40,
-                                "type": "gear",
-                                "rotation": 7.560000000000018,
-                                "startRotation": 7.560000000000018,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 2380,
-                                "y": 160,
-                                "w": 40,
-                                "h": 40,
-                                "type": "gear",
-                                "rotation": 7.560000000000018,
-                                "startRotation": 7.560000000000018,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 2280,
-                                "y": 120,
-                                "w": 40,
-                                "h": 40,
-                                "type": "gear",
-                                "rotation": 7.560000000000018,
-                                "startRotation": 7.560000000000018,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 2380,
-                                "y": 40,
-                                "w": 40,
-                                "h": 40,
-                                "type": "gear",
-                                "rotation": 7.560000000000018,
-                                "startRotation": 7.560000000000018,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 2320,
-                                "y": 180,
-                                "w": 80,
-                                "h": 40,
-                                "type": "cable",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 2320,
-                                "y": 60,
-                                "w": 80,
-                                "h": 40,
-                                "type": "cable",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 2200,
-                                "y": 140,
-                                "w": 100,
-                                "h": 40,
-                                "type": "cable",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 2240,
-                                "y": 80,
-                                "w": 20,
-                                "h": 40,
-                                "type": "gear",
-                                "rotation": 7.560000000000018,
-                                "startRotation": 7.560000000000018,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 2220,
-                                "y": 60,
-                                "w": 40,
-                                "h": 40,
-                                "type": "gear",
-                                "rotation": 7.560000000000018,
-                                "startRotation": 7.560000000000018,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 1620,
-                                "y": 500,
-                                "w": 80,
-                                "h": 20,
-                                "type": "pipe",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 1700,
-                                "y": 500,
-                                "w": 80,
-                                "h": 20,
-                                "type": "pipe",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 1780,
-                                "y": 500,
-                                "w": 80,
-                                "h": 20,
-                                "type": "pipe",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 1860,
-                                "y": 500,
-                                "w": 80,
-                                "h": 20,
-                                "type": "pipe",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 1940,
-                                "y": 500,
-                                "w": 80,
-                                "h": 20,
-                                "type": "pipe",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 2180,
-                                "y": 500,
-                                "w": 80,
-                                "h": 20,
-                                "type": "pipe",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 2020,
-                                "y": 500,
-                                "w": 80,
-                                "h": 20,
-                                "type": "pipe",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 2100,
-                                "y": 500,
-                                "w": 80,
-                                "h": 20,
-                                "type": "pipe",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "",
-                                "color": ""
-                },
-                {
-                                "x": 2040,
-                                "y": -20,
-                                "w": 200,
-                                "h": 60,
-                                "type": "textbox",
-                                "rotation": 0,
-                                "startRotation": 0,
-                                "state": 0,
-                                "text": "Yeterince küçülürsen her yerden  geçebilirsin",
-                                "color": "#06b6d4"
+                    "x": 1780, "y": 40, "w": 240, "h": 100,
+                    "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
+                    "text": "Aşağıdaki zıplama pedi seni yukarı fırlatacak. Havada JEL (Mor) moda geçip tavana yapış ve sağdaki kapıyı açacak butona ulaş!",
+                    "color": "#06b6d4"
                 }
-];
+            ];
         } else if (levelNumber === 1) {
             // ═══════════════════════════════════════════════
             // BÖLÜM 1: NEON GİRİŞİ — Tehlikeli Işıklar

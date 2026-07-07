@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v354';
-import { Level } from './level.js?v=v354';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v354';
-import { UIManager } from './ui.js?v=v354';
-import { CloudSaveManager } from './cloud_save.js?v=v354';
-import { audio } from './audio.js?v=v354';
-import { LevelEditor } from './editor.js?v=v354';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v354';
+import { Player } from './player.js?v=v355';
+import { Level } from './level.js?v=v355';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v355';
+import { UIManager } from './ui.js?v=v355';
+import { CloudSaveManager } from './cloud_save.js?v=v355';
+import { audio } from './audio.js?v=v355';
+import { LevelEditor } from './editor.js?v=v355';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v355';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -125,6 +125,7 @@ export class GameManager {
         this.boss = null;
         this.splatters = [];
         this.particles = [];
+        this.tutorialGhosts = [];
         this.menuBlobCanvases = null;
 
         // Kamera Ayarları ve Cilaları
@@ -592,6 +593,11 @@ export class GameManager {
             this.rewardedSkipUsed = false;
         }
         this.level.loadLevel(this.currentLevel);
+        if (this.currentLevel === 0) {
+            this.initTutorialGhosts();
+        } else {
+            this.tutorialGhosts = [];
+        }
         if (this.level && this.level.themeId) {
             audio.setTheme(this.level.themeId);
         } else {
@@ -1078,7 +1084,7 @@ export class GameManager {
             }
             
             // Hemen buluta kaydet (arka planda)
-            import('./cloud_save.js?v=v354').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v355').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Achievement sync error:", err));
             });
             
@@ -1169,7 +1175,7 @@ export class GameManager {
         if (changed) {
             localStorage.setItem('viscora_achievements', JSON.stringify(achievements));
             // Arka planda buluta kaydet
-            import('./cloud_save.js?v=v354').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v355').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Retrospective sync error:", err));
             });
         }
@@ -1670,6 +1676,11 @@ export class GameManager {
             this.emitParticles.bind(this),
             (event, data) => this.handlePlayerEvent(event, data)
         );
+
+        // Update tutorial ghosts if level 0
+        if (this.currentLevel === 0 && this.tutorialGhosts) {
+            this.tutorialGhosts.forEach(g => g.update(this.player.x));
+        }
         
         // Ekran flaş sayacı güncelleme
         if (this.flashDuration > 0) {
@@ -2525,6 +2536,11 @@ export class GameManager {
                 this.ctx.globalAlpha = prevAlpha;
             }
 
+            // Eğitim Hayaletlerini Çiz
+            if (this.currentLevel === 0 && this.tutorialGhosts) {
+                this.tutorialGhosts.forEach(g => g.draw(this.ctx, this.camera));
+            }
+
             // Oyuncu Çiz
             this.player.draw(this.ctx, this.camera);
 
@@ -2676,7 +2692,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v354', this.cssWidth - 10, 10);
+        this.ctx.fillText('v355', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
@@ -3803,7 +3819,183 @@ export class GameManager {
         const ms = Math.floor((timeSecs % 1) * 100);
         return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
     }
+
+    initTutorialGhosts() {
+        this.tutorialGhosts = [
+            // 1. Sıvı Çift Zıplama Hayaleti (Mavi modla çukuru çift zıplama ile aşar)
+            new TutorialGhost([
+                { t: 0, x: 260, y: 440, viscosity: 'NORMAL', key: null },
+                { t: 30, x: 360, y: 440, viscosity: 'NORMAL', key: null },
+                { t: 40, x: 390, y: 440, viscosity: 'LOW', key: 'SHIFT' },
+                { t: 55, x: 460, y: 340, viscosity: 'LOW', key: 'JUMP' },
+                { t: 70, x: 560, y: 240, viscosity: 'LOW', key: 'JUMP' },
+                { t: 95, x: 720, y: 440, viscosity: 'LOW', key: null },
+                { t: 110, x: 780, y: 440, viscosity: 'NORMAL', key: null }
+            ], 200, 420),
+
+            // 2. Jel Duvar Tırmanma Hayaleti (Mor modla duvara yapışır ve tırmanır)
+            new TutorialGhost([
+                { t: 0, x: 1040, y: 440, viscosity: 'NORMAL', key: null },
+                { t: 20, x: 1100, y: 440, viscosity: 'NORMAL', key: null },
+                { t: 30, x: 1130, y: 440, viscosity: 'HIGH', key: 'SHIFT' },
+                { t: 45, x: 1200, y: 340, viscosity: 'HIGH', key: 'JUMP' },
+                { t: 55, x: 1200, y: 310, viscosity: 'HIGH', key: null },
+                { t: 85, x: 1200, y: 160, viscosity: 'HIGH', key: 'UP' },
+                { t: 105, x: 1240, y: 140, viscosity: 'HIGH', key: 'JUMP' },
+                { t: 120, x: 1300, y: 140, viscosity: 'NORMAL', key: null }
+            ], 980, 1180),
+
+            // 3. Jel Tavan Tutunma Hayaleti (Padden fırlayıp tavana yapışır, kayarak butona basar)
+            new TutorialGhost([
+                { t: 0, x: 1520, y: 140, viscosity: 'NORMAL', key: null },
+                { t: 20, x: 1600, y: 440, viscosity: 'NORMAL', key: null },
+                { t: 40, x: 1600, y: 60, viscosity: 'NORMAL', key: null },
+                { t: 50, x: 1600, y: 40, viscosity: 'HIGH', key: 'SHIFT' },
+                { t: 90, x: 1800, y: 40, viscosity: 'HIGH', key: 'RIGHT' },
+                { t: 100, x: 1800, y: 240, viscosity: 'NORMAL', key: 'SHIFT' },
+                { t: 110, x: 1830, y: 440, viscosity: 'NORMAL', key: null },
+                { t: 130, x: 1950, y: 440, viscosity: 'NORMAL', key: null }
+            ], 1400, 1680)
+        ];
+    }
 }
+
+class TutorialGhost {
+    constructor(keyframes, triggerXMin, triggerXMax) {
+        this.keyframes = keyframes;
+        this.triggerXMin = triggerXMin;
+        this.triggerXMax = triggerXMax;
+        this.active = false;
+        this.timer = 0;
+        this.x = keyframes[0].x;
+        this.y = keyframes[0].y;
+        this.currentViscosity = keyframes[0].viscosity;
+        this.currentKey = keyframes[0].key || null;
+        this.maxTime = keyframes[keyframes.length - 1].t;
+        this.resetDelay = 60;
+        this.delayTimer = 0;
+    }
+
+    update(playerX) {
+        if (playerX >= this.triggerXMin && playerX <= this.triggerXMax) {
+            this.active = true;
+        } else {
+            this.active = false;
+            this.timer = 0;
+            this.delayTimer = 0;
+            this.x = this.keyframes[0].x;
+            this.y = this.keyframes[0].y;
+            this.currentViscosity = this.keyframes[0].viscosity;
+            this.currentKey = this.keyframes[0].key || null;
+            return;
+        }
+
+        if (this.delayTimer > 0) {
+            this.delayTimer--;
+            if (this.delayTimer === 0) {
+                this.timer = 0;
+                this.x = this.keyframes[0].x;
+                this.y = this.keyframes[0].y;
+                this.currentViscosity = this.keyframes[0].viscosity;
+                this.currentKey = this.keyframes[0].key || null;
+            }
+            return;
+        }
+
+        this.timer++;
+        if (this.timer > this.maxTime) {
+            this.delayTimer = this.resetDelay;
+            return;
+        }
+
+        let prevKf = this.keyframes[0];
+        let nextKf = this.keyframes[0];
+
+        for (let i = 0; i < this.keyframes.length; i++) {
+            if (this.keyframes[i].t <= this.timer) {
+                prevKf = this.keyframes[i];
+            }
+            if (this.keyframes[i].t >= this.timer) {
+                nextKf = this.keyframes[i];
+                break;
+            }
+        }
+
+        if (prevKf === nextKf) {
+            this.x = prevKf.x;
+            this.y = prevKf.y;
+            this.currentViscosity = prevKf.viscosity;
+            this.currentKey = prevKf.key || null;
+        } else {
+            const range = nextKf.t - prevKf.t;
+            const progress = (this.timer - prevKf.t) / range;
+            this.x = prevKf.x + (nextKf.x - prevKf.x) * progress;
+            this.y = prevKf.y + (nextKf.y - prevKf.y) * progress;
+            this.currentViscosity = prevKf.viscosity;
+            this.currentKey = prevKf.key || null;
+        }
+    }
+
+    draw(ctx, camera) {
+        if (!this.active || this.delayTimer > 0) return;
+
+        ctx.save();
+        if (camera) {
+            ctx.translate(-camera.x, -camera.y);
+        }
+        ctx.globalAlpha = 0.45;
+
+        let color = '#10b981';
+        if (this.currentViscosity === 'LOW') color = '#06b6d4';
+        if (this.currentViscosity === 'HIGH') color = '#d946ef';
+
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 12;
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.arc(this.x - 5, this.y - 2, 3, 0, Math.PI * 2);
+        ctx.arc(this.x + 5, this.y - 2, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#0a0a0f';
+        ctx.beginPath();
+        ctx.arc(this.x - 5, this.y - 2, 1, 0, Math.PI * 2);
+        ctx.arc(this.x + 5, this.y - 2, 1, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (this.currentKey) {
+            ctx.font = '900 11px monospace';
+            ctx.textAlign = 'center';
+            const textWidth = ctx.measureText(this.currentKey).width;
+            ctx.fillStyle = 'rgba(10, 10, 15, 0.8)';
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            
+            // roundRect fallback just in case
+            if (ctx.roundRect) {
+                ctx.roundRect(this.x - textWidth/2 - 5, this.y - 41, textWidth + 10, 16, 4);
+            } else {
+                ctx.rect(this.x - textWidth/2 - 5, this.y - 41, textWidth + 10, 16);
+            }
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(this.currentKey, this.x, this.y - 29);
+        }
+
+        ctx.restore();
+    }
+}
+
 export default GameManager;
 
 
