@@ -573,6 +573,17 @@ export class GameManager {
             this.rewardedSkipUsed = false;
         }
         this.level.loadLevel(this.currentLevel);
+        
+        // Cache level bounds to optimize minimap rendering performance
+        this.levelMaxY = 600;
+        if (this.level.platforms && this.level.platforms.length > 0) {
+            let maxPlatY = 600;
+            this.level.platforms.forEach(p => {
+                const bottom = p.y + p.h;
+                if (bottom > maxPlatY) maxPlatY = bottom;
+            });
+            this.levelMaxY = maxPlatY;
+        }
         if (this.currentLevel === 0) {
             this.initTutorialGhosts();
         } else {
@@ -663,6 +674,17 @@ export class GameManager {
         this.enemies = []; // Önceki bölümden kalan düşmanları temizle
         this.levelCardTimer = 0; // No level title card for custom maps
         this.level.loadLevel(levelData);
+        
+        // Cache level bounds to optimize minimap rendering performance
+        this.levelMaxY = 600;
+        if (this.level.platforms && this.level.platforms.length > 0) {
+            let maxPlatY = 600;
+            this.level.platforms.forEach(p => {
+                const bottom = p.y + p.h;
+                if (bottom > maxPlatY) maxPlatY = bottom;
+            });
+            this.levelMaxY = maxPlatY;
+        }
         if (this.level && this.level.themeId) {
             audio.setTheme(this.level.themeId);
         } else {
@@ -2794,11 +2816,7 @@ export class GameManager {
             // Coordinate ratios
             // Calculate active height of the level to prevent squishing when level height is arbitrarily large (like Level 14 typo or custom levels)
             let activeHeight = 600;
-            let maxY = 600;
-            if (this.level.platforms && this.level.platforms.length > 0) {
-                const maxPlatY = Math.max(...this.level.platforms.map(p => p.y + p.h));
-                if (maxPlatY > maxY) maxY = maxPlatY;
-            }
+            let maxY = this.levelMaxY || 600;
             if (this.level.portal) {
                 const portalBottom = this.level.portal.y + this.level.portal.h;
                 if (portalBottom > maxY) maxY = portalBottom;
@@ -3962,8 +3980,6 @@ class TutorialGhost {
         
         ctx.globalAlpha = activeAlpha;
         ctx.strokeStyle = padColor;
-        ctx.shadowColor = padColor;
-        ctx.shadowBlur = this.active && this.delayTimer === 0 ? 12 : 5;
         ctx.lineWidth = 2.5;
 
         // Draw ellipse on floor
@@ -3975,15 +3991,29 @@ class TutorialGhost {
         }
         ctx.stroke();
 
-        // Draw glowing light beam going up
-        const rColor = hexToRgba(padColor, 0.35);
-        const rColorHalf = hexToRgba(padColor, 0.15);
-        const grad = ctx.createLinearGradient(padX, padY, padX, padY - 80);
-        grad.addColorStop(0, rColor);
-        grad.addColorStop(0.5, rColorHalf);
-        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        // Draw a simulated neon glow (secondary thick ellipse)
+        ctx.save();
+        ctx.globalAlpha = activeAlpha * 0.45;
+        ctx.lineWidth = 5.5;
+        ctx.beginPath();
+        if (ctx.ellipse) {
+            ctx.ellipse(padX, padY, 25.5 * pulse, 6.5 * pulse, 0, 0, Math.PI * 2);
+        }
+        ctx.stroke();
+        ctx.restore();
 
-        ctx.fillStyle = grad;
+        // Draw glowing light beam going up (reusing cached linear gradient)
+        if (!this.beamGradient) {
+            const rColor = hexToRgba(padColor, 0.32);
+            const rColorHalf = hexToRgba(padColor, 0.12);
+            const grad = ctx.createLinearGradient(padX, padY, padX, padY - 80);
+            grad.addColorStop(0, rColor);
+            grad.addColorStop(0.5, rColorHalf);
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            this.beamGradient = grad;
+        }
+
+        ctx.fillStyle = this.beamGradient;
         ctx.beginPath();
         ctx.moveTo(padX - 22 * pulse, padY);
         ctx.lineTo(padX - 12, padY - 80);

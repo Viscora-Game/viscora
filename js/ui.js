@@ -406,6 +406,7 @@ export class UIManager {
     bindTouchClick(btn, callback) {
         if (!btn) return;
         let triggered = false;
+        let lastTouchTime = 0;
         
         let startX = 0;
         let startY = 0;
@@ -463,10 +464,17 @@ export class UIManager {
 
         btn.addEventListener('touchend', (e) => {
             if (isScrolling) return; // Kaydırma yapılıyorsa tıklamayı es geç
+            lastTouchTime = Date.now();
             handleEvent(e);
         }, { passive: false });
 
         btn.addEventListener('click', (e) => {
+            // Eğer son 600ms içinde dokunmatik tıklama tetiklendiyse, mükerrer fare tıklamasını yoksay (Ghost Click önleme)
+            if (Date.now() - lastTouchTime < 600) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
             handleEvent(e);
         });
     }
