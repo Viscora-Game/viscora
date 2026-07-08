@@ -36,6 +36,7 @@ export class CloudSaveManager {
             weeklyProgress: 'viscora_weekly_progress',
             weeklyClaimed: 'viscora_weekly_claimed',
             weeklyResetTime: 'viscora_weekly_reset_time',
+            levelRecords: 'viscora_level_records',
             lastSaveTime: 'viscora_last_save_time'
         };
     }

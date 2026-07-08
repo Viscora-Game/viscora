@@ -1377,7 +1377,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     justify-content: space-between;
     align-items: center;
     gap: 4px;
-    min-height: 52px;
+    min-height: 60px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     box-sizing: border-box;
 }

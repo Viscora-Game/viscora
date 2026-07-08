@@ -760,6 +760,11 @@ class AudioManager {
                 staticUrl = 'assets/audio/game_theme.mp3';
             }
 
+            // If already playing this track, don't restart it
+            if (this.isStaticAudioMode && this.currentAudioElement && this.currentAudioElement.src.includes(staticUrl)) {
+                return;
+            }
+
             this.playStaticBGM(staticUrl);
         } catch (e) {
             console.error("Error starting music:", e);
