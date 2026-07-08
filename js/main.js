@@ -1,8 +1,23 @@
-import { GameManager } from './game.js?v=v359';
-import { audio } from './audio.js?v=v359';
-import { CloudSaveManager } from './cloud_save.js?v=v359';
+import { GameManager } from './game.js?v=v360';
+import { audio } from './audio.js?v=v360';
+import { CloudSaveManager } from './cloud_save.js?v=v360';
 
 const initGame = () => {
+    // Mobilde performansı artırmak için pahalı canvas gölge efektlerini (shadowBlur) devre dışı bırak
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    if (isTouchDevice) {
+        try {
+            Object.defineProperty(CanvasRenderingContext2D.prototype, 'shadowBlur', {
+                get() { return 0; },
+                set(value) { /* gölgeyi yoksay */ },
+                configurable: true
+            });
+            console.log("Mobile context: shadowBlur optimization activated.");
+        } catch (e) {
+            console.warn("Failed to optimize shadowBlur:", e);
+        }
+    }
+
     // Otomatik Bulut Eşitlemesi (Startup Sync): Oyuncu bağlıysa başlangıçta en güncel veriyi çek
     const syncCode = localStorage.getItem('viscora_sync_code') || localStorage.getItem('viscora_user_id');
     if (syncCode) {

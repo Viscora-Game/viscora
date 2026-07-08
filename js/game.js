@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v359';
-import { Level } from './level.js?v=v359';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v359';
-import { UIManager } from './ui.js?v=v359';
-import { CloudSaveManager } from './cloud_save.js?v=v359';
-import { audio } from './audio.js?v=v359';
-import { LevelEditor } from './editor.js?v=v359';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v359';
+import { Player } from './player.js?v=v360';
+import { Level } from './level.js?v=v360';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v360';
+import { UIManager } from './ui.js?v=v360';
+import { CloudSaveManager } from './cloud_save.js?v=v360';
+import { audio } from './audio.js?v=v360';
+import { LevelEditor } from './editor.js?v=v360';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v360';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -72,6 +72,12 @@ export class GameManager {
         // Çözünürlük ve Boyutlar
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
+        window.addEventListener('orientationchange', () => {
+            this.resizeCanvas();
+            setTimeout(() => this.resizeCanvas(), 100);
+            setTimeout(() => this.resizeCanvas(), 300);
+            setTimeout(() => this.resizeCanvas(), 600);
+        });
 
         // Fullscreen geçişlerinde ekran boyutlarının gecikmeli güncellenmesini önlemek için dinleyiciler
         document.addEventListener('fullscreenchange', () => {
@@ -1108,7 +1114,7 @@ export class GameManager {
             }
             
             // Hemen buluta kaydet (arka planda)
-            import('./cloud_save.js?v=v359').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v360').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Achievement sync error:", err));
             });
             
@@ -1199,7 +1205,7 @@ export class GameManager {
         if (changed) {
             localStorage.setItem('viscora_achievements', JSON.stringify(achievements));
             // Arka planda buluta kaydet
-            import('./cloud_save.js?v=v359').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v360').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Retrospective sync error:", err));
             });
         }

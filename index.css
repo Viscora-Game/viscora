@@ -4763,3 +4763,39 @@ button:hover .icon-svg,
     }
 }
 
+/* Mobil Cihazlar İçin Performans ve Çentik (Safe Area) Optimizasyonları */
+@media (max-width: 1024px), (pointer: coarse) {
+    /* backdrop-filter blurlarını mobilde kaldırarak GPU repainting lagını sıfıra indiriyoruz */
+    .settings-overlay, 
+    #creditsOverlay, 
+    #languageSelectOverlay, 
+    #storyOverlay, 
+    #shopOverlay, 
+    #profileOverlay, 
+    #levelSelectOverlay, 
+    #leaderboardOverlay, 
+    #achievementsOverlay,
+    .menu-overlay,
+    .dialog-overlay,
+    .viscora-modal,
+    [class*="overlay"] {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background-color: rgba(10, 10, 15, 0.96) !important; /* Yarı saydam koyu arka plan ile okunurluğu koru */
+    }
+    
+    /* Inset box-shadow canvas üzerinde mobilde performansı korumak için kapatılır */
+    #gameCanvas {
+        box-shadow: none !important;
+    }
+
+    /* Çentikli telefonlar için yatay modda güvenli alan padding desteği */
+    body {
+        padding-left: env(safe-area-inset-left) !important;
+        padding-right: env(safe-area-inset-right) !important;
+        padding-top: env(safe-area-inset-top) !important;
+        padding-bottom: env(safe-area-inset-bottom) !important;
+    }
+}
+
+
