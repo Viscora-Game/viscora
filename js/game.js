@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v358';
-import { Level } from './level.js?v=v358';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v358';
-import { UIManager } from './ui.js?v=v358';
-import { CloudSaveManager } from './cloud_save.js?v=v358';
-import { audio } from './audio.js?v=v358';
-import { LevelEditor } from './editor.js?v=v358';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v358';
+import { Player } from './player.js?v=v359';
+import { Level } from './level.js?v=v359';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v359';
+import { UIManager } from './ui.js?v=v359';
+import { CloudSaveManager } from './cloud_save.js?v=v359';
+import { audio } from './audio.js?v=v359';
+import { LevelEditor } from './editor.js?v=v359';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v359';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -651,7 +651,6 @@ export class GameManager {
         this.ui.updateHUDHealth(this.player.health);
         this.ui.updateHUDViscosity(this.player.viscosity);
         audio.resume();
-        this.lastTime = performance.now(); // Reset delta clock to prevent large frame jumps on initial load
 
         // Hikaye Terminali Tetikleme (Belirtilen bölümlerde ilk girişte)
         const storyLevels = [1, 2, 3, 5, 9, 10, 11, 15, 16, 17, 20, 21, 22, 26, 29, 30];
@@ -671,11 +670,14 @@ export class GameManager {
                     this.player.introState = 'materializing';
                     this.player.introTimer = 60;
                     this.lastTime = performance.now();
+                    this.physicsAccumulator = 0;
                 });
             }
         } else {
             this.state = 'PLAYING';
         }
+        // Reset delta clock AFTER all heavy init work to prevent large first-frame delta on mobile
+        this.lastTime = performance.now();
         this.physicsAccumulator = 0;
     }
 
@@ -1106,7 +1108,7 @@ export class GameManager {
             }
             
             // Hemen buluta kaydet (arka planda)
-            import('./cloud_save.js?v=v358').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v359').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Achievement sync error:", err));
             });
             
@@ -1197,7 +1199,7 @@ export class GameManager {
         if (changed) {
             localStorage.setItem('viscora_achievements', JSON.stringify(achievements));
             // Arka planda buluta kaydet
-            import('./cloud_save.js?v=v358').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v359').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Retrospective sync error:", err));
             });
         }
@@ -3483,6 +3485,7 @@ export class GameManager {
             this.player.introState = 'materializing';
             this.player.introTimer = 60;
             this.lastTime = performance.now();
+            this.physicsAccumulator = 0;
         });
     }
 

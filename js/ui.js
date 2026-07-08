@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v358';
-import { ViscosityList } from './viscosity.js?v=v358';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v358';
-import { CloudSaveManager } from './cloud_save.js?v=v358';
+import { audio } from './audio.js?v=v359';
+import { ViscosityList } from './viscosity.js?v=v359';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v359';
+import { CloudSaveManager } from './cloud_save.js?v=v359';
 
 const TRANSLATIONS = {
     tr: {
@@ -4687,21 +4687,8 @@ export class UIManager {
                 const starRow = [1,2,3].map(i =>
                     `<span class="btn-star${stars >= i ? '' : ' empty'}">★</span>`
                 ).join('');
-                
-                let recordHtml = '';
-                try {
-                    const records = JSON.parse(localStorage.getItem('viscora_level_records') || '{}');
-                    const rec = records['level_0'];
-                    if (rec && rec.bestTime) {
-                        const min = Math.floor(rec.bestTime / 60);
-                        const sec = Math.floor(rec.bestTime % 60);
-                        const timeStr = `${min}:${sec.toString().padStart(2, '0')}`;
-                        const crystalsStr = rec.crystalsTotal > 0 ? ` 💎${rec.crystalsCollected}/${rec.crystalsTotal}` : '';
-                        recordHtml = `<span class="btn-record-info" style="font-size: 0.52rem; color: rgba(255, 255, 255, 0.55); display: flex; gap: 4px; align-items: center; justify-content: center; margin-top: 1px; font-weight: normal; font-family: monospace;">⏱️${timeStr}${crystalsStr}</span>`;
-                    }
-                } catch(e) {}
 
-                btn.innerHTML = `<span class="btn-num" style="font-size: 0.65rem; font-weight: 700; white-space: nowrap;">${label}</span><span class="btn-stars-row">${starRow}</span>${recordHtml}`;
+                btn.innerHTML = `<span class="btn-num" style="font-size: 0.65rem; font-weight: 700; white-space: nowrap;">${label}</span><span class="btn-stars-row">${starRow}</span>`;
             } else if (isUnlocked) {
                 btn.classList.remove('locked');
                 btn.disabled = false;
@@ -4711,20 +4698,7 @@ export class UIManager {
                     `<span class="btn-star${stars >= i ? '' : ' empty'}">★</span>`
                 ).join('');
 
-                let recordHtml = '';
-                try {
-                    const records = JSON.parse(localStorage.getItem('viscora_level_records') || '{}');
-                    const rec = records['level_' + lvlNum];
-                    if (rec && rec.bestTime) {
-                        const min = Math.floor(rec.bestTime / 60);
-                        const sec = Math.floor(rec.bestTime % 60);
-                        const timeStr = `${min}:${sec.toString().padStart(2, '0')}`;
-                        const crystalsStr = rec.crystalsTotal > 0 ? ` 💎${rec.crystalsCollected}/${rec.crystalsTotal}` : '';
-                        recordHtml = `<span class="btn-record-info" style="font-size: 0.52rem; color: rgba(255, 255, 255, 0.55); display: flex; gap: 4px; align-items: center; justify-content: center; margin-top: 1px; font-weight: normal; font-family: monospace;">⏱️${timeStr}${crystalsStr}</span>`;
-                    }
-                } catch(e) {}
-
-                btn.innerHTML = `<span class="btn-num">${lvlNum}</span><span class="btn-stars-row">${starRow}</span>${recordHtml}`;
+                btn.innerHTML = `<span class="btn-num">${lvlNum}</span><span class="btn-stars-row">${starRow}</span>`;
             } else {
                 btn.classList.add('locked');
                 btn.innerHTML = `<span class="btn-num">${lvlNum}</span><span style="font-size: 0.6rem; margin-top: 1px;">🔒</span>`;

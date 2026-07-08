@@ -75,12 +75,12 @@ class AudioManager {
             this.viscosityFilter.connect(this.masterVolume);
 
             this.musicVolume = this.ctx.createGain();
-            const initialMusicGain = this.isMusicMuted ? 0 : (this.musicVolumeLevel * 0.55);
+            const initialMusicGain = this.isMusicMuted ? 0 : (this._applyVolumeCurve(this.musicVolumeLevel) * 0.55);
             this.musicVolume.gain.setValueAtTime(initialMusicGain, this.ctx.currentTime);
             this.musicVolume.connect(this.viscosityFilter);
             
             this.sfxVolume = this.ctx.createGain();
-            const initialSfxGain = this.isSfxMuted ? 0 : (this.sfxVolumeLevel * 1.0);
+            const initialSfxGain = this.isSfxMuted ? 0 : (this._applyVolumeCurve(this.sfxVolumeLevel) * 1.0);
             this.sfxVolume.gain.setValueAtTime(initialSfxGain, this.ctx.currentTime);
             this.sfxVolume.connect(this.masterVolume);
 
@@ -221,6 +221,15 @@ class AudioManager {
     /**
      * Set music volume level (0 to 1)
      */
+    /**
+     * Apply exponential curve to volume for perceptually accurate control.
+     * Human hearing is logarithmic — linear sliders make low values too loud.
+     * Using cubic curve: 9% slider → 0.07% gain, 50% slider → 12.5% gain.
+     */
+    _applyVolumeCurve(val) {
+        return val * val * val; // Cubic curve for natural volume perception
+    }
+
     setMusicVolume(val) {
         const prevVolume = this.musicVolumeLevel;
         this.musicVolumeLevel = val;
@@ -230,7 +239,7 @@ class AudioManager {
         
         try {
             if (this.musicVolume && this.ctx) {
-                const targetGain = this.isMusicMuted ? 0 : (this.musicVolumeLevel * 0.55);
+                const targetGain = this.isMusicMuted ? 0 : (this._applyVolumeCurve(this.musicVolumeLevel) * 0.55);
                 this.musicVolume.gain.linearRampToValueAtTime(targetGain, this.ctx.currentTime + 0.05);
             }
             if (prevVolume === 0 && this.musicVolumeLevel > 0 && !this.isMusicMuted && this.playChordRef && this.musicPlaying) {
@@ -253,7 +262,7 @@ class AudioManager {
         
         try {
             if (this.sfxVolume && this.ctx) {
-                const targetGain = this.isSfxMuted ? 0 : (this.sfxVolumeLevel * 1.0);
+                const targetGain = this.isSfxMuted ? 0 : (this._applyVolumeCurve(this.sfxVolumeLevel) * 1.0);
                 this.sfxVolume.gain.linearRampToValueAtTime(targetGain, this.ctx.currentTime + 0.05);
             }
         } catch (e) {
@@ -270,7 +279,7 @@ class AudioManager {
         localStorage.setItem('viscora_music_muted', this.isMusicMuted.toString());
         try {
             if (this.musicVolume && this.ctx) {
-                const targetGain = this.isMusicMuted ? 0 : (this.musicVolumeLevel * 0.55);
+                const targetGain = this.isMusicMuted ? 0 : (this._applyVolumeCurve(this.musicVolumeLevel) * 0.55);
                 this.musicVolume.gain.linearRampToValueAtTime(targetGain, this.ctx.currentTime + 0.05);
             }
             if (!this.isMusicMuted && this.musicVolumeLevel > 0 && this.playChordRef && this.musicPlaying) {
@@ -290,7 +299,7 @@ class AudioManager {
         localStorage.setItem('viscora_sfx_muted', this.isSfxMuted.toString());
         try {
             if (this.sfxVolume && this.ctx) {
-                const targetGain = this.isSfxMuted ? 0 : (this.sfxVolumeLevel * 1.0);
+                const targetGain = this.isSfxMuted ? 0 : (this._applyVolumeCurve(this.sfxVolumeLevel) * 1.0);
                 this.sfxVolume.gain.linearRampToValueAtTime(targetGain, this.ctx.currentTime + 0.05);
             }
         } catch (e) {
