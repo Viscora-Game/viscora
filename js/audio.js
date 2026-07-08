@@ -791,10 +791,26 @@ class AudioManager {
             this.isStaticAudioMode = true;
             this.musicPlaying = true;
 
+            // Dynamically detect current version query parameter from DOM scripts to match sw.js cache key
+            let version = 'v358';
+            try {
+                const scripts = document.getElementsByTagName('script');
+                for (let s of scripts) {
+                    if (s.src && s.src.includes('?v=')) {
+                        const match = s.src.match(/\?v=([a-zA-Z0-9_-]+)/);
+                        if (match && match[1]) {
+                            version = match[1];
+                            break;
+                        }
+                    }
+                }
+            } catch (e) {}
+
             const audioEl = new Audio();
-            audioEl.src = url + '?v=v356';
-            audioEl.loop = true;
+            // CRITICAL: Set crossOrigin BEFORE src to ensure correct CORS pre-flight / headers
             audioEl.crossOrigin = "anonymous";
+            audioEl.src = url + '?v=' + version;
+            audioEl.loop = true;
 
             // Route HTML5 Audio through our Web Audio volume node!
             // This lets static MP3 music enjoy real-time lowpass filtering when jelly is viscous!
