@@ -807,7 +807,7 @@ class AudioManager {
             this.musicPlaying = true;
 
             // Dynamically detect current version query parameter from DOM scripts to match sw.js cache key
-            let version = 'v362';
+            let version = 'v363';
             try {
                 const scripts = document.getElementsByTagName('script');
                 for (let s of scripts) {

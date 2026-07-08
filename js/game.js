@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v362';
-import { Level } from './level.js?v=v362';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v362';
-import { UIManager } from './ui.js?v=v362';
-import { CloudSaveManager } from './cloud_save.js?v=v362';
-import { audio } from './audio.js?v=v362';
-import { LevelEditor } from './editor.js?v=v362';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v362';
+import { Player } from './player.js?v=v363';
+import { Level } from './level.js?v=v363';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v363';
+import { UIManager } from './ui.js?v=v363';
+import { CloudSaveManager } from './cloud_save.js?v=v363';
+import { audio } from './audio.js?v=v363';
+import { LevelEditor } from './editor.js?v=v363';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v363';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -2749,7 +2749,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v362', this.cssWidth - 10, 10);
+        this.ctx.fillText('v363', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
@@ -3879,8 +3879,8 @@ export class GameManager {
             // 1. YEŞİL Hayalet (NORMAL mod) — yürü ve zıpla, çukuru normal zıplamayla aş
             new TutorialGhost([
                 { t: 0,   x: 200, y: 440, viscosity: 'NORMAL', key: null },
-                { t: 30,  x: 340, y: 440, viscosity: 'NORMAL', key: 'RIGHT' },
-                { t: 45,  x: 390, y: 440, viscosity: 'NORMAL', key: 'JUMP' },
+                { t: 30,  x: 340, y: 440, viscosity: 'NORMAL', key: 'SAĞ OK' },
+                { t: 45,  x: 390, y: 440, viscosity: 'NORMAL', key: 'ZIPLA' },
                 { t: 60,  x: 470, y: 340, viscosity: 'NORMAL', key: null },
                 { t: 80,  x: 550, y: 440, viscosity: 'NORMAL', key: null },
                 { t: 100, x: 650, y: 440, viscosity: 'NORMAL', key: null }
@@ -3891,8 +3891,8 @@ export class GameManager {
                 { t: 0,   x: 800, y: 440, viscosity: 'NORMAL', key: null },
                 { t: 20,  x: 900, y: 440, viscosity: 'NORMAL', key: null },
                 { t: 35,  x: 960, y: 440, viscosity: 'LOW',    key: 'SHIFT' },
-                { t: 50,  x: 1020, y: 340, viscosity: 'LOW',   key: 'JUMP' },
-                { t: 70,  x: 1120, y: 280, viscosity: 'LOW',   key: 'JUMP' },
+                { t: 50,  x: 1020, y: 340, viscosity: 'LOW',   key: 'ZIPLA' },
+                { t: 70,  x: 1120, y: 280, viscosity: 'LOW',   key: 'ZIPLA' },
                 { t: 95,  x: 1300, y: 440, viscosity: 'LOW',   key: null },
                 { t: 110, x: 1380, y: 440, viscosity: 'NORMAL', key: 'SHIFT' },
                 { t: 120, x: 1420, y: 440, viscosity: 'NORMAL', key: null }
@@ -3909,7 +3909,7 @@ export class GameManager {
                 { t: 95,  x: 1620, y: 80,  viscosity: 'HIGH',   key: 'ZIPLA' },
                 { t: 105, x: 1720, y: 80,  viscosity: 'NORMAL', key: 'SHIFT' },
                 { t: 115, x: 1800, y: 440, viscosity: 'NORMAL', key: null },
-                { t: 125, x: 1840, y: 440, viscosity: 'NORMAL', key: 'AŞAĞI OK' },
+                { t: 125, x: 1840, y: 440, viscosity: 'NORMAL', key: 'AŞAĞI OK', crouch: true },
                 { t: 155, x: 2020, y: 440, viscosity: 'NORMAL', key: 'SAĞ OK' },
                 { t: 165, x: 2050, y: 440, viscosity: 'NORMAL', key: null }, // Şaltere basış
                 { t: 180, x: 2120, y: 440, viscosity: 'NORMAL', key: null },
@@ -3930,6 +3930,7 @@ class TutorialGhost {
         this.y = keyframes[0].y;
         this.currentViscosity = keyframes[0].viscosity;
         this.currentKey = keyframes[0].key || null;
+        this.currentCrouch = keyframes[0].crouch || false;
         this.maxTime = keyframes[keyframes.length - 1].t;
         this.resetDelay = 60;
         this.delayTimer = 0;
@@ -3956,6 +3957,7 @@ class TutorialGhost {
             this.y = this.keyframes[0].y;
             this.currentViscosity = this.keyframes[0].viscosity;
             this.currentKey = this.keyframes[0].key || null;
+            this.currentCrouch = this.keyframes[0].crouch || false;
             return;
         }
 
@@ -3967,6 +3969,7 @@ class TutorialGhost {
                 this.y = this.keyframes[0].y;
                 this.currentViscosity = this.keyframes[0].viscosity;
                 this.currentKey = this.keyframes[0].key || null;
+                this.currentCrouch = this.keyframes[0].crouch || false;
             }
             return;
         }
@@ -3995,6 +3998,7 @@ class TutorialGhost {
             this.y = prevKf.y;
             this.currentViscosity = prevKf.viscosity;
             this.currentKey = prevKf.key || null;
+            this.currentCrouch = prevKf.crouch || false;
         } else {
             const range = nextKf.t - prevKf.t;
             const progress = (this.timer - prevKf.t) / range;
@@ -4002,6 +4006,7 @@ class TutorialGhost {
             this.y = prevKf.y + (nextKf.y - prevKf.y) * progress;
             this.currentViscosity = prevKf.viscosity;
             this.currentKey = prevKf.key || null;
+            this.currentCrouch = prevKf.crouch || false;
         }
     }
 
@@ -4013,7 +4018,7 @@ class TutorialGhost {
 
         // Determine base color & label
         let padColor = '#10b981';
-        let padLabel = '🟢 YOL GÖSTERİCİ';
+        let padLabel = '🟢 NORMAL KILAVUZU';
         if (this.triggerXMin === 600) {
             padColor = '#06b6d4';
             padLabel = '🔵 SIVI KILAVUZU';
@@ -4092,20 +4097,22 @@ class TutorialGhost {
 
             ctx.fillStyle = color;
             ctx.beginPath();
-            ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
+            const radius = this.currentCrouch ? 12 : 18;
+            const offsetY = this.currentCrouch ? 6 : 0;
+            ctx.arc(this.x, this.y + offsetY, radius, 0, Math.PI * 2);
             ctx.fill();
 
             ctx.fillStyle = '#ffffff';
             ctx.shadowBlur = 0;
             ctx.beginPath();
-            ctx.arc(this.x - 5, this.y - 2, 3, 0, Math.PI * 2);
-            ctx.arc(this.x + 5, this.y - 2, 3, 0, Math.PI * 2);
+            ctx.arc(this.x - 5 * (this.currentCrouch ? 0.7 : 1), this.y - 2 + offsetY, 3 * (this.currentCrouch ? 0.7 : 1), 0, Math.PI * 2);
+            ctx.arc(this.x + 5 * (this.currentCrouch ? 0.7 : 1), this.y - 2 + offsetY, 3 * (this.currentCrouch ? 0.7 : 1), 0, Math.PI * 2);
             ctx.fill();
 
             ctx.fillStyle = '#0a0a0f';
             ctx.beginPath();
-            ctx.arc(this.x - 5, this.y - 2, 1, 0, Math.PI * 2);
-            ctx.arc(this.x + 5, this.y - 2, 1, 0, Math.PI * 2);
+            ctx.arc(this.x - 5 * (this.currentCrouch ? 0.7 : 1), this.y - 2 + offsetY, 1 * (this.currentCrouch ? 0.7 : 1), 0, Math.PI * 2);
+            ctx.arc(this.x + 5 * (this.currentCrouch ? 0.7 : 1), this.y - 2 + offsetY, 1 * (this.currentCrouch ? 0.7 : 1), 0, Math.PI * 2);
             ctx.fill();
 
             if (this.currentKey) {
