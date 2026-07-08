@@ -199,6 +199,8 @@ export class UIManager {
         this.codexReferrer = 'start';
         this.lastRenderedHealth = null;
         this.lastRenderedMaxHealth = null;
+        this.rewardsInterval = null;
+        this.updateRewardsPanelRef = null;
         
         // Initialize User ID for Community Map ownership checks
         let myUserId = localStorage.getItem('viscora_user_id');
@@ -4548,6 +4550,7 @@ export class UIManager {
     showScreen(screenName, pushToHistory = true) {
         // Ekran geçiş süresini kaydet (Hızlı tıklama sızmasını engellemek için)
         this.screenShowTime = Date.now();
+        this.stopRewardsTimers();
 
         if (screenName === 'level-select' || screenName === 'start') {
             this.buildLevelSelectionUI();
@@ -4590,6 +4593,10 @@ export class UIManager {
             const screen = this.screens[screenName];
             if (screen) {
                 screen.classList.remove('hidden');
+            }
+
+            if (screenName === 'rewards') {
+                this.startRewardsTimers();
             }
             
             if (screenName === 'pause' || screenName === 'gameover' || screenName === 'win') {
@@ -5749,6 +5756,81 @@ export class UIManager {
                 // Buluta anında kaydet ve eşitle
                 CloudSaveManager.saveProgress().catch(err => console.warn("Günlük ödül bulut eşitleme hatası:", err));
             });
+        }
+        
+        this.updateRewardsPanelRef = updateRewardsPanel;
+    }
+
+    startRewardsTimers() {
+        this.stopRewardsTimers();
+
+        const dailyTimerEl = document.getElementById('daily-reward-timer');
+        const weeklyTimerEl = document.getElementById('weekly-reward-timer');
+
+        const updateTimers = () => {
+            const now = Date.now();
+
+            // 1. Günlük giriş sayacı
+            if (dailyTimerEl) {
+                const d = new Date();
+                const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                const lastClaim = localStorage.getItem('viscora_daily_last_claim_date') || '';
+                
+                if (lastClaim !== today) {
+                    dailyTimerEl.innerHTML = `<span style="color: #22c55e; font-weight: bold; animation: reward-pulse 2s infinite ease-in-out;">GİRİŞ PROTOKOLÜ HAZIR!</span>`;
+                } else {
+                    const nextMidnight = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+                    const msLeft = nextMidnight.getTime() - now;
+                    
+                    const hours = Math.floor(msLeft / (3600 * 1000));
+                    const mins = Math.floor((msLeft % (3600 * 1000)) / (60 * 1000));
+                    const secs = Math.floor((msLeft % (60 * 1000)) / 1000);
+                    
+                    const timeStr = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                    dailyTimerEl.innerHTML = `Yeni protokol için: <span style="color: #38bdf8; font-weight: bold;">${timeStr}</span>`;
+                }
+            }
+
+            // 2. Haftalık görev sayacı
+            if (weeklyTimerEl) {
+                let resetTime = parseInt(localStorage.getItem('viscora_weekly_reset_time')) || 0;
+                
+                if (now > resetTime) {
+                    // Haftalık sıfırlama süresi geçmiş!
+                    localStorage.setItem('viscora_weekly_reset_time', (now + 7 * 24 * 60 * 60 * 1000).toString());
+                    localStorage.setItem('viscora_weekly_progress', JSON.stringify({ 1: 0, 2: 0, 3: 0 }));
+                    localStorage.setItem('viscora_weekly_claimed', JSON.stringify({ 1: false, 2: false, 3: false }));
+                    
+                    // Ekranda değişikliklerin anında yansıması için tetikleyelim
+                    if (this.updateRewardsPanelRef) {
+                        this.updateRewardsPanelRef();
+                    }
+                    resetTime = parseInt(localStorage.getItem('viscora_weekly_reset_time')) || 0;
+                }
+
+                const msLeft = Math.max(0, resetTime - now);
+                const days = Math.floor(msLeft / (24 * 3600 * 1000));
+                const hours = Math.floor((msLeft % (24 * 3600 * 1000)) / (3600 * 1000));
+                const mins = Math.floor((msLeft % (3600 * 1000)) / (60 * 1000));
+                const secs = Math.floor((msLeft % (60 * 1000)) / 1000);
+                
+                let timeStr = "";
+                if (days > 0) {
+                    timeStr += `${days}g `;
+                }
+                timeStr += `${hours.toString().padStart(2, '0')}s ${mins.toString().padStart(2, '0')}d ${secs.toString().padStart(2, '0')}sn`;
+                weeklyTimerEl.innerHTML = `Yenilenmeye kalan: <span style="color: #f43f5e; font-weight: bold;">${timeStr}</span>`;
+            }
+        };
+
+        updateTimers();
+        this.rewardsInterval = setInterval(updateTimers, 1000);
+    }
+
+    stopRewardsTimers() {
+        if (this.rewardsInterval) {
+            clearInterval(this.rewardsInterval);
+            this.rewardsInterval = null;
         }
     }
 

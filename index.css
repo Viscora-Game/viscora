@@ -4420,6 +4420,11 @@ button:hover .icon-svg,
         padding: 6px !important;
         font-size: 0.75rem !important;
     }
+    #daily-reward-timer,
+    #weekly-reward-timer {
+        margin: 2px 0 4px 0 !important;
+        font-size: 0.65rem !important;
+    }
 }
 
 /* Yatay Mod (Landscape) Mobil Cihazlar için Ayarlar Menüsü Optimizasyonu */
