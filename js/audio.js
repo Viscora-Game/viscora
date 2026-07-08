@@ -6,6 +6,12 @@
 
 class AudioManager {
     constructor() {
+        if (typeof window !== 'undefined' && window._viscoraAudioInstance) {
+            return window._viscoraAudioInstance;
+        }
+        if (typeof window !== 'undefined') {
+            window._viscoraAudioInstance = this;
+        }
         // Load persisted audio configurations
         const savedMusicVol = localStorage.getItem('viscora_music_volume');
         const savedSfxVol = localStorage.getItem('viscora_sfx_volume');
@@ -75,12 +81,12 @@ class AudioManager {
             this.viscosityFilter.connect(this.masterVolume);
 
             this.musicVolume = this.ctx.createGain();
-            const initialMusicGain = this.isMusicMuted ? 0 : (this._applyVolumeCurve(this.musicVolumeLevel) * 0.55);
+            const initialMusicGain = this.isMusicMuted ? 0 : (this._applyVolumeCurve(this.musicVolumeLevel) * 0.22);
             this.musicVolume.gain.setValueAtTime(initialMusicGain, this.ctx.currentTime);
             this.musicVolume.connect(this.viscosityFilter);
             
             this.sfxVolume = this.ctx.createGain();
-            const initialSfxGain = this.isSfxMuted ? 0 : (this._applyVolumeCurve(this.sfxVolumeLevel) * 1.0);
+            const initialSfxGain = this.isSfxMuted ? 0 : (this._applyVolumeCurve(this.sfxVolumeLevel) * 0.65);
             this.sfxVolume.gain.setValueAtTime(initialSfxGain, this.ctx.currentTime);
             this.sfxVolume.connect(this.masterVolume);
 
@@ -227,7 +233,7 @@ class AudioManager {
      * Using cubic curve: 9% slider → 0.07% gain, 50% slider → 12.5% gain.
      */
     _applyVolumeCurve(val) {
-        return val * val * val; // Cubic curve for natural volume perception
+        return val * val; // Quadratic curve (power of 2) for smooth natural logarithmic representation
     }
 
     setMusicVolume(val) {
@@ -239,7 +245,7 @@ class AudioManager {
         
         try {
             if (this.musicVolume && this.ctx) {
-                const targetGain = this.isMusicMuted ? 0 : (this._applyVolumeCurve(this.musicVolumeLevel) * 0.55);
+                const targetGain = this.isMusicMuted ? 0 : (this._applyVolumeCurve(this.musicVolumeLevel) * 0.22);
                 this.musicVolume.gain.linearRampToValueAtTime(targetGain, this.ctx.currentTime + 0.05);
             }
             if (prevVolume === 0 && this.musicVolumeLevel > 0 && !this.isMusicMuted && this.playChordRef && this.musicPlaying) {
@@ -262,7 +268,7 @@ class AudioManager {
         
         try {
             if (this.sfxVolume && this.ctx) {
-                const targetGain = this.isSfxMuted ? 0 : (this._applyVolumeCurve(this.sfxVolumeLevel) * 1.0);
+                const targetGain = this.isSfxMuted ? 0 : (this._applyVolumeCurve(this.sfxVolumeLevel) * 0.65);
                 this.sfxVolume.gain.linearRampToValueAtTime(targetGain, this.ctx.currentTime + 0.05);
             }
         } catch (e) {
@@ -279,7 +285,7 @@ class AudioManager {
         localStorage.setItem('viscora_music_muted', this.isMusicMuted.toString());
         try {
             if (this.musicVolume && this.ctx) {
-                const targetGain = this.isMusicMuted ? 0 : (this._applyVolumeCurve(this.musicVolumeLevel) * 0.55);
+                const targetGain = this.isMusicMuted ? 0 : (this._applyVolumeCurve(this.musicVolumeLevel) * 0.22);
                 this.musicVolume.gain.linearRampToValueAtTime(targetGain, this.ctx.currentTime + 0.05);
             }
             if (!this.isMusicMuted && this.musicVolumeLevel > 0 && this.playChordRef && this.musicPlaying) {
@@ -299,7 +305,7 @@ class AudioManager {
         localStorage.setItem('viscora_sfx_muted', this.isSfxMuted.toString());
         try {
             if (this.sfxVolume && this.ctx) {
-                const targetGain = this.isSfxMuted ? 0 : (this._applyVolumeCurve(this.sfxVolumeLevel) * 1.0);
+                const targetGain = this.isSfxMuted ? 0 : (this._applyVolumeCurve(this.sfxVolumeLevel) * 0.65);
                 this.sfxVolume.gain.linearRampToValueAtTime(targetGain, this.ctx.currentTime + 0.05);
             }
         } catch (e) {
@@ -801,7 +807,7 @@ class AudioManager {
             this.musicPlaying = true;
 
             // Dynamically detect current version query parameter from DOM scripts to match sw.js cache key
-            let version = 'v361';
+            let version = 'v362';
             try {
                 const scripts = document.getElementsByTagName('script');
                 for (let s of scripts) {
@@ -816,6 +822,9 @@ class AudioManager {
             } catch (e) {}
 
             const audioEl = new Audio();
+            if (typeof window !== 'undefined') {
+                window._activeViscoraBGM = audioEl;
+            }
             // CRITICAL: Set crossOrigin BEFORE src to ensure correct CORS pre-flight / headers
             audioEl.crossOrigin = "anonymous";
             audioEl.src = url + '?v=' + version;
@@ -853,6 +862,14 @@ class AudioManager {
                 this.currentAudioElement.load();
             } catch (e) {}
             this.currentAudioElement = null;
+        }
+        if (typeof window !== 'undefined' && window._activeViscoraBGM) {
+            try {
+                window._activeViscoraBGM.pause();
+                window._activeViscoraBGM.src = "";
+                window._activeViscoraBGM.load();
+            } catch (e) {}
+            window._activeViscoraBGM = null;
         }
         if (this.audioSourceNode) {
             try {
