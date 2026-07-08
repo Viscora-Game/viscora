@@ -216,6 +216,22 @@ export class GameManager {
         // Gamepad State variables
         this.gamepadPrevButtons = {};
         this.gamepadKeys = { left: false, right: false, up: false, down: false, jump: false, shift: false };
+        this.gamepadConnected = false;
+        
+        window.addEventListener("gamepadconnected", () => {
+            this.gamepadConnected = true;
+        });
+        window.addEventListener("gamepaddisconnected", () => {
+            const gps = navigator.getGamepads ? navigator.getGamepads() : [];
+            let active = false;
+            for (let i = 0; i < gps.length; i++) {
+                if (gps[i]) active = true;
+            }
+            this.gamepadConnected = active;
+        });
+
+        // Initialize state indicators
+        this.lastIsGameActive = null;
 
         // Döngüyü Başlat
         this.loop = this.loop.bind(this);
@@ -574,15 +590,19 @@ export class GameManager {
         }
         this.level.loadLevel(this.currentLevel);
         
-        // Cache level bounds to optimize minimap rendering performance
+        // Cache level bounds to optimize minimap rendering and camera boundaries performance
         this.levelMaxY = 600;
+        this.levelMinPlatformY = 0;
         if (this.level.platforms && this.level.platforms.length > 0) {
             let maxPlatY = 600;
+            let minPlatY = 0;
             this.level.platforms.forEach(p => {
                 const bottom = p.y + p.h;
                 if (bottom > maxPlatY) maxPlatY = bottom;
+                if (p.y < minPlatY) minPlatY = p.y;
             });
             this.levelMaxY = maxPlatY;
+            this.levelMinPlatformY = minPlatY;
         }
         if (this.currentLevel === 0) {
             this.initTutorialGhosts();
@@ -1351,10 +1371,13 @@ export class GameManager {
 
         // Menülerde dikey modda gezinmeye izin ver, oyun başlarken veya editördeyken yatay mod uyarısı göster
         const isGameActive = this.state === 'PLAYING' || this.state === 'INTRO_CINEMATIC' || this.state === 'STORY' || this.state === 'EDITOR' || this.state === 'PAUSED' || this.state === 'WIN' || this.state === 'GAMEOVER';
-        if (isGameActive) {
-            document.body.classList.add('game-active');
-        } else {
-            document.body.classList.remove('game-active');
+        if (this.lastIsGameActive !== isGameActive) {
+            if (isGameActive) {
+                document.body.classList.add('game-active');
+            } else {
+                document.body.classList.remove('game-active');
+            }
+            this.lastIsGameActive = isGameActive;
         }
 
         if (this.state === 'PLAYING') {
@@ -1586,6 +1609,11 @@ export class GameManager {
      * Gamepad (Kontrolcü) durumunu sorgular ve girdileri eşleştirir
      */
     pollGamepad() {
+        if (!this.gamepadConnected) {
+            this.gamepadKeys = { left: false, right: false, up: false, down: false, jump: false, shift: false };
+            return;
+        }
+
         if (!navigator.getGamepads) return;
         const gamepads = navigator.getGamepads();
         let gp = null;
@@ -1597,6 +1625,7 @@ export class GameManager {
         }
 
         if (!gp) {
+            this.gamepadConnected = false;
             this.gamepadKeys = { left: false, right: false, up: false, down: false, jump: false, shift: false };
             return;
         }
@@ -1845,12 +1874,7 @@ export class GameManager {
         }
 
         // Haritadaki en yüksek platformun (negatif Y) konumuna göre kamera sınırını dinamik genişlet
-        let minPlatformY = 0;
-        if (this.level && this.level.platforms) {
-            this.level.platforms.forEach(p => {
-                if (p.y < minPlatformY) minPlatformY = p.y;
-            });
-        }
+        const minPlatformY = this.levelMinPlatformY || 0;
         const cameraYBuffer = Math.max(350, -minPlatformY + 250);
 
         if (this.cssHeight > this.level.height + cameraYBuffer * 2) {
@@ -2282,14 +2306,13 @@ export class GameManager {
             if (cx + currentSize > 0 && cx - currentSize < this.cssWidth &&
                 cy + currentSize > 0 && cy - currentSize < this.cssHeight) {
                 
-                this.ctx.save();
-                
                 const themeId = (this.level.theme && this.level.theme.id) ? this.level.theme.id : 'neon_sewer';
                 const color = (this.level.theme && this.level.theme.cellColor) ? this.level.theme.cellColor : 'rgba(6, 182, 212, 0.8)';
                 
-                this.ctx.globalAlpha = cell.alpha * 1.5; // Boost visibility for custom details
-                
                 if (cell.type === 'special') {
+                    this.ctx.save();
+                    this.ctx.globalAlpha = cell.alpha * 1.5; // Boost visibility for custom details
+                    
                     // Draw theme-specific background vectors
                     if (themeId === 'neon_sewer') {
                         // Spinning ventilation fan
@@ -2418,15 +2441,17 @@ export class GameManager {
                         
                         this.ctx.restore();
                     }
+                    this.ctx.restore();
                 } else {
-                    // Standard circular dust cloud
+                    // Standard circular dust cloud - Draw directly without save/restore overhead
+                    const prevAlpha = this.ctx.globalAlpha;
+                    this.ctx.globalAlpha = cell.alpha * 1.5;
                     this.ctx.fillStyle = color;
                     this.ctx.beginPath();
                     this.ctx.arc(cx, cy, currentSize, 0, Math.PI * 2);
                     this.ctx.fill();
+                    this.ctx.globalAlpha = prevAlpha;
                 }
-                
-                this.ctx.restore();
             }
         });
 

@@ -197,6 +197,8 @@ export class UIManager {
     constructor(game) {
         this.game = game;
         this.codexReferrer = 'start';
+        this.lastRenderedHealth = null;
+        this.lastRenderedMaxHealth = null;
         
         // Initialize User ID for Community Map ownership checks
         let myUserId = localStorage.getItem('viscora_user_id');
@@ -4474,14 +4476,17 @@ export class UIManager {
         this.shiftBtn.classList.add(classId);
     }
 
-    /**
-     * HUD can göstergesini günceller
-     */
     updateHUDHealth(health) {
+        const maxHealth = (this.game && this.game.player) ? this.game.player.maxHealth : 3;
+        if (this.lastRenderedHealth === health && this.lastRenderedMaxHealth === maxHealth) {
+            return;
+        }
+        this.lastRenderedHealth = health;
+        this.lastRenderedMaxHealth = maxHealth;
+
         const container = document.getElementById('health-container');
         if (container) {
             container.innerHTML = '';
-            const maxHealth = (this.game && this.game.player) ? this.game.player.maxHealth : 3;
             for (let i = 0; i < maxHealth; i++) {
                 const drop = document.createElement('span');
                 drop.className = 'health-drop';
