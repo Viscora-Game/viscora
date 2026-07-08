@@ -4276,7 +4276,7 @@ export class Level {
                 },
                 // Oda 4 Bilgi Kutusu
                 {
-                    "x": 1810, "y": 200, "w": 260, "h": 95,
+                    "x": 1610, "y": 220, "w": 240, "h": 95,
                     "type": "textbox", "rotation": 0, "startRotation": 0, "state": 0,
                     "text": "SHIFT butonu ile NORMAL (Yeşil) moda dön ve AŞAĞI butonu ile eğilerek dar geçitten geç. Şaltere ulaşıp lazeri kapat!",
                     "color": "#06b6d4"
