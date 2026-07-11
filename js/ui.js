@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v364';
-import { ViscosityList } from './viscosity.js?v=v364';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v364';
-import { CloudSaveManager } from './cloud_save.js?v=v364';
+import { audio } from './audio.js?v=v365';
+import { ViscosityList } from './viscosity.js?v=v365';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v365';
+import { CloudSaveManager } from './cloud_save.js?v=v365';
 
 const TRANSLATIONS = {
     tr: {
@@ -4708,6 +4708,7 @@ export class UIManager {
                 btn.innerHTML = `<span class="btn-num">${lvlNum}</span><span class="btn-stars-row">${starRow}</span>`;
             } else {
                 btn.classList.add('locked');
+                btn.disabled = true;
                 btn.innerHTML = `<span class="btn-num">${lvlNum}</span><span style="font-size: 0.6rem; margin-top: 1px;">🔒</span>`;
             }
 
