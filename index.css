@@ -5088,4 +5088,27 @@ button:hover .icon-svg,
     }
 }
 
+/* PWA/TWA ve Standalone Modu için SEO Gizleme ve Kaydırma Engelleme */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+    html, body {
+        overflow: hidden !important;
+        height: 100vh !important;
+        min-height: 100vh !important;
+    }
+    #seo-landing-content {
+        display: none !important;
+    }
+}
+
+.standalone-mode,
+.standalone-mode body {
+    overflow: hidden !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+}
+
+.standalone-mode #seo-landing-content {
+    display: none !important;
+}
+
 

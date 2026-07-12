@@ -59,6 +59,18 @@
             }
         })();
     </script>
+    <script>
+        // Standalone (PWA / TWA / Google Play Store App) Mode Detection
+        (function() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                                 window.matchMedia('(display-mode: fullscreen)').matches ||
+                                 window.navigator.standalone || 
+                                 document.referrer.includes('android-app://');
+            if (isStandalone) {
+                document.documentElement.classList.add('standalone-mode');
+            }
+        })();
+    </script>
     <link rel="manifest" href="manifest.json">
     <script>
         // Custom Premium Alert & Confirm Dialogs to bypass native browser alert/confirm domain prefixing
