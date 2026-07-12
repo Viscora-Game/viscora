@@ -74,8 +74,9 @@ input[type="range"] {
 
 html, body {
     width: 100%;
-    height: 100%;
-    overflow: hidden;
+    min-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
     background-color: var(--bg-dark);
     font-family: var(--font-game);
     color: var(--text-primary);
@@ -198,9 +199,14 @@ html, body {
 #game-container {
     position: relative;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     background-color: #050508;
     overflow: hidden;
+}
+
+body.game-active {
+    overflow: hidden !important;
+    height: 100vh !important;
 }
 
 /* Yüksek Teknoloji CRT/Scanline Ekran Efekti */
@@ -4800,6 +4806,285 @@ button:hover .icon-svg,
         padding-right: env(safe-area-inset-right) !important;
         padding-top: env(safe-area-inset-top) !important;
         padding-bottom: env(safe-area-inset-bottom) !important;
+    }
+}
+
+/* --------------------------------------------------
+   SEO & AdSense Landing Page Styles
+-------------------------------------------------- */
+#seo-landing-content {
+    background-color: #07070a;
+    color: var(--text-primary);
+    font-family: var(--font-game);
+    padding: 80px 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.seo-container {
+    max-width: 1000px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+}
+
+.seo-title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    text-align: center;
+    background: linear-gradient(135deg, #00f0ff 0%, #d946ef 50%, #10b981 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+}
+
+.seo-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 30px auto;
+    line-height: 1.6;
+}
+
+.seo-badge-row {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.seo-badge {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.seo-section {
+    background: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.seo-section-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.seo-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.seo-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 25px;
+    border-radius: 14px;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.seo-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(6, 182, 212, 0.3);
+}
+
+.seo-card h4 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.seo-card p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.seo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.seo-list-item {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+.seo-list-bullet {
+    background: rgba(6, 182, 212, 0.1);
+    color: #06b6d4;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.seo-list-bullet.color-low {
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--color-low);
+}
+
+.seo-list-bullet.color-high {
+    background: rgba(217, 70, 239, 0.1);
+    color: var(--color-high);
+}
+
+.seo-list-bullet.color-normal {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-normal);
+}
+
+.seo-list-content h4 {
+    font-size: 1.1rem;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.seo-list-content p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.faq-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 20px;
+}
+
+.faq-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.faq-question {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.faq-answer {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.changelog-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.changelog-item {
+    position: relative;
+    padding-left: 25px;
+    border-left: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.changelog-item::before {
+    content: " ";
+    position: absolute;
+    left: -6px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #06b6d4;
+    border: 2px solid #07070a;
+}
+
+.changelog-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.changelog-version {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.changelog-date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.changelog-desc {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.seo-footer {
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.seo-footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.seo-footer-link {
+    color: #06b6d4;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: color 0.3s ease;
+}
+
+.seo-footer-link:hover {
+    color: #d946ef;
+}
+
+@media (max-width: 768px) {
+    .seo-title {
+        font-size: 2rem;
+    }
+    
+    .seo-section {
+        padding: 25px;
     }
 }
 
