@@ -1,6 +1,6 @@
-import { GameManager } from './game.js?v=v365';
-import { audio } from './audio.js?v=v365';
-import { CloudSaveManager } from './cloud_save.js?v=v365';
+import { GameManager } from './game.js?v=v366';
+import { audio } from './audio.js?v=v366';
+import { CloudSaveManager } from './cloud_save.js?v=v366';
 
 const initGame = () => {
     // Mobilde performansı artırmak için pahalı canvas gölge efektlerini (shadowBlur) devre dışı bırak
@@ -18,20 +18,23 @@ const initGame = () => {
         }
     }
 
-    // Otomatik Bulut Eşitlemesi (Startup Sync): Oyuncu bağlıysa başlangıçta en güncel veriyi çek
-    const syncCode = localStorage.getItem('viscora_sync_code') || localStorage.getItem('viscora_user_id');
+    // Otomatik Bulut Eşitlemesi (Startup Sync): Oyuncu bağlıysa (Google ile) başlangıçta en güncel veriyi çek
+    const syncCode = localStorage.getItem('viscora_sync_code');
     if (syncCode) {
-        CloudSaveManager.saveProgress().then(res => {
-            if (res && res.success) {
-                const hasUpdated = localStorage.getItem('viscora_last_save_time_updated') === 'true';
-                if (hasUpdated) {
-                    localStorage.removeItem('viscora_last_save_time_updated');
-                    window.location.reload();
+        // Sayfa yüklenme hızını etkilememesi için 2 saniye gecikmeyle arka planda eşitle
+        setTimeout(() => {
+            CloudSaveManager.saveProgress().then(res => {
+                if (res && res.success) {
+                    const hasUpdated = localStorage.getItem('viscora_last_save_time_updated') === 'true';
+                    if (hasUpdated) {
+                        localStorage.removeItem('viscora_last_save_time_updated');
+                        window.location.reload();
+                    }
                 }
-            }
-        }).catch(err => {
-            console.warn("Otomatik başlangıç eşitleme hatası:", err);
-        });
+            }).catch(err => {
+                console.warn("Otomatik başlangıç eşitleme hatası:", err);
+            });
+        }, 2000);
     }
     // Giriş Animasyonu (Splash Screen) Kontrolü
     const splash = document.getElementById('splash-screen');
