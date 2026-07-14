@@ -387,10 +387,25 @@ export class UIManager {
                 auto_select: false
             });
 
-            const container = document.getElementById('google-signin-btn-container');
-            if (container) {
-                container.innerHTML = ''; // Clear "Yükleniyor..."
-                window.google.accounts.id.renderButton(container, {
+            // 1. Ayarlar Modalı Butonu
+            const container1 = document.getElementById('google-signin-btn-container');
+            if (container1) {
+                container1.innerHTML = ''; // Clear "Yükleniyor..."
+                window.google.accounts.id.renderButton(container1, {
+                    theme: 'dark',
+                    size: 'medium',
+                    type: 'standard',
+                    shape: 'rectangular',
+                    text: 'signin_with',
+                    logo_alignment: 'left'
+                });
+            }
+
+            // 2. Oyuncu Profili Modalı Butonu
+            const container2 = document.getElementById('profile-google-btn-container');
+            if (container2) {
+                container2.innerHTML = '';
+                window.google.accounts.id.renderButton(container2, {
                     theme: 'dark',
                     size: 'medium',
                     type: 'standard',
@@ -1407,9 +1422,14 @@ export class UIManager {
         // Global Google Sign-In Callback handler
         window.handleGoogleSignInActual = (response) => {
             const googleStatus = document.getElementById('google-sync-status');
+            const profileStatus = document.getElementById('profile-modal-sync-status');
             if (googleStatus) {
                 googleStatus.textContent = 'Doğrulanıyor...';
                 googleStatus.style.color = '#38bdf8';
+            }
+            if (profileStatus) {
+                profileStatus.textContent = 'Doğrulanıyor...';
+                profileStatus.style.color = '#38bdf8';
             }
             
             CloudSaveManager.loginWithGoogle(response.credential).then(res => {
@@ -4690,12 +4710,12 @@ export class UIManager {
                 btn.classList.remove('locked');
                 btn.disabled = false;
                 const stars = this.game.getStarsForLevel(0);
-                const label = this.currentLanguage === 'tr' ? '🔬 EĞİTİM' : '🔬 TUTORIAL';
+                const label = this.currentLanguage === 'tr' ? 'EĞİTİM' : 'TUTORIAL';
                 const starRow = [1,2,3].map(i =>
                     `<span class="btn-star${stars >= i ? '' : ' empty'}">★</span>`
                 ).join('');
 
-                btn.innerHTML = `<span class="btn-num" style="font-size: 0.65rem; font-weight: 700; white-space: nowrap;">${label}</span><span class="btn-stars-row">${starRow}</span>`;
+                btn.innerHTML = `<span class="btn-num" style="font-size: 0.55rem; font-weight: 800; letter-spacing: -0.2px; text-transform: uppercase; white-space: nowrap;">${label}</span><span class="btn-stars-row">${starRow}</span>`;
             } else if (isUnlocked) {
                 btn.classList.remove('locked');
                 btn.disabled = false;
@@ -4965,6 +4985,51 @@ export class UIManager {
         }, 3000);
     }
 
+    updateAllCloudStatusUI() {
+        const googleEmail = localStorage.getItem('viscora_google_email');
+        
+        // 1. Ana Ekran Profil Widget Bulut Simgesi Güncelleme
+        const widgetCloud = document.getElementById('profile-widget-cloud-status');
+        if (widgetCloud) {
+            if (googleEmail) {
+                widgetCloud.innerHTML = `<svg class="icon-svg" style="width: 10px; height: 10px; fill: currentColor;"><use href="#icon-cloud"></use></svg> Aktif`;
+                widgetCloud.style.color = '#10b981'; // Green
+                widgetCloud.style.textShadow = '0 0 5px rgba(16, 185, 129, 0.4)';
+            } else {
+                widgetCloud.innerHTML = `<svg class="icon-svg" style="width: 10px; height: 10px; fill: currentColor;"><use href="#icon-warning"></use></svg> Yedekle`;
+                widgetCloud.style.color = '#f59e0b'; // Orange
+                widgetCloud.style.textShadow = '0 0 5px rgba(245, 158, 11, 0.4)';
+            }
+        }
+        
+        // 2. Ayarlar Modalı Durumu Güncelleme
+        const googleStatus = document.getElementById('google-sync-status');
+        if (googleStatus) {
+            if (googleEmail) {
+                googleStatus.textContent = `Bağlı Hesap: ${googleEmail} (Otomatik)`;
+                googleStatus.style.color = '#10b981';
+            } else {
+                googleStatus.textContent = 'Hesap bağlı değil (Yedekleme devre dışı)';
+                googleStatus.style.color = '#64748b';
+            }
+        }
+        
+        // 3. Oyuncu Profili Modalı Durumu Güncelleme
+        const profileStatus = document.getElementById('profile-modal-sync-status');
+        const profileGoogleContainer = document.getElementById('profile-google-btn-container');
+        if (profileStatus) {
+            if (googleEmail) {
+                profileStatus.textContent = `Bulut Yedekleme Aktif (${googleEmail})`;
+                profileStatus.style.color = '#10b981';
+                if (profileGoogleContainer) profileGoogleContainer.style.display = 'none';
+            } else {
+                profileStatus.textContent = 'İlerlemenizin silinmemesi için Google ile bağlayın:';
+                profileStatus.style.color = '#f43f5e'; // Red
+                if (profileGoogleContainer) profileGoogleContainer.style.display = 'flex';
+            }
+        }
+    }
+
     initProfileUI() {
         const widget = document.getElementById('player-profile-widget');
         const modal = document.getElementById('profile-settings-modal');
@@ -5067,12 +5132,15 @@ export class UIManager {
             if (widgetAvatar) {
                 widgetAvatar.src = `assets/avatars/${currentAvatar}.png?v=v356`;
             }
+            this.updateAllCloudStatusUI();
         };
         
         updateWidget();
         
         // Show Profile settings Modal
         let openProfileModal = (isFirstTime = false) => {
+            this.loadGoogleSignInSDK(); // Lazy load Google SDK to render the button
+            this.updateAllCloudStatusUI();
             const titleEl = modal.querySelector('.star-gate-title');
             if (isFirstTime) {
                 if (titleEl) titleEl.innerHTML = '<svg class="icon-svg"><use href="#icon-flask"></use></svg> SİSTEME GİRİŞ YAPIN';
@@ -5539,31 +5607,39 @@ export class UIManager {
         const updateRewardsPanel = () => {
             checkWeeklyReset();
             
-            const today = getTodayStr();
-            const yesterday = getYesterdayStr();
-            const lastClaim = localStorage.getItem('viscora_daily_last_claim_date') || '';
+            const now = Date.now();
+            
+            // Migration check: if they have last_claim_date but no last_claim_time, parse it
+            let lastClaimTime = parseInt(localStorage.getItem('viscora_daily_last_claim_time')) || 0;
+            const oldLastClaimDate = localStorage.getItem('viscora_daily_last_claim_date');
+            if (lastClaimTime === 0 && oldLastClaimDate) {
+                const parsedDate = new Date(oldLastClaimDate);
+                if (!isNaN(parsedDate.getTime())) {
+                    lastClaimTime = parsedDate.getTime();
+                    localStorage.setItem('viscora_daily_last_claim_time', lastClaimTime.toString());
+                }
+            }
+            
             let streak = parseInt(localStorage.getItem('viscora_daily_streak')) || 0;
             
-            let nextClaimableDay = 1;
-            let canClaimToday = false;
+            const canClaimToday = (lastClaimTime === 0) || (now - lastClaimTime >= 24 * 60 * 60 * 1000);
             
-            if (lastClaim === '') {
-                nextClaimableDay = 1;
-                canClaimToday = true;
-            } else if (lastClaim === today) {
-                nextClaimableDay = streak;
-                canClaimToday = false;
-            } else if (lastClaim === yesterday) {
-                nextClaimableDay = streak >= 7 ? 1 : streak + 1;
-                canClaimToday = true;
-            } else {
-                // Gün kaçırılmış! Seriyi sıfırla, sıradaki ödül 1. Gün
-                nextClaimableDay = 1;
-                canClaimToday = true;
-                if (streak !== 0) {
-                    streak = 0;
-                    localStorage.setItem('viscora_daily_streak', '0');
+            let nextClaimableDay = 1;
+            if (canClaimToday) {
+                if (lastClaimTime === 0) {
+                    nextClaimableDay = 1;
+                } else if (now - lastClaimTime < 48 * 60 * 60 * 1000) {
+                    nextClaimableDay = streak >= 7 ? 1 : streak + 1;
+                } else {
+                    // Missed more than 48 hours, reset streak
+                    nextClaimableDay = 1;
+                    if (streak !== 0) {
+                        streak = 0;
+                        localStorage.setItem('viscora_daily_streak', '0');
+                    }
                 }
+            } else {
+                nextClaimableDay = streak;
             }
 
             if (dailyGrid) {
@@ -5573,11 +5649,11 @@ export class UIManager {
                     box.className = 'daily-reward-box';
                     
                     let stateClass = 'locked';
-                    if (lastClaim === today && day <= nextClaimableDay) {
+                    if (!canClaimToday && day <= nextClaimableDay) {
                         stateClass = 'claimed';
-                    } else if (lastClaim !== today && day < nextClaimableDay) {
+                    } else if (canClaimToday && day < nextClaimableDay) {
                         stateClass = 'claimed';
-                    } else if (lastClaim !== today && day === nextClaimableDay) {
+                    } else if (canClaimToday && day === nextClaimableDay) {
                         stateClass = 'active';
                     }
                     
@@ -5722,20 +5798,19 @@ export class UIManager {
 
         if (btnClaimDaily) {
             this.bindTouchClick(btnClaimDaily, () => {
-                const today = getTodayStr();
-                const yesterday = getYesterdayStr();
-                const lastClaim = localStorage.getItem('viscora_daily_last_claim_date') || '';
+                const now = Date.now();
+                const lastClaimTime = parseInt(localStorage.getItem('viscora_daily_last_claim_time')) || 0;
                 let streak = parseInt(localStorage.getItem('viscora_daily_streak')) || 0;
                 
-                if (lastClaim === today) {
+                if (lastClaimTime !== 0 && (now - lastClaimTime < 24 * 60 * 60 * 1000)) {
                     this.showGlobalToast("Bugünkü ödülünüzü zaten aldınız!", false);
                     return;
                 }
                 
                 let nextStreak = 1;
-                if (lastClaim === '') {
+                if (lastClaimTime === 0) {
                     nextStreak = 1;
-                } else if (lastClaim === yesterday) {
+                } else if (now - lastClaimTime < 48 * 60 * 60 * 1000) {
                     nextStreak = streak >= 7 ? 1 : streak + 1;
                 } else {
                     nextStreak = 1; // Gün kaçırılmışsa seriyi 1'den başlat
@@ -5746,8 +5821,13 @@ export class UIManager {
                     window.shopManager.addCrystals(rewardAmount);
                 }
 
-                localStorage.setItem('viscora_daily_last_claim_date', today);
+                localStorage.setItem('viscora_daily_last_claim_time', now.toString());
                 localStorage.setItem('viscora_daily_streak', nextStreak.toString());
+
+                // Old format backup
+                const d = new Date();
+                const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                localStorage.setItem('viscora_daily_last_claim_date', todayStr);
 
                 this.showGlobalToast(`Tebrikler! ${nextStreak}. Gün ödülü olarak ${rewardAmount} Kristal aldınız!`, true);
                 
@@ -5773,15 +5853,12 @@ export class UIManager {
 
             // 1. Günlük giriş sayacı
             if (dailyTimerEl) {
-                const d = new Date();
-                const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                const lastClaim = localStorage.getItem('viscora_daily_last_claim_date') || '';
+                const lastClaimTime = parseInt(localStorage.getItem('viscora_daily_last_claim_time')) || 0;
                 
-                if (lastClaim !== today) {
+                if (lastClaimTime === 0 || (now - lastClaimTime >= 24 * 60 * 60 * 1000)) {
                     dailyTimerEl.innerHTML = `<span style="color: #22c55e; font-weight: bold; animation: reward-pulse 2s infinite ease-in-out;">GİRİŞ PROTOKOLÜ HAZIR!</span>`;
                 } else {
-                    const nextMidnight = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
-                    const msLeft = nextMidnight.getTime() - now;
+                    const msLeft = (lastClaimTime + 24 * 60 * 60 * 1000) - now;
                     
                     const hours = Math.floor(msLeft / (3600 * 1000));
                     const mins = Math.floor((msLeft % (3600 * 1000)) / (60 * 1000));
@@ -5817,9 +5894,9 @@ export class UIManager {
                 
                 let timeStr = "";
                 if (days > 0) {
-                    timeStr += `${days}g `;
+                    timeStr += `${days} gün `;
                 }
-                timeStr += `${hours.toString().padStart(2, '0')}s ${mins.toString().padStart(2, '0')}d ${secs.toString().padStart(2, '0')}sn`;
+                timeStr += `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
                 weeklyTimerEl.innerHTML = `Yenilenmeye kalan: <span style="color: #f43f5e; font-weight: bold;">${timeStr}</span>`;
             }
         };

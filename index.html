@@ -535,6 +535,9 @@
             <path d="M12 6a6 6 0 1 0 6 6"/>
             <path d="M12 10a2 2 0 1 0 2 2"/>
         </symbol>
+        <symbol id="icon-cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+        </symbol>
         <symbol id="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
             <circle cx="12" cy="12" r="3"/>
@@ -785,7 +788,10 @@
                     <!-- Oyuncu Profil Kartı (Karakter & Bakiye) -->
                     <div id="player-profile-widget">
                         <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v366" alt="Avatar" />
-                        <div id="profile-widget-name">Oyuncu</div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px;">
+                            <div id="profile-widget-name">Oyuncu</div>
+                            <div id="profile-widget-cloud-status" style="font-size: 0.58rem; font-weight: 800; display: flex; align-items: center; gap: 2px;"></div>
+                        </div>
                         <div class="profile-divider"></div>
                         <div class="profile-crystals">
                             <svg class="icon-svg icon-gem" style="width: 14px; height: 14px; margin-right: 4px; fill: #00f2fe; filter: drop-shadow(0 0 5px #00f2fe);"><use href="#icon-gem"></use></svg>
@@ -894,6 +900,19 @@
                 <div id="profile-pane-badges" class="profile-pane hidden" style="max-height: 270px; overflow-y: auto; padding-right: 4px; box-sizing: border-box; margin: 10px 0;">
                     <div id="profile-badges-grid" class="badges-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
                         <!-- Achievements will be generated here -->
+                    </div>
+                </div>
+
+                <!-- Bulut Senkronizasyon Kısayolu -->
+                <div class="settings-block" style="margin-top: 10px; margin-bottom: 15px; padding: 10px; background: rgba(6, 182, 212, 0.05); border: 1px dashed rgba(6, 182, 212, 0.2); border-radius: 8px;">
+                    <span class="settings-block-title" style="color: #00f2fe; font-size: 0.72rem; display: flex; align-items: center; gap: 4px;">
+                        <svg class="icon-svg" style="width: 12px; height: 12px; fill: currentColor;"><use href="#icon-cloud"></use></svg> BULUT YEDEKLEME DURUMU
+                    </span>
+                    <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center;">
+                        <span id="profile-modal-sync-status" style="font-size: 0.72rem; color: #94a3b8; text-align: center;">Hesap bağlı değil (Yedekleme devre dışı)</span>
+                        <div id="profile-google-btn-container" style="width: 100%; display: flex; justify-content: center; min-height: 40px; align-items: center;">
+                            <!-- Google button placeholder -->
+                        </div>
                     </div>
                 </div>
 
