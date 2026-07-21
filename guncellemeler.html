@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Viscora - Sürüm Günlüğü & Yama Notları (Changelog)</title>
+    <meta name="description" content="Viscora oyununun v366 sürümüne kadar olan geliştirme geçmişi, performans iyileştirmeleri, hata düzeltmeleri ve yama notları. Sürüm geçmişini takip edin.">
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #07070a;
+            --card-bg: rgba(15, 15, 25, 0.65);
+            --border-color: rgba(255, 255, 255, 0.06);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --color-cyan: #00f2fe;
+            --color-magenta: #f43f5e;
+            --color-green: #22c55e;
+            --font-main: 'Outfit', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 0%, rgba(20, 10, 40, 0.3) 0%, transparent 60%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding-bottom: 60px;
+            overflow-x: hidden;
+        }
+
+        /* Navigasyon Bar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(7, 7, 10, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-logo span {
+            color: var(--color-cyan);
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, var(--color-cyan) 0%, #00c6ff 100%);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            text-decoration: none;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.4);
+        }
+
+        /* İçerik Container */
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, #fff 30%, var(--color-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Dikey Zaman Tüneli (Timeline) */
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 40px auto;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 8px;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--color-cyan) 0%, var(--color-magenta) 50%, rgba(255,255,255,0.05) 100%);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 50px;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -30px;
+            top: 6px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--bg-color);
+            border: 3px solid var(--color-cyan);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+            z-index: 10;
+        }
+
+        .timeline-item:nth-child(even) .timeline-dot {
+            border-color: var(--color-magenta);
+            box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
+        }
+
+        .timeline-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+
+        .timeline-content:hover {
+            transform: translateX(5px);
+        }
+
+        .version-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .version-tag {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--color-cyan);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline-item:nth-child(even) .version-tag {
+            color: var(--color-magenta);
+        }
+
+        .version-date {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: rgba(255,255,255,0.04);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .version-body ul {
+            list-style: none;
+            padding-left: 5px;
+        }
+
+        .version-body li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .version-body li strong {
+            color: var(--text-primary);
+        }
+
+        .version-body li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--color-green);
+            font-weight: bold;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 80px;
+            border-top: 1px solid var(--border-color);
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .footer-link:hover {
+            color: var(--text-primary);
+        }
+
+        .footer p {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.3);
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .navbar { padding: 15px 5%; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">
+            <span>VISCORA</span>
+        </a>
+        <div class="nav-links">
+            <a href="nasil-oynanir.html" class="nav-link">Nasıl Oynanır?</a>
+            <a href="guncellemeler.html" class="nav-link" style="color: var(--color-cyan);">Güncellemeler</a>
+            <a href="hakkinda.html" class="nav-link">Hakkında</a>
+            <a href="privacy.html" class="nav-link">Gizlilik</a>
+        </div>
+        <a href="index.html" class="nav-btn">Oyunu Başlat</a>
+    </nav>
+
+    <div class="container">
+        <header>
+            <h1>Sürüm Günlüğü & Yama Notları</h1>
+            <p class="subtitle">Viscora'nın gelişim sürecinde yayınlanan tüm güncellemeler, eklenen özellikler, hata düzeltmeleri ve optimizasyonlar.</p>
+        </header>
+
+        <div class="timeline">
+            <!-- v366 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="version-header">
+                        <span class="version-tag">🚀 v366 (Güncel Sürüm)</span>
+                        <span class="version-date">Temmuz 2026</span>
+                    </div>
+                    <div class="version-body">
+                        <ul>
+                            <li><strong>Performans Optimizasyonu:</strong> Misafir kullanıcılar için başlangıçtaki API pingleme çağrıları tamamen kaldırılarak ilk sayfa yüklenme hızı optimize edildi.</li>
+                            <li><strong>Arka Plan Senkronizasyonu:</strong> Giriş yapmış kullanıcılar için API istekleri arka plana taşınarak tarayıcının yüklenme simgesinin takılı kalması engellendi.</li>
+                            <li><strong>Profil Widget Düzenlemesi:</strong> Oyuncu profil penceresine bulut senkronizasyon durumunun detaylı gösterimi ve Google ile Giriş yapma arayüzü eklendi.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- v365 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="version-header">
+                        <span class="version-tag">🔧 v365</span>
+                        <span class="version-date">Temmuz 2026</span>
+                    </div>
+                    <div class="version-body">
+                        <ul>
+                            <li><strong>Ses Sistemi Çakışması Giderildi:</strong> Tarayıcı önbellek çakışmalarından kaynaklanan müziklerin üst üste binmesi sorunu küresel AudioManager singleton koruması ile çözüldü.</li>
+                            <li><strong>Ses Seviyesi Eğrisi İyileştirmesi:</strong> Ses kontrolü cubic'ten quadratic'e güncellenerek %10 ve %40 arasındaki dengesiz ses patlamaları giderildi.</li>
+                            <li><strong>Eğitim Bölümü Güncellemesi:</strong> 0. Bölüm (Eğitim) Room 4 içindeki yönlendirme yazılarının yerleşimleri mobil ekranlar için optimize edildi.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- v360 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="version-header">
+                        <span class="version-tag">⚙️ v360</span>
+                        <span class="version-date">Haziran 2026</span>
+                    </div>
+                    <div class="version-body">
+                        <ul>
+                            <li><strong>Safe Area Desteği:</strong> Çentikli ve ekran içi kameralı mobil telefon ekranları için Safe Area CSS özellikleri sisteme entegre edildi.</li>
+                            <li><strong>Mobil GPU Optimizasyonu:</strong> Canvas üzerindeki bazı ağır gölgeleme efektleri hafifletilerek mobil tarayıcılardaki kare hızı (FPS) artırıldı.</li>
+                            <li><strong>Dükkan Görsel İyileştirmeleri:</strong> Kristal dükkanı arka plan görselleştirmesi daha canlı ve modern hale getirildi.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- v350 -->
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="version-header">
+                        <span class="version-tag">✨ v350</span>
+                        <span class="version-date">Mayıs 2026</span>
+                    </div>
+                    <div class="version-body">
+                        <ul>
+                            <li><strong>Başarımlar (Achievements):</strong> Oyuna 12 farklı kilit açılabilir rozet ve başarım sistemi eklendi.</li>
+                            <li><strong>Günlük Ödüller:</strong> Düzenli oyuna giren kullanıcıların kristal kazanmasını sağlayan Günlük Giriş Ödülü (Daily Login Claim) sistemi devreye alındı.</li>
+                            <li><strong>Kozmetik Mağazası:</strong> Oyuncuların kazandıkları kristallerle satın alabilecekleri şapkalar, gözler ve iz (trail) efektleri dükkana eklendi.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="index.html" class="footer-link">Oyuna Dön</a>
+                <a href="nasil-oynanir.html" class="footer-link">Nasıl Oynanır?</a>
+                <a href="guncellemeler.html" class="footer-link">Güncellemeler</a>
+                <a href="hakkinda.html" class="footer-link">Hakkında</a>
+                <a href="privacy.html" class="footer-link">Gizlilik Politikası</a>
+                <a href="terms.html" class="footer-link">Kullanım Şartları</a>
+            </div>
+            <p>© 2026 CyberCore Interactive. Tüm hakları saklıdır.</p>
+        </footer>
+    </div>
+
+</body>
+</html>
