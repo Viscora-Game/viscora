@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v368';
-import { ViscosityList } from './viscosity.js?v=v368';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v368';
-import { CloudSaveManager } from './cloud_save.js?v=v368';
+import { audio } from './audio.js?v=v369';
+import { ViscosityList } from './viscosity.js?v=v369';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v369';
+import { CloudSaveManager } from './cloud_save.js?v=v369';
 
 const TRANSLATIONS = {
     tr: {
@@ -4598,6 +4598,12 @@ export class UIManager {
             if (window.controlsCustomizer && window.controlsCustomizer.isEditing) {
                 window.controlsCustomizer.exitEditMode(true);
             }
+        }
+
+        if (screenName === 'start') {
+            if (window.admobManager) window.admobManager.showBanner();
+        } else if (screenName === 'hud') {
+            if (window.admobManager) window.admobManager.hideBanner();
         }
 
         // Belirtilen ekranı göster

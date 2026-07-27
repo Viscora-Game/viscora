@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v368';
-import { Level } from './level.js?v=v368';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v368';
-import { UIManager } from './ui.js?v=v368';
-import { CloudSaveManager } from './cloud_save.js?v=v368';
-import { audio } from './audio.js?v=v368';
-import { LevelEditor } from './editor.js?v=v368';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v368';
+import { Player } from './player.js?v=v369';
+import { Level } from './level.js?v=v369';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v369';
+import { UIManager } from './ui.js?v=v369';
+import { CloudSaveManager } from './cloud_save.js?v=v369';
+import { audio } from './audio.js?v=v369';
+import { LevelEditor } from './editor.js?v=v369';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v369';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -826,6 +826,19 @@ export class GameManager {
      */
     rewardedContinue() {
         const game = this;
+        if (window.admobManager) {
+            window.admobManager.triggerReviveAd(() => {
+                game._executeRewardedContinue();
+            }, (errorMsg) => {
+                if (game.ui && typeof game.ui.showGlobalToast === 'function') {
+                    game.ui.showGlobalToast(errorMsg, true);
+                } else {
+                    alert(errorMsg);
+                }
+            });
+            return;
+        }
+
         adBreak({
             type: 'reward',
             name: 'rewarded-continue',
@@ -969,6 +982,19 @@ export class GameManager {
      */
     rewardedSkipLevel() {
         const game = this;
+        if (window.admobManager) {
+            window.admobManager.triggerSkipAd(() => {
+                game._executeRewardedSkip();
+            }, (errorMsg) => {
+                if (game.ui && typeof game.ui.showGlobalToast === 'function') {
+                    game.ui.showGlobalToast(errorMsg, true);
+                } else {
+                    alert(errorMsg);
+                }
+            });
+            return;
+        }
+
         adBreak({
             type: 'reward',
             name: 'rewarded-skip-level',
@@ -982,48 +1008,36 @@ export class GameManager {
                 audio.resume();
             },
             adViewed: () => {
-                // Reklam başarıyla tamamlandı — bölümü atla
-                game.rewardedSkipUsed = true;
-                // İlerlemeyi kaydet (0 yıldız)
-                try {
-                    let progress = JSON.parse(localStorage.getItem('viscora_progress') || '{}');
-                    const lvlKey = 'level_' + game.currentLevel;
-                    if (!progress[lvlKey]) {
-                        progress[lvlKey] = { stars: 0, completed: true, skipped: true };
-                    }
-                    // Sonraki bölümün kilidini de aç
-                    const nextLvlKey = 'level_' + (game.currentLevel + 1);
-                    if (!progress[nextLvlKey]) {
-                        progress[nextLvlKey] = { unlocked: true };
-                    }
-                    localStorage.setItem('viscora_last_save_time', Date.now().toString());
-                    localStorage.setItem('viscora_progress', JSON.stringify(progress));
-                } catch(e) { /* localStorage hatası yoksay */ }
-                game.ui.showScreen('hud');
-                game.nextLevel();
+                game._executeRewardedSkip();
             },
             adBreakDone: (info) => {
-                // SDK hazır değilse de ödülü ver (test ortamı)
                 if (info.breakStatus === 'notReady' || info.breakStatus === 'frequencyCapped' || info.breakStatus === 'other') {
-                    game.rewardedSkipUsed = true;
-                    try {
-                        let progress = JSON.parse(localStorage.getItem('viscora_progress') || '{}');
-                        const lvlKey = 'level_' + game.currentLevel;
-                        if (!progress[lvlKey]) {
-                            progress[lvlKey] = { stars: 0, completed: true, skipped: true };
-                        }
-                        const nextLvlKey = 'level_' + (game.currentLevel + 1);
-                        if (!progress[nextLvlKey]) {
-                            progress[nextLvlKey] = { unlocked: true };
-                        }
-                        localStorage.setItem('viscora_last_save_time', Date.now().toString());
-                        localStorage.setItem('viscora_progress', JSON.stringify(progress));
-                    } catch(e) {}
-                    game.ui.showScreen('hud');
-                    game.nextLevel();
+                    game._executeRewardedSkip();
                 }
             }
         });
+    }
+
+    /**
+     * Ödüllü bölüm atlama mantığını yürüten iç metot.
+     */
+    _executeRewardedSkip() {
+        this.rewardedSkipUsed = true;
+        try {
+            let progress = JSON.parse(localStorage.getItem('viscora_progress') || '{}');
+            const lvlKey = 'level_' + this.currentLevel;
+            if (!progress[lvlKey]) {
+                progress[lvlKey] = { stars: 0, completed: true, skipped: true };
+            }
+            const nextLvlKey = 'level_' + (this.currentLevel + 1);
+            if (!progress[nextLvlKey]) {
+                progress[nextLvlKey] = { unlocked: true };
+            }
+            localStorage.setItem('viscora_last_save_time', Date.now().toString());
+            localStorage.setItem('viscora_progress', JSON.stringify(progress));
+        } catch(e) { /* localStorage hatası yoksay */ }
+        this.ui.showScreen('hud');
+        this.nextLevel();
     }
 
     /**
@@ -2751,7 +2765,7 @@ export class GameManager {
         this.ctx.font = '12px monospace';
         this.ctx.textAlign = 'right';
         this.ctx.textBaseline = 'top';
-        this.ctx.fillText('v368', this.cssWidth - 10, 10);
+        this.ctx.fillText('v369', this.cssWidth - 10, 10);
         
         // Print laser path coordinates for debug (yalnızca F3 ile açıldığında)
         if (this.showDebug && this.level && this.level.laserEmitters) {
