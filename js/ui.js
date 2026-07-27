@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v367';
-import { ViscosityList } from './viscosity.js?v=v367';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v367';
-import { CloudSaveManager } from './cloud_save.js?v=v367';
+import { audio } from './audio.js?v=v368';
+import { ViscosityList } from './viscosity.js?v=v368';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v368';
+import { CloudSaveManager } from './cloud_save.js?v=v368';
 
 const TRANSLATIONS = {
     tr: {
