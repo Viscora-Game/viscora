@@ -6,4 +6,13 @@ server/__pycache__/
 .agents/
 *.zip
 *.apk
+*.aab
 server/db_*.json
+
+# Capacitor / Android native build
+android/
+www/
+node_modules/
+package.json
+package-lock.json
+capacitor.config.json

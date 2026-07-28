@@ -1,6 +1,6 @@
 /**
  * VISCORA - AdMob Reklam ve 24 Saatlik Dinamik Geri Sayım Yöneticisi
- * AdMob ID'lerini, banner gösterimlerini ve 24 saatlik sıklık sınırlarını yönetir.
+ * Capacitor @capacitor-community/admob plugin ile native AdMob entegrasyonu.
  */
 
 const ADMOB_CONFIG = {
@@ -19,16 +19,36 @@ class AdMobManager {
     constructor() {
         this.initialized = false;
         this.bannerVisible = false;
+        this.admobPlugin = null;
         this.init();
     }
 
-    init() {
-        // TWA veya Cordova AdMob SDK kontrolü
-        if (window.admob || window.GoogleMobileAds || window.admobDeviceready) {
-            this.initialized = true;
-            console.log("✅ AdMob SDK algılandı.");
-        } else {
-            console.log("ℹ️ AdMob Web / Test Modunda başlatıldı.");
+    async init() {
+        try {
+            // Capacitor plugin'ini yükle
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+                this.admobPlugin = window.Capacitor.Plugins.AdMob;
+            } else if (window.Capacitor) {
+                // Capacitor v5+ dinamik import
+                try {
+                    const admobModule = await import('@capacitor-community/admob');
+                    this.admobPlugin = admobModule.AdMob;
+                } catch(e) {
+                    console.log("ℹ️ AdMob modülü dinamik olarak yüklenemedi, global deneniyor...");
+                }
+            }
+
+            if (this.admobPlugin) {
+                await this.admobPlugin.initialize({
+                    initializeForTesting: false
+                });
+                this.initialized = true;
+                console.log("✅ AdMob SDK başarıyla başlatıldı (Capacitor Native).");
+            } else {
+                console.log("ℹ️ AdMob plugin bulunamadı. Web/Test modunda çalışılıyor.");
+            }
+        } catch (err) {
+            console.warn("⚠️ AdMob başlatma hatası:", err);
         }
     }
 
@@ -59,7 +79,6 @@ class AdMobManager {
         let startTime = parseInt(localStorage.getItem('viscora_ad_skip_start_time')) || 0;
         let count = parseInt(localStorage.getItem('viscora_ad_skip_count')) || 0;
 
-        // 24 saat dolduysa sayacı sıfırla
         if (startTime > 0 && now - startTime >= ADMOB_CONFIG.COOLDOWN_24H_MS) {
             localStorage.removeItem('viscora_ad_skip_start_time');
             localStorage.setItem('viscora_ad_skip_count', '0');
@@ -87,7 +106,6 @@ class AdMobManager {
         let startTime = parseInt(localStorage.getItem('viscora_ad_revive_start_time')) || 0;
         let count = parseInt(localStorage.getItem('viscora_ad_revive_count')) || 0;
 
-        // 24 saat dolduysa sayacı sıfırla
         if (startTime > 0 && now - startTime >= ADMOB_CONFIG.COOLDOWN_24H_MS) {
             localStorage.removeItem('viscora_ad_revive_start_time');
             localStorage.setItem('viscora_ad_revive_count', '0');
@@ -118,7 +136,6 @@ class AdMobManager {
         }
 
         this.showRewardedAd(ADMOB_CONFIG.skipLevelId, () => {
-            // Reklam başarıyla izlendiğinde kullanımı kaydet
             const now = Date.now();
             let startTime = parseInt(localStorage.getItem('viscora_ad_skip_start_time')) || 0;
             let count = parseInt(localStorage.getItem('viscora_ad_skip_count')) || 0;
@@ -143,7 +160,6 @@ class AdMobManager {
         }
 
         this.showRewardedAd(ADMOB_CONFIG.reviveId, () => {
-            // Reklam başarıyla izlendiğinde kullanımı kaydet
             const now = Date.now();
             let startTime = parseInt(localStorage.getItem('viscora_ad_revive_start_time')) || 0;
             let count = parseInt(localStorage.getItem('viscora_ad_revive_count')) || 0;
@@ -158,23 +174,44 @@ class AdMobManager {
     }
 
     /**
-     * AdMob Ödüllü Reklam Gösterimi (Native SDK veya Test Simülasyonu)
+     * AdMob Ödüllü Reklam Gösterimi (Capacitor Native veya Web Fallback)
      */
-    showRewardedAd(adUnitId, onSuccess, onError) {
+    async showRewardedAd(adUnitId, onSuccess, onError) {
         console.log(`🎬 Ödüllü reklam yükleniyor... ID: ${adUnitId}`);
 
-        if (window.admob && typeof window.admob.rewardVideo === 'object') {
-            // AdMob Native Plugin
-            window.admob.rewardVideo.prepare({ adId: adUnitId });
-            window.admob.rewardVideo.show();
+        if (this.admobPlugin && this.initialized) {
+            try {
+                // Capacitor Native AdMob SDK ile ödüllü reklam
+                const options = {
+                    adId: adUnitId,
+                    isTesting: false
+                };
 
-            const onReward = () => {
-                document.removeEventListener('admob.rewardVideo.events.REWARD', onReward);
+                // Reklam yükle
+                await this.admobPlugin.prepareRewardVideoAd(options);
+
+                // Ödül event'ini dinle
+                const rewardHandler = this.admobPlugin.addListener('onRewardedVideoAdReward', () => {
+                    console.log("✅ Ödüllü reklam: Ödül kazanıldı!");
+                    rewardHandler.remove();
+                    if (onSuccess) onSuccess();
+                });
+
+                const dismissHandler = this.admobPlugin.addListener('onRewardedVideoAdDismissed', () => {
+                    console.log("ℹ️ Ödüllü reklam kapatıldı.");
+                    dismissHandler.remove();
+                });
+
+                // Reklamı göster
+                await this.admobPlugin.showRewardVideoAd();
+
+            } catch (err) {
+                console.warn("⚠️ Native reklam hatası:", err);
+                // Native başarısız olursa, ödülü yine de ver (kullanıcıyı cezalandırma)
                 if (onSuccess) onSuccess();
-            };
-            document.addEventListener('admob.rewardVideo.events.REWARD', onReward);
+            }
         } else {
-            // Web veya Test ortamı simülasyonu
+            // Web/Test ortamı simülasyonu
             console.log("ℹ️ Web simülasyonu: Reklam izleniyor (1.2 saniye)...");
             setTimeout(() => {
                 console.log("✅ Web simülasyonu: Ödül kazanıldı!");
@@ -186,34 +223,46 @@ class AdMobManager {
     /**
      * Ana Menü Banner Reklamını Gösterir
      */
-    showBanner() {
-        const bannerContainer = document.getElementById('admob-banner-placeholder') || document.getElementById('admob-banner-container');
-        if (bannerContainer) {
-            bannerContainer.style.display = 'flex';
-        }
-
-        if (window.admob && typeof window.admob.banner === 'object') {
-            window.admob.banner.prepare({
-                adId: ADMOB_CONFIG.bannerId,
-                isTesting: false,
-                autoShow: true
-            });
-            this.bannerVisible = true;
+    async showBanner() {
+        if (this.admobPlugin && this.initialized) {
+            try {
+                await this.admobPlugin.showBanner({
+                    adId: ADMOB_CONFIG.bannerId,
+                    adSize: 'ADAPTIVE_BANNER',
+                    position: 'BOTTOM_CENTER',
+                    isTesting: false
+                });
+                this.bannerVisible = true;
+                console.log("✅ Banner reklam gösterildi.");
+            } catch (err) {
+                console.warn("⚠️ Banner gösterim hatası:", err);
+            }
+        } else {
+            // Web fallback — placeholder'ı göster
+            const bannerContainer = document.getElementById('admob-banner-placeholder') || document.getElementById('admob-banner-container');
+            if (bannerContainer) {
+                bannerContainer.style.display = 'flex';
+            }
         }
     }
 
     /**
      * Ana Menü Banner Reklamını Gizler
      */
-    hideBanner() {
-        const bannerContainer = document.getElementById('admob-banner-placeholder') || document.getElementById('admob-banner-container');
-        if (bannerContainer) {
-            bannerContainer.style.display = 'none';
-        }
-
-        if (window.admob && typeof window.admob.banner === 'object' && this.bannerVisible) {
-            window.admob.banner.hide();
-            this.bannerVisible = false;
+    async hideBanner() {
+        if (this.admobPlugin && this.initialized && this.bannerVisible) {
+            try {
+                await this.admobPlugin.hideBanner();
+                this.bannerVisible = false;
+                console.log("ℹ️ Banner reklam gizlendi.");
+            } catch (err) {
+                console.warn("⚠️ Banner gizleme hatası:", err);
+            }
+        } else {
+            const bannerContainer = document.getElementById('admob-banner-placeholder') || document.getElementById('admob-banner-container');
+            if (bannerContainer) {
+                bannerContainer.style.display = 'none';
+            }
         }
     }
 }
