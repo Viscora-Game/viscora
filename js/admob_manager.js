@@ -6,8 +6,10 @@
 const ADMOB_CONFIG = {
     appId: 'ca-app-pub-5810332619798187~2648255737',
     bannerId: 'ca-app-pub-5810332619798187/6308299147',
+    interstitialId: 'ca-app-pub-5810332619798187/8349043080',
     skipLevelId: 'ca-app-pub-5810332619798187/9996528642',
     reviveId: 'ca-app-pub-5810332619798187/2049489939',
+    crystalId: 'ca-app-pub-5810332619798187/4935773657',
     
     // Günlük kullanım limitleri
     MAX_SKIPS_PER_24H: 3,
@@ -20,6 +22,7 @@ class AdMobManager {
         this.initialized = false;
         this.bannerVisible = false;
         this.admobPlugin = null;
+        this.completedLevelsCount = 0;
         this.init();
     }
 
@@ -171,6 +174,44 @@ class AdMobManager {
 
             if (onSuccess) onSuccess();
         }, onError);
+    }
+
+    /**
+     * Ücretsiz Kristal Ödüllü Reklamını Tetikler
+     */
+    triggerCrystalAd(onSuccess, onError) {
+        this.showRewardedAd(ADMOB_CONFIG.crystalId, () => {
+            if (onSuccess) onSuccess();
+        }, onError);
+    }
+
+    /**
+     * Geçiş Reklamı (Interstitial) Tetikler
+     */
+    async triggerInterstitialAd(onComplete) {
+        console.log("📺 Geçiş reklamı tetiklendi...");
+        if (this.admobPlugin && this.initialized) {
+            try {
+                await this.admobPlugin.prepareInterstitial({
+                    adId: ADMOB_CONFIG.interstitialId,
+                    isTesting: false
+                });
+
+                const dismissHandler = this.admobPlugin.addListener('onInterstitialAdDismissed', () => {
+                    console.log("ℹ️ Geçiş reklamı kapatıldı.");
+                    dismissHandler.remove();
+                    if (onComplete) onComplete();
+                });
+
+                await this.admobPlugin.showInterstitial();
+            } catch (err) {
+                console.warn("⚠️ Geçiş reklamı gösterim hatası:", err);
+                if (onComplete) onComplete();
+            }
+        } else {
+            console.log("ℹ️ Web fallback: Geçiş reklamı atlanıyor.");
+            if (onComplete) onComplete();
+        }
     }
 
     /**
