@@ -2131,13 +2131,13 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     opacity: 1 !important;
 }
 
-/* Yatay Modda Başlangıç Ekranı İki Sütunlu Kompakt Yerleşim Optimizasyonu */
-@media (orientation: landscape) and (max-height: 640px) {
+/* Yatay Modda Başlangıç Ekranı İki Sütunlu Kompakt Yerleşim Optimizasyonu (Telefonlar ve Tabletler) */
+@media (orientation: landscape) and (max-height: 1200px) {
     #start-screen {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
-        justify-content: flex-start !important;
+        justify-content: center !important;
         padding: 15px 10px !important;
         overflow-y: auto !important;
         box-sizing: border-box !important;
@@ -2930,8 +2930,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     flex-shrink: 0;
 }
 
-/* Landscape compact overrides for settings modals to prevent layout overflow */
-@media (orientation: landscape) and (max-height: 640px) {
+/* Landscape compact overrides for settings modals to prevent layout overflow (Tablets & Phones) */
+@media (orientation: landscape) and (max-height: 1200px) {
     .star-gate-card {
         padding: 0.8rem 1.2rem !important;
         max-width: 380px !important;
@@ -3382,8 +3382,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     animation: toast-in-out 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/* Mobile Landscape Community Screen Adjustments */
-@media (orientation: landscape) and (max-height: 640px) {
+/* Mobile & Tablet Landscape Community Screen Adjustments */
+@media (orientation: landscape) and (max-height: 1200px) {
     #community-screen {
         padding: 0 !important;
         display: flex !important;
@@ -3497,8 +3497,8 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     }
 }
 
-/* Mobile Landscape Shop Layout Adjustments */
-@media (orientation: landscape) and (max-height: 640px) {
+/* Mobile & Tablet Landscape Shop Layout Adjustments */
+@media (orientation: landscape) and (max-height: 1200px) {
     #shop-screen {
         padding: 0 !important;
         display: flex !important;
@@ -4386,8 +4386,8 @@ button:hover .icon-svg,
     border-radius: 4px !important;
 }
 
-/* Dikey yükseklik kısıtlı olduğunda (örn: mobil yatay mod) Siber Ödüller panelini küçült ve sığdır */
-@media (max-height: 540px) {
+/* Dikey yükseklik kısıtlı olduğunda veya yatay tablette Siber Ödüller panelini küçült ve sığdır */
+@media (orientation: landscape), (max-height: 640px) {
     #rewards-screen .menu-card {
         padding: 0.8rem 1.2rem !important;
         max-height: 96vh !important;

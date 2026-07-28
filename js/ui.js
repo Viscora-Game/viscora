@@ -1397,13 +1397,16 @@ export class UIManager {
                 const googleStatus = document.getElementById('google-sync-status');
                 const googleEmail = localStorage.getItem('viscora_google_email');
                 const manualSyncDiv = document.getElementById('manual-sync-buttons');
-                if (googleEmail && googleStatus) {
-                    googleStatus.textContent = `Bağlı Hesap: ${googleEmail} (Otomatik)`;
-                    googleStatus.style.color = '#10b981';
-                    if (manualSyncDiv) manualSyncDiv.style.display = 'flex';
-                } else {
-                    if (manualSyncDiv) manualSyncDiv.style.display = 'none';
+                if (googleStatus) {
+                    if (googleEmail) {
+                        googleStatus.textContent = `Bağlı Hesap: ${googleEmail} (Otomatik)`;
+                        googleStatus.style.color = '#10b981';
+                    } else {
+                        googleStatus.textContent = 'Henüz Google hesabı bağlanmadı (Manuel veya Google ile yedekleyin)';
+                        googleStatus.style.color = '#a1a1aa';
+                    }
                 }
+                if (manualSyncDiv) manualSyncDiv.style.display = 'flex';
                 
                 // Arka planda bir eşitleme başlat
                 CloudSaveManager.saveProgress().then(res => {
@@ -5010,14 +5013,18 @@ export class UIManager {
         
         // 2. Ayarlar Modalı Durumu Güncelleme
         const googleStatus = document.getElementById('google-sync-status');
+        const manualSyncDiv = document.getElementById('manual-sync-buttons');
         if (googleStatus) {
             if (googleEmail) {
-                googleStatus.textContent = `Bağlı Hesap: ${googleEmail} (Otomatik)`;
+                googleStatus.textContent = `Bağlı Hesap: ${googleEmail} (Otomatik Oturum)`;
                 googleStatus.style.color = '#10b981';
             } else {
-                googleStatus.textContent = 'Hesap bağlı değil (Yedekleme devre dışı)';
-                googleStatus.style.color = '#64748b';
+                googleStatus.textContent = 'Henüz Google hesabı bağlanmadı (Manuel veya Google ile yedekleyin)';
+                googleStatus.style.color = '#a1a1aa';
             }
+        }
+        if (manualSyncDiv) {
+            manualSyncDiv.style.display = 'flex';
         }
         
         // 3. Oyuncu Profili Modalı Durumu Güncelleme
@@ -5029,8 +5036,8 @@ export class UIManager {
                 profileStatus.style.color = '#10b981';
                 if (profileGoogleContainer) profileGoogleContainer.style.display = 'none';
             } else {
-                profileStatus.textContent = 'İlerlemenizin silinmemesi için Google ile bağlayın:';
-                profileStatus.style.color = '#f43f5e'; // Red
+                profileStatus.textContent = 'İlerlemenizi buluta yedeklemek için Google ile giriş yapın:';
+                profileStatus.style.color = '#fbbf24'; // Warning yellow/amber
                 if (profileGoogleContainer) profileGoogleContainer.style.display = 'flex';
             }
         }
