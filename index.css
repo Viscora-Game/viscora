@@ -3982,8 +3982,9 @@ button:hover .icon-svg,
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35) !important;
 }
 
-#settings-modal .star-gate-card {
-    max-width: 420px;
+#settings-modal .star-gate-card,
+#profile-modal .star-gate-card {
+    max-width: 440px;
     max-height: 72vh;
     margin-bottom: 50px;
     overflow-y: auto;

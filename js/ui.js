@@ -5401,6 +5401,9 @@ export class UIManager {
                 
                 updateWidget();
                 modal.classList.add('hidden');
+                if (window.admobManager && this.getActiveScreenName() !== 'hud') {
+                    window.admobManager.showBanner();
+                }
                 this.showGlobalToast("Profil başarıyla kaydedildi!", true);
                 
                 // Profil değiştiğinde arka planda buluta hemen eşitle
@@ -5412,6 +5415,9 @@ export class UIManager {
         if (btnClose) {
             this.bindTouchClick(btnClose, () => {
                 modal.classList.add('hidden');
+                if (window.admobManager && this.getActiveScreenName() !== 'hud') {
+                    window.admobManager.showBanner();
+                }
             });
         }
         
@@ -5451,9 +5457,12 @@ export class UIManager {
             });
         }
         
-        // Wrap openProfileModal with tab reset
+        // Wrap openProfileModal with tab reset & banner ad hide
         const originalOpenProfileModal = openProfileModal;
         openProfileModal = (isFirstTime = false) => {
+            if (window.admobManager) {
+                window.admobManager.hideBanner();
+            }
             originalOpenProfileModal(isFirstTime);
             if (tabAvatar) {
                 // Reset active tab to avatar choice
