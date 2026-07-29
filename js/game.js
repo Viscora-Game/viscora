@@ -241,7 +241,7 @@ export class GameManager {
         // Initialize state indicators
         this.lastIsGameActive = null;
 
-        // Döngüyü Başlat
+        this._boundEmitParticles = this.emitParticles.bind(this);
         this.loop = this.loop.bind(this);
         requestAnimationFrame(this.loop);
     }
@@ -1812,8 +1812,8 @@ export class GameManager {
 
         // Düşmanları Güncelle & Çarpışma Kontrolü
         this.enemies.forEach(enemy => {
-            enemy.update(this.level, this.player, this.emitParticles.bind(this));
-            enemy.checkCollision(this.player, this.emitParticles.bind(this), () => {
+            enemy.update(this.level, this.player, this._boundEmitParticles);
+            enemy.checkCollision(this.player, this._boundEmitParticles, () => {
                 // Cilalama: Düşmana basınca kamera sallanır, oyun kısa süreli donar ve stomping sesi tetiklenir
                 this.shakeCamera(7, 10);
                 this.triggerHitStop(4); // 70ms donma efekti

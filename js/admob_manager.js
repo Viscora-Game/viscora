@@ -259,11 +259,36 @@ class AdMobManager {
         }
     }
 
+    _showAdLoadingOverlay() {
+        this._hideAdLoadingOverlay();
+        const overlay = document.createElement('div');
+        overlay.id = 'admob-loading-overlay';
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px); z-index: 999999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #fff; font-family: sans-serif; gap: 12px; pointer-events: auto;
+        `;
+        overlay.innerHTML = `
+            <div style="width: 38px; height: 38px; border: 3.5px solid rgba(255,255,255,0.15); border-top-color: #00f2fe; border-radius: 50%; animation: adSpin 0.8s linear infinite;"></div>
+            <div style="font-weight: 800; font-size: 1rem; color: #00f2fe; text-shadow: 0 0 10px rgba(0,242,254,0.5); letter-spacing: 0.5px;">🎬 Reklam Hazırlanıyor...</div>
+            <style>@keyframes adSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    _hideAdLoadingOverlay() {
+        const el = document.getElementById('admob-loading-overlay');
+        if (el) el.remove();
+    }
+
     /**
      * AdMob Ödüllü Reklam Gösterimi (Capacitor Native veya Web Fallback)
      */
     async showRewardedAd(adUnitId, onSuccess, onError) {
         console.log(`🎬 Ödüllü reklam yükleniyor... ID: ${adUnitId}`);
+        this._showAdLoadingOverlay();
 
         if (this.admobPlugin && this.initialized) {
             try {
@@ -279,20 +304,24 @@ class AdMobManager {
                 // Ödül event'ini dinle
                 const rewardHandler = this.admobPlugin.addListener('onRewardedVideoAdReward', () => {
                     console.log("✅ Ödüllü reklam: Ödül kazanıldı!");
+                    this._hideAdLoadingOverlay();
                     rewardHandler.remove();
                     if (onSuccess) onSuccess();
                 });
 
                 const dismissHandler = this.admobPlugin.addListener('onRewardedVideoAdDismissed', () => {
                     console.log("ℹ️ Ödüllü reklam kapatıldı.");
+                    this._hideAdLoadingOverlay();
                     dismissHandler.remove();
                 });
 
                 // Reklamı göster
                 await this.admobPlugin.showRewardVideoAd();
+                setTimeout(() => { this._hideAdLoadingOverlay(); }, 1000);
 
             } catch (err) {
                 console.warn("⚠️ Native reklam hatası:", err);
+                this._hideAdLoadingOverlay();
                 // Native başarısız olursa, ödülü yine de ver (kullanıcıyı cezalandırma)
                 if (onSuccess) onSuccess();
             }
@@ -300,6 +329,7 @@ class AdMobManager {
             // Web/Test ortamı simülasyonu
             console.log("ℹ️ Web simülasyonu: Reklam izleniyor (1.2 saniye)...");
             setTimeout(() => {
+                this._hideAdLoadingOverlay();
                 console.log("✅ Web simülasyonu: Ödül kazanıldı!");
                 if (onSuccess) onSuccess();
             }, 1200);

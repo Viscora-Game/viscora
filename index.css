@@ -3983,7 +3983,10 @@ button:hover .icon-svg,
 }
 
 #settings-modal .star-gate-card {
-    max-width: 400px;
+    max-width: 420px;
+    max-height: 72vh;
+    margin-bottom: 50px;
+    overflow-y: auto;
 }
 
 @media (max-width: 350px) {
