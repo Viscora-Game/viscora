@@ -981,11 +981,17 @@ export class GameManager {
      * Oyuncu reklam izledikten sonra bir sonraki bölüme geçer (0 yıldız).
      */
     rewardedSkipLevel() {
+        if (this._isAdBusy) return;
+        this._isAdBusy = true;
+        const resetAdBusy = () => { setTimeout(() => { this._isAdBusy = false; }, 1500); };
         const game = this;
+
         if (window.admobManager) {
             window.admobManager.triggerSkipAd(() => {
+                resetAdBusy();
                 game._executeRewardedSkip();
             }, (errorMsg) => {
+                resetAdBusy();
                 if (game.ui && typeof game.ui.showGlobalToast === 'function') {
                     game.ui.showGlobalToast(errorMsg, true);
                 } else {
@@ -1003,11 +1009,6 @@ export class GameManager {
             },
             afterAd: () => {
                 audio.resume();
-            },
-            adDismissed: () => {
-                audio.resume();
-            },
-            adViewed: () => {
                 game._executeRewardedSkip();
             },
             adBreakDone: (info) => {

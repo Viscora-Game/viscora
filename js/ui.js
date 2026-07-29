@@ -238,10 +238,9 @@ export class UIManager {
         this.mobileControls = document.getElementById('mobile-controls');
         this.shiftBtn = document.getElementById('btn-shift');
 
-        // Geliştirici Modu Tespiti (localhost, 127.0.0.1 veya özel şifre parametresi ile)
+        // Geliştirici Modu Tespiti (Özel URL parametresi ile)
         const searchLower = window.location.search.toLowerCase();
-        this.devMode = window.location.hostname === 'localhost' || 
-                       window.location.hostname === '127.0.0.1' || 
+        this.devMode = searchLower.includes('dev=true') || 
                        searchLower.includes('sudenazkarkin') || 
                        searchLower.includes('sudenazkarkın');
 
@@ -1402,6 +1401,7 @@ export class UIManager {
         if (btnOpenSettings && settingsModal) {
             this.bindTouchClick(btnOpenSettings, () => {
                 settingsModal.classList.remove('hidden');
+                if (window.admobManager) window.admobManager.hideBanner();
                 this.loadGoogleSignInSDK(); // Lazy load Google SDK to speed up game startup
                 
                 // Bulut kurtarma kodunu güncelle/tetikle
@@ -1661,6 +1661,7 @@ export class UIManager {
         if (btnCloseSettings && settingsModal) {
             this.bindTouchClick(btnCloseSettings, () => {
                 settingsModal.classList.add('hidden');
+                if (window.admobManager) window.admobManager.showBanner();
             });
         }
 

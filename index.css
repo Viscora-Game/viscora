@@ -283,16 +283,18 @@ body.game-active {
     box-shadow: 0 0 30px rgba(239, 68, 68, 0.15), 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
-/* Yazı Stilleri */
+/* Yazı Stilleri - Ultra Parlak VISCORA Başlığı */
 .game-title {
     font-size: 3.5rem;
-    font-weight: 800;
+    font-weight: 900;
     letter-spacing: 0.4rem;
-    background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.7) 50%, var(--color-low) 100%);
+    color: #ffffff;
+    background: linear-gradient(135deg, #ffffff 0%, #00f2fe 40%, #a855f7 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 0.2rem;
-    filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.3));
+    text-shadow: 0 0 25px rgba(0, 242, 254, 0.9), 0 0 45px rgba(168, 85, 247, 0.6);
+    filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.9));
 }
 
 .game-subtitle {
@@ -2186,9 +2188,13 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     }
     
     #start-screen .brand .game-title {
-        font-size: 2.2rem !important; /* Enlarged from 1.8rem */
+        font-size: 2.2rem !important;
         letter-spacing: 0.18rem !important;
         margin-bottom: 0 !important;
+        background: linear-gradient(135deg, #ffffff 0%, #00f2fe 50%, #e0e7ff 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        filter: drop-shadow(0 0 12px rgba(0, 242, 254, 0.8)) !important;
     }
     
     #start-screen .brand .game-subtitle {
@@ -2918,15 +2924,14 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 #admob-banner-placeholder {
     width: 320px;
     height: 50px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px dashed rgba(255, 255, 255, 0.12);
-    border-radius: 8px;
+    background: transparent;
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
     pointer-events: none;
     z-index: 999;
-    margin: 15px auto 5px auto;
+    margin: 5px auto;
     flex-shrink: 0;
 }
 
