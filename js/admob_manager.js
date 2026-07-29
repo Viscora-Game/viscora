@@ -340,6 +340,12 @@ class AdMobManager {
      * Ana Menü Banner Reklamını Gösterir
      */
     async showBanner() {
+        const activeScreen = (window.game && window.game.ui && typeof window.game.ui.getActiveScreenName === 'function') 
+            ? window.game.ui.getActiveScreenName() : '';
+        if (activeScreen === 'hud') {
+            this.hideBanner();
+            return;
+        }
         if (this.bannerVisible) return; // Zaten ekranda yayındaysa tekrar çağırma (git-gel/yanıp sönmeyi engeller)
         if (this.admobPlugin && this.initialized) {
             try {

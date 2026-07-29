@@ -1727,7 +1727,11 @@ export class UIManager {
         if (btnCloseSettings && settingsModal) {
             this.bindTouchClick(btnCloseSettings, () => {
                 settingsModal.classList.add('hidden');
-                if (window.admobManager) window.admobManager.showBanner();
+                if (this.getActiveScreenName() !== 'hud') {
+                    if (window.admobManager) window.admobManager.showBanner();
+                } else {
+                    if (window.admobManager) window.admobManager.hideBanner();
+                }
             });
         }
 
