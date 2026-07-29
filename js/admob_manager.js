@@ -310,6 +310,7 @@ class AdMobManager {
      * Ana Menü Banner Reklamını Gösterir
      */
     async showBanner() {
+        if (this.bannerVisible) return; // Zaten ekranda yayındaysa tekrar çağırma (git-gel/yanıp sönmeyi engeller)
         if (this.admobPlugin && this.initialized) {
             try {
                 await this.admobPlugin.showBanner({
@@ -335,6 +336,7 @@ class AdMobManager {
             if (bannerContainer) {
                 bannerContainer.style.display = 'flex';
             }
+            this.bannerVisible = true;
         }
     }
 
@@ -342,7 +344,8 @@ class AdMobManager {
      * Ana Menü Banner Reklamını Gizler
      */
     async hideBanner() {
-        if (this.admobPlugin && this.initialized && this.bannerVisible) {
+        if (!this.bannerVisible) return; // Zaten gizliyse tekrar çağırma
+        if (this.admobPlugin && this.initialized) {
             try {
                 await this.admobPlugin.hideBanner();
                 this.bannerVisible = false;
@@ -355,6 +358,7 @@ class AdMobManager {
             if (bannerContainer) {
                 bannerContainer.style.display = 'none';
             }
+            this.bannerVisible = false;
         }
     }
 }

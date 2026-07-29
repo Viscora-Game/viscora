@@ -830,7 +830,9 @@ export class GameManager {
             window.admobManager.triggerReviveAd(() => {
                 game._executeRewardedContinue();
             }, (errorMsg) => {
-                if (game.ui && typeof game.ui.showGlobalToast === 'function') {
+                if (game.ui && typeof game.ui.showAdLimitPopup === 'function') {
+                    game.ui.showAdLimitPopup(errorMsg);
+                } else if (game.ui && typeof game.ui.showGlobalToast === 'function') {
                     game.ui.showGlobalToast(errorMsg, true);
                 } else {
                     alert(errorMsg);
@@ -992,7 +994,9 @@ export class GameManager {
                 game._executeRewardedSkip();
             }, (errorMsg) => {
                 resetAdBusy();
-                if (game.ui && typeof game.ui.showGlobalToast === 'function') {
+                if (game.ui && typeof game.ui.showAdLimitPopup === 'function') {
+                    game.ui.showAdLimitPopup(errorMsg);
+                } else if (game.ui && typeof game.ui.showGlobalToast === 'function') {
                     game.ui.showGlobalToast(errorMsg, true);
                 } else {
                     alert(errorMsg);

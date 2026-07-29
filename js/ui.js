@@ -1378,7 +1378,7 @@ export class UIManager {
                         this.showGlobalToast("🎁 Tebrikler! 50 Hediye Kristal Hesabınıza Eklendi!", false);
                         CloudSaveManager.saveProgress();
                     }, (err) => {
-                        this.showGlobalToast(err, true);
+                        this.showAdLimitPopup(err);
                     });
                 }
             });
@@ -5072,6 +5072,58 @@ export class UIManager {
                 found.scores = scores;
             }
         }
+    }
+
+    /**
+     * Günlük Reklam Sınırı Ulaşıldığında Ön Katmanda Pop-up Uyarı Çıkarır
+     */
+    showAdLimitPopup(message) {
+        const oldPopups = document.querySelectorAll('.ad-limit-popup-overlay');
+        oldPopups.forEach(p => p.remove());
+
+        if (window.audio && typeof window.audio.playError === 'function') {
+            try { window.audio.playError(); } catch(e){}
+        }
+
+        const overlay = document.createElement('div');
+        overlay.className = 'ad-limit-popup-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        `;
+
+        overlay.innerHTML = `
+            <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.98) 100%); border: 2px solid #f59e0b; box-shadow: 0 0 35px rgba(245, 158, 11, 0.5); color: #fff; padding: 22px 28px; border-radius: 20px; text-align: center; max-width: 360px; width: 88%; font-family: sans-serif; position: relative;">
+                <div style="font-size: 2.5rem; margin-bottom: 6px;">⏳</div>
+                <div style="font-size: 1.15rem; font-weight: 800; color: #f59e0b; letter-spacing: 0.5px; margin-bottom: 8px;">REKLAM SINIRINA ULAŞILDI</div>
+                <div style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.45; margin-bottom: 18px; font-weight: 600;">${message}</div>
+                <button type="button" class="btn-ad-limit-close" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000; border: none; padding: 10px 28px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); transition: transform 0.15s ease;">ANLADIM</button>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        const closeBtn = overlay.querySelector('.btn-ad-limit-close');
+        if (closeBtn) {
+            closeBtn.onclick = () => { overlay.remove(); };
+        }
+        overlay.onclick = (e) => {
+            if (e.target === overlay) overlay.remove();
+        };
+
+        setTimeout(() => {
+            if (overlay && overlay.parentNode) {
+                overlay.remove();
+            }
+        }, 4500);
     }
 
     /**
