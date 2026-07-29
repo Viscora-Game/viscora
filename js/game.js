@@ -1031,21 +1031,43 @@ export class GameManager {
      */
     _executeRewardedSkip() {
         this.rewardedSkipUsed = true;
+        const nextLvl = this.currentLevel + 1;
+        
+        // 1. Bir sonraki bölümün kilit durumunu ve ilerlemesini hem bellekte hem de hafızada aç
+        if (nextLvl > this.unlockedLevel && nextLvl <= 30) {
+            this.unlockedLevel = nextLvl;
+            localStorage.setItem('viscora_unlocked_level', this.unlockedLevel.toString());
+        }
+
         try {
             let progress = JSON.parse(localStorage.getItem('viscora_progress') || '{}');
             const lvlKey = 'level_' + this.currentLevel;
-            if (!progress[lvlKey]) {
-                progress[lvlKey] = { stars: 0, completed: true, skipped: true };
-            }
-            const nextLvlKey = 'level_' + (this.currentLevel + 1);
-            if (!progress[nextLvlKey]) {
-                progress[nextLvlKey] = { unlocked: true };
-            }
+            progress[lvlKey] = { stars: 0, completed: true, skipped: true };
+            
+            const nextLvlKey = 'level_' + nextLvl;
+            progress[nextLvlKey] = { unlocked: true };
+            
             localStorage.setItem('viscora_last_save_time', Date.now().toString());
             localStorage.setItem('viscora_progress', JSON.stringify(progress));
-        } catch(e) { /* localStorage hatası yoksay */ }
-        this.ui.showScreen('hud');
-        this.nextLevel();
+        } catch(e) {}
+
+        // Bulut kaydını güncelle
+        import('./cloud_save.js').then(({ CloudSaveManager }) => {
+            CloudSaveManager.saveProgress(false);
+        }).catch(() => {});
+
+        // 2. Arayüzü güncelle ve DOĞRUDAN sonraki bölümü başlat (Ana menüye atma)
+        if (this.ui) {
+            this.ui.updateLevelButtonsUI();
+            this.ui.showScreen('hud');
+        }
+
+        if (nextLvl <= 30) {
+            this.currentLevel = nextLvl;
+            this.start();
+        } else {
+            this.goToMenu();
+        }
     }
 
     /**
