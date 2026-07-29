@@ -380,8 +380,30 @@ export class UIManager {
             `;
             const btn = container.querySelector('.custom-google-btn');
             if (btn) {
-                btn.onclick = (e) => {
+                btn.onclick = async (e) => {
                     e.preventDefault();
+                    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth) {
+                        try {
+                            const user = await window.Capacitor.Plugins.GoogleAuth.signIn();
+                            if (user && user.email) {
+                                const cleanEmail = user.email.trim().toLowerCase();
+                                localStorage.setItem('viscora_google_email', cleanEmail);
+                                const myUserId = user.id ? ('google_' + user.id) : (localStorage.getItem('viscora_user_id') || ('user_' + Math.random().toString(36).substring(2, 11)));
+                                localStorage.setItem('viscora_user_id', myUserId);
+                                
+                                CloudSaveManager.saveProgress(true).then(() => {
+                                    alert("✅ Google hesabınız (" + cleanEmail + ") başarıyla bağlandı!");
+                                    this.updateAllCloudStatusUI();
+                                }).catch(() => {
+                                    this.updateAllCloudStatusUI();
+                                });
+                                return;
+                            }
+                        } catch (err) {
+                            console.warn("Native Google Auth error/cancelled:", err);
+                        }
+                    }
+                    
                     const email = prompt("Bulut senkronizasyonu için Google E-posta adresinizi giriniz:", localStorage.getItem('viscora_google_email') || "");
                     if (email && email.trim() && email.includes('@')) {
                         const cleanEmail = email.trim().toLowerCase();
