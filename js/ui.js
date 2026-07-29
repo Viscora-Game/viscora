@@ -1384,9 +1384,11 @@ export class UIManager {
             });
         }
 
-        // Hediye Kristal reklam geri sayımını periyodik güncelle
+        // Hediye Kristal reklam geri sayımını sadece ana menüdeyken güncelle
         setInterval(() => {
-            this.updateFreeCrystalAdUI();
+            if (this.getActiveScreenName() === 'start') {
+                this.updateFreeCrystalAdUI();
+            }
         }, 1000);
 
         // Oyun Bitti Ekranı - Yeniden Dene

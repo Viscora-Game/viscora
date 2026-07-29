@@ -284,7 +284,7 @@ export class Enemy {
 
         // Dış neon glow
         ctx.shadowColor = this.color;
-        ctx.shadowBlur = 12 + Math.abs(pulse) * 3;
+        ctx.shadowBlur = 0;
 
         // Gövde gradyanı
         const grad = ctx.createRadialGradient(this.x - 3, this.y - 3, 2, this.x, this.y, currentRadius);
@@ -786,7 +786,7 @@ export class GelChaser extends Enemy {
 
         // Dış neon glow efekti
         ctx.shadowColor = glowColor;
-        ctx.shadowBlur = this.state === 'chase' ? (16 + pulse * 4) : (10 + Math.abs(pulse) * 2);
+        ctx.shadowBlur = 0;
 
         // 3D Kubbe gradyanı
         const grad = ctx.createRadialGradient(
@@ -1055,7 +1055,7 @@ export class TractorUFO {
         }
 
         ctx.shadowColor = this.color;
-        ctx.shadowBlur = 15 + Math.abs(pulse) * 3;
+        ctx.shadowBlur = 0;
 
         ctx.fillStyle = 'rgba(0, 240, 255, 0.8)';
         ctx.beginPath();
@@ -1338,7 +1338,7 @@ export class SweeperUFO {
 
             // 1. Dış Parlama (Outer neon glow)
             ctx.shadowColor = laserColor;
-            ctx.shadowBlur = 25;
+            ctx.shadowBlur = 0;
             ctx.fillStyle = this.laserType === 'pink' ? 'rgba(217, 70, 239, 0.3)' : (this.laserType === 'green' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(6, 182, 212, 0.3)');
             ctx.fillRect(this.laserX - 12, this.y + 10, 24, this.beamHeight);
 
@@ -1358,7 +1358,7 @@ export class SweeperUFO {
         }
 
         ctx.shadowColor = this.state === 'overheat' ? (Math.floor(this.pulseTime * 8) % 2 === 0 ? '#ffffff' : '#ff0055') : this.color;
-        ctx.shadowBlur = 15 + Math.abs(pulse) * 3;
+        ctx.shadowBlur = 0;
 
         ctx.fillStyle = this.state === 'overheat' ? '#ff3300' : 'rgba(255, 0, 85, 0.8)';
         ctx.beginPath();

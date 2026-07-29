@@ -321,7 +321,13 @@ class AdMobManager {
                 this.bannerVisible = true;
                 console.log("✅ Banner reklam gösterildi.");
             } catch (err) {
-                console.warn("⚠️ Banner gösterim hatası:", err);
+                try {
+                    await this.admobPlugin.resumeBanner();
+                    this.bannerVisible = true;
+                    console.log("✅ Banner reklam resume edildi.");
+                } catch (e) {
+                    console.warn("⚠️ Banner gösterim hatası:", err);
+                }
             }
         } else {
             // Web fallback — placeholder'ı göster
