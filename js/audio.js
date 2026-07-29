@@ -760,6 +760,15 @@ class AudioManager {
     }
 
     /**
+     * Victory / Reward Fanfare (Alias for playWin)
+     */
+    playFanfare() {
+        try {
+            this.playWin();
+        } catch(e) {}
+    }
+
+    /**
      * Start background music (Static MP3 with real-time filtering, or Procedural fallback)
      */
     startMusic() {

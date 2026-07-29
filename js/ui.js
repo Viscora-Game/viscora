@@ -1374,7 +1374,9 @@ export class UIManager {
                         localStorage.setItem('viscora_total_crystals', this.game.totalCrystals);
                         this.updateMenuCrystalsUI();
                         this.updateFreeCrystalAdUI();
-                        audio.playFanfare();
+                        if (typeof audio !== 'undefined' && typeof audio.playWin === 'function') {
+                            try { audio.playWin(); } catch(e){}
+                        }
                         this.showGlobalToast("🎁 Tebrikler! 50 Hediye Kristal Hesabınıza Eklendi!", false);
                         CloudSaveManager.saveProgress();
                     }, (err) => {
