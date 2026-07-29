@@ -400,6 +400,10 @@ export class UIManager {
                                 }).catch(() => {});
                             }
                             
+                            try {
+                                await window.Capacitor.Plugins.GoogleAuth.signOut();
+                            } catch(e) {}
+
                             const user = await window.Capacitor.Plugins.GoogleAuth.signIn();
                             if (user && user.email) {
                                 const cleanEmail = user.email.trim().toLowerCase();
@@ -4736,6 +4740,19 @@ export class UIManager {
             if (el && !el.classList.contains('hidden')) return name;
         }
         return 'start';
+    }
+
+    /**
+     * Menüdeki Toplam Kristal Sayacını Günceller
+     */
+    updateMenuCrystalsUI() {
+        const balance = this.game ? this.game.totalCrystals : (parseInt(localStorage.getItem('viscora_total_crystals')) || 0);
+        const menuCounter = document.getElementById('menu-crystal-count');
+        const shopCounter = document.getElementById('shop-crystal-balance');
+        const rewardsCounter = document.getElementById('rewards-crystal-balance');
+        if (menuCounter) menuCounter.textContent = balance;
+        if (shopCounter) shopCounter.textContent = balance;
+        if (rewardsCounter) rewardsCounter.textContent = balance;
     }
 
     /**
