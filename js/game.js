@@ -1441,8 +1441,6 @@ export class GameManager {
         if (this.state === 'PLAYING') {
             if (this.pausedForCustomizer) {
                 // Do not update physics while customizing controls
-            } else if (this.hitStopTimer > 0) {
-                this.hitStopTimer--; // Donma efekti sayaç düşüşü
             } else {
                 this.physicsAccumulator = (this.physicsAccumulator || 0) + elapsed;
                 const stepMs = 16.666; // ~60fps step
@@ -3249,7 +3247,7 @@ export class GameManager {
      * Ekran donması (Hit Stop) tetikler
      */
     triggerHitStop(duration) {
-        this.hitStopTimer = duration;
+        this.hitStopTimer = 0;
     }
 
     /**
@@ -3807,15 +3805,25 @@ export class GameManager {
         if (boardList) boardList.innerHTML = '<div style="color: #9ca3af; text-align:center; padding: 6px;">Skorlar yükleniyor...</div>';
         if (percentileText) percentileText.textContent = '';
 
+        // 1. Skoru Gönder ve Yüzdelik Sıralamayı Al
         fetch(`${API_BASE}/api/campaign/${levelNumber}/score`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: myUserId, username: username, time: timeValue })
         })
-        .then(res => {
-            if (!res.ok) throw new Error("Kampanya skoru kaydedilemedi.");
-            return res.json();
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+            if (percentileText && data && data.percentile !== null && data.percentile !== undefined) {
+                percentileText.innerHTML = `Süreniz en hızlı oyuncular arasında <span style="color: #34d399; font-weight: bold;">ilk %${data.percentile}'lik</span> dilimde! (Sıralama: ${data.rank || 1}/${data.totalPlayers || 1})`;
+            }
         })
+        .catch(err => console.warn("Kampanya skor gönderme:", err));
+
+        // 2. Genel Liderlik Tablosunu (İlk 3 Oyuncuyu) Çek ve Göster
+        fetch(`${API_BASE}/api/campaign/${levelNumber}/leaderboard`, {
+            method: 'GET'
+        })
+        .then(res => res.ok ? res.json() : null)
         .then(data => {
             if (boardList) {
                 boardList.innerHTML = '';
@@ -3839,16 +3847,12 @@ export class GameManager {
                         boardList.appendChild(row);
                     });
                 } else {
-                    boardList.innerHTML = '<div style="color: #9ca3af; text-align:center;">Henüz derece yok.</div>';
+                    boardList.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; padding:3px 0;"><span style="color:#f59e0b;">🥇 ${username} (Siz)</span><span style="color:#38bdf8; font-weight:bold;">${this.formatTime(timeValue)}</span></div>`;
                 }
-            }
-            if (percentileText && data && data.percentile !== null && data.percentile !== undefined) {
-                percentileText.innerHTML = `Süreniz en hızlı oyuncular arasında <span style="color: #34d399; font-weight: bold;">ilk %${data.percentile}'lik</span> dilimde! (Sıralama: ${data.rank || 1}/${data.totalPlayers || 1})`;
             }
         })
         .catch(err => {
-            console.error("Kampanya skor kaydetme hatası:", err);
-            if (boardList) boardList.innerHTML = '<div style="color: #9ca3af; text-align:center;">Derece yüklenemedi.</div>';
+            if (boardList) boardList.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; padding:3px 0;"><span style="color:#f59e0b;">🥇 ${username} (Siz)</span><span style="color:#38bdf8; font-weight:bold;">${this.formatTime(timeValue)}</span></div>`;
         });
     }
 
