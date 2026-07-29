@@ -3777,64 +3777,83 @@ export class GameManager {
             username = 'Oyuncu';
         }
         const myUserId = localStorage.getItem('viscora_user_id') || 'user_anon';
-        
         const API_BASE = 'https://viscora.onrender.com';
-            
-        // Reset container to loading state
+        
         const boardList = document.getElementById('win-leaderboard-list');
         const percentileText = document.getElementById('win-percentile-text');
-        if (boardList) boardList.innerHTML = '<div style="color: #9ca3af; text-align:center;">Skorlar yükleniyor...</div>';
-        if (percentileText) percentileText.textContent = '';
-        
+
+        // Yardımcı Render Fonksiyonu
+        const renderBoardData = (data) => {
+            if (!boardList) return;
+            boardList.innerHTML = '';
+            if (data && data.leaderboard && data.leaderboard.length > 0) {
+                data.leaderboard.forEach((s, idx) => {
+                    const medalEmoji = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : '🥉');
+                    const medalColor = idx === 0 ? '#f59e0b' : (idx === 1 ? '#cbd5e1' : '#b45309');
+                    const row = document.createElement('div');
+                    row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.03);';
+                    
+                    const left = document.createElement('span');
+                    left.style.cssText = 'color:#f3f4f6; display:flex; align-items:center; gap:6px; font-size:0.85rem;';
+                    left.innerHTML = `<span style="color: ${medalColor}">${medalEmoji}</span> ${s.username}`;
+                    
+                    const right = document.createElement('span');
+                    right.style.cssText = 'color:#38bdf8; font-weight:bold; font-size:0.85rem;';
+                    right.textContent = this.formatTime(s.time);
+                    
+                    row.appendChild(left);
+                    row.appendChild(right);
+                    boardList.appendChild(row);
+                });
+            } else {
+                boardList.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; padding:3px 0;"><span style="color:#f59e0b;">🥇 ${username} (Siz)</span><span style="color:#38bdf8; font-weight:bold;">${this.formatTime(timeValue)}</span></div>`;
+            }
+
+            if (percentileText) {
+                if (data && data.percentile !== undefined && data.percentile !== null) {
+                    percentileText.innerHTML = `Süreniz en hızlı oyuncular arasında <span style="color: #34d399; font-weight: bold;">ilk %${data.percentile}'lik</span> dilimde!`;
+                } else {
+                    percentileText.innerHTML = `⏱️ Bölüm Süreniz: <span style="color: #38bdf8; font-weight: bold;">${this.formatTime(timeValue)}</span>`;
+                }
+            }
+        };
+
+        // 1. ÖNCE ANINDA YEREL ÖNBELLEKTEN VEYA OYUNCUNUN KENDİ SKORUNDAN GÖSTER (0ms Gecikme)
+        const cacheKey = `viscora_leaderboard_lvl_${levelNumber}`;
+        let cachedData = null;
+        try {
+            const raw = localStorage.getItem(cacheKey);
+            if (raw) cachedData = JSON.parse(raw);
+        } catch(e){}
+
+        renderBoardData(cachedData);
+
+        // 2. ARKA PLANDA SUNUCUDAN SKORU İŞLE (4 Saniye Zamanaşımı Koruması)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+
         fetch(`${API_BASE}/api/campaign/${levelNumber}/score`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: myUserId, username: username, time: timeValue })
+            body: JSON.stringify({ userId: myUserId, username: username, time: timeValue }),
+            signal: controller.signal
         })
         .then(res => {
-            if (!res.ok) throw new Error("Kampanya skoru kaydedilemedi.");
+            clearTimeout(timeoutId);
+            if (!res.ok) throw new Error("Sunucu yanıt vermedi.");
             return res.json();
         })
         .then(data => {
-            if (boardList) {
-                boardList.innerHTML = '';
-                if (data.leaderboard && data.leaderboard.length > 0) {
-                    data.leaderboard.forEach((s, idx) => {
-                        const medalEmoji = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : '🥉');
-                        const medalColor = idx === 0 ? '#f59e0b' : (idx === 1 ? '#cbd5e1' : '#b45309');
-                        const row = document.createElement('div');
-                        row.style.display = 'flex';
-                        row.style.justifyContent = 'space-between';
-                        row.style.alignItems = 'center';
-                        row.style.padding = '3px 0';
-                        row.style.borderBottom = '1px solid rgba(255,255,255,0.03)';
-                        
-                        const left = document.createElement('span');
-                        left.style.color = '#f3f4f6';
-                        left.style.display = 'flex';
-                        left.style.alignItems = 'center';
-                        left.style.gap = '6px';
-                        left.innerHTML = `<span style="color: ${medalColor}">${medalEmoji}</span> ${s.username}`;
-                        
-                        const right = document.createElement('span');
-                        right.style.color = '#38bdf8';
-                        right.textContent = this.formatTime(s.time);
-                        
-                        row.appendChild(left);
-                        row.appendChild(right);
-                        boardList.appendChild(row);
-                    });
-                } else {
-                    boardList.innerHTML = '<div style="color: #9ca3af; text-align:center;">Henüz derece yok.</div>';
-                }
-            }
-            if (percentileText && data.percentile !== null) {
-                percentileText.innerHTML = `Süreniz en hızlı oyuncular arasında <span style="color: #34d399; font-weight: bold;">ilk %${data.percentile}'lik</span> dilimde! (Sıralama: ${data.rank}/${data.totalPlayers})`;
+            if (data && data.status === 'success') {
+                try {
+                    localStorage.setItem(cacheKey, JSON.stringify(data));
+                } catch(e){}
+                renderBoardData(data);
             }
         })
         .catch(err => {
-            console.error("Kampanya skor kaydetme hatası:", err);
-            if (boardList) boardList.innerHTML = '<div style="color: #ef4444; text-align:center;">Yükleme başarısız.</div>';
+            clearTimeout(timeoutId);
+            console.warn("Skor güncelleme sunucu arka plan bildirimi:", err.message);
         });
     }
 
