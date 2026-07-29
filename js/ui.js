@@ -370,6 +370,15 @@ export class UIManager {
     }
 
     initGoogleSignInButton() {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth) {
+            try {
+                window.Capacitor.Plugins.GoogleAuth.initialize({
+                    clientId: '15853335626-gtdu2riughd6lf3jf3gig8mfl8pr1v7k.apps.googleusercontent.com',
+                    grantOfflineAccess: false
+                }).catch(() => {});
+            } catch(e) {}
+        }
+
         const renderFallbackGoogleBtn = (container) => {
             if (!container) return;
             container.innerHTML = `
@@ -384,6 +393,13 @@ export class UIManager {
                     e.preventDefault();
                     if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth) {
                         try {
+                            if (typeof window.Capacitor.Plugins.GoogleAuth.initialize === 'function') {
+                                await window.Capacitor.Plugins.GoogleAuth.initialize({
+                                    clientId: '15853335626-gtdu2riughd6lf3jf3gig8mfl8pr1v7k.apps.googleusercontent.com',
+                                    grantOfflineAccess: false
+                                }).catch(() => {});
+                            }
+                            
                             const user = await window.Capacitor.Plugins.GoogleAuth.signIn();
                             if (user && user.email) {
                                 const cleanEmail = user.email.trim().toLowerCase();
@@ -391,29 +407,24 @@ export class UIManager {
                                 const myUserId = user.id ? ('google_' + user.id) : (localStorage.getItem('viscora_user_id') || ('user_' + Math.random().toString(36).substring(2, 11)));
                                 localStorage.setItem('viscora_user_id', myUserId);
                                 
-                                CloudSaveManager.saveProgress(true).then(() => {
-                                    alert("✅ Google hesabınız (" + cleanEmail + ") başarıyla bağlandı!");
+                                CloudSaveManager.syncByGoogleEmail(cleanEmail, user.id).then((res) => {
+                                    if (res && res.restored) {
+                                        alert("🎉 Hoş geldiniz! (" + cleanEmail + ") Bulut hesabınızdaki kayıtlı yıldızlar, seviyeler ve kristalleriniz başarıyla geri yüklendi!");
+                                    } else {
+                                        alert("✅ Google hesabınız (" + cleanEmail + ") başarıyla bağlandı!");
+                                    }
+                                    if (this.game && typeof this.game.initProgress === 'function') {
+                                        this.game.initProgress();
+                                    }
                                     this.updateAllCloudStatusUI();
+                                    this.updateLevelButtonsUI();
                                 }).catch(() => {
                                     this.updateAllCloudStatusUI();
                                 });
-                                return;
                             }
                         } catch (err) {
-                            console.warn("Native Google Auth error/cancelled:", err);
+                            console.warn("Google Sign-In penceresi kapatıldı:", err);
                         }
-                    }
-                    
-                    const email = prompt("Bulut senkronizasyonu için Google E-posta adresinizi giriniz:", localStorage.getItem('viscora_google_email') || "");
-                    if (email && email.trim() && email.includes('@')) {
-                        const cleanEmail = email.trim().toLowerCase();
-                        localStorage.setItem('viscora_google_email', cleanEmail);
-                        CloudSaveManager.saveProgress(true).then(() => {
-                            alert("✅ Google hesabınız (" + cleanEmail + ") başarıyla bağlandı ve bulut senkronizasyonu aktif edildi!");
-                            this.updateAllCloudStatusUI();
-                        }).catch(() => {
-                            this.updateAllCloudStatusUI();
-                        });
                     }
                 };
             }
@@ -1348,6 +1359,31 @@ export class UIManager {
         this.bindTouchClick(document.getElementById('btn-rewarded-skip'), () => {
             this.game.rewardedSkipLevel();
         });
+
+        // Ana Menü Ücretsiz Hediye Kristal Reklam Butonu (Günde 3x 50 Kristal)
+        const btnFreeCrystalAd = document.getElementById('btn-free-crystal-ad');
+        if (btnFreeCrystalAd) {
+            this.bindTouchClick(btnFreeCrystalAd, () => {
+                if (window.admobManager) {
+                    window.admobManager.triggerCrystalAd(() => {
+                        this.game.totalCrystals += 50;
+                        localStorage.setItem('viscora_total_crystals', this.game.totalCrystals);
+                        this.updateMenuCrystalsUI();
+                        this.updateFreeCrystalAdUI();
+                        audio.playFanfare();
+                        this.showGlobalToast("🎁 Tebrikler! 50 Hediye Kristal Hesabınıza Eklendi!", false);
+                        CloudSaveManager.saveProgress();
+                    }, (err) => {
+                        this.showGlobalToast(err, true);
+                    });
+                }
+            });
+        }
+
+        // Hediye Kristal reklam geri sayımını periyodik güncelle
+        setInterval(() => {
+            this.updateFreeCrystalAdUI();
+        }, 1000);
 
         // Oyun Bitti Ekranı - Yeniden Dene
         this.bindTouchClick(document.getElementById('btn-retry'), () => {
@@ -4652,10 +4688,10 @@ export class UIManager {
             }
         }
 
-        if (screenName === 'start') {
-            if (window.admobManager) window.admobManager.showBanner();
-        } else if (screenName === 'hud') {
+        if (screenName === 'hud') {
             if (window.admobManager) window.admobManager.hideBanner();
+        } else {
+            if (window.admobManager) window.admobManager.showBanner();
         }
 
         // Belirtilen ekranı göster
@@ -4677,6 +4713,10 @@ export class UIManager {
                 this.startRewardsTimers();
             }
             
+            if (screenName === 'start') {
+                this.updateFreeCrystalAdUI();
+            }
+            
             if (screenName === 'pause' || screenName === 'gameover' || screenName === 'win') {
                 const btnPause = document.getElementById('btn-main-menu');
                 const btnGameover = document.getElementById('btn-main-menu-gameover');
@@ -4696,6 +4736,24 @@ export class UIManager {
             if (el && !el.classList.contains('hidden')) return name;
         }
         return 'start';
+    }
+
+    /**
+     * Ana Menüdeki Ücretsiz Hediye Kristal Reklam Butonunun Durumunu & Geri Sayımını Günceller
+     */
+    updateFreeCrystalAdUI() {
+        const btn = document.getElementById('btn-free-crystal-ad');
+        const badge = document.getElementById('free-crystal-badge');
+        if (!btn || !badge || !window.admobManager) return;
+
+        const status = window.admobManager.getCrystalStatus();
+        if (status.available) {
+            btn.classList.remove('cooldown');
+            badge.textContent = `${status.remainingCount}/3`;
+        } else {
+            btn.classList.add('cooldown');
+            badge.textContent = `⏳ ${status.formattedTime}`;
+        }
     }
 
     /**

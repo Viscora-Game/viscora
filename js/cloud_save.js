@@ -266,5 +266,46 @@ export class CloudSaveManager {
         }
         return { success: false, error: 'Bilinmeyen hata.' };
     }
+
+    /**
+     * E-posta veya GoogleID ile MongoDB'deki en güncel kaydı çeker ve yerel hafızaya uygular.
+     */
+    static async syncByGoogleEmail(email, googleId = null) {
+        if (!email) return { success: false, error: 'Geçersiz e-posta' };
+        
+        const cleanEmail = email.trim().toLowerCase();
+        localStorage.setItem('viscora_google_email', cleanEmail);
+        
+        try {
+            const response = await fetch(`${API_BASE}/api/user/sync_email`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: cleanEmail,
+                    googleId: googleId,
+                    currentSaveData: this.getSaveData()
+                })
+            });
+
+            if (response.ok) {
+                const res = await response.json();
+                if (res.status === 'success') {
+                    if (res.userId) localStorage.setItem('viscora_user_id', res.userId);
+                    if (res.syncCode) localStorage.setItem('viscora_sync_code', res.syncCode);
+                    
+                    if (res.saveData && Object.keys(res.saveData).length > 0) {
+                        this.applySaveData(res.saveData);
+                    }
+                    return { success: true, restored: !!res.restored, saveData: res.saveData };
+                }
+            }
+        } catch (e) {
+            console.warn("syncByGoogleEmail network fallback:", e);
+        }
+
+        return await this.saveProgress(false);
+    }
 }
 

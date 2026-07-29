@@ -785,7 +785,7 @@
                     <h1 class="game-title">VISCORA</h1>
                     <div class="game-subtitle">VISCOUS ODYSSEY</div>
                     
-                    <!-- Oyuncu Profil Kartı (Karakter & Bakiye) -->
+                    <!-- Oyuncu Profil Kartı (Karakter & Bakiye & Hediye Reklam Kutusu) -->
                     <div id="player-profile-widget">
                         <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v369" alt="Avatar" />
                         <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px;">
@@ -793,10 +793,17 @@
                             <div id="profile-widget-cloud-status" style="font-size: 0.58rem; font-weight: 800; display: flex; align-items: center; gap: 2px;"></div>
                         </div>
                         <div class="profile-divider"></div>
-                        <div class="profile-crystals">
+                        <div class="profile-crystals" title="Toplam Kristalleriniz">
                             <svg class="icon-svg icon-gem" style="width: 14px; height: 14px; margin-right: 4px; fill: #00f2fe; filter: drop-shadow(0 0 5px #00f2fe);"><use href="#icon-gem"></use></svg>
                             <span id="menu-crystal-count">0</span>
                         </div>
+                        <div class="profile-divider"></div>
+                        <button id="btn-free-crystal-ad" class="profile-free-crystal-btn" type="button" title="Ücretsiz 50 Kristal Kazan (Günde 3 Adet)">
+                            <span class="gift-icon">🎁</span>
+                            <svg class="icon-svg icon-gem" style="width: 13px; height: 13px; fill: #00f2fe; filter: drop-shadow(0 0 4px #00f2fe);"><use href="#icon-gem"></use></svg>
+                            <span class="video-icon">📹</span>
+                            <span id="free-crystal-badge" class="free-crystal-badge">3/3</span>
+                        </button>
                     </div>
                 </div>
                 <!-- Üst Butonlar (Rehber ve Ses) -->

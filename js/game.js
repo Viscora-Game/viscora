@@ -1275,6 +1275,10 @@ export class GameManager {
      * Parçacık Sistemi Ekleme Yardımcısı
      */
     emitParticles(x, y, type, color, count = 5) {
+        if (!this.particles) this.particles = [];
+        if (this.particles.length >= 70) {
+            this.particles.splice(0, Math.min(count, 25));
+        }
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
             let speed = 0.5 + Math.random() * 3;
@@ -2556,21 +2560,16 @@ export class GameManager {
                         
                         this.ctx.restore();
                     } else if (p.type === 'toxic') {
-                        this.ctx.save();
                         this.ctx.globalAlpha = p.alpha;
                         this.ctx.fillStyle = p.color;
-                        this.ctx.shadowColor = p.color;
-                        this.ctx.shadowBlur = 5;
                         this.ctx.beginPath();
                         this.ctx.arc(p.x - this.camera.x, p.y - this.camera.y, p.size, 0, Math.PI * 2);
                         this.ctx.fill();
                         
                         this.ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-                        this.ctx.shadowBlur = 0;
                         this.ctx.beginPath();
                         this.ctx.arc(p.x - this.camera.x - p.size*0.3, p.y - this.camera.y - p.size*0.3, p.size*0.3, 0, Math.PI * 2);
                         this.ctx.fill();
-                        this.ctx.restore();
                     } else if (p.type === 'binary') {
                         this.ctx.save();
                         this.ctx.globalAlpha = p.alpha;

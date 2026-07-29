@@ -9,7 +9,7 @@ const ADMOB_CONFIG = {
     interstitialId: 'ca-app-pub-5810332619798187/8349043080',
     skipLevelId: 'ca-app-pub-5810332619798187/9996528642',
     reviveId: 'ca-app-pub-5810332619798187/2049489939',
-    crystalId: 'ca-app-pub-5810332619798187/4935773657',
+    crystalId: 'ca-app-pub-5810332619798187/8798569413',
     
     // Günlük kullanım limitleri
     MAX_SKIPS_PER_24H: 3,
@@ -47,6 +47,8 @@ class AdMobManager {
                 });
                 this.initialized = true;
                 console.log("✅ AdMob SDK başarıyla başlatıldı (Capacitor Native).");
+                // SDK başlatılır başlatılmaz banner'ı otomatik göster
+                this.showBanner();
             } else {
                 console.log("ℹ️ AdMob plugin bulunamadı. Web/Test modunda çalışılıyor.");
             }
@@ -177,10 +179,53 @@ class AdMobManager {
     }
 
     /**
-     * Ücretsiz Kristal Ödüllü Reklamını Tetikler
+     * Ücretsiz Hediye Kristal Reklam Durumunu ve Geri Sayımını Döner
+     */
+    getCrystalStatus() {
+        const now = Date.now();
+        let startTime = parseInt(localStorage.getItem('viscora_ad_crystal_start_time')) || 0;
+        let count = parseInt(localStorage.getItem('viscora_ad_crystal_count')) || 0;
+
+        if (startTime > 0 && now - startTime >= ADMOB_CONFIG.COOLDOWN_24H_MS) {
+            localStorage.removeItem('viscora_ad_crystal_start_time');
+            localStorage.setItem('viscora_ad_crystal_count', '0');
+            startTime = 0;
+            count = 0;
+        }
+
+        const remainingMs = startTime > 0 ? (startTime + ADMOB_CONFIG.COOLDOWN_24H_MS) - now : 0;
+        const available = count < 3; // Günde max 3 reklam
+
+        return {
+            available: available,
+            count: count,
+            remainingCount: Math.max(0, 3 - count),
+            max: 3,
+            remainingMs: Math.max(0, remainingMs),
+            formattedTime: this.formatRemainingTime(remainingMs)
+        };
+    }
+
+    /**
+     * Ücretsiz Kristal Ödüllü Reklamını Tetikler (Günde 3 Adet, 24 saatlik sayaç ilk reklamda başlar)
      */
     triggerCrystalAd(onSuccess, onError) {
+        const status = this.getCrystalStatus();
+        if (!status.available) {
+            if (onError) onError(`Günlük hediye kristal sınırına ulaşıldı (3/3). Kalan süre: ${status.formattedTime}`);
+            return;
+        }
+
         this.showRewardedAd(ADMOB_CONFIG.crystalId, () => {
+            const now = Date.now();
+            let startTime = parseInt(localStorage.getItem('viscora_ad_crystal_start_time')) || 0;
+            let count = parseInt(localStorage.getItem('viscora_ad_crystal_count')) || 0;
+
+            if (count === 0 || startTime === 0) {
+                localStorage.setItem('viscora_ad_crystal_start_time', now.toString());
+            }
+            localStorage.setItem('viscora_ad_crystal_count', (count + 1).toString());
+
             if (onSuccess) onSuccess();
         }, onError);
     }
