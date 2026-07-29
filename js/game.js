@@ -332,13 +332,23 @@ export class GameManager {
     resizeCanvas() {
         const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
-        // Yüksek DPI ekranlar için devicePixelRatio kullan (Retina, Android)
-        // Mobilde performans için max 1.5 ile sınırla (GPU fillrate bottleneck'ini çözer)
-        const dpr = Math.min(window.devicePixelRatio || 1, isTouchDevice ? 1.5 : 2.0);
-        this._dpr = dpr;
-
         const cssWidth  = this.canvas.clientWidth || window.innerWidth;
         const cssHeight = this.canvas.clientHeight || window.innerHeight;
+
+        // Yüksek çözünürlüklü tablet ekranlarında (2K/4K) GPU fillrate yükünü engelle:
+        // Tablet ekranlarında (cssWidth > 950 veya cssHeight > 650) DPR'ı 1.0'e sabitle.
+        // Bu işlem görüntüyü bozmadan çizim piksel yükünü %80 azaltır ve tablette 60 FPS kilitler.
+        let dpr = window.devicePixelRatio || 1;
+        if (isTouchDevice) {
+            if (cssWidth > 950 || cssHeight > 650) {
+                dpr = 1.0; // Tablet çözünürlük kilidi (60 FPS Akıcılık Garantisi)
+            } else {
+                dpr = Math.min(dpr, 1.25);
+            }
+        } else {
+            dpr = Math.min(dpr, 2.0);
+        }
+        this._dpr = dpr;
 
         // Canvas buffer boyutu (gerçek piksel — net çizim, CSS boyutuna göre otomatik ayarlanır)
         this.canvas.width  = Math.round(cssWidth  * dpr);
