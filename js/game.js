@@ -597,6 +597,9 @@ export class GameManager {
             this.rewardedSkipUsed = false;
         }
         this.level.loadLevel(this.currentLevel);
+        if (window.admobManager) {
+            window.admobManager.hideBanner();
+        }
         
         // Cache level bounds to optimize minimap rendering and camera boundaries performance
         this.levelMaxY = 600;
