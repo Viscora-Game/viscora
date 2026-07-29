@@ -1506,7 +1506,8 @@ export class Player {
         } else {
             ctx.shadowColor = this.viscosity.color;
         }
-        ctx.shadowBlur = Math.min(totalGlow, 20); // Performans için gölge bulanıklığını 20px ile sınırla
+        const isTouchDev = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        ctx.shadowBlur = isTouchDev ? 0 : Math.min(totalGlow, 20); // Performans için mobilde 0, masaüstünde 20px ile sınırla
 
         // Şekli Bezier eğrileriyle yumuşatılmış olarak çiz
         ctx.beginPath();
