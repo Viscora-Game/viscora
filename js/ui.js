@@ -522,71 +522,19 @@ export class UIManager {
      */
     bindTouchClick(btn, callback) {
         if (!btn) return;
-        let triggered = false;
-        let lastTouchTime = 0;
-        
-        let startX = 0;
-        let startY = 0;
-        let isScrolling = false;
+        let lastClickTime = 0;
 
-        btn.addEventListener('touchstart', (e) => {
-            if (e.touches && e.touches[0]) {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                isScrolling = false;
-            }
-        }, { passive: true });
+        btn.addEventListener('click', (e) => {
+            const now = Date.now();
+            if (now - lastClickTime < 200) return;
+            lastClickTime = now;
 
-        btn.addEventListener('touchmove', (e) => {
-            if (e.touches && e.touches[0]) {
-                const dx = e.touches[0].clientX - startX;
-                const dy = e.touches[0].clientY - startY;
-                // Tablet ve büyük dokunmatik ekranlar için kaydırma toleransını 24 piksele çıkar
-                if (Math.abs(dx) > 24 || Math.abs(dy) > 24) {
-                    isScrolling = true;
-                }
-            }
-        }, { passive: true });
-
-        const handleEvent = (e) => {
-            // Hızlı tıklama sızmasını önle (Gameover, Win, Pause ekranlarındaki butonları 300ms kilitle)
-            if (this.screenShowTime && Date.now() - this.screenShowTime < 300) {
-                const isMenuButton = btn.closest('#gameover-screen') || 
-                                     btn.closest('#win-screen') || 
-                                     btn.closest('#pause-screen');
-                if (isMenuButton) {
-                    return;
-                }
-            }
-
-            if (triggered) return;
-            triggered = true;
-            setTimeout(() => { triggered = false; }, 250);
-            
-            // Unconditionally unlock Web Audio on menu button interaction (valid gesture)
             if (typeof audio !== 'undefined') {
                 audio.init();
                 audio.unlock();
             }
-            
+
             callback(e);
-        };
-
-        btn.addEventListener('touchend', (e) => {
-            if (isScrolling) return; // Kaydırma yapılıyorsa tıklamayı es geç
-            lastTouchTime = Date.now();
-            if (e.cancelable) {
-                e.preventDefault();
-            }
-            handleEvent(e);
-        }, { passive: false });
-
-        btn.addEventListener('click', (e) => {
-            // Eğer son 400ms içinde dokunmatik tıklama tetiklendiyse mükerrer tıklamayı es geç, yoksa çalıştır
-            if (Date.now() - lastTouchTime < 400) {
-                return;
-            }
-            handleEvent(e);
         });
     }
 
