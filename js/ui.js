@@ -537,12 +537,9 @@ export class UIManager {
         if (!btn) return;
         let lastClickTime = 0;
 
-        const handleTap = (e) => {
-            if (e && e.type === 'touchend') {
-                try { e.preventDefault(); } catch(err) {}
-            }
+        btn.addEventListener('click', (e) => {
             const now = Date.now();
-            if (now - lastClickTime < 300) return;
+            if (now - lastClickTime < 200) return;
             lastClickTime = now;
 
             try {
@@ -557,10 +554,7 @@ export class UIManager {
             } catch(err) {
                 console.error("Button click error:", err);
             }
-        };
-
-        btn.addEventListener('touchend', handleTap, { passive: false });
-        btn.addEventListener('click', handleTap);
+        });
     }
 
     /**

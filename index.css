@@ -113,9 +113,7 @@ html, body {
 }
 
 .screen:not(#start-screen) {
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    background: radial-gradient(circle at center, rgba(8, 8, 14, 0.88) 0%, rgba(3, 3, 6, 0.96) 100%) !important;
+    background: radial-gradient(circle at center, rgba(12, 12, 22, 0.97) 0%, rgba(5, 5, 12, 0.99) 100%) !important;
 }
 
 #start-screen {
@@ -2614,9 +2612,7 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 .star-gate-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(5,5,10,0.82);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(5, 5, 12, 0.95) !important;
     display: flex;
     align-items: center;
     justify-content: center;
