@@ -3325,6 +3325,8 @@ export class GameManager {
                 life: 150 + Math.random() * 60,
                 maxLife: 150 + Math.random() * 60
             });
+        }
+        
         if (!this.splatters) this.splatters = [];
         if (this.splatters.length >= 40) {
             this.splatters.splice(0, Math.min(splatterGroup.length, this.splatters.length));
