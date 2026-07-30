@@ -1797,6 +1797,8 @@ export class UIManager {
 
         window.addEventListener('viscora_cloud_restored', (e) => {
             alert("Bulutta daha yeni bir ilerleme bulundu! Verileriniz güncelleniyor...");
+        });
+
         // Otomatik Hata Bildirimi (Crash Reporter) Buton Dinleyicileri
         const btnSubmitCrash = document.getElementById('btn-submit-crash-report');
         const btnCloseCrash = document.getElementById('btn-close-crash-report');
