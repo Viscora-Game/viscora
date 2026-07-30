@@ -426,14 +426,8 @@ export class UIManager {
                         cleanEmail = (user.email || '').trim().toLowerCase();
                         displayName = user.name || user.givenName || (cleanEmail ? cleanEmail.split('@')[0] : 'Oyuncu');
                     } else {
-                        // GMS bulunmayan Huawei cihazları için yedek e-posta giriş istemcisi
-                        const inputEmail = prompt("Google E-posta Adresinizi Giriniz (Huawei / Manuel Bağlantı):", localStorage.getItem('viscora_google_email') || '');
-                        if (inputEmail && inputEmail.includes('@')) {
-                            cleanEmail = inputEmail.trim().toLowerCase();
-                            displayName = cleanEmail.split('@')[0];
-                        } else {
-                            return; // İptal edildi
-                        }
+                        this.showGlobalToast("⚠️ Giriş yapılamadı veya iptal edildi.", false);
+                        return;
                     }
 
                     if (cleanEmail) {
@@ -537,18 +531,27 @@ export class UIManager {
         if (!btn) return;
         let lastClickTime = 0;
 
-        btn.addEventListener('click', (e) => {
+        const handleTap = (e) => {
             const now = Date.now();
-            if (now - lastClickTime < 200) return;
+            if (now - lastClickTime < 250) return;
             lastClickTime = now;
 
-            if (typeof audio !== 'undefined') {
-                audio.init();
-                audio.unlock();
-            }
+            try {
+                if (typeof audio !== 'undefined') {
+                    audio.init();
+                    audio.unlock();
+                }
+            } catch(ae) {}
 
-            callback(e);
-        });
+            try {
+                callback(e);
+            } catch(err) {
+                console.error("Button click error:", err);
+            }
+        };
+
+        btn.addEventListener('pointerup', handleTap, { passive: true });
+        btn.addEventListener('click', handleTap);
     }
 
     /**
@@ -4752,6 +4755,10 @@ export class UIManager {
             const screen = this.screens[screenName];
             if (screen) {
                 screen.classList.remove('hidden');
+            } else {
+                if (this.screens['start']) {
+                    this.screens['start'].classList.remove('hidden');
+                }
             }
 
             if (screenName === 'rewards') {
