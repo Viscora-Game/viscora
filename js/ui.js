@@ -398,6 +398,8 @@ export class UIManager {
             if (btn) {
                 btn.onclick = async (e) => {
                     e.preventDefault();
+                    let user = null;
+
                     if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth) {
                         try {
                             if (typeof window.Capacitor.Plugins.GoogleAuth.initialize === 'function') {
@@ -411,53 +413,65 @@ export class UIManager {
                                 await window.Capacitor.Plugins.GoogleAuth.signOut();
                             } catch(signOutErr) {}
 
-                            const user = await window.Capacitor.Plugins.GoogleAuth.signIn();
-                            if (user && (user.email || user.id)) {
-                                const cleanEmail = (user.email || '').trim().toLowerCase();
-                                if (cleanEmail) {
-                                    localStorage.setItem('viscora_google_email', cleanEmail);
-                                }
-                                
-                                const displayName = user.name || user.givenName || (cleanEmail ? cleanEmail.split('@')[0] : 'Oyuncu');
-                                const currentAuthor = localStorage.getItem('viscora_author_name');
-                                if (!currentAuthor || currentAuthor === 'Oyuncu') {
-                                    localStorage.setItem('viscora_author_name', displayName);
-                                }
-                                
-                                localStorage.setItem('viscora_username_set', 'true');
-                                
-                                const myUserId = user.id ? ('google_' + user.id) : (localStorage.getItem('viscora_user_id') || ('user_' + Math.random().toString(36).substring(2, 11)));
-                                localStorage.setItem('viscora_user_id', myUserId);
-                                
-                                // Modal kapat ve UI güncelle
-                                const profileModal = document.getElementById('profile-settings-modal');
-                                if (profileModal) profileModal.classList.add('hidden');
-                                
-                                this.updateAllCloudStatusUI();
-                                this.updateMenuCrystalsUI();
-                                
-                                alert("🎉 Google hesabınız (" + (cleanEmail || displayName) + ") başarıyla bağlandı!\n\nBulut senkronizasyonu aktif.");
-                                
-                                // Bulut senkronizasyonu çalıştır
-                                try {
-                                    const res = await CloudSaveManager.syncByGoogleEmail(cleanEmail, user.id);
-                                    if (res && res.restored) {
-                                        if (this.game && typeof this.game.initProgress === 'function') {
-                                            this.game.initProgress();
-                                        }
-                                        this.updateMenuCrystalsUI();
-                                        this.buildLevelSelectionUI();
-                                        this.updateLevelButtonsUI();
-                                        this.showGlobalToast("🎉 Bulut verileriniz başarıyla yüklendi!", true);
-                                    }
-                                } catch (syncErr) {
-                                    console.warn("Cloud sync after Google sign-in failed:", syncErr);
-                                }
-                                this.updateAllCloudStatusUI();
-                            }
+                            user = await window.Capacitor.Plugins.GoogleAuth.signIn();
                         } catch (err) {
-                            console.warn("Google Sign-In error:", err);
+                            console.warn("Native Google Sign-In error (GMS bulunmayan cihazlar için yedekleme devreye giriyor):", err);
                         }
+                    }
+
+                    let cleanEmail = '';
+                    let displayName = '';
+
+                    if (user && (user.email || user.id)) {
+                        cleanEmail = (user.email || '').trim().toLowerCase();
+                        displayName = user.name || user.givenName || (cleanEmail ? cleanEmail.split('@')[0] : 'Oyuncu');
+                    } else {
+                        // GMS bulunmayan Huawei cihazları için yedek e-posta giriş istemcisi
+                        const inputEmail = prompt("Google E-posta Adresinizi Giriniz (Huawei / Manuel Bağlantı):", localStorage.getItem('viscora_google_email') || '');
+                        if (inputEmail && inputEmail.includes('@')) {
+                            cleanEmail = inputEmail.trim().toLowerCase();
+                            displayName = cleanEmail.split('@')[0];
+                        } else {
+                            return; // İptal edildi
+                        }
+                    }
+
+                    if (cleanEmail) {
+                        localStorage.setItem('viscora_google_email', cleanEmail);
+                        const currentAuthor = localStorage.getItem('viscora_author_name');
+                        if (!currentAuthor || currentAuthor === 'Oyuncu') {
+                            localStorage.setItem('viscora_author_name', displayName);
+                        }
+                        localStorage.setItem('viscora_username_set', 'true');
+                        
+                        const myUserId = (user && user.id) ? ('google_' + user.id) : ('email_' + cleanEmail.replace(/[^a-z0-9]/g, '_'));
+                        localStorage.setItem('viscora_user_id', myUserId);
+                        
+                        // Modal kapat ve UI güncelle
+                        const profileModal = document.getElementById('profile-settings-modal');
+                        if (profileModal) profileModal.classList.add('hidden');
+                        
+                        this.updateAllCloudStatusUI();
+                        this.updateMenuCrystalsUI();
+                        
+                        alert("🎉 Google hesabınız (" + cleanEmail + ") başarıyla bağlandı!\n\nBulut senkronizasyonu aktif.");
+                        
+                        // Bulut senkronizasyonu çalıştır
+                        try {
+                            const res = await CloudSaveManager.syncByGoogleEmail(cleanEmail, user ? user.id : null);
+                            if (res && res.restored) {
+                                if (this.game && typeof this.game.initProgress === 'function') {
+                                    this.game.initProgress();
+                                }
+                                this.updateMenuCrystalsUI();
+                                this.buildLevelSelectionUI();
+                                this.updateLevelButtonsUI();
+                                this.showGlobalToast("🎉 Bulut verileriniz başarıyla yüklendi!", true);
+                            }
+                        } catch (syncErr) {
+                            console.warn("Cloud sync error:", syncErr);
+                        }
+                        this.updateAllCloudStatusUI();
                     }
                 };
             }
