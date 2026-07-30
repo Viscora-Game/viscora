@@ -1448,35 +1448,39 @@ export class GameManager {
             this.lastIsGameActive = isGameActive;
         }
 
-        if (this.state === 'PLAYING') {
-            if (this.pausedForCustomizer) {
-                // Do not update physics while customizing controls
-            } else {
-                this.physicsAccumulator = (this.physicsAccumulator || 0) + elapsed;
-                const stepMs = 16.666; // ~60fps step
-                let updates = 0;
-                while (this.physicsAccumulator >= stepMs) {
-                    this.update(1.0); // dt is exactly 1.0 logic-step
-                    this.physicsAccumulator -= stepMs;
-                    updates++;
-                    if (updates >= 5) { // Cap updates per render frame to prevent spiral of death
-                        this.physicsAccumulator = 0;
-                        break;
+        try {
+            if (this.state === 'PLAYING') {
+                if (this.pausedForCustomizer) {
+                    // Do not update physics while customizing controls
+                } else {
+                    this.physicsAccumulator = (this.physicsAccumulator || 0) + elapsed;
+                    const stepMs = 16.666; // ~60fps step
+                    let updates = 0;
+                    while (this.physicsAccumulator >= stepMs) {
+                        this.update(1.0); // dt is exactly 1.0 logic-step
+                        this.physicsAccumulator -= stepMs;
+                        updates++;
+                        if (updates >= 5) { // Cap updates per render frame to prevent spiral of death
+                            this.physicsAccumulator = 0;
+                            break;
+                        }
                     }
                 }
-            }
-        } else if (this.state === 'INTRO_CINEMATIC') {
-            this.updateIntroCinematic(elapsed);
-        } else if (this.state === 'EDITOR') {
-            if (this.editor && this.editor.active) {
+            } else if (this.state === 'INTRO_CINEMATIC') {
+                this.updateIntroCinematic(elapsed);
+            } else if (this.state === 'EDITOR') {
+                if (this.editor && this.editor.active) {
+                    const dt = elapsed / 16.666;
+                    this.editor.update(dt);
+                }
+            } else if (this.state === 'MENU' || this.state === 'SHOP') {
                 const dt = elapsed / 16.666;
-                this.editor.update(dt);
+                this.updateMenuPhysics(dt);
             }
-        } else if (this.state === 'MENU' || this.state === 'SHOP') {
-            const dt = elapsed / 16.666;
-            this.updateMenuPhysics(dt);
+            this.draw();
+        } catch (err) {
+            console.error("Game loop caught error safely:", err);
         }
-        this.draw();
 
         requestAnimationFrame(this.loop);
     }
@@ -3321,8 +3325,10 @@ export class GameManager {
                 life: 150 + Math.random() * 60,
                 maxLife: 150 + Math.random() * 60
             });
+        if (!this.splatters) this.splatters = [];
+        if (this.splatters.length >= 40) {
+            this.splatters.splice(0, Math.min(splatterGroup.length, this.splatters.length));
         }
-        
         this.splatters.push(...splatterGroup);
     }
 

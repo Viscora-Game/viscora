@@ -1727,7 +1727,7 @@ export class UIManager {
         if (btnCloseSettings && settingsModal) {
             this.bindTouchClick(btnCloseSettings, () => {
                 settingsModal.classList.add('hidden');
-                if (this.getActiveScreenName() !== 'hud') {
+                if (['start', 'level-select'].includes(this.getActiveScreenName())) {
                     if (window.admobManager) window.admobManager.showBanner();
                 } else {
                     if (window.admobManager) window.admobManager.hideBanner();
@@ -4700,10 +4700,11 @@ export class UIManager {
             }
         }
 
-        if (screenName === 'hud') {
-            if (window.admobManager) window.admobManager.hideBanner();
-        } else {
+        const allowedBannerScreens = ['start', 'level-select'];
+        if (allowedBannerScreens.includes(screenName)) {
             if (window.admobManager) window.admobManager.showBanner();
+        } else {
+            if (window.admobManager) window.admobManager.hideBanner();
         }
 
         // Belirtilen ekranı göster
@@ -5401,8 +5402,10 @@ export class UIManager {
                 
                 updateWidget();
                 modal.classList.add('hidden');
-                if (window.admobManager && this.getActiveScreenName() !== 'hud') {
+                if (window.admobManager && ['start', 'level-select'].includes(this.getActiveScreenName())) {
                     window.admobManager.showBanner();
+                } else if (window.admobManager) {
+                    window.admobManager.hideBanner();
                 }
                 this.showGlobalToast("Profil başarıyla kaydedildi!", true);
                 
@@ -5415,8 +5418,10 @@ export class UIManager {
         if (btnClose) {
             this.bindTouchClick(btnClose, () => {
                 modal.classList.add('hidden');
-                if (window.admobManager && this.getActiveScreenName() !== 'hud') {
+                if (window.admobManager && ['start', 'level-select'].includes(this.getActiveScreenName())) {
                     window.admobManager.showBanner();
+                } else if (window.admobManager) {
+                    window.admobManager.hideBanner();
                 }
             });
         }

@@ -337,32 +337,47 @@ class AdMobManager {
     }
 
     /**
-     * Ana Menü Banner Reklamını Gösterir
+     * Ana Menü Banner Reklamını Gösterir (Sadece Ana Menü ve Bölüm Seçim Ekranında)
      */
     async showBanner() {
         const activeScreen = (window.game && window.game.ui && typeof window.game.ui.getActiveScreenName === 'function') 
             ? window.game.ui.getActiveScreenName() : '';
-        if (activeScreen === 'hud') {
+            
+        // Banner reklam SADECE 'start' (Ana Menü) ve 'level-select' ekranlarında gösterilebilir.
+        // HUD (Oyun), Community (Topluluk), Editor, Story vb. ekranlarda ASLA gösterilmez.
+        const allowedScreens = ['start', 'level-select'];
+        if (!allowedScreens.includes(activeScreen)) {
             this.hideBanner();
             return;
         }
-        if (this.bannerVisible) return; // Zaten ekranda yayındaysa tekrar çağırma (git-gel/yanıp sönmeyi engeller)
+        if (this.bannerVisible) return; // Zaten ekranda yayındaysa tekrar çağırma
+        
         if (this.admobPlugin && this.initialized) {
             try {
+                this.bannerVisible = true;
                 await this.admobPlugin.showBanner({
                     adId: ADMOB_CONFIG.bannerId,
                     adSize: 'ADAPTIVE_BANNER',
                     position: 'BOTTOM_CENTER',
                     isTesting: false
                 });
-                this.bannerVisible = true;
-                console.log("✅ Banner reklam gösterildi.");
+                
+                // Asenkron yükleme bittiğinde ekran durumunu tekrar kontrol et (Sızmayı %100 engeller)
+                const currentScreen = (window.game && window.game.ui && typeof window.game.ui.getActiveScreenName === 'function') 
+                    ? window.game.ui.getActiveScreenName() : '';
+                if (!allowedScreens.includes(currentScreen)) {
+                    await this.admobPlugin.hideBanner();
+                    this.bannerVisible = false;
+                } else {
+                    console.log("✅ Banner reklam gösterildi.");
+                }
             } catch (err) {
                 try {
                     await this.admobPlugin.resumeBanner();
                     this.bannerVisible = true;
                     console.log("✅ Banner reklam resume edildi.");
                 } catch (e) {
+                    this.bannerVisible = false;
                     console.warn("⚠️ Banner gösterim hatası:", err);
                 }
             }
@@ -380,21 +395,18 @@ class AdMobManager {
      * Ana Menü Banner Reklamını Gizler
      */
     async hideBanner() {
-        if (!this.bannerVisible) return; // Zaten gizliyse tekrar çağırma
+        this.bannerVisible = false;
         if (this.admobPlugin && this.initialized) {
             try {
                 await this.admobPlugin.hideBanner();
-                this.bannerVisible = false;
                 console.log("ℹ️ Banner reklam gizlendi.");
             } catch (err) {
                 console.warn("⚠️ Banner gizleme hatası:", err);
             }
-        } else {
-            const bannerContainer = document.getElementById('admob-banner-placeholder') || document.getElementById('admob-banner-container');
-            if (bannerContainer) {
-                bannerContainer.style.display = 'none';
-            }
-            this.bannerVisible = false;
+        }
+        const bannerContainer = document.getElementById('admob-banner-placeholder') || document.getElementById('admob-banner-container');
+        if (bannerContainer) {
+            bannerContainer.style.display = 'none';
         }
     }
 }
