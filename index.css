@@ -2625,7 +2625,14 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
 }
 
 .star-gate-overlay.hidden {
-    display: none;
+    display: none !important;
+}
+
+.star-gate-overlay:not(.hidden) {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
 }
 .star-gate-card {
     background: linear-gradient(145deg, rgba(15,23,42,0.96) 0%, rgba(8,8,16,0.98) 100%);

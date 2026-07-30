@@ -422,11 +422,17 @@ export class UIManager {
                     let cleanEmail = '';
                     let displayName = '';
 
-                    if (user && (user.email || user.id)) {
-                        cleanEmail = (user.email || '').trim().toLowerCase();
+                    if (user) {
+                        cleanEmail = (user.email || (user.authentication && user.authentication.email) || '').trim().toLowerCase();
                         displayName = user.name || user.givenName || (cleanEmail ? cleanEmail.split('@')[0] : 'Oyuncu');
-                    } else {
-                        this.showGlobalToast("⚠️ Giriş yapılamadı veya iptal edildi.", false);
+                        
+                        if (!cleanEmail && user.id) {
+                            cleanEmail = (displayName ? displayName.replace(/[^a-z0-9]/gi, '_').toLowerCase() : ('user_' + user.id)) + '@google.com';
+                        }
+                    }
+
+                    if (!cleanEmail) {
+                        this.showGlobalToast("⚠️ Google hesabı seçilmedi.", false);
                         return;
                     }
 
@@ -532,8 +538,11 @@ export class UIManager {
         let lastClickTime = 0;
 
         const handleTap = (e) => {
+            if (e && e.type === 'touchend') {
+                try { e.preventDefault(); } catch(err) {}
+            }
             const now = Date.now();
-            if (now - lastClickTime < 250) return;
+            if (now - lastClickTime < 300) return;
             lastClickTime = now;
 
             try {
@@ -550,7 +559,7 @@ export class UIManager {
             }
         };
 
-        btn.addEventListener('pointerup', handleTap, { passive: true });
+        btn.addEventListener('touchend', handleTap, { passive: false });
         btn.addEventListener('click', handleTap);
     }
 
