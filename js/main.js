@@ -25,10 +25,10 @@ const initGame = () => {
         setTimeout(() => {
             CloudSaveManager.saveProgress().then(res => {
                 if (res && res.success) {
-                    const hasUpdated = localStorage.getItem('viscora_last_save_time_updated') === 'true';
-                    if (hasUpdated) {
-                        localStorage.removeItem('viscora_last_save_time_updated');
-                        window.location.reload();
+                    localStorage.removeItem('viscora_last_save_time_updated');
+                    if (window.game && window.game.ui) {
+                        window.game.ui.buildLevelSelectionUI();
+                        window.game.ui.updateAllCloudStatusUI();
                     }
                 }
             }).catch(err => {
