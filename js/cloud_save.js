@@ -102,6 +102,10 @@ export class CloudSaveManager {
             localStorage.setItem('viscora_balance_sig', sig);
         }
 
+        try {
+            window.dispatchEvent(new CustomEvent('viscora_cloud_data_applied'));
+        } catch (e) {}
+
         return true;
     }
 

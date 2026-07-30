@@ -337,16 +337,15 @@ class AdMobManager {
     }
 
     /**
-     * Ana Menü Banner Reklamını Gösterir (Sadece Ana Menü ve Bölüm Seçim Ekranında)
+     * Ana Menü Banner Reklamını Gösterir (Oyun içi ve editör hariç tüm menülerde)
      */
     async showBanner() {
         const activeScreen = (window.game && window.game.ui && typeof window.game.ui.getActiveScreenName === 'function') 
-            ? window.game.ui.getActiveScreenName() : '';
+            ? window.game.ui.getActiveScreenName() : 'start';
             
-        // Banner reklam SADECE 'start' (Ana Menü) ve 'level-select' ekranlarında gösterilebilir.
-        // HUD (Oyun), Community (Topluluk), Editor, Story vb. ekranlarda ASLA gösterilmez.
-        const allowedScreens = ['start', 'level-select'];
-        if (!allowedScreens.includes(activeScreen)) {
+        // Banner SADECE oyun oynanışında ('hud') ve seviye tasarımcısında ('editor') gizlenir.
+        // Ana Menü, Bölüm Seçim, Mağaza, Ödüller ve Profilde banner %100 YAYINDADIR!
+        if (activeScreen === 'hud' || activeScreen === 'editor') {
             this.hideBanner();
             return;
         }
@@ -362,10 +361,10 @@ class AdMobManager {
                     isTesting: false
                 });
                 
-                // Asenkron yükleme bittiğinde ekran durumunu tekrar kontrol et (Sızmayı %100 engeller)
+                // Asenkron yükleme bittiğinde ekran durumunu tekrar kontrol et (Oyun içine sızmayı engeller)
                 const currentScreen = (window.game && window.game.ui && typeof window.game.ui.getActiveScreenName === 'function') 
-                    ? window.game.ui.getActiveScreenName() : '';
-                if (!allowedScreens.includes(currentScreen)) {
+                    ? window.game.ui.getActiveScreenName() : 'start';
+                if (currentScreen === 'hud' || currentScreen === 'editor') {
                     await this.admobPlugin.hideBanner();
                     this.bannerVisible = false;
                 } else {

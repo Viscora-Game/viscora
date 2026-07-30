@@ -505,34 +505,27 @@ export class UIManager {
             if (e.touches && e.touches[0]) {
                 const dx = e.touches[0].clientX - startX;
                 const dy = e.touches[0].clientY - startY;
-                // Eğer oyuncu parmağını 10 pikselden fazla hareket ettirdiyse kaydırma olarak say
-                if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+                // Tablet ve büyük dokunmatik ekranlar için kaydırma toleransını 24 piksele çıkar
+                if (Math.abs(dx) > 24 || Math.abs(dy) > 24) {
                     isScrolling = true;
                 }
             }
         }, { passive: true });
 
         const handleEvent = (e) => {
-            // Hızlı tıklama sızmasını önle (Gameover, Win, Pause ekranlarındaki butonları 500ms kilitle)
-            if (this.screenShowTime && Date.now() - this.screenShowTime < 500) {
+            // Hızlı tıklama sızmasını önle (Gameover, Win, Pause ekranlarındaki butonları 300ms kilitle)
+            if (this.screenShowTime && Date.now() - this.screenShowTime < 300) {
                 const isMenuButton = btn.closest('#gameover-screen') || 
                                      btn.closest('#win-screen') || 
                                      btn.closest('#pause-screen');
                 if (isMenuButton) {
-                    e.preventDefault();
-                    e.stopPropagation();
                     return;
                 }
             }
 
             if (triggered) return;
             triggered = true;
-            setTimeout(() => { triggered = false; }, 300);
-            
-            if (e.cancelable) {
-                e.preventDefault();
-            }
-            e.stopPropagation();
+            setTimeout(() => { triggered = false; }, 250);
             
             // Unconditionally unlock Web Audio on menu button interaction (valid gesture)
             if (typeof audio !== 'undefined') {
@@ -546,14 +539,15 @@ export class UIManager {
         btn.addEventListener('touchend', (e) => {
             if (isScrolling) return; // Kaydırma yapılıyorsa tıklamayı es geç
             lastTouchTime = Date.now();
+            if (e.cancelable) {
+                e.preventDefault();
+            }
             handleEvent(e);
         }, { passive: false });
 
         btn.addEventListener('click', (e) => {
-            // Eğer son 600ms içinde dokunmatik tıklama tetiklendiyse, mükerrer fare tıklamasını yoksay (Ghost Click önleme)
-            if (Date.now() - lastTouchTime < 600) {
-                e.preventDefault();
-                e.stopPropagation();
+            // Eğer son 400ms içinde dokunmatik tıklama tetiklendiyse mükerrer tıklamayı es geç, yoksa çalıştır
+            if (Date.now() - lastTouchTime < 400) {
                 return;
             }
             handleEvent(e);
@@ -1795,8 +1789,17 @@ export class UIManager {
             if (rewardsCounter) rewardsCounter.textContent = e.detail.balance;
         });
 
-        window.addEventListener('viscora_cloud_restored', (e) => {
-            alert("Bulutta daha yeni bir ilerleme bulundu! Verileriniz güncelleniyor...");
+        window.addEventListener('viscora_cloud_data_applied', () => {
+            if (this.game) {
+                this.game.totalCrystals = parseInt(localStorage.getItem('viscora_total_crystals')) || 0;
+                this.game.spentCrystals = parseInt(localStorage.getItem('viscora_spent_crystals')) || 0;
+            }
+            this.updateMenuCrystalsUI();
+            this.buildLevelSelectionUI();
+            this.updateAllCloudStatusUI();
+            if (window.shopManager) {
+                window.shopManager.loadUserCosmetics();
+            }
         });
 
         // Otomatik Hata Bildirimi (Crash Reporter) Buton Dinleyicileri
@@ -4735,11 +4738,10 @@ export class UIManager {
             }
         }
 
-        const allowedBannerScreens = ['start', 'level-select'];
-        if (allowedBannerScreens.includes(screenName)) {
-            if (window.admobManager) window.admobManager.showBanner();
-        } else {
+        if (screenName === 'hud' || screenName === 'editor') {
             if (window.admobManager) window.admobManager.hideBanner();
+        } else {
+            if (window.admobManager) window.admobManager.showBanner();
         }
 
         // Belirtilen ekranı göster
