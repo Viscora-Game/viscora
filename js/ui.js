@@ -1797,8 +1797,8 @@ export class UIManager {
             this.updateMenuCrystalsUI();
             this.buildLevelSelectionUI();
             this.updateAllCloudStatusUI();
-            if (window.shopManager) {
-                window.shopManager.loadUserCosmetics();
+            if (window.shopManager && typeof window.shopManager.load === 'function') {
+                window.shopManager.load();
             }
         });
 
