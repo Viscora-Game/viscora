@@ -1797,8 +1797,41 @@ export class UIManager {
 
         window.addEventListener('viscora_cloud_restored', (e) => {
             alert("Bulutta daha yeni bir ilerleme bulundu! Verileriniz güncelleniyor...");
-            window.location.reload();
-        });
+        // Otomatik Hata Bildirimi (Crash Reporter) Buton Dinleyicileri
+        const btnSubmitCrash = document.getElementById('btn-submit-crash-report');
+        const btnCloseCrash = document.getElementById('btn-close-crash-report');
+        const crashModal = document.getElementById('crash-reporter-modal');
+
+        if (btnSubmitCrash) {
+            this.bindTouchClick(btnSubmitCrash, () => {
+                const errData = window.lastCapturedError || { message: 'Bilinmeyen Hata' };
+                const payload = {
+                    message: errData.message,
+                    file: errData.file,
+                    line: errData.line,
+                    stack: errData.stack,
+                    user: localStorage.getItem('viscora_author_name') || 'Anonim',
+                    syncCode: localStorage.getItem('viscora_sync_code') || 'Yok',
+                    time: new Date().toISOString()
+                };
+
+                // Sunucuya Hata Raporunu POST et
+                fetch('https://viscora.onrender.com/api/reports/crash', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).catch(e => console.warn("Hata raporu gönderim uyarısı:", e));
+
+                if (crashModal) crashModal.classList.add('hidden');
+                this.showGlobalToast("📩 Hata raporu geliştiriciye iletildi. Teşekkürler!", true);
+            });
+        }
+
+        if (btnCloseCrash) {
+            this.bindTouchClick(btnCloseCrash, () => {
+                if (crashModal) crashModal.classList.add('hidden');
+            });
+        }
 
         // initial load of crystals
         setTimeout(updateCrystalUI, 100);

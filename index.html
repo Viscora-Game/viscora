@@ -1,16 +1,34 @@
 <!DOCTYPE html>
 <html lang="tr" style="background-color: #0a0a0f;">
 <head>
-    <!-- JS Hata Yakalayıcı (sadece ?debug modunda görünür) -->
+    <!-- Global Hata Yakalayıcı (Crash Reporter & Otomatik Bildirim) -->
     <script>
-        if (location.search.includes('debug')) {
-            window.addEventListener('error', function(e) {
-                const errDiv = document.createElement('div');
-                errDiv.style.cssText = 'position:fixed;top:10px;left:10px;right:10px;background:rgba(220,38,38,.95);color:#fff;padding:15px;border-radius:8px;z-index:999999;font-family:monospace;font-size:12px;white-space:pre-wrap;box-shadow:0 10px 15px -3px rgba(0,0,0,.5)';
-                errDiv.innerHTML = '<strong>[JS HATA]</strong> ' + e.message + '\nDosya: ' + e.filename + '\nSatır: ' + e.lineno + ':' + e.colno + '\nStack:\n' + (e.error ? e.error.stack : 'N/A');
-                document.documentElement.appendChild(errDiv);
-            });
-        }
+        window.lastCapturedError = null;
+        window.showCrashReporter = function(message, file, line, stack) {
+            window.lastCapturedError = {
+                message: message || "Bilinmeyen Hata",
+                file: file || "bilinmiyor",
+                line: line || 0,
+                stack: stack || "",
+                time: new Date().toISOString()
+            };
+            var modal = document.getElementById('crash-reporter-modal');
+            var msgEl = document.getElementById('crash-reporter-msg');
+            if (modal && msgEl) {
+                var fileName = file ? file.split('/').pop() : 'bilinmiyor';
+                msgEl.textContent = '[Hata Detayı]: ' + message + '\n[Konum]: ' + fileName + ':' + line;
+                modal.classList.remove('hidden');
+            }
+        };
+        window.addEventListener('error', function(e) {
+            if (e.message && !e.message.includes('ResizeObserver')) {
+                window.showCrashReporter(e.message, e.filename, e.lineno, e.error ? e.error.stack : '');
+            }
+        });
+        window.addEventListener('unhandledrejection', function(e) {
+            var msg = e.reason ? (e.reason.message || String(e.reason)) : "Promise Hatası";
+            window.showCrashReporter(msg, 'async_promise', 0, e.reason ? e.reason.stack : '');
+        });
     </script>
 
     <meta charset="UTF-8">
@@ -965,6 +983,23 @@
                 <div class="achievement-toast-text-container">
                     <span class="achievement-toast-label">🏆 BAŞARIM AÇILDI!</span>
                     <span id="achievement-toast-title" class="achievement-toast-name">Başarım Adı</span>
+                </div>
+            </div>
+        <!-- Otomatik Hata Bildirimi (Crash Reporter) Modalı -->
+        <div id="crash-reporter-modal" class="star-gate-overlay hidden" style="z-index: 999999;">
+            <div class="star-gate-card" style="max-width: 400px; text-align: center; border: 1px solid rgba(239, 68, 68, 0.45); box-shadow: 0 0 25px rgba(239, 68, 68, 0.35);">
+                <div style="font-size: 2.2rem; margin-bottom: 6px;">🚨</div>
+                <h2 class="star-gate-title" style="color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);">BİR HATA OLUŞTU</h2>
+                <div id="crash-reporter-msg" style="font-size: 0.78rem; color: #f3f4f6; margin: 12px 0 15px; line-height: 1.4; text-align: left; word-break: break-word; max-height: 110px; overflow-y: auto; background: rgba(15, 23, 42, 0.75); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); font-family: monospace;">
+                    Uygulama esnasında beklenmeyen bir aksaklık tespit edildi.
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
+                    <button id="btn-submit-crash-report" class="menu-btn primary-btn" style="background: linear-gradient(135deg, #ef4444, #dc2626); border-color: #ef4444; height: 42px; font-size: 0.85rem; font-weight: bold; width: 100%; margin: 0;">
+                        📩 HATAYI GELİŞTİRİCİYE BİLDİR
+                    </button>
+                    <button id="btn-close-crash-report" class="menu-btn secondary-btn" style="height: 36px; font-size: 0.8rem; width: 100%; margin: 0;">
+                        ✕ KAPAT VE OYUNA DEVAM ET
+                    </button>
                 </div>
             </div>
         </div>
