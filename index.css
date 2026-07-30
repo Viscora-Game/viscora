@@ -258,9 +258,9 @@ body.game-active {
     flex-shrink: 0;
 }
 
-.screen.hidden .menu-card {
-    transform: translateY(30px) scale(0.96);
-    opacity: 0;
+.screen:not(.hidden) .menu-card {
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .menu-card:hover {
@@ -4825,13 +4825,17 @@ button:hover .icon-svg,
 }
 /* Screen and Card Entrance Transitions */
 .screen:not(.hidden) {
-    animation: screenFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 .screen:not(.hidden) .menu-card,
 .screen:not(.hidden) .star-gate-card,
+.star-gate-overlay:not(.hidden) .star-gate-card,
 .screen:not(.hidden) .shop-container,
 .screen:not(.hidden) .codex-container {
-    animation: cardSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
 }
 @keyframes screenFadeIn {
     from { opacity: 0; }
