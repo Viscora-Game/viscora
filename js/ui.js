@@ -402,7 +402,7 @@ export class UIManager {
                             
                             try {
                                 await window.Capacitor.Plugins.GoogleAuth.signOut();
-                            } catch(e) {}
+                            } catch(signOutErr) {}
 
                             const user = await window.Capacitor.Plugins.GoogleAuth.signIn();
                             if (user && user.email) {
@@ -411,20 +411,29 @@ export class UIManager {
                                 const myUserId = user.id ? ('google_' + user.id) : (localStorage.getItem('viscora_user_id') || ('user_' + Math.random().toString(36).substring(2, 11)));
                                 localStorage.setItem('viscora_user_id', myUserId);
                                 
-                                CloudSaveManager.syncByGoogleEmail(cleanEmail, user.id).then((res) => {
+                                // Hemen UI güncelle — kullanıcı anında geri bildirim alsın
+                                this.updateAllCloudStatusUI();
+                                this.updateMenuCrystalsUI();
+                                
+                                // Arka planda sunucuyla eşitle
+                                try {
+                                    const res = await CloudSaveManager.syncByGoogleEmail(cleanEmail, user.id);
                                     if (res && res.restored) {
+                                        if (this.game && typeof this.game.initProgress === 'function') {
+                                            this.game.initProgress();
+                                        }
+                                        this.updateMenuCrystalsUI();
+                                        this.buildLevelSelectionUI();
+                                        this.updateLevelButtonsUI();
                                         alert("🎉 Hoş geldiniz! (" + cleanEmail + ") Bulut hesabınızdaki kayıtlı yıldızlar, seviyeler ve kristalleriniz başarıyla geri yüklendi!");
                                     } else {
                                         alert("✅ Google hesabınız (" + cleanEmail + ") başarıyla bağlandı!");
                                     }
-                                    if (this.game && typeof this.game.initProgress === 'function') {
-                                        this.game.initProgress();
-                                    }
-                                    this.updateAllCloudStatusUI();
-                                    this.updateLevelButtonsUI();
-                                }).catch(() => {
-                                    this.updateAllCloudStatusUI();
-                                });
+                                } catch (syncErr) {
+                                    console.warn("Cloud sync after Google sign-in failed:", syncErr);
+                                    alert("✅ Google hesabınız (" + cleanEmail + ") bağlandı! (Bulut eşitleme arka planda tamamlanacak)");
+                                }
+                                this.updateAllCloudStatusUI();
                             }
                         } catch (err) {
                             console.warn("Google Sign-In penceresi kapatıldı:", err);
@@ -1461,7 +1470,6 @@ export class UIManager {
         if (btnOpenSettings && settingsModal) {
             this.bindTouchClick(btnOpenSettings, () => {
                 settingsModal.classList.remove('hidden');
-                if (window.admobManager) window.admobManager.hideBanner();
                 this.loadGoogleSignInSDK(); // Lazy load Google SDK to speed up game startup
                 
                 // Bulut kurtarma kodunu güncelle/tetikle
@@ -1721,11 +1729,6 @@ export class UIManager {
         if (btnCloseSettings && settingsModal) {
             this.bindTouchClick(btnCloseSettings, () => {
                 settingsModal.classList.add('hidden');
-                if (['start', 'level-select'].includes(this.getActiveScreenName())) {
-                    if (window.admobManager) window.admobManager.showBanner();
-                } else {
-                    if (window.admobManager) window.admobManager.hideBanner();
-                }
             });
         }
 
@@ -1790,15 +1793,19 @@ export class UIManager {
         });
 
         window.addEventListener('viscora_cloud_data_applied', () => {
-            if (this.game) {
-                this.game.totalCrystals = parseInt(localStorage.getItem('viscora_total_crystals')) || 0;
-                this.game.spentCrystals = parseInt(localStorage.getItem('viscora_spent_crystals')) || 0;
-            }
-            this.updateMenuCrystalsUI();
-            this.buildLevelSelectionUI();
-            this.updateAllCloudStatusUI();
-            if (window.shopManager && typeof window.shopManager.load === 'function') {
-                window.shopManager.load();
+            try {
+                if (this.game) {
+                    this.game.totalCrystals = parseInt(localStorage.getItem('viscora_total_crystals')) || 0;
+                    this.game.spentCrystals = parseInt(localStorage.getItem('viscora_spent_crystals')) || 0;
+                }
+                this.updateMenuCrystalsUI();
+                this.buildLevelSelectionUI();
+                this.updateAllCloudStatusUI();
+                if (window.shopManager && typeof window.shopManager.load === 'function') {
+                    window.shopManager.load();
+                }
+            } catch (e) {
+                console.warn('Cloud data applied UI update error:', e);
             }
         });
 

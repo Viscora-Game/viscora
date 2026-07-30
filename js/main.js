@@ -21,20 +21,24 @@ const initGame = () => {
     // Otomatik Bulut Eşitlemesi (Startup Sync): Oyuncu bağlıysa (Google ile) başlangıçta en güncel veriyi çek
     const syncCode = localStorage.getItem('viscora_sync_code');
     if (syncCode) {
-        // Sayfa yüklenme hızını etkilememesi için 2 saniye gecikmeyle arka planda eşitle
+        // Sayfa yüklenme hızını etkilememesi için 5 saniye gecikmeyle arka planda eşitle
         setTimeout(() => {
             CloudSaveManager.saveProgress().then(res => {
-                if (res && res.success) {
-                    localStorage.removeItem('viscora_last_save_time_updated');
-                    if (window.game && window.game.ui) {
-                        window.game.ui.buildLevelSelectionUI();
-                        window.game.ui.updateAllCloudStatusUI();
+                try {
+                    if (res && res.success) {
+                        localStorage.removeItem('viscora_last_save_time_updated');
+                        if (window.game && window.game.ui) {
+                            window.game.ui.updateMenuCrystalsUI();
+                            window.game.ui.updateAllCloudStatusUI();
+                        }
                     }
+                } catch (uiErr) {
+                    console.warn("Startup sync UI update error:", uiErr);
                 }
             }).catch(err => {
                 console.warn("Otomatik başlangıç eşitleme hatası:", err);
             });
-        }, 2000);
+        }, 5000);
     }
     // Giriş Animasyonu (Splash Screen) Kontrolü
     const splash = document.getElementById('splash-screen');
