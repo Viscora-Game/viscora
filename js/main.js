@@ -69,19 +69,24 @@ const initGame = () => {
     // GameManager nesnesi oluşturulur (Canvas kimliğini veriyoruz)
     const game = new GameManager('game-canvas');
 
-    // Tarayıcı güvenlik kısıtlamalarını aşmak için ilk etkileşimde ses motorunu hazırlarız
-    const unlockAudio = () => {
-        audio.init();
-        audio.unlock();
-        audio.setTheme('default');
-        audio.startMusic();
-        removeSplash(); // Dokunulduğunda splash'ı hemen geç
-        
-        // Dinleyicileri temizle
-        window.removeEventListener('click', unlockAudio);
-        window.removeEventListener('touchend', unlockAudio);
-        window.removeEventListener('keydown', unlockAudio);
+    // Tarayıcı güvenlik kısıtlamalarını aşmak için oyuncu Açılış Ekranına dokunduğunda oyuna geçer
+    let splashUnlocked = false;
+    const unlockAudio = (e) => {
+        if (e) {
+            e.stopPropagation();
+        }
+        if (splashUnlocked) return;
+        splashUnlocked = true;
 
+        try {
+            audio.init();
+            audio.unlock();
+            audio.setTheme('default');
+            audio.startMusic();
+        } catch(ae) {}
+
+        removeSplash(); // Kullanıcı bizzat tıkladığında açılış ekranını kaldır
+        
         // İlk kez giren oyuncu için ana menüye geçildiğinde profil kurulum modalını göster
         if (!localStorage.getItem('viscora_username_set') && !localStorage.getItem('viscora_google_email')) {
             setTimeout(() => {
@@ -92,12 +97,10 @@ const initGame = () => {
         }
     };
 
-    // 500ms gecikme ile dinleyicileri ekle ki sayfa yüklenirken kazara tetiklenmesin (event bleeding engellenir)
-    setTimeout(() => {
-        window.addEventListener('click', unlockAudio);
-        window.addEventListener('touchend', unlockAudio);
-        window.addEventListener('keydown', unlockAudio);
-    }, 500);
+    if (splash) {
+        splash.addEventListener('click', unlockAudio);
+        splash.addEventListener('touchend', unlockAudio);
+    }
 
     // OYNA butonuna basıldığında ses aktifleştirilir (Tam ekran tetikleyicisi kaldırıldı)
     const playBtn = document.getElementById('btn-play');

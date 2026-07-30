@@ -436,6 +436,8 @@ export class UIManager {
                                 this.updateAllCloudStatusUI();
                                 this.updateMenuCrystalsUI();
                                 
+                                alert("🎉 Google hesabınız (" + (cleanEmail || displayName) + ") başarıyla bağlandı!\n\nBulut senkronizasyonu aktif.");
+                                
                                 // Bulut senkronizasyonu çalıştır
                                 try {
                                     const res = await CloudSaveManager.syncByGoogleEmail(cleanEmail, user.id);
@@ -446,13 +448,10 @@ export class UIManager {
                                         this.updateMenuCrystalsUI();
                                         this.buildLevelSelectionUI();
                                         this.updateLevelButtonsUI();
-                                        this.showGlobalToast("🎉 Hoş geldiniz! (" + (cleanEmail || displayName) + ") Hesabınız yüklendi!", true);
-                                    } else {
-                                        this.showGlobalToast("✅ Google hesabınız (" + (cleanEmail || displayName) + ") bağlandı!", true);
+                                        this.showGlobalToast("🎉 Bulut verileriniz başarıyla yüklendi!", true);
                                     }
                                 } catch (syncErr) {
                                     console.warn("Cloud sync after Google sign-in failed:", syncErr);
-                                    this.showGlobalToast("✅ Google hesabınız bağlandı!", true);
                                 }
                                 this.updateAllCloudStatusUI();
                             }
