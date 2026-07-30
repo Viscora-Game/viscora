@@ -46,13 +46,15 @@ const initGame = () => {
     let removeTimeout = null;
 
     const removeSplash = () => {
-        if (splash && !splash.classList.contains('fade-out')) {
+        if (splash) {
             if (splashTimeout) clearTimeout(splashTimeout);
             if (removeTimeout) clearTimeout(removeTimeout);
             splash.classList.add('fade-out');
-            setTimeout(() => {
-                splash.remove();
-            }, 600);
+            splash.style.pointerEvents = 'none';
+            splash.style.display = 'none';
+            if (splash.parentNode) {
+                try { splash.parentNode.removeChild(splash); } catch(e) {}
+            }
         }
     };
 
@@ -61,9 +63,8 @@ const initGame = () => {
         const isSwReload = sessionStorage.getItem('viscora_sw_reloaded') === 'true';
         if (isSwReload) {
             sessionStorage.removeItem('viscora_sw_reloaded');
-            splash.remove();
+            removeSplash();
         }
-        // Otomatik kaldırma kaldırıldı; kullanıcının dokunarak tam ekrana geçmesi beklenir.
     }
 
     // GameManager nesnesi oluşturulur (Canvas kimliğini veriyoruz)
@@ -85,16 +86,7 @@ const initGame = () => {
             audio.startMusic();
         } catch(ae) {}
 
-        removeSplash(); // Kullanıcı bizzat tıkladığında açılış ekranını kaldır
-        
-        // İlk kez giren oyuncu için ana menüye geçildiğinde profil kurulum modalını göster
-        if (!localStorage.getItem('viscora_username_set') && !localStorage.getItem('viscora_google_email')) {
-            setTimeout(() => {
-                if (window.game && window.game.ui && typeof window.game.ui.openProfileModal === 'function') {
-                    window.game.ui.openProfileModal(true);
-                }
-            }, 600);
-        }
+        removeSplash(); // Kullanıcı bizzat tıkladığında açılış ekranını tamamen kaldır
     };
 
     if (splash) {

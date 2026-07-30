@@ -2799,9 +2799,12 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     overflow: hidden;
 }
 
-.splash-screen.fade-out {
-    opacity: 0;
-    visibility: hidden;
+.splash-screen.fade-out,
+.splash-screen.hidden {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    display: none !important;
 }
 
 .splash-goo-container {
