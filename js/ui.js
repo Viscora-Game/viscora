@@ -346,6 +346,11 @@ export class UIManager {
      * This prevents Google Sign-In from slowing down the game startup on mobile.
      */
     loadGoogleSignInSDK() {
+        if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+            this.initGoogleSignInButton();
+            return;
+        }
+
         if (window.google && window.google.accounts) {
             this.initGoogleSignInButton();
             return;
@@ -370,6 +375,8 @@ export class UIManager {
     }
 
     initGoogleSignInButton() {
+        const isNative = window.Capacitor && window.Capacitor.isNativePlatform();
+
         if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth) {
             try {
                 window.Capacitor.Plugins.GoogleAuth.initialize({
@@ -405,17 +412,31 @@ export class UIManager {
                             } catch(signOutErr) {}
 
                             const user = await window.Capacitor.Plugins.GoogleAuth.signIn();
-                            if (user && user.email) {
-                                const cleanEmail = user.email.trim().toLowerCase();
-                                localStorage.setItem('viscora_google_email', cleanEmail);
+                            if (user && (user.email || user.id)) {
+                                const cleanEmail = (user.email || '').trim().toLowerCase();
+                                if (cleanEmail) {
+                                    localStorage.setItem('viscora_google_email', cleanEmail);
+                                }
+                                
+                                const displayName = user.name || user.givenName || (cleanEmail ? cleanEmail.split('@')[0] : 'Oyuncu');
+                                const currentAuthor = localStorage.getItem('viscora_author_name');
+                                if (!currentAuthor || currentAuthor === 'Oyuncu') {
+                                    localStorage.setItem('viscora_author_name', displayName);
+                                }
+                                
+                                localStorage.setItem('viscora_username_set', 'true');
+                                
                                 const myUserId = user.id ? ('google_' + user.id) : (localStorage.getItem('viscora_user_id') || ('user_' + Math.random().toString(36).substring(2, 11)));
                                 localStorage.setItem('viscora_user_id', myUserId);
                                 
-                                // Hemen UI güncelle — kullanıcı anında geri bildirim alsın
+                                // Modal kapat ve UI güncelle
+                                const profileModal = document.getElementById('profile-settings-modal');
+                                if (profileModal) profileModal.classList.add('hidden');
+                                
                                 this.updateAllCloudStatusUI();
                                 this.updateMenuCrystalsUI();
                                 
-                                // Arka planda sunucuyla eşitle
+                                // Bulut senkronizasyonu çalıştır
                                 try {
                                     const res = await CloudSaveManager.syncByGoogleEmail(cleanEmail, user.id);
                                     if (res && res.restored) {
@@ -425,18 +446,18 @@ export class UIManager {
                                         this.updateMenuCrystalsUI();
                                         this.buildLevelSelectionUI();
                                         this.updateLevelButtonsUI();
-                                        alert("🎉 Hoş geldiniz! (" + cleanEmail + ") Bulut hesabınızdaki kayıtlı yıldızlar, seviyeler ve kristalleriniz başarıyla geri yüklendi!");
+                                        this.showGlobalToast("🎉 Hoş geldiniz! (" + (cleanEmail || displayName) + ") Hesabınız yüklendi!", true);
                                     } else {
-                                        alert("✅ Google hesabınız (" + cleanEmail + ") başarıyla bağlandı!");
+                                        this.showGlobalToast("✅ Google hesabınız (" + (cleanEmail || displayName) + ") bağlandı!", true);
                                     }
                                 } catch (syncErr) {
                                     console.warn("Cloud sync after Google sign-in failed:", syncErr);
-                                    alert("✅ Google hesabınız (" + cleanEmail + ") bağlandı! (Bulut eşitleme arka planda tamamlanacak)");
+                                    this.showGlobalToast("✅ Google hesabınız bağlandı!", true);
                                 }
                                 this.updateAllCloudStatusUI();
                             }
                         } catch (err) {
-                            console.warn("Google Sign-In penceresi kapatıldı:", err);
+                            console.warn("Google Sign-In error:", err);
                         }
                     }
                 };
@@ -445,6 +466,12 @@ export class UIManager {
 
         const container1 = document.getElementById('google-signin-btn-container');
         const container2 = document.getElementById('profile-google-btn-container');
+
+        if (isNative) {
+            renderFallbackGoogleBtn(container1);
+            renderFallbackGoogleBtn(container2);
+            return;
+        }
 
         if (window.google && window.google.accounts) {
             try {
@@ -5520,18 +5547,13 @@ export class UIManager {
             this.renderBadgesGrid();
         };
 
+        this.openProfileModal = openProfileModal;
+        
         // Bind Widget Click again to ensure the wrapped openProfileModal is used
         if (widget) {
             this.bindTouchClick(widget, () => {
                 openProfileModal(false);
             });
-        }
-        
-        // Trigger First-time username prompt if not set
-        if (!localStorage.getItem('viscora_username_set')) {
-            setTimeout(() => {
-                openProfileModal(true);
-            }, 800);
         }
     }
 

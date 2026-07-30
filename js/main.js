@@ -81,6 +81,15 @@ const initGame = () => {
         window.removeEventListener('click', unlockAudio);
         window.removeEventListener('touchend', unlockAudio);
         window.removeEventListener('keydown', unlockAudio);
+
+        // İlk kez giren oyuncu için ana menüye geçildiğinde profil kurulum modalını göster
+        if (!localStorage.getItem('viscora_username_set') && !localStorage.getItem('viscora_google_email')) {
+            setTimeout(() => {
+                if (window.game && window.game.ui && typeof window.game.ui.openProfileModal === 'function') {
+                    window.game.ui.openProfileModal(true);
+                }
+            }, 600);
+        }
     };
 
     // 500ms gecikme ile dinleyicileri ekle ki sayfa yüklenirken kazara tetiklenmesin (event bleeding engellenir)
