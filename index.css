@@ -4861,23 +4861,27 @@ button:hover .icon-svg,
 
 /* Mobil Cihazlar İçin Performans ve Çentik (Safe Area) Optimizasyonları */
 @media (max-width: 1024px), (pointer: coarse) {
-    /* backdrop-filter blurlarını mobilde kaldırarak GPU repainting lagını sıfıra indiriyoruz */
-    .settings-overlay, 
-    #creditsOverlay, 
-    #languageSelectOverlay, 
-    #storyOverlay, 
-    #shopOverlay, 
-    #profileOverlay, 
-    #levelSelectOverlay, 
-    #leaderboardOverlay, 
-    #achievementsOverlay,
-    .menu-overlay,
-    .dialog-overlay,
-    .viscora-modal,
-    [class*="overlay"] {
+    /* backdrop-filter blurlarını mobilde ve tabletlerde kaldırarak GPU repainting lagını ve kart şeffaflık bugını sıfıra indiriyoruz */
+    *, 
+    *::before, 
+    *::after,
+    .menu-card, 
+    .star-gate-card, 
+    .codex-card, 
+    .community-card, 
+    .shop-item, 
+    #player-profile-widget,
+    .star-gate-overlay,
+    .screen {
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
-        background-color: rgba(10, 10, 15, 0.96) !important; /* Yarı saydam koyu arka plan ile okunurluğu koru */
+    }
+    
+    .menu-card,
+    .star-gate-card,
+    .codex-card,
+    .community-card {
+        background: linear-gradient(145deg, rgba(15, 23, 42, 0.98) 0%, rgba(8, 8, 16, 0.99) 100%) !important;
     }
     
     /* Inset box-shadow canvas üzerinde mobilde performansı korumak için kapatılır */
@@ -5194,6 +5198,22 @@ button:hover .icon-svg,
 
 .standalone-mode #seo-landing-content {
     display: none !important;
+}
+
+/* ABSOLUTE GLOBAL OVERRIDE FOR CARDS & OVERLAYS - NO GPU BLUR TRANSPARENCY */
+.menu-card,
+.star-gate-card,
+.codex-card,
+.community-card,
+.shop-card,
+.rewards-card,
+.star-gate-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.98) 0%, rgba(8, 8, 16, 0.99) 100%) !important;
+    border: 1px solid rgba(0, 240, 255, 0.25) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 
