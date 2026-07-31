@@ -1456,6 +1456,15 @@ export class UIManager {
             });
         }
 
+        // Tüm modallar için dışarıya (arka plana) dokunarak kapatma desteği
+        document.querySelectorAll('.star-gate-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.add('hidden');
+                }
+            });
+        });
+
         // Ses Ayarları Modalı Aç/Kapat
         const btnOpenSettings = document.getElementById('btn-open-settings');
         const btnCloseSettings = document.getElementById('btn-close-settings');
@@ -4726,6 +4735,11 @@ export class UIManager {
         // Tüm ekranları gizle
         Object.keys(this.screens).forEach(key => {
             this.screens[key].classList.add('hidden');
+        });
+        
+        // Tüm modalları ve çakışan kaplamaları kapat
+        document.querySelectorAll('.star-gate-overlay').forEach(modal => {
+            modal.classList.add('hidden');
         });
         
         this.hud.classList.add('hidden');
