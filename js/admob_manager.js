@@ -298,37 +298,47 @@ class AdMobManager {
 
         if (this.admobPlugin && this.initialized) {
             try {
-                // Capacitor Native AdMob SDK ile ödüllü reklam
                 const options = {
                     adId: adUnitId,
                     isTesting: false
                 };
 
-                // Reklam yükle
-                await this.admobPlugin.prepareRewardVideoAd(options);
+                let rewardEarned = false;
 
-                // Ödül event'ini dinle
-                const rewardHandler = this.admobPlugin.addListener('onRewardedVideoAdReward', () => {
+                const rewardHandler1 = this.admobPlugin.addListener('onRewardedVideoAdReward', () => {
                     console.log("✅ Ödüllü reklam: Ödül kazanıldı!");
-                    this._hideAdLoadingOverlay();
-                    rewardHandler.remove();
-                    if (onSuccess) onSuccess();
+                    rewardEarned = true;
+                });
+                const rewardHandler2 = this.admobPlugin.addListener('rewarded', () => {
+                    console.log("✅ Ödüllü reklam: Ödül kazanıldı!");
+                    rewardEarned = true;
                 });
 
                 const dismissHandler = this.admobPlugin.addListener('onRewardedVideoAdDismissed', () => {
                     console.log("ℹ️ Ödüllü reklam kapatıldı.");
                     this._hideAdLoadingOverlay();
-                    dismissHandler.remove();
+                    try { if (rewardHandler1) rewardHandler1.remove(); } catch(e){}
+                    try { if (rewardHandler2) rewardHandler2.remove(); } catch(e){}
+                    try { if (dismissHandler) dismissHandler.remove(); } catch(e){}
+                    if (rewardEarned && onSuccess) {
+                        onSuccess();
+                    }
                 });
 
-                // Reklamı göster
-                await this.admobPlugin.showRewardVideoAd();
-                setTimeout(() => { this._hideAdLoadingOverlay(); }, 1000);
+                const rewardItem = await this.admobPlugin.showRewardVideoAd(options);
+                if (rewardItem) {
+                    rewardEarned = true;
+                }
+                setTimeout(() => {
+                    this._hideAdLoadingOverlay();
+                    if ((rewardEarned || !this.admobPlugin) && onSuccess) {
+                        onSuccess();
+                    }
+                }, 1000);
 
             } catch (err) {
-                console.warn("⚠️ Native reklam hatası:", err);
+                console.warn("⚠️ Native reklam hatası (fallback ödül verildi):", err);
                 this._hideAdLoadingOverlay();
-                // Native başarısız olursa, ödülü yine de ver (kullanıcıyı cezalandırma)
                 if (onSuccess) onSuccess();
             }
         } else {

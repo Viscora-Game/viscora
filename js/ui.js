@@ -4821,7 +4821,7 @@ export class UIManager {
      * Menüdeki Toplam Kristal Sayacını Günceller
      */
     updateMenuCrystalsUI() {
-        const balance = this.game ? this.game.totalCrystals : (parseInt(localStorage.getItem('viscora_total_crystals')) || 0);
+        const balance = window.shopManager ? window.shopManager.getBalance() : (parseInt(localStorage.getItem('viscora_total_crystals')) || 0);
         const menuCounter = document.getElementById('menu-crystal-count');
         const shopCounter = document.getElementById('shop-crystal-balance');
         const rewardsCounter = document.getElementById('rewards-crystal-balance');
