@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Viscora - İletişim & Yayıncı Künyesi (Contact & Impressum)</title>
+    <meta name="description" content="Viscora oyunu geliştirici ekibi CyberCore Interactive ile iletişime geçin. Destek, iş birliği, reklam ve yayıncı künye bilgileri.">
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #07070a;
+            --card-bg: rgba(15, 15, 25, 0.65);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --color-cyan: #00f2fe;
+            --color-magenta: #f43f5e;
+            --font-main: 'Outfit', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 0%, rgba(20, 10, 40, 0.3) 0%, transparent 60%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding-bottom: 60px;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(7, 7, 10, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-decoration: none;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--color-cyan);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00f2fe 0%, #f43f5e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: var(--color-cyan);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .info-list li {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-list li strong {
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .form-group input, .form-group textarea {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--color-cyan);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #00f2fe 0%, #00c6ff 100%);
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--color-cyan);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">VISCORA</a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Oyna</a>
+            <a href="nasil-oynanir.html" class="nav-link">Nasıl Oynanır?</a>
+            <a href="guncellemeler.html" class="nav-link">Güncellemeler</a>
+            <a href="hakkinda.html" class="nav-link">Hakkında</a>
+            <a href="iletisim.html" class="nav-link active">İletişim & Künye</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="hero">
+            <h1>İletişim & Yayıncı Künyesi</h1>
+            <p>Viscora oyunu ile ilgili her türlü soru, öneri, teknik destek ve yayıncılık talepleriniz için bizimle iletişime geçebilirsiniz.</p>
+        </section>
+
+        <div class="grid-2">
+            <div class="card">
+                <h2>🌐 Yayıncı & Şirket Künyesi</h2>
+                <ul class="info-list">
+                    <li>
+                        <strong>Geliştirici Stüdyo:</strong>
+                        CyberCore Interactive
+                    </li>
+                    <li>
+                        <strong>Oyun Adı:</strong>
+                        Viscora - 2D Physical Precision Platformer
+                    </li>
+                    <li>
+                        <strong>Resmi Destek E-Postası:</strong>
+                        viscoragames@gmail.com
+                    </li>
+                    <li>
+                        <strong>Resmi Web Sitesi:</strong>
+                        https://viscoragame.com
+                    </li>
+                    <li>
+                        <strong>Desteklenen Platformlar:</strong>
+                        Google Play Store (Android Native), Web (HTML5/PWA)
+                    </li>
+                    <li>
+                        <strong>Telif Hakkı & Lisans:</strong>
+                        © 2026 CyberCore Interactive. Tüm hakları saklıdır.
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>📩 Doğrudan Mesaj Gönderin</h2>
+                <form class="contact-form" action="mailto:viscoragames@gmail.com" method="post" enctype="text/plain">
+                    <div class="form-group">
+                        <label for="name">Adınız & Soyadınız:</label>
+                        <input type="text" id="name" name="name" placeholder="Örn: Ahmet Yılmaz" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">E-Posta Adresiniz:</label>
+                        <input type="email" id="email" name="email" placeholder="Örn: ahmet@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Konu:</label>
+                        <input type="text" id="subject" name="subject" placeholder="Örn: Destek / İş Birliği" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Mesajınız:</label>
+                        <textarea id="message" name="message" rows="4" placeholder="Mesajınızı buraya yazabilirsiniz..." required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">MESAJ GÖNDER</button>
+                </form>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="index.html">Ana Sayfa</a>
+                <a href="nasil-oynanir.html">Nasıl Oynanır?</a>
+                <a href="guncellemeler.html">Güncellemeler</a>
+                <a href="hakkinda.html">Hakkında</a>
+                <a href="privacy.html">Gizlilik Politikası</a>
+                <a href="terms.html">Kullanım Şartları</a>
+                <a href="delete-account.html">Hesap Silme</a>
+            </div>
+            <p>© 2026 CyberCore Interactive. Tüm hakları saklıdır.</p>
+        </footer>
+    </div>
+</body>
+</html>
