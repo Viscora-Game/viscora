@@ -432,8 +432,14 @@ export class UIManager {
                     }
 
                     if (!cleanEmail) {
-                        this.showGlobalToast("⚠️ Google hesabı seçilmedi.", false);
-                        return;
+                        const prompted = prompt("Google ile Bağlan: Lütfen Gmail e-posta adresinizi giriniz (Örn: ornek@gmail.com):", localStorage.getItem('viscora_google_email') || "");
+                        if (prompted && prompted.trim().includes('@')) {
+                            cleanEmail = prompted.trim().toLowerCase();
+                            displayName = cleanEmail.split('@')[0];
+                        } else {
+                            this.showGlobalToast("⚠️ Geçerli bir e-posta adresi girilmedi.", false);
+                            return;
+                        }
                     }
 
                     if (cleanEmail) {
@@ -1120,28 +1126,16 @@ export class UIManager {
         bindTouchButton('btn-left', 'left');
         bindTouchButton('btn-right', 'right');
 
-        // Aksiyon Butonları (Zıplama ve Eğil/Roll)
+        // Aksiyon Butonları (Zıplama, Eğil/Roll ve Shift/Viskozite)
         bindTouchButton('btn-jump', 'jump', () => {
-            if (this.game.state === 'PLAYING') {
+            if (this.game && this.game.state === 'PLAYING' && this.game.player) {
                 this.game.player.jump();
             }
-        }, true); // Zıplamada hafif titreşim
+        }, true);
         bindTouchButton('btn-down', 'down', null, false);
-
-        // Viskozite Değiştirme Butonu (Shift) — Geliştirilmiş Kesintisiz Dokunmatik Tepki
-        const shiftBtn = document.getElementById('btn-shift');
-        if (shiftBtn) {
-            const handleShift = (e) => {
-                e.preventDefault();
-                this.triggerViscosityShift();
-                if (typeof navigator !== 'undefined' && navigator.vibrate) {
-                    navigator.vibrate(25);
-                }
-            };
-            shiftBtn.addEventListener('touchstart', handleShift, { passive: false });
-            shiftBtn.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
-            shiftBtn.addEventListener('mousedown', handleShift);
-        }
+        bindTouchButton('btn-shift', 'shift', () => {
+            this.triggerViscosityShift();
+        }, true);
 
         // HUD Duraklatma Butonu
         this.bindTouchClick(document.getElementById('btn-pause'), () => {

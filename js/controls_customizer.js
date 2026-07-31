@@ -91,6 +91,8 @@ class ControlsCustomizer {
             btn.style.top      = pos.topPct  + '%';
             btn.style.right    = 'auto';
             btn.style.bottom   = 'auto';
+            btn.style.pointerEvents = 'auto';
+            btn.style.touchAction = 'none';
             btn.dataset.customSize = size;
 
             if (id === 'btn-shift') {

@@ -2636,18 +2636,28 @@ button, input, select, textarea, .menu-btn, .sound-toggle-btn, .sound-toggle-min
     background: linear-gradient(145deg, rgba(15,23,42,0.96) 0%, rgba(8,8,16,0.98) 100%);
     border: 1px solid rgba(0, 240, 255, 0.25);
     border-radius: 20px;
-    padding: 2rem 2rem 1.6rem;
-    max-width: 320px;
-    width: 90%;
+    padding: 1.4rem 1.4rem 1.2rem;
+    max-width: 380px;
+    width: 92%;
     text-align: center;
     box-shadow: 0 15px 50px rgba(0,0,0,0.75), 0 0 25px rgba(0, 240, 255, 0.1), 0 0 0 1px rgba(255,255,255,0.05) inset;
     animation: slide-up 0.3s cubic-bezier(.18,.89,.32,1.28);
     
     /* Responsive layout enhancements */
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
+    max-height: 88vh !important;
+    display: flex !important;
+    flex-direction: column !important;
     box-sizing: border-box;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+}
+
+.sound-settings-card {
+    max-width: 380px;
+    width: 92%;
+    max-height: 88vh !important;
+    overflow-y: auto !important;
 }
 
 .star-gate-card .menu-settings {
