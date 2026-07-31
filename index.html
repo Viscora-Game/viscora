@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="tr" style="background-color: #0a0a0f;">
 <head>
-    <!-- Global Hata Yakalayıcı (Crash Reporter & Otomatik Bildirim) -->
+    <!-- Global Hata Yakalayıcı (Konsol Günlüğü & Geliştirici Modu) -->
     <script>
         window.lastCapturedError = null;
         window.showCrashReporter = function(message, file, line, stack) {
+            console.error("[Viscora Core Error]:", message, file, line, stack);
             window.lastCapturedError = {
                 message: message || "Bilinmeyen Hata",
                 file: file || "bilinmiyor",
@@ -12,22 +13,16 @@
                 stack: stack || "",
                 time: new Date().toISOString()
             };
-            var modal = document.getElementById('crash-reporter-modal');
-            var msgEl = document.getElementById('crash-reporter-msg');
-            if (modal && msgEl) {
-                var fileName = file ? file.split('/').pop() : 'bilinmiyor';
-                msgEl.textContent = '[Hata Detayı]: ' + message + '\n[Konum]: ' + fileName + ':' + line;
-                modal.classList.remove('hidden');
-            }
+            // Otomatik engelleyici modal kaldırıldı; sadece devMode veya manuel olarak görünür.
         };
         window.addEventListener('error', function(e) {
             if (e.message && !e.message.includes('ResizeObserver')) {
-                window.showCrashReporter(e.message, e.filename, e.lineno, e.error ? e.error.stack : '');
+                console.warn("[Caught Error]:", e.message, e.filename, e.lineno);
             }
         });
         window.addEventListener('unhandledrejection', function(e) {
             var msg = e.reason ? (e.reason.message || String(e.reason)) : "Promise Hatası";
-            window.showCrashReporter(msg, 'async_promise', 0, e.reason ? e.reason.stack : '');
+            console.warn("[Unhandled Promise Rejection]:", msg);
         });
     </script>
 
