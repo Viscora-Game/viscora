@@ -1168,10 +1168,8 @@ export class UIManager {
         
         // Başlangıç Ekranı - Oyna
         this.bindTouchClick(document.getElementById('btn-play'), () => {
-            // Eğer geçerli bölüm seçili değilse veya geçersizse
-            if (this.game.currentLevel === 999 || this.game.currentLevel === null || this.game.currentLevel === undefined || this.game.currentLevel > 30 || this.game.currentLevel < 0) {
-                alert("Lütfen oynamak istediğiniz bölümü seçin!");
-                return;
+            if (this.game.currentLevel !== 999 && (!this.game.currentLevel || this.game.currentLevel < 1 || this.game.currentLevel > 30)) {
+                this.game.currentLevel = Math.max(1, this.game.unlockedLevel || 1);
             }
             audio.init(); // İlk ses motoru tetiklemesi
             audio.startMusic();
