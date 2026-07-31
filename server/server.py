@@ -892,7 +892,12 @@ async def post_user_sync(request: Request):
 @app.api_route("/api/user/sync_email", methods=["GET", "POST", "OPTIONS"])
 @app.api_route("/api/user/sync_email/", methods=["GET", "POST", "OPTIONS"])
 async def post_user_sync_email(request: Request):
-    body = await request.json()
+    if request.method in ["GET", "OPTIONS"]:
+        return JSONResponse({'status': 'ok'})
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
     email = body.get('email')
     google_id = body.get('googleId')
     current_save = body.get('currentSaveData', {})
