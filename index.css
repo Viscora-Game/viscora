@@ -4837,16 +4837,21 @@ button:hover .icon-svg,
 .screen:not(.hidden) {
     opacity: 1 !important;
     visibility: visible !important;
+    display: flex !important;
+    z-index: 200 !important;
 }
 .screen:not(.hidden) .menu-card,
 .screen:not(.hidden) .star-gate-card,
-.star-gate-overlay:not(.hidden) .star-gate-card,
-.screen:not(.hidden) .shop-container,
-.screen:not(.hidden) .codex-container {
+.screen:not(.hidden) .codex-card,
+.screen:not(.hidden) .community-card,
+.screen:not(.hidden) .shop-card,
+.screen:not(.hidden) .rewards-card,
+.star-gate-overlay:not(.hidden) .star-gate-card {
     opacity: 1 !important;
     visibility: visible !important;
     display: flex !important;
     flex-direction: column !important;
+    z-index: 201 !important;
 }
 @keyframes screenFadeIn {
     from { opacity: 0; }
