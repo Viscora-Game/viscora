@@ -5213,14 +5213,19 @@ button:hover .icon-svg,
 .codex-card,
 .community-card,
 .shop-card,
-.rewards-card,
-.star-gate-overlay {
+.rewards-card {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     background: linear-gradient(145deg, rgba(15, 23, 42, 0.98) 0%, rgba(8, 8, 16, 0.99) 100%) !important;
     border: 1px solid rgba(0, 240, 255, 0.25) !important;
     opacity: 1 !important;
     visibility: visible !important;
+}
+
+.star-gate-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(5, 5, 12, 0.65) !important;
 }
 
 
