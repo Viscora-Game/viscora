@@ -889,7 +889,8 @@ async def post_user_sync(request: Request):
     else:
         return JSONResponse(status_code=500, content={'error': 'Veritabanına kaydedilemedi.'})
 
-@app.post("/api/user/sync_email")
+@app.api_route("/api/user/sync_email", methods=["GET", "POST", "OPTIONS"])
+@app.api_route("/api/user/sync_email/", methods=["GET", "POST", "OPTIONS"])
 async def post_user_sync_email(request: Request):
     body = await request.json()
     email = body.get('email')
