@@ -4769,7 +4769,11 @@ export class UIManager {
                 this.mobileControls.classList.remove('hidden');
             }
         } else {
-            const screen = this.screens[screenName];
+            let screen = this.screens[screenName];
+            if (!screen) {
+                screen = document.getElementById(`${screenName}-screen`);
+                if (screen) this.screens[screenName] = screen;
+            }
             if (screen) {
                 screen.classList.remove('hidden');
             } else {

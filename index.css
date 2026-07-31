@@ -218,7 +218,7 @@ body.game-active {
     height: 100%;
     background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.08) 50%);
     background-size: 100% 3px;
-    z-index: 999999;
+    z-index: 2;
     pointer-events: none;
     opacity: 0.22;
 }
