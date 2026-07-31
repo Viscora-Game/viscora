@@ -1,55 +1,24 @@
-const CACHE_NAME = 'viscora-v1.0.0.23';
+const CACHE_NAME = 'viscora-v1.0.0.54';
 const ASSETS = [
   './',
   './index.html',
-  './index.css?v=v369',
+  './index.css?v=v370',
   './manifest.json',
-  './js/main.js?v=v369',
-  './js/game.js?v=v369',
-  './js/audio.js?v=v369',
-  './js/ui.js?v=v369',
-  './js/level.js?v=v369',
-  './js/player.js?v=v369',
-  './js/enemies.js?v=v369',
-  './js/viscosity.js?v=v369',
-  './js/boss.js?v=v369',
-  './js/editor.js?v=v369',
-  './js/controls_customizer.js?v=v369',
-  './js/admob_manager.js?v=v369',
-  './js/cloud_save.js?v=v369',
-  './js/generator.js?v=v369',
-  './js/shop.js?v=v369',
-  './nasil-oynanir.html?v=v369',
-  './guncellemeler.html?v=v369',
-  './hakkinda.html?v=v369',
-  './privacy.html?v=v369',
-  './terms.html?v=v369',
-  './ads.txt',
-  './app-ads.txt',
-  './assets/audio/menu_theme.mp3?v=v369',
-  './assets/audio/game_theme.mp3?v=v369',
-  './assets/dragon_head.png',
-  './assets/flamethrower.png',
-  './assets/avatars/slime_king.png?v=v356',
-  './assets/avatars/mecha_drone.png?v=v356',
-  './assets/avatars/fire_elemental.png?v=v356',
-  './assets/avatars/ancient_totem.png?v=v356',
-  './assets/avatars/crystal_shard.png?v=v356',
-  './assets/avatars/ghost_orb.png?v=v356',
-  './assets/avatars/tentacle_blob.png?v=v356',
-  './assets/avatars/shadow_artifact.png?v=v356',
-  './assets/badges/badge_first_steps.png?v=v356',
-  './assets/badges/badge_boss_1.png?v=v356',
-  './assets/badges/badge_star_collector.png?v=v356',
-  './assets/badges/badge_form_shifter.png?v=v356',
-  './assets/badges/badge_speedrun.png?v=v356',
-  './assets/badges/badge_champion.png?v=v356',
-  './assets/badges/badge_90_stars.png?v=v356',
-  './assets/badges/badge_all_bosses.png?v=v356',
-  './assets/badges/badge_patrol_killer.png?v=v356',
-  './assets/badges/badge_gel_killer.png?v=v356',
-  './assets/badges/badge_ufo_killer.png?v=v356',
-  './assets/badges/badge_crystal_spender.png?v=v356'
+  './js/main.js?v=v370',
+  './js/game.js?v=v370',
+  './js/audio.js?v=v370',
+  './js/ui.js?v=v370',
+  './js/level.js?v=v370',
+  './js/player.js?v=v370',
+  './js/enemies.js?v=v370',
+  './js/viscosity.js?v=v370',
+  './js/boss.js?v=v370',
+  './js/editor.js?v=v370',
+  './js/controls_customizer.js?v=v370',
+  './js/admob_manager.js?v=v370',
+  './js/cloud_save.js?v=v370',
+  './js/generator.js?v=v370',
+  './js/shop.js?v=v370'
 ];
 
 self.addEventListener('install', (e) => {
@@ -75,15 +44,32 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // API isteklerini veya GET dışındaki istekleri önbelleğe alma
   if (e.request.method !== 'GET' || e.request.url.includes('/api/')) {
     return;
   }
   
+  // HTML gezinme veya index.html istekleri için AĞ ÖNCELİKLİ (Network-First) strateji
+  const isHtmlRequest = e.request.mode === 'navigate' || e.request.url.endsWith('index.html') || e.request.url.endsWith('/');
+  
+  if (isHtmlRequest) {
+    e.respondWith(
+      fetch(e.request).then((networkResponse) => {
+        if (networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, responseToCache));
+        }
+        return networkResponse;
+      }).catch(() => {
+        return caches.match(e.request);
+      })
+    );
+    return;
+  }
+
+  // Statik varlıklar (JS/CSS/Resim) için Stale-While-Revalidate
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Arka planda güncel sürümü sorgula ve önbelleği güncelle (Stale-While-Revalidate)
         fetch(e.request).then((networkResponse) => {
           if (networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => cache.put(e.request, networkResponse));
@@ -95,6 +81,3 @@ self.addEventListener('fetch', (e) => {
     })
   );
 });
-
-
-
