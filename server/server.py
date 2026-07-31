@@ -830,6 +830,14 @@ async def get_campaign_leaderboard(level_num: int, userId: str = ''):
         'personalBest': personal_best
     }
 
+def safe_int_ts(val):
+    if not val:
+        return 0
+    try:
+        return int(float(str(val).strip()))
+    except (ValueError, TypeError):
+        return 0
+
 @app.post("/api/user/sync")
 async def post_user_sync(request: Request):
     body = await request.json()
@@ -850,8 +858,8 @@ async def post_user_sync(request: Request):
             existing_user['saveData'] = save_data
         else:
             db_save = existing_user.get('saveData', {})
-            db_time = int(db_save.get('lastSaveTime', 0) or 0)
-            inc_time = int(save_data.get('lastSaveTime', 0) or 0)
+            db_time = safe_int_ts(db_save.get('lastSaveTime'))
+            inc_time = safe_int_ts(save_data.get('lastSaveTime'))
             
             if inc_time >= db_time:
                 existing_user['saveData'] = save_data
@@ -880,6 +888,80 @@ async def post_user_sync(request: Request):
         }
     else:
         return JSONResponse(status_code=500, content={'error': 'Veritabanına kaydedilemedi.'})
+
+@app.post("/api/user/sync_email")
+async def post_user_sync_email(request: Request):
+    body = await request.json()
+    email = body.get('email')
+    google_id = body.get('googleId')
+    current_save = body.get('currentSaveData', {})
+    
+    if not email:
+        return JSONResponse(status_code=400, content={'error': 'Email zorunludur.'})
+        
+    clean_email = str(email).strip().lower()
+    user_record = get_user_by_email(clean_email)
+    
+    if not user_record and google_id:
+        user_record = get_user_by_google_id(google_id)
+        
+    now_iso = datetime.now(timezone.utc).isoformat()
+    
+    if user_record:
+        if clean_email and not user_record.get('googleEmail'):
+            user_record['googleEmail'] = clean_email
+        if google_id and not user_record.get('googleId'):
+            user_record['googleId'] = google_id
+            
+        db_save = user_record.get('saveData', {})
+        db_time = safe_int_ts(db_save.get('lastSaveTime'))
+        inc_time = safe_int_ts(current_save.get('lastSaveTime'))
+        
+        restored = False
+        if inc_time >= db_time and current_save:
+            user_record['saveData'] = current_save
+        else:
+            restored = True
+            
+        user_record['lastUpdated'] = now_iso
+        save_user(user_record)
+        
+        return {
+            'status': 'success',
+            'userId': user_record.get('userId'),
+            'syncCode': user_record.get('syncCode'),
+            'saveData': user_record.get('saveData', {}),
+            'restored': restored,
+            'lastUpdated': user_record.get('lastUpdated')
+        }
+    else:
+        import string
+        import time
+        import uuid
+        chars = string.ascii_uppercase + string.digits
+        sync_code = ''.join(random.choices(chars, k=6))
+        while get_user_by_sync_code(sync_code) is not None:
+            sync_code = ''.join(random.choices(chars, k=6))
+            
+        user_id = 'user_' + str(uuid.uuid4())[:8] + '_' + str(int(time.time()))
+        user_record = {
+            'userId': user_id,
+            'googleEmail': clean_email,
+            'googleId': google_id,
+            'syncCode': sync_code,
+            'saveData': current_save if current_save else {},
+            'lastUpdated': now_iso
+        }
+        save_user(user_record)
+        
+        return {
+            'status': 'success',
+            'userId': user_id,
+            'syncCode': sync_code,
+            'saveData': user_record['saveData'],
+            'restored': False,
+            'lastUpdated': now_iso
+        }
 
 @app.post("/api/user/restore")
 async def post_user_restore(request: Request):
