@@ -1367,15 +1367,21 @@ export class UIManager {
             this.bindTouchClick(btnFreeCrystalAd, () => {
                 if (window.admobManager) {
                     window.admobManager.triggerCrystalAd(() => {
-                        this.game.totalCrystals += 50;
-                        localStorage.setItem('viscora_total_crystals', this.game.totalCrystals);
+                        if (window.shopManager) {
+                            window.shopManager.addCrystals(50);
+                        } else {
+                            this.game.totalCrystals = (this.game.totalCrystals || 0) + 50;
+                            localStorage.setItem('viscora_total_crystals', this.game.totalCrystals.toString());
+                        }
+                        if (this.game) {
+                            this.game.totalCrystals = window.shopManager ? window.shopManager.totalCrystals : (this.game.totalCrystals || 0);
+                        }
                         this.updateMenuCrystalsUI();
                         this.updateFreeCrystalAdUI();
                         if (typeof audio !== 'undefined' && typeof audio.playWin === 'function') {
                             try { audio.playWin(); } catch(e){}
                         }
                         this.showGlobalToast("🎁 Tebrikler! 50 Hediye Kristal Hesabınıza Eklendi!", false);
-                        CloudSaveManager.saveProgress();
                     }, (err) => {
                         this.showAdLimitPopup(err);
                     });
