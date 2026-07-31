@@ -4842,6 +4842,7 @@ button:hover .icon-svg,
     opacity: 1 !important;
     visibility: visible !important;
     display: flex !important;
+    flex-direction: column !important;
 }
 @keyframes screenFadeIn {
     from { opacity: 0; }
