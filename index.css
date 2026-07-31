@@ -431,14 +431,12 @@ h2 {
 .codex-card {
     width: 92%;
     max-width: 680px;
-    height: auto;
-    min-height: 0;
-    max-height: min(520px, 88vh);
-    display: flex;
-    flex-direction: column;
+    height: min(560px, 88vh) !important;
+    display: flex !important;
+    flex-direction: column !important;
     padding: 1.5rem !important;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow: hidden !important;
 }
 
 .codex-header {
