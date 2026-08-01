@@ -32,6 +32,11 @@
     outline: none;
 }
 
+html, body, #app {
+    background-color: #03050a !important;
+    background: #03050a !important;
+}
+
 /* Menüler ve alt elemanlarında dikey kaydırmayı serbest bırak (Oyun kontrolleri hariç) */
 #start-screen, #start-screen *,
 #codex-screen, #codex-screen *,
