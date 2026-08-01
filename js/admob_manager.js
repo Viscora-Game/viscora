@@ -237,6 +237,40 @@ class AdMobManager {
     }
 
     /**
+     * Her 3 bölümde bir (Hikaye veya Topluluk haritası) geçiş reklamı açar
+     */
+    trackLevelCompletion(onComplete) {
+        let count = parseInt(localStorage.getItem('viscora_completed_levels_count')) || 0;
+        count++;
+        localStorage.setItem('viscora_completed_levels_count', count.toString());
+        console.log(`🎮 Tamamlanan bölüm sayısı: ${count}/3`);
+
+        if (count >= 3) {
+            localStorage.setItem('viscora_completed_levels_count', '0');
+            this.triggerInterstitialAd(onComplete);
+        } else {
+            if (onComplete) onComplete();
+        }
+    }
+
+    /**
+     * Dükkanda yapılan her 3 satın alımda bir geçiş reklamı açar
+     */
+    trackShopPurchase(onComplete) {
+        let count = parseInt(localStorage.getItem('viscora_shop_purchases_count')) || 0;
+        count++;
+        localStorage.setItem('viscora_shop_purchases_count', count.toString());
+        console.log(`🛍️ Dükkan satın alım sayısı: ${count}/3`);
+
+        if (count >= 3) {
+            localStorage.setItem('viscora_shop_purchases_count', '0');
+            this.triggerInterstitialAd(onComplete);
+        } else {
+            if (onComplete) onComplete();
+        }
+    }
+
+    /**
      * Geçiş Reklamı (Interstitial) Tetikler
      */
     async triggerInterstitialAd(onComplete) {

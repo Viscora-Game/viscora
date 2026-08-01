@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v375';
-import { ViscosityList } from './viscosity.js?v=v375';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v375';
-import { CloudSaveManager } from './cloud_save.js?v=v375';
+import { audio } from './audio.js?v=v376';
+import { ViscosityList } from './viscosity.js?v=v376';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v376';
+import { CloudSaveManager } from './cloud_save.js?v=v376';
 
 const TRANSLATIONS = {
     tr: {
@@ -1397,10 +1397,17 @@ export class UIManager {
             this.game.restart();
         });
 
-        // Bölüm Sonu Ekranı - Tekrar Oyna (Sonraki Bölüm)
+        // Bölüm Sonu Ekranı - Tekrar Oyna (Sonraki Bölüm veya Topluluk Bölümü)
         this.bindTouchClick(document.getElementById('btn-next'), () => {
-            this.showScreen('hud');
-            this.game.nextLevel();
+            if (window.admobManager) {
+                window.admobManager.trackLevelCompletion(() => {
+                    this.showScreen('hud');
+                    this.game.nextLevel();
+                });
+            } else {
+                this.showScreen('hud');
+                this.game.nextLevel();
+            }
         });
 
         // Bölüm Sonu Ekranı - Bölümü Tekrarla (Aynı Bölümü Yeniden Başlat)

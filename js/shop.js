@@ -1,4 +1,4 @@
-import { CloudSaveManager } from './cloud_save.js?v=v375';
+import { CloudSaveManager } from './cloud_save.js?v=v376';
 
 export const SHOP_ITEMS = [
     // Trails
@@ -346,6 +346,10 @@ class ShopManager {
         this.spentCrystals += price;
         this.ownedItems.push(itemId);
         this.save();
+
+        if (window.admobManager && typeof window.admobManager.trackShopPurchase === 'function') {
+            window.admobManager.trackShopPurchase();
+        }
 
         window.dispatchEvent(new CustomEvent('viscora_crystals_changed', { detail: { balance: this.getBalance() } }));
         return { success: true };

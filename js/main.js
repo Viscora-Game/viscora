@@ -1,6 +1,6 @@
-import { GameManager } from './game.js?v=v375';
-import { audio } from './audio.js?v=v375';
-import { CloudSaveManager } from './cloud_save.js?v=v375';
+import { GameManager } from './game.js?v=v376';
+import { audio } from './audio.js?v=v376';
+import { CloudSaveManager } from './cloud_save.js?v=v376';
 
 const initGame = () => {
     // Mobilde performansı artırmak için pahalı canvas gölge efektlerini (shadowBlur) devre dışı bırak
