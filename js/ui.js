@@ -4736,8 +4736,11 @@ export class UIManager {
         });
         
         // Tüm modalları ve çakışan kaplamaları kapat
-        document.querySelectorAll('.star-gate-overlay').forEach(modal => {
+        document.querySelectorAll('.star-gate-overlay, .viscora-modal-overlay').forEach(modal => {
             modal.classList.add('hidden');
+            if (modal.classList.contains('viscora-modal-overlay')) {
+                modal.remove(); // Dinamik modal kaplamalarını DOM'dan tamamen temizle
+            }
         });
         
         this.hud.classList.add('hidden');
