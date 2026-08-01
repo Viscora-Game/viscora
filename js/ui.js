@@ -4761,6 +4761,12 @@ export class UIManager {
         if (screenName === 'hud') {
             this.hud.classList.remove('hidden');
             
+            // Oyun sırasında harita tasarım modallarının açık kalmasını kesin olarak engelle
+            const slotModal = document.getElementById('slot-selection-modal');
+            if (slotModal) slotModal.classList.add('hidden');
+            const designModal = document.getElementById('design-setup-modal');
+            if (designModal) designModal.classList.add('hidden');
+
             // Eğer mobil veya dokunmatik ekran ise kontrolleri göster (PWA)
             const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
             if (isTouchDevice || window.innerWidth < 1024) {
