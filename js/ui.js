@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v369';
-import { ViscosityList } from './viscosity.js?v=v369';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v369';
-import { CloudSaveManager } from './cloud_save.js?v=v369';
+import { audio } from './audio.js?v=v370';
+import { ViscosityList } from './viscosity.js?v=v370';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v370';
+import { CloudSaveManager } from './cloud_save.js?v=v370';
 
 const TRANSLATIONS = {
     tr: {
@@ -1730,6 +1730,16 @@ export class UIManager {
         if (btnCloseSettings && settingsModal) {
             this.bindTouchClick(btnCloseSettings, () => {
                 settingsModal.classList.add('hidden');
+            });
+        }
+
+        const btnCustomizeControlsModal = document.getElementById('btn-customize-controls-modal');
+        if (btnCustomizeControlsModal && settingsModal) {
+            this.bindTouchClick(btnCustomizeControlsModal, () => {
+                settingsModal.classList.add('hidden');
+                if (window.controlsCustomizer) {
+                    window.controlsCustomizer.enterEditMode();
+                }
             });
         }
 
