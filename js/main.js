@@ -21,11 +21,27 @@ const initGame = () => {
         studioIntro.addEventListener('pointerdown', preventSkip, true);
         studioIntro.addEventListener('keydown', preventSkip, true);
 
-        // Yalnızca Stüdyo Çınlama Sesini Çal
-        try {
-            const studioAudio = new Audio('assets/audio/cybercore_sound_2_hollywood.wav');
-            studioAudio.play().catch(() => { /* Autoplay kısıtlamaları için sessiz geçer */ });
-        } catch (e) {}
+        // Yalnızca Stüdyo Çınlama Sesini Çal (Mobil APK ve Web Autoplay uyumlu)
+        const playIntroSound = () => {
+            try {
+                const studioAudio = new Audio('assets/audio/cybercore_sound_2_hollywood.wav');
+                studioAudio.play().catch(() => {
+                    // Tarayıcı Otomatik Oynatma Kısıtlaması (Autoplay Policy) - İlk tıklamada çalması için dinleyici ekle
+                    const unlockWebAudio = () => {
+                        try {
+                            studioAudio.play().catch(() => {});
+                        } catch(e) {}
+                        window.removeEventListener('click', unlockWebAudio);
+                        window.removeEventListener('touchend', unlockWebAudio);
+                        window.removeEventListener('pointerdown', unlockWebAudio);
+                    };
+                    window.addEventListener('click', unlockWebAudio, { once: true });
+                    window.addEventListener('touchend', unlockWebAudio, { once: true });
+                    window.addEventListener('pointerdown', unlockWebAudio, { once: true });
+                });
+            } catch (e) {}
+        };
+        playIntroSound();
 
         // 1.4 saniye sonra stüdyo ekranını yumuşakça kaldır ve oyun sesleri/reklam kilitlerini aç
         setTimeout(() => {
