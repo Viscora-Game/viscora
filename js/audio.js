@@ -772,6 +772,10 @@ class AudioManager {
      * Start background music (Static MP3 with real-time filtering, or Procedural fallback)
      */
     startMusic() {
+        if (typeof window !== 'undefined' && window.isCyberCoreIntroActive) {
+            console.log("🤫 CyberCore stüdyo girişi aktif — oyun müziği bekletiliyor.");
+            return;
+        }
         try {
             this.init(); // Auto init if not done
             this.musicPlaying = true;

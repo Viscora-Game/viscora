@@ -400,6 +400,9 @@ class AdMobManager {
      * Ana Menü Banner Reklamını Gösterir (Oyun içi ve editör hariç tüm menülerde)
      */
     async showBanner() {
+        if (typeof window !== 'undefined' && window.isCyberCoreIntroActive) {
+            return;
+        }
         const activeScreen = (window.game && window.game.ui && typeof window.game.ui.getActiveScreenName === 'function') 
             ? window.game.ui.getActiveScreenName() : 'start';
             

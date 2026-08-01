@@ -6,19 +6,39 @@ const initGame = () => {
     // CyberCore Interactive Studio Intro Ekranı Mantığı
     const studioIntro = document.getElementById('cybercore-studio-intro');
     if (studioIntro) {
+        window.isCyberCoreIntroActive = true;
+
+        // Tıklanıp geçilmeyi kesinlikle engelle (Unskippable Intro)
+        const preventSkip = (e) => {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+            }
+        };
+        studioIntro.addEventListener('click', preventSkip, true);
+        studioIntro.addEventListener('touchend', preventSkip, true);
+        studioIntro.addEventListener('pointerdown', preventSkip, true);
+        studioIntro.addEventListener('keydown', preventSkip, true);
+
+        // Yalnızca Stüdyo Çınlama Sesini Çal
         try {
             const studioAudio = new Audio('assets/audio/cybercore_sound_2_hollywood.wav');
             studioAudio.play().catch(() => { /* Autoplay kısıtlamaları için sessiz geçer */ });
         } catch (e) {}
 
+        // 1.4 saniye sonra stüdyo ekranını yumuşakça kaldır ve oyun sesleri/reklam kilitlerini aç
         setTimeout(() => {
             studioIntro.classList.add('fade-out');
             setTimeout(() => {
+                window.isCyberCoreIntroActive = false;
                 if (studioIntro.parentNode) {
                     try { studioIntro.parentNode.removeChild(studioIntro); } catch(e) {}
                 }
             }, 500);
         }, 1400);
+    } else {
+        window.isCyberCoreIntroActive = false;
     }
 
     // Mobilde performansı artırmak için pahalı canvas gölge efektlerini (shadowBlur) devre dışı bırak
@@ -91,6 +111,7 @@ const initGame = () => {
     // Tarayıcı güvenlik kısıtlamalarını aşmak için oyuncu Açılış Ekranına dokunduğunda oyuna geçer
     let splashUnlocked = false;
     const unlockAudio = (e) => {
+        if (window.isCyberCoreIntroActive) return; // Stüdyo girisi aktifken tıklama dinleyicisini blokla
         if (e) {
             e.stopPropagation();
         }
