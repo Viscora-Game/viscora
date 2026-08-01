@@ -805,6 +805,10 @@ export class UIManager {
                     const canSelect = this.isLevelUnlocked(lvlNum);
                     if (canSelect) {
                         this.selectLevel(lvlNum);
+                        audio.init();
+                        audio.startMusic();
+                        this.showScreen('hud');
+                        this.game.start();
                     } else if (lvlNum % 10 === 0 && lvlNum > 0) {
                         // Boss level kilitli: modal göster
                         this.showStarGateModal(lvlNum);
@@ -1168,7 +1172,7 @@ export class UIManager {
         
         // Başlangıç Ekranı - Oyna
         this.bindTouchClick(document.getElementById('btn-play'), () => {
-            if (this.game.currentLevel !== 999 && (!this.game.currentLevel || this.game.currentLevel < 1 || this.game.currentLevel > 30)) {
+            if (this.game.currentLevel !== 999 && (this.game.currentLevel === undefined || this.game.currentLevel === null || this.game.currentLevel < 0 || this.game.currentLevel > 30)) {
                 this.game.currentLevel = Math.max(1, this.game.unlockedLevel || 1);
             }
             audio.init(); // İlk ses motoru tetiklemesi
