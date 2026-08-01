@@ -1356,7 +1356,10 @@ export class UIManager {
         // Ana Menü Ücretsiz Hediye Kristal Reklam Butonu (Günde 3x 50 Kristal)
         const btnFreeCrystalAd = document.getElementById('btn-free-crystal-ad');
         if (btnFreeCrystalAd) {
-            this.bindTouchClick(btnFreeCrystalAd, () => {
+            this.bindTouchClick(btnFreeCrystalAd, (e) => {
+                if (e) {
+                    try { e.preventDefault(); e.stopPropagation(); } catch(err){}
+                }
                 if (window.admobManager) {
                     window.admobManager.triggerCrystalAd(() => {
                         if (window.shopManager) {
@@ -1373,7 +1376,7 @@ export class UIManager {
                         if (typeof audio !== 'undefined' && typeof audio.playWin === 'function') {
                             try { audio.playWin(); } catch(e){}
                         }
-                        this.showGlobalToast("🎁 Tebrikler! 50 Hediye Kristal Hesabınıza Eklendi!", false);
+                        this.showGlobalToast("🎁 Tebrikler! 50 Hediye Kristal Hesabınıza Eklendi!", true);
                     }, (err) => {
                         this.showAdLimitPopup(err);
                     });

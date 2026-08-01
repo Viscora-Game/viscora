@@ -293,7 +293,7 @@ class AdMobManager {
      * AdMob Ödüllü Reklam Gösterimi (Capacitor Native veya Web Fallback)
      */
     async showRewardedAd(adUnitId, onSuccess, onError) {
-        console.log(`🎬 Ödüllü reklam yükleniyor... ID: ${adUnitId}`);
+        console.log(`🎬 Ödüllü reklam hazırlanıyor... ID: ${adUnitId}`);
         this._showAdLoadingOverlay();
 
         if (this.admobPlugin && this.initialized) {
@@ -325,30 +325,40 @@ class AdMobManager {
                     }
                 });
 
+                // Önce reklamı hazırla (prepare), ardından göster (show)
+                try {
+                    await this.admobPlugin.prepareRewardVideoAd(options);
+                } catch(pe) {
+                    console.warn("Prepare reward video warning:", pe);
+                }
+                
                 const rewardItem = await this.admobPlugin.showRewardVideoAd(options);
                 if (rewardItem) {
                     rewardEarned = true;
                 }
-                setTimeout(() => {
-                    this._hideAdLoadingOverlay();
-                    if ((rewardEarned || !this.admobPlugin) && onSuccess) {
-                        onSuccess();
-                    }
-                }, 1000);
+
+                this._hideAdLoadingOverlay();
+                if (rewardEarned && onSuccess) {
+                    onSuccess();
+                }
 
             } catch (err) {
-                console.warn("⚠️ Native reklam hatası (fallback ödül verildi):", err);
+                console.warn("⚠️ Native reklam gösterim hatası:", err);
                 this._hideAdLoadingOverlay();
-                if (onSuccess) onSuccess();
+                if (onError) {
+                    onError("Reklam şu an doldurulamadı, lütfen birkaç saniye sonra tekrar deneyin.");
+                } else if (onSuccess) {
+                    onSuccess();
+                }
             }
         } else {
             // Web/Test ortamı simülasyonu
-            console.log("ℹ️ Web simülasyonu: Reklam izleniyor (1.2 saniye)...");
+            console.log("ℹ️ Web simülasyonu: Reklam izleniyor (2 saniye)...");
             setTimeout(() => {
                 this._hideAdLoadingOverlay();
                 console.log("✅ Web simülasyonu: Ödül kazanıldı!");
                 if (onSuccess) onSuccess();
-            }, 1200);
+            }, 2000);
         }
     }
 

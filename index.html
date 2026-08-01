@@ -798,7 +798,7 @@
                     <h1 class="game-title">VISCORA</h1>
                     <div class="game-subtitle">VISCOUS ODYSSEY</div>
                     
-                    <!-- Oyuncu Profil Kartı (Karakter & Bakiye & Hediye Reklam Kutusu) -->
+                    <!-- Oyuncu Profil Kartı (Karakter & Bakiye) -->
                     <div id="player-profile-widget">
                         <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v370" alt="Avatar" />
                         <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px;">
@@ -810,19 +810,23 @@
                             <svg class="icon-svg icon-gem" style="width: 14px; height: 14px; margin-right: 4px; fill: #00f2fe; filter: drop-shadow(0 0 5px #00f2fe);"><use href="#icon-gem"></use></svg>
                             <span id="menu-crystal-count">0</span>
                         </div>
-                        <div class="profile-divider"></div>
-                        <button id="btn-free-crystal-ad" class="profile-free-crystal-btn" type="button" title="Ücretsiz 50 Kristal Kazan (Günde 3 Adet)">
-                            <span class="gift-icon">🎁</span>
-                            <svg class="icon-svg icon-gem" style="width: 13px; height: 13px; fill: #00f2fe; filter: drop-shadow(0 0 4px #00f2fe);"><use href="#icon-gem"></use></svg>
-                            <span class="video-icon">📹</span>
-                            <span id="free-crystal-badge" class="free-crystal-badge">3/3</span>
-                        </button>
                     </div>
                 </div>
-                <!-- Üst Butonlar (Rehber ve Ses) -->
-                <div class="start-top-buttons" style="display: flex; gap: 8px; justify-content: center; margin-bottom: 0.7rem; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto;">
+
+                <!-- Üst Butonlar (Rehber, Ayarlar ve Yuvarlak Hediye Kristal Reklamı) -->
+                <div class="start-top-buttons" style="display: flex; gap: 10px; justify-content: center; align-items: center; margin-bottom: 0.7rem; width: 100%; max-width: 360px; margin-left: auto; margin-right: auto;">
                     <button id="btn-codex" class="codex-btn" type="button" aria-label="Nesne Rehberi" title="Nesne ve Canavar Rehberi" style="margin: 0; flex: 1;" data-translate="btn-codex"><svg class="icon-svg"><use href="#icon-book"></use></svg> Rehber</button>
                     <button id="btn-open-settings" class="codex-btn" type="button" aria-label="Ayarlar" title="Oyun Ayarları ve Bulut Senkronizasyonu" style="margin: 0; flex: 1;" data-translate="btn-settings"><svg class="icon-svg"><use href="#icon-gear"></use></svg> Ayarlar</button>
+                    
+                    <!-- Yuvarlak Özel Hediye Kristal Reklam Butonu -->
+                    <button id="btn-free-crystal-ad" class="circular-reward-ad-btn" type="button" title="Reklam İzle 50 Kristal Kazan (Günde 3 Adet)">
+                        <div class="circular-ad-content">
+                            <svg class="icon-svg icon-gem" style="width: 18px; height: 18px; fill: #00f2fe; filter: drop-shadow(0 0 6px #00f2fe);"><use href="#icon-gem"></use></svg>
+                            <span class="circular-ad-reward-text">+50</span>
+                        </div>
+                        <span class="circular-ad-video-icon">📹</span>
+                        <span id="free-crystal-badge" class="free-crystal-badge">3/3</span>
+                    </button>
                 </div>
                 <div class="instructions">
                     <div class="inst-item">
