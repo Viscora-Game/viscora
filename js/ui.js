@@ -1,7 +1,7 @@
-import { audio } from './audio.js?v=v373';
-import { ViscosityList } from './viscosity.js?v=v373';
-import { shopManager, SHOP_ITEMS } from './shop.js?v=v373';
-import { CloudSaveManager } from './cloud_save.js?v=v373';
+import { audio } from './audio.js?v=v375';
+import { ViscosityList } from './viscosity.js?v=v375';
+import { shopManager, SHOP_ITEMS } from './shop.js?v=v375';
+import { CloudSaveManager } from './cloud_save.js?v=v375';
 
 const TRANSLATIONS = {
     tr: {
@@ -4856,9 +4856,11 @@ export class UIManager {
         if (status.available) {
             btn.classList.remove('cooldown');
             badge.textContent = `${status.remainingCount}/3`;
+            btn.title = "Reklam İzle 50 Kristal Kazan (Günde 3 Adet)";
         } else {
             btn.classList.add('cooldown');
-            badge.textContent = `⏳ ${status.formattedTime}`;
+            badge.textContent = `⏳`;
+            btn.title = `Günlük Hak Doldu! Kalan Süre: ${status.formattedTime}`;
         }
     }
 

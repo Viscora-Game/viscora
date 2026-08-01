@@ -40,7 +40,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=v373">
+    <link rel="stylesheet" href="index.css?v=v375">
     <!-- Google AdSense Doğrulama Kodu -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5810332619798187"
          crossorigin="anonymous"></script>
@@ -705,7 +705,7 @@
                     <span class="terminal-dot red"></span>
                     <span class="terminal-dot yellow"></span>
                     <span class="terminal-dot green"></span>
-                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v373</span>
+                    <span class="terminal-title">SISTEM TERMINALI - VISCORA CORE v375</span>
                 </div>
                 <div class="terminal-body">
                     <div id="terminal-text"></div>
@@ -798,34 +798,36 @@
                     <h1 class="game-title">VISCORA</h1>
                     <div class="game-subtitle">VISCOUS ODYSSEY</div>
                     
-                    <!-- Oyuncu Profil Kartı (Karakter & Bakiye) -->
-                    <div id="player-profile-widget">
-                        <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v373" alt="Avatar" />
-                        <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px;">
-                            <div id="profile-widget-name">Oyuncu</div>
-                            <div id="profile-widget-cloud-status" style="font-size: 0.58rem; font-weight: 800; display: flex; align-items: center; gap: 2px;"></div>
+                    <!-- Oyuncu Profil Kartı ve Yanında Bağımsız Yuvarlak Reklam Butonu -->
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; width: 100%;">
+                        <div id="player-profile-widget">
+                            <img id="profile-widget-avatar" src="assets/avatars/slime_king.png?v=v375" alt="Avatar" />
+                            <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px;">
+                                <div id="profile-widget-name">Oyuncu</div>
+                                <div id="profile-widget-cloud-status" style="font-size: 0.58rem; font-weight: 800; display: flex; align-items: center; gap: 2px;"></div>
+                            </div>
+                            <div class="profile-divider"></div>
+                            <div class="profile-crystals" title="Toplam Kristalleriniz">
+                                <svg class="icon-svg icon-gem" style="width: 14px; height: 14px; margin-right: 4px; fill: #00f2fe; filter: drop-shadow(0 0 5px #00f2fe);"><use href="#icon-gem"></use></svg>
+                                <span id="menu-crystal-count">0</span>
+                            </div>
                         </div>
-                        <div class="profile-divider"></div>
-                        <div class="profile-crystals" title="Toplam Kristalleriniz">
-                            <svg class="icon-svg icon-gem" style="width: 14px; height: 14px; margin-right: 4px; fill: #00f2fe; filter: drop-shadow(0 0 5px #00f2fe);"><use href="#icon-gem"></use></svg>
-                            <span id="menu-crystal-count">0</span>
-                        </div>
+
+                        <!-- Yuvarlak Minik Elmaslı Reklam Butonu (Profile Tıklamadan Direkt Reklam Açar) -->
+                        <button id="btn-free-crystal-ad" class="circular-reward-ad-btn" type="button" title="Reklam İzle 50 Kristal Kazan (Günde 3 Adet)">
+                            <div class="circular-ad-content">
+                                <svg class="icon-svg icon-gem" style="width: 22px; height: 22px; fill: #00f2fe; filter: drop-shadow(0 0 8px #00f2fe);"><use href="#icon-gem"></use></svg>
+                            </div>
+                            <span class="circular-ad-video-icon">📹</span>
+                            <span id="free-crystal-badge" class="free-crystal-badge">3/3</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Üst Butonlar (Rehber, Ayarlar ve Yuvarlak Hediye Kristal Reklamı) -->
-                <div class="start-top-buttons" style="display: flex; gap: 10px; justify-content: center; align-items: center; margin-bottom: 0.7rem; width: 100%; max-width: 360px; margin-left: auto; margin-right: auto;">
+                <!-- Üst Butonlar (Rehber ve Ayarlar) -->
+                <div class="start-top-buttons" style="display: flex; gap: 10px; justify-content: center; align-items: center; margin-bottom: 0.7rem; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto;">
                     <button id="btn-codex" class="codex-btn" type="button" aria-label="Nesne Rehberi" title="Nesne ve Canavar Rehberi" style="margin: 0; flex: 1;" data-translate="btn-codex"><svg class="icon-svg"><use href="#icon-book"></use></svg> Rehber</button>
                     <button id="btn-open-settings" class="codex-btn" type="button" aria-label="Ayarlar" title="Oyun Ayarları ve Bulut Senkronizasyonu" style="margin: 0; flex: 1;" data-translate="btn-settings"><svg class="icon-svg"><use href="#icon-gear"></use></svg> Ayarlar</button>
-                    
-                    <!-- Yuvarlak Minik Elmaslı Reklam Butonu -->
-                    <button id="btn-free-crystal-ad" class="circular-reward-ad-btn" type="button" title="Reklam İzle 50 Kristal Kazan (Günde 3 Adet)">
-                        <div class="circular-ad-content">
-                            <svg class="icon-svg icon-gem" style="width: 22px; height: 22px; fill: #00f2fe; filter: drop-shadow(0 0 8px #00f2fe);"><use href="#icon-gem"></use></svg>
-                        </div>
-                        <span class="circular-ad-video-icon">📹</span>
-                        <span id="free-crystal-badge" class="free-crystal-badge">3/3</span>
-                    </button>
                 </div>
                 <div class="instructions">
                     <div class="inst-item">
@@ -1899,9 +1901,9 @@
         <span class="offline-dot"></span> ÇEVRİMDIŞI MOD
     </div>
 
-    <script src="js/admob_manager.js?v=v373"></script>
-    <script src="js/controls_customizer.js?v=v373"></script>
-    <script type="module" src="js/main.js?v=v373"></script>
+    <script src="js/admob_manager.js?v=v375"></script>
+    <script src="js/controls_customizer.js?v=v375"></script>
+    <script type="module" src="js/main.js?v=v375"></script>
 </body>
 </html>
 

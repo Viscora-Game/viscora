@@ -5257,26 +5257,38 @@ button:hover .icon-svg,
 -------------------------------------------------- */
 .circular-reward-ad-btn {
     position: relative;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(0, 242, 254, 0.4) 0%, rgba(15, 23, 42, 0.95) 75%);
-    border: 2px solid #00f2fe;
-    box-shadow: 0 0 12px rgba(0, 242, 254, 0.5), inset 0 0 8px rgba(0, 242, 254, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    border-radius: 50% !important;
+    background: radial-gradient(circle at 35% 35%, rgba(0, 242, 254, 0.4) 0%, rgba(15, 23, 42, 0.95) 75%) !important;
+    border: 2px solid #00f2fe !important;
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.5), inset 0 0 8px rgba(0, 242, 254, 0.3) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    padding: 0;
-    margin: 0;
-    flex-shrink: 0;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
     user-select: none;
+}
+
+.circular-reward-ad-btn.cooldown {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.5), inset 0 0 8px rgba(16, 185, 129, 0.3) !important;
+    background: radial-gradient(circle at 35% 35%, rgba(16, 185, 129, 0.4) 0%, rgba(15, 23, 42, 0.95) 75%) !important;
 }
 
 .circular-reward-ad-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(0, 242, 254, 0.8), inset 0 0 12px rgba(0, 242, 254, 0.5);
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.8), inset 0 0 12px rgba(0, 242, 254, 0.5) !important;
 }
 
 .circular-reward-ad-btn:active {
@@ -5315,7 +5327,7 @@ button:hover .icon-svg,
     color: #fff;
     font-size: 0.55rem;
     font-weight: 900;
-    padding: 1px 4px;
+    padding: 1px 5px;
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
