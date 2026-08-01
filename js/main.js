@@ -1,8 +1,26 @@
-import { GameManager } from './game.js?v=v376';
-import { audio } from './audio.js?v=v376';
-import { CloudSaveManager } from './cloud_save.js?v=v376';
+import { GameManager } from './game.js?v=v378';
+import { audio } from './audio.js?v=v378';
+import { CloudSaveManager } from './cloud_save.js?v=v378';
 
 const initGame = () => {
+    // CyberCore Interactive Studio Intro Ekranı Mantığı
+    const studioIntro = document.getElementById('cybercore-studio-intro');
+    if (studioIntro) {
+        try {
+            const studioAudio = new Audio('assets/audio/cybercore_sound_2_hollywood.wav');
+            studioAudio.play().catch(() => { /* Autoplay kısıtlamaları için sessiz geçer */ });
+        } catch (e) {}
+
+        setTimeout(() => {
+            studioIntro.classList.add('fade-out');
+            setTimeout(() => {
+                if (studioIntro.parentNode) {
+                    try { studioIntro.parentNode.removeChild(studioIntro); } catch(e) {}
+                }
+            }, 500);
+        }, 1400);
+    }
+
     // Mobilde performansı artırmak için pahalı canvas gölge efektlerini (shadowBlur) devre dışı bırak
     const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
     if (isTouchDevice) {
