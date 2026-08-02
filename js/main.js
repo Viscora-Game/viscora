@@ -52,7 +52,7 @@ const initGame = () => {
         };
         playIntroSound();
 
-        // 1.2 saniye sonra stüdyo ekranını yumuşakça kaldır ve "BAŞLAMAK İÇİN EKRANA DOKUNUN" (Splash) ekranını getir
+        // 2.3 saniye sonra stüdyo ekranını yumuşakça kaldır ve "BAŞLAMAK İÇİN EKRANA DOKUNUN" (Splash) ekranını getir
         setTimeout(() => {
             studioIntro.classList.add('fade-out');
             studioIntro.style.pointerEvents = 'none';
@@ -66,7 +66,7 @@ const initGame = () => {
                 splash.style.display = 'flex';
                 splash.classList.remove('hidden', 'fade-out');
             }
-        }, 1200);
+        }, 2300);
     } else {
         window.isCyberCoreIntroActive = false;
         if (splash) {
