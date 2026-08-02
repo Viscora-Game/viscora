@@ -34,9 +34,12 @@ const initGame = () => {
                 const studioAudio = new Audio('assets/audio/cybercore_sound_2_hollywood.wav');
                 studioAudio.play().catch(() => {
                     const unlockWebAudio = () => {
-                        try {
-                            studioAudio.play().catch(() => {});
-                        } catch(e) {}
+                        // Sadece ve sadece stüdyo introsu aktifse çal; intro geçtikten sonra gecikmeli çalma!
+                        if (window.isCyberCoreIntroActive) {
+                            try {
+                                studioAudio.play().catch(() => {});
+                            } catch(e) {}
+                        }
                         window.removeEventListener('click', unlockWebAudio);
                         window.removeEventListener('touchend', unlockWebAudio);
                         window.removeEventListener('pointerdown', unlockWebAudio);
