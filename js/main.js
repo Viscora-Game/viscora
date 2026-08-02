@@ -49,21 +49,21 @@ const initGame = () => {
         };
         playIntroSound();
 
-        // 1.4 saniye sonra stüdyo ekranını yumuşakça kaldır ve "BAŞLAMAK İÇİN EKRANA DOKUNUN" (Splash) ekranını getir
+        // 1.2 saniye sonra stüdyo ekranını yumuşakça kaldır ve "BAŞLAMAK İÇİN EKRANA DOKUNUN" (Splash) ekranını getir
         setTimeout(() => {
             studioIntro.classList.add('fade-out');
-            setTimeout(() => {
-                window.isCyberCoreIntroActive = false;
-                if (studioIntro.parentNode) {
-                    try { studioIntro.parentNode.removeChild(studioIntro); } catch(e) {}
-                }
-                // Intro bitti, şimdi "BAŞLAMAK İÇİN EKRANA DOKUNUN" ekranını göster!
-                if (splash) {
-                    splash.style.display = 'flex';
-                    splash.classList.remove('hidden', 'fade-out');
-                }
-            }, 500);
-        }, 1400);
+            studioIntro.style.pointerEvents = 'none';
+            studioIntro.style.display = 'none';
+            window.isCyberCoreIntroActive = false;
+            if (studioIntro.parentNode) {
+                try { studioIntro.parentNode.removeChild(studioIntro); } catch(e) {}
+            }
+            // Intro bitti, şimdi "BAŞLAMAK İÇİN EKRANA DOKUNUN" ekranını göster!
+            if (splash) {
+                splash.style.display = 'flex';
+                splash.classList.remove('hidden', 'fade-out');
+            }
+        }, 1200);
     } else {
         window.isCyberCoreIntroActive = false;
         if (splash) {
