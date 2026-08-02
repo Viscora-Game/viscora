@@ -47,14 +47,12 @@ class AdMobManager {
                 });
                 this.initialized = true;
                 console.log("✅ AdMob SDK başarıyla başlatıldı (Capacitor Native).");
-                // SDK başlatılır başlatılmaz banner'ı otomatik göster
-                this.showBanner();
-                // UI henüz hazır olmayabilir; 2 saniye sonra tekrar dene (banner ilk açılışta görünsün)
+                // İntro sırasında (0 - 2.3sn) reklam gösterilmesini kesinlikle engelle; 2.5 saniye sonra ana menüde aç!
                 setTimeout(() => {
-                    if (!this.bannerVisible) {
+                    if (!this.bannerVisible && !window.isCyberCoreIntroActive) {
                         this.showBanner();
                     }
-                }, 2000);
+                }, 2500);
             } else {
                 console.log("ℹ️ AdMob plugin bulunamadı. Web/Test modunda çalışılıyor.");
             }

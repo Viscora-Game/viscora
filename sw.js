@@ -1,25 +1,25 @@
-const CACHE_NAME = 'viscora-v1.0.0.89';
+const CACHE_NAME = 'viscora-v1.0.0.90';
 const ASSETS = [
   './',
   './index.html',
-  './index.css?v=v400',
+  './index.css?v=v401',
   './manifest.json',
   './assets/audio/cybercore_sound_2_hollywood.wav',
-  './js/main.js?v=v400',
-  './js/game.js?v=v400',
-  './js/audio.js?v=v400',
-  './js/ui.js?v=v400',
-  './js/level.js?v=v400',
-  './js/player.js?v=v400',
-  './js/enemies.js?v=v400',
-  './js/viscosity.js?v=v400',
-  './js/boss.js?v=v397',
-  './js/editor.js?v=v397',
-  './js/controls_customizer.js?v=v397',
-  './js/admob_manager.js?v=v397',
-  './js/cloud_save.js?v=v397',
-  './js/generator.js?v=v397',
-  './js/shop.js?v=v397'
+  './js/main.js?v=v401',
+  './js/game.js?v=v401',
+  './js/audio.js?v=v401',
+  './js/ui.js?v=v401',
+  './js/level.js?v=v401',
+  './js/player.js?v=v401',
+  './js/enemies.js?v=v401',
+  './js/viscosity.js?v=v401',
+  './js/boss.js?v=v401',
+  './js/editor.js?v=v401',
+  './js/controls_customizer.js?v=v401',
+  './js/admob_manager.js?v=v401',
+  './js/cloud_save.js?v=v401',
+  './js/generator.js?v=v401',
+  './js/shop.js?v=v401'
 ];
 
 self.addEventListener('install', (e) => {
