@@ -805,10 +805,6 @@ export class UIManager {
                     const canSelect = this.isLevelUnlocked(lvlNum);
                     if (canSelect) {
                         this.selectLevel(lvlNum);
-                        audio.init();
-                        audio.startMusic();
-                        this.showScreen('hud');
-                        this.game.start();
                     } else if (lvlNum % 10 === 0 && lvlNum > 0) {
                         // Boss level kilitli: modal göster
                         this.showStarGateModal(lvlNum);
@@ -1196,6 +1192,20 @@ export class UIManager {
         this.bindTouchClick(document.getElementById('btn-main-menu'), () => {
             this.game.goToMenu();
         });
+
+        // Duraklatma Ekranı - Kontrolleri Düzenle
+        const btnPauseCustomizeControls = document.getElementById('btn-pause-customize-controls');
+        if (btnPauseCustomizeControls) {
+            this.bindTouchClick(btnPauseCustomizeControls, () => {
+                const pauseScreen = document.getElementById('pause-screen');
+                if (pauseScreen) pauseScreen.classList.add('hidden');
+                const mobileControls = document.getElementById('mobile-controls');
+                if (mobileControls) mobileControls.classList.remove('hidden');
+                if (window.controlsCustomizer) {
+                    window.controlsCustomizer.enterEditMode();
+                }
+            });
+        }
 
         // Ayrılmış Müzik ve Efekt Kontrolleri
         const sliderMenuMusic = document.getElementById('slider-menu-music');

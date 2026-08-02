@@ -219,6 +219,12 @@ class ControlsCustomizer {
             const el = this.layer.querySelector('.' + cls);
             if (el) el.style.pointerEvents = 'auto';
         });
+
+        // Eğer oyun durdurulmuş halde ise duraklatma ekranını geri göster
+        if (window.uiInstance && window.uiInstance.game && window.uiInstance.game.state === 'PAUSED') {
+            const pauseScreen = document.getElementById('pause-screen');
+            if (pauseScreen) pauseScreen.classList.remove('hidden');
+        }
     }
 
     resetToDefault() {

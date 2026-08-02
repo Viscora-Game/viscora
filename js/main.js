@@ -3,6 +3,13 @@ import { audio } from './audio.js?v=v378';
 import { CloudSaveManager } from './cloud_save.js?v=v378';
 
 const initGame = () => {
+    // Eski splash-screen parazitini kaldır, CyberCore Intro tamamen kendine özel ve temiz olsun
+    const splashScreen = document.getElementById('splash-screen');
+    if (splashScreen) {
+        splashScreen.style.display = 'none';
+        try { splashScreen.parentNode.removeChild(splashScreen); } catch(e) {}
+    }
+
     // CyberCore Interactive Studio Intro Ekranı Mantığı
     const studioIntro = document.getElementById('cybercore-studio-intro');
     if (studioIntro) {
