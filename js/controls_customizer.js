@@ -517,15 +517,10 @@ class ControlsCustomizer {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (window.gameInstance) {
-                if (window.gameInstance.state === 'PLAYING') {
-                    window.gameInstance.togglePause();
-                }
-                const settingsModal = document.getElementById('settings-modal');
-                if (settingsModal) {
-                    settingsModal.classList.remove('hidden');
-                }
-            }
+            if (this.isEditing) return;
+            const mobileControls = document.getElementById('mobile-controls');
+            if (mobileControls) mobileControls.classList.remove('hidden');
+            this.enterEditMode();
         });
 
         // HUD'a ekle

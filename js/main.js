@@ -3,15 +3,15 @@ import { audio } from './audio.js?v=v378';
 import { CloudSaveManager } from './cloud_save.js?v=v378';
 
 const initGame = () => {
-    // Eski splash-screen parazitini kaldır, CyberCore Intro tamamen kendine özel ve temiz olsun
-    const splashScreen = document.getElementById('splash-screen');
-    if (splashScreen) {
-        splashScreen.style.display = 'none';
-        try { splashScreen.parentNode.removeChild(splashScreen); } catch(e) {}
+    const studioIntro = document.getElementById('cybercore-studio-intro');
+    const splash = document.getElementById('splash-screen');
+
+    // Intro oynarken splash screen'i geçici olarak gizle
+    if (splash && studioIntro) {
+        splash.style.display = 'none';
     }
 
     // CyberCore Interactive Studio Intro Ekranı Mantığı
-    const studioIntro = document.getElementById('cybercore-studio-intro');
     if (studioIntro) {
         window.isCyberCoreIntroActive = true;
 
@@ -33,7 +33,6 @@ const initGame = () => {
             try {
                 const studioAudio = new Audio('assets/audio/cybercore_sound_2_hollywood.wav');
                 studioAudio.play().catch(() => {
-                    // Tarayıcı Otomatik Oynatma Kısıtlaması (Autoplay Policy) - İlk tıklamada çalması için dinleyici ekle
                     const unlockWebAudio = () => {
                         try {
                             studioAudio.play().catch(() => {});
@@ -50,7 +49,7 @@ const initGame = () => {
         };
         playIntroSound();
 
-        // 1.4 saniye sonra stüdyo ekranını yumuşakça kaldır ve oyun sesleri/reklam kilitlerini aç
+        // 1.4 saniye sonra stüdyo ekranını yumuşakça kaldır ve "BAŞLAMAK İÇİN EKRANA DOKUNUN" (Splash) ekranını getir
         setTimeout(() => {
             studioIntro.classList.add('fade-out');
             setTimeout(() => {
@@ -58,10 +57,18 @@ const initGame = () => {
                 if (studioIntro.parentNode) {
                     try { studioIntro.parentNode.removeChild(studioIntro); } catch(e) {}
                 }
+                // Intro bitti, şimdi "BAŞLAMAK İÇİN EKRANA DOKUNUN" ekranını göster!
+                if (splash) {
+                    splash.style.display = 'flex';
+                    splash.classList.remove('hidden', 'fade-out');
+                }
             }, 500);
         }, 1400);
     } else {
         window.isCyberCoreIntroActive = false;
+        if (splash) {
+            splash.style.display = 'flex';
+        }
     }
 
     // Mobilde performansı artırmak için pahalı canvas gölge efektlerini (shadowBlur) devre dışı bırak
