@@ -1193,19 +1193,6 @@ export class UIManager {
             this.game.goToMenu();
         });
 
-        // Duraklatma Ekranı - Kontrolleri Düzenle
-        const btnPauseCustomizeControls = document.getElementById('btn-pause-customize-controls');
-        if (btnPauseCustomizeControls) {
-            this.bindTouchClick(btnPauseCustomizeControls, () => {
-                const pauseScreen = document.getElementById('pause-screen');
-                if (pauseScreen) pauseScreen.classList.add('hidden');
-                const mobileControls = document.getElementById('mobile-controls');
-                if (mobileControls) mobileControls.classList.remove('hidden');
-                if (window.controlsCustomizer) {
-                    window.controlsCustomizer.enterEditMode();
-                }
-            });
-        }
 
         // Ayrılmış Müzik ve Efekt Kontrolleri
         const sliderMenuMusic = document.getElementById('slider-menu-music');
