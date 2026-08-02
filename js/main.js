@@ -109,7 +109,6 @@ const initGame = () => {
         }, 5000);
     }
     // Giriş Animasyonu (Splash Screen) Kontrolü
-    const splash = document.getElementById('splash-screen');
     let splashTimeout = null;
     let removeTimeout = null;
 
