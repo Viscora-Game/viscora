@@ -1,11 +1,11 @@
-import { Player } from './player.js?v=v378';
-import { Level } from './level.js?v=v378';
-import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v378';
-import { UIManager } from './ui.js?v=v378';
-import { CloudSaveManager } from './cloud_save.js?v=v378';
-import { audio } from './audio.js?v=v378';
-import { LevelEditor } from './editor.js?v=v378';
-import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v378';
+import { Player } from './player.js?v=v395';
+import { Level } from './level.js?v=v395';
+import { Enemy, GelChaser, TractorUFO, SweeperUFO } from './enemies.js?v=v395';
+import { UIManager } from './ui.js?v=v395';
+import { CloudSaveManager } from './cloud_save.js?v=v395';
+import { audio } from './audio.js?v=v395';
+import { LevelEditor } from './editor.js?v=v395';
+import { Boss, CyberBoss, UfoBoss } from './boss.js?v=v395';
 
 const LEVEL_NAMES = [
     "EĞİTİM LABORATUVARI",
@@ -1170,7 +1170,7 @@ export class GameManager {
             }
             
             // Hemen buluta kaydet (arka planda)
-            import('./cloud_save.js?v=v360').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v395').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Achievement sync error:", err));
             });
             
@@ -1261,7 +1261,7 @@ export class GameManager {
         if (changed) {
             localStorage.setItem('viscora_achievements', JSON.stringify(achievements));
             // Arka planda buluta kaydet
-            import('./cloud_save.js?v=v360').then(({ CloudSaveManager }) => {
+            import('./cloud_save.js?v=v395').then(({ CloudSaveManager }) => {
                 CloudSaveManager.saveProgress(false).catch(err => console.warn("Retrospective sync error:", err));
             });
         }

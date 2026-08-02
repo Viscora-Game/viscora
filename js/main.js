@@ -1,6 +1,6 @@
-import { GameManager } from './game.js?v=v378';
-import { audio } from './audio.js?v=v378';
-import { CloudSaveManager } from './cloud_save.js?v=v378';
+import { GameManager } from './game.js?v=v395';
+import { audio } from './audio.js?v=v395';
+import { CloudSaveManager } from './cloud_save.js?v=v395';
 
 const initGame = () => {
     const studioIntro = document.getElementById('cybercore-studio-intro');

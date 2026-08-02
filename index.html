@@ -449,6 +449,25 @@
             <div class="cybercore-brand-subtitle">INTERACTIVE</div>
         </div>
     </div>
+    <script>
+        // Fail-safe intro auto-remover: 1.5 saniye sonra ne olursa olsun intro ekranını kesin olarak kaldırır!
+        setTimeout(function() {
+            var intro = document.getElementById('cybercore-studio-intro');
+            var splash = document.getElementById('splash-screen');
+            if (intro) {
+                intro.classList.add('fade-out');
+                intro.style.pointerEvents = 'none';
+                intro.style.display = 'none';
+                if (intro.parentNode) {
+                    try { intro.parentNode.removeChild(intro); } catch(e) {}
+                }
+            }
+            if (splash) {
+                splash.style.display = 'flex';
+                splash.classList.remove('hidden', 'fade-out');
+            }
+        }, 1500);
+    </script>
 
     <!-- SVG Sprite Library for Cyber Emojis/Icons -->
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">

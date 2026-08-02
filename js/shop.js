@@ -1,4 +1,4 @@
-import { CloudSaveManager } from './cloud_save.js?v=v378';
+import { CloudSaveManager } from './cloud_save.js?v=v395';
 
 export const SHOP_ITEMS = [
     // Trails
