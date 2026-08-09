@@ -4778,7 +4778,7 @@ export class UIManager {
         if (screenName === 'hud' || screenName === 'editor') {
             if (window.admobManager) window.admobManager.hideBanner();
         } else {
-            if (window.admobManager) window.admobManager.showBanner();
+            if (window.admobManager) window.admobManager.showBanner(screenName);
         }
 
         // Belirtilen ekranı göster
