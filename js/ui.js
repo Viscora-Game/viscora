@@ -1191,15 +1191,8 @@ export class UIManager {
 
         // Duraklatma Ekranı - Yeniden Başlat
         this.bindTouchClick(document.getElementById('btn-restart-pause'), () => {
-            if (window.admobManager) {
-                window.admobManager.trackLevelCompletion(() => {
-                    this.showScreen('hud');
-                    this.game.restart(true);
-                });
-            } else {
-                this.showScreen('hud');
-                this.game.restart(true);
-            }
+            this.showScreen('hud');
+            this.game.restart(true);
         });
 
         // Duraklatma Ekranı - Ana Menüye Dön
@@ -1414,15 +1407,8 @@ export class UIManager {
 
         // Oyun Bitti Ekranı - Yeniden Dene
         this.bindTouchClick(document.getElementById('btn-retry'), () => {
-            if (window.admobManager) {
-                window.admobManager.trackLevelCompletion(() => {
-                    this.showScreen('hud');
-                    this.game.restart();
-                });
-            } else {
-                this.showScreen('hud');
-                this.game.restart();
-            }
+            this.showScreen('hud');
+            this.game.restart();
         });
 
         // Bölüm Sonu Ekranı - Tekrar Oyna (Sonraki Bölüm veya Topluluk Bölümü)
@@ -1440,15 +1426,8 @@ export class UIManager {
 
         // Bölüm Sonu Ekranı - Bölümü Tekrarla (Aynı Bölümü Yeniden Başlat)
         this.bindTouchClick(document.getElementById('btn-win-retry'), () => {
-            if (window.admobManager) {
-                window.admobManager.trackLevelCompletion(() => {
-                    this.showScreen('hud');
-                    this.game.restart(true);
-                });
-            } else {
-                this.showScreen('hud');
-                this.game.restart(true);
-            }
+            this.showScreen('hud');
+            this.game.restart(true);
         });
 
         // Bölüm Sonu Ekranı - Ana Menüye Dön

@@ -458,22 +458,33 @@ class AdMobManager {
         if (this.admobPlugin && this.initialized) {
             try {
                 this.bannerVisible = true;
-                // 3 dakika bekleme sorununu çözmek için: Eski bayat reklamı temizle, anında taze banner iste
-                try { await this.admobPlugin.removeBanner(); } catch(e) {}
-                await this.admobPlugin.showBanner({
-                    adId: ADMOB_CONFIG.bannerId,
-                    adSize: 'ADAPTIVE_BANNER',
-                    position: 'BOTTOM_CENTER',
-                    isTesting: false
-                });
-                console.log("✅ Taze Banner reklam anında yüklendi.");
+                // Önce gizli banner'ı tekrar görünür yapmayı dene
+                await this.admobPlugin.resumeBanner();
+                console.log("✅ Banner reklam resume edildi.");
             } catch (e1) {
                 try {
-                    await this.admobPlugin.resumeBanner();
-                    console.log("✅ Banner reklam resume edildi.");
+                    // Evrensel standart 320x50 Banner boyutuyla sıfırdan yükle
+                    await this.admobPlugin.showBanner({
+                        adId: ADMOB_CONFIG.bannerId,
+                        adSize: 'BANNER',
+                        position: 'BOTTOM_CENTER',
+                        isTesting: false
+                    });
+                    console.log("✅ Standart Banner reklam yüklendi.");
                 } catch (e2) {
-                    this.bannerVisible = false;
-                    console.warn("⚠️ Banner gösterim hatası:", e2);
+                    try {
+                        await this.admobPlugin.removeBanner();
+                        await this.admobPlugin.showBanner({
+                            adId: ADMOB_CONFIG.bannerId,
+                            adSize: 'BANNER',
+                            position: 'BOTTOM_CENTER',
+                            isTesting: false
+                        });
+                        console.log("✅ Banner reklam recreate edildi.");
+                    } catch (e3) {
+                        this.bannerVisible = false;
+                        console.warn("⚠️ Banner gösterim hatası:", e3);
+                    }
                 }
             }
         } else {
