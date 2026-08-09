@@ -3816,18 +3816,31 @@ export class GameManager {
         }
         const myUserId = (typeof CloudSaveManager !== 'undefined' && CloudSaveManager.getUserId) ? CloudSaveManager.getUserId() : (localStorage.getItem('viscora_user_id') || ('user_' + Math.random().toString(36).substring(2, 9)));
         const API_BASE = 'https://viscora.onrender.com';
-        
+
         const boardList = document.getElementById('win-leaderboard-list');
         const percentileText = document.getElementById('win-percentile-text');
         
         if (boardList) boardList.innerHTML = '<div style="color: #9ca3af; text-align:center; padding: 6px;">Skorlar yükleniyor...</div>';
         if (percentileText) percentileText.textContent = '';
 
+        const renderFallback = () => {
+            if (boardList && boardList.innerHTML.includes('Skorlar yükleniyor')) {
+                boardList.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; padding:3px 0;"><span style="color:#f59e0b;">🥇 ${username} (Siz)</span><span style="color:#38bdf8; font-weight:bold;">${this.formatTime(timeValue)}</span></div>`;
+            }
+        };
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+            controller.abort();
+            renderFallback();
+        }, 6000);
+
         // 1. Skoru Gönder ve Yüzdelik Sıralamayı Al
         fetch(`${API_BASE}/api/campaign/${levelNumber}/score`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: myUserId, username: username, time: timeValue })
+            body: JSON.stringify({ userId: myUserId, username: username, time: timeValue }),
+            signal: controller.signal
         })
         .then(res => res.ok ? res.json() : null)
         .then(data => {
@@ -3835,14 +3848,16 @@ export class GameManager {
                 percentileText.innerHTML = `Süreniz en hızlı oyuncular arasında <span style="color: #34d399; font-weight: bold;">ilk %${data.percentile}'lik</span> dilimde! (Sıralama: ${data.rank || 1}/${data.totalPlayers || 1})`;
             }
         })
-        .catch(err => console.warn("Kampanya skor gönderme:", err));
+        .catch(() => {});
 
         // 2. Genel Liderlik Tablosunu (İlk 3 Oyuncuyu) Çek ve Göster
         fetch(`${API_BASE}/api/campaign/${levelNumber}/leaderboard`, {
-            method: 'GET'
+            method: 'GET',
+            signal: controller.signal
         })
         .then(res => res.ok ? res.json() : null)
         .then(data => {
+            clearTimeout(timeoutId);
             if (boardList) {
                 boardList.innerHTML = '';
                 if (data && data.leaderboard && data.leaderboard.length > 0) {
@@ -3865,12 +3880,13 @@ export class GameManager {
                         boardList.appendChild(row);
                     });
                 } else {
-                    boardList.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; padding:3px 0;"><span style="color:#f59e0b;">🥇 ${username} (Siz)</span><span style="color:#38bdf8; font-weight:bold;">${this.formatTime(timeValue)}</span></div>`;
+                    renderFallback();
                 }
             }
         })
-        .catch(err => {
-            if (boardList) boardList.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; padding:3px 0;"><span style="color:#f59e0b;">🥇 ${username} (Siz)</span><span style="color:#38bdf8; font-weight:bold;">${this.formatTime(timeValue)}</span></div>`;
+        .catch(() => {
+            clearTimeout(timeoutId);
+            renderFallback();
         });
     }
 

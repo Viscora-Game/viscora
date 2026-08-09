@@ -89,6 +89,11 @@ const initGame = () => {
         }
     }
 
+    // Instant Server Wakeup Ping: Oyuna girildiği ilk an Render sunucusunu uykudan uyandır
+    try {
+        fetch('https://viscora.onrender.com/api/status', { method: 'GET' }).catch(() => {});
+    } catch (e) {}
+
     // Unique User ID Garantisi (İlk açılışta anında oluştur)
     if (typeof CloudSaveManager !== 'undefined' && CloudSaveManager.getUserId) {
         CloudSaveManager.getUserId();
