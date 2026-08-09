@@ -415,20 +415,21 @@ class AdMobManager {
         if (this.admobPlugin && this.initialized) {
             try {
                 this.bannerVisible = true;
-                // 1. Önce gizli kalmış banner'ı resumeBanner ile anında açmayı dene
-                await this.admobPlugin.resumeBanner();
-                console.log("✅ Banner reklam resume edildi.");
+                // 3 dakika bekleme sorununu çözmek için: Eski bayat reklamı temizle, anında taze banner iste
+                try { await this.admobPlugin.removeBanner(); } catch(e) {}
+                await this.admobPlugin.showBanner({
+                    adId: ADMOB_CONFIG.bannerId,
+                    adSize: 'ADAPTIVE_BANNER',
+                    position: 'BOTTOM_CENTER',
+                    isTesting: false
+                });
+                console.log("✅ Taze Banner reklam anında yüklendi.");
             } catch (e1) {
                 try {
-                    // 2. İlk açılışsa veya bulunamadıysa sıfırdan showBanner yap
-                    await this.admobPlugin.showBanner({
-                        adId: ADMOB_CONFIG.bannerId,
-                        adSize: 'ADAPTIVE_BANNER',
-                        position: 'BOTTOM_CENTER',
-                        isTesting: false
-                    });
-                    console.log("✅ Banner reklam gösterildi.");
+                    await this.admobPlugin.resumeBanner();
+                    console.log("✅ Banner reklam resume edildi.");
                 } catch (e2) {
+                    this.bannerVisible = false;
                     console.warn("⚠️ Banner gösterim hatası:", e2);
                 }
             }

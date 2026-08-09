@@ -1190,7 +1190,13 @@ export class UIManager {
 
         // Duraklatma Ekranı - Ana Menüye Dön
         this.bindTouchClick(document.getElementById('btn-main-menu'), () => {
-            this.game.goToMenu();
+            if (window.admobManager) {
+                window.admobManager.trackLevelCompletion(() => {
+                    this.game.goToMenu();
+                });
+            } else {
+                this.game.goToMenu();
+            }
         });
 
 
@@ -1419,12 +1425,24 @@ export class UIManager {
 
         // Bölüm Sonu Ekranı - Ana Menüye Dön
         this.bindTouchClick(document.getElementById('btn-main-menu-win'), () => {
-            this.game.goToMenu();
+            if (window.admobManager) {
+                window.admobManager.trackLevelCompletion(() => {
+                    this.game.goToMenu();
+                });
+            } else {
+                this.game.goToMenu();
+            }
         });
 
         // Oyun Bitti Ekranı - Ana Menüye Dön
         this.bindTouchClick(document.getElementById('btn-main-menu-gameover'), () => {
-            this.game.goToMenu();
+            if (window.admobManager) {
+                window.admobManager.trackLevelCompletion(() => {
+                    this.game.goToMenu();
+                });
+            } else {
+                this.game.goToMenu();
+            }
         });
 
 
