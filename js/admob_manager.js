@@ -28,11 +28,9 @@ class AdMobManager {
 
     async init() {
         try {
-            // Capacitor plugin'ini yükle
             if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
                 this.admobPlugin = window.Capacitor.Plugins.AdMob;
             } else if (window.Capacitor) {
-                // Capacitor v5+ dinamik import
                 try {
                     const admobModule = await import('@capacitor-community/admob');
                     this.admobPlugin = admobModule.AdMob;
@@ -48,7 +46,6 @@ class AdMobManager {
                 this.initialized = true;
                 console.log("✅ AdMob SDK başarıyla başlatıldı (Capacitor Native).");
                 this.preloadInterstitial();
-                // İntro sırasında (0 - 2.3sn) reklam gösterilmesini kesinlikle engelle; 2.5 saniye sonra ana menüde aç!
                 setTimeout(() => {
                     if (!this.bannerVisible && !window.isCyberCoreIntroActive) {
                         this.showBanner();
@@ -62,9 +59,6 @@ class AdMobManager {
         }
     }
 
-    /**
-     * Kalan milisaniyeyi "21 saat 34 dakika" veya "45 dakika 12 saniye" formatına dönüştürür.
-     */
     formatRemainingTime(ms) {
         if (ms <= 0) return '0 saniye';
         const totalSeconds = Math.floor(ms / 1000);
@@ -81,9 +75,6 @@ class AdMobManager {
         }
     }
 
-    /**
-     * Bölüm Atlama (Skip Level) Durumunu ve Geri Sayımı Döner
-     */
     getSkipStatus() {
         const now = Date.now();
         let startTime = parseInt(localStorage.getItem('viscora_ad_skip_start_time')) || 0;
@@ -108,9 +99,6 @@ class AdMobManager {
         };
     }
 
-    /**
-     * Yeniden Dene (Revive Checkpoint) Durumunu ve Geri Sayımı Döner
-     */
     getReviveStatus() {
         const now = Date.now();
         let startTime = parseInt(localStorage.getItem('viscora_ad_revive_start_time')) || 0;
@@ -135,9 +123,6 @@ class AdMobManager {
         };
     }
 
-    /**
-     * Bölüm Atlama Reklamını Tetikler
-     */
     triggerSkipAd(onSuccess, onError) {
         const status = this.getSkipStatus();
         if (!status.available) {
@@ -159,9 +144,6 @@ class AdMobManager {
         }, onError);
     }
 
-    /**
-     * Yeniden Dene (Checkpoint Revive) Reklamını Tetikler
-     */
     triggerReviveAd(onSuccess, onError) {
         const status = this.getReviveStatus();
         if (!status.available) {
@@ -183,9 +165,6 @@ class AdMobManager {
         }, onError);
     }
 
-    /**
-     * Ücretsiz Hediye Kristal Reklam Durumunu ve Geri Sayımını Döner
-     */
     getCrystalStatus() {
         const now = Date.now();
         let startTime = parseInt(localStorage.getItem('viscora_ad_crystal_start_time')) || 0;
@@ -199,7 +178,7 @@ class AdMobManager {
         }
 
         const remainingMs = startTime > 0 ? (startTime + ADMOB_CONFIG.COOLDOWN_24H_MS) - now : 0;
-        const available = count < 3; // Günde max 3 reklam
+        const available = count < 3;
 
         return {
             available: available,
@@ -211,9 +190,6 @@ class AdMobManager {
         };
     }
 
-    /**
-     * Ücretsiz Kristal Ödüllü Reklamını Tetikler (Günde 3 Adet, 24 saatlik sayaç ilk reklamda başlar)
-     */
     triggerCrystalAd(onSuccess, onError) {
         const status = this.getCrystalStatus();
         if (!status.available) {
@@ -235,23 +211,16 @@ class AdMobManager {
         }, onError);
     }
 
-    /**
-     * Tamamlanan bölüm/çıkış sayacını takip eder ve reklam açar
-     */
     trackLevelCompletion(onComplete) {
         let count = parseInt(localStorage.getItem('viscora_completed_levels_count')) || 0;
         count++;
         localStorage.setItem('viscora_completed_levels_count', count.toString());
         console.log(`🎮 Bölüm çıkış/tamamlama sayısı: ${count}/1`);
 
-        // Her menü çıkışında anında reklam aç
         localStorage.setItem('viscora_completed_levels_count', '0');
         this.triggerInterstitialAd(onComplete);
     }
 
-    /**
-     * Dükkanda yapılan her 2 satın alımda bir geçiş reklamı açar
-     */
     trackShopPurchase(onComplete) {
         let count = parseInt(localStorage.getItem('viscora_shop_purchases_count')) || 0;
         count++;
@@ -266,9 +235,6 @@ class AdMobManager {
         }
     }
 
-    /**
-     * Geçiş Reklamını Arka Planda Önceden Yükler
-     */
     async preloadInterstitial() {
         if (this.admobPlugin && this.initialized) {
             try {
@@ -278,14 +244,17 @@ class AdMobManager {
                 });
                 console.log("⚡ Geçiş reklamı arka planda hazırlandı (Preloaded).");
             } catch (e) {
-                console.warn("Preload interstitial warning:", e);
+                try {
+                    await this.admobPlugin.prepareInterstitial({
+                        adId: 'ca-app-pub-3940256099942544/1033173712',
+                        isTesting: true
+                    });
+                    console.log("⚡ Test Geçiş reklamı arka planda hazırlandı.");
+                } catch(e2) {}
             }
         }
     }
 
-    /**
-     * Geçiş Reklamı (Interstitial) Tetikler (Multi-Event Listener Matrix & 4s Güvenlik Zamanlayıcılı)
-     */
     async triggerInterstitialAd(onComplete) {
         console.log("📺 Geçiş reklamı tetiklendi...");
         let callbackCalled = false;
@@ -299,7 +268,7 @@ class AdMobManager {
             console.warn("⚠️ Reklam zaman aşımına uğradı, menüye geçiliyor.");
             this._hideAdLoadingOverlay();
             safeComplete();
-        }, 4000);
+        }, 4500);
 
         if (this.admobPlugin && this.initialized) {
             try {
@@ -323,15 +292,33 @@ class AdMobManager {
                     } catch(e) {}
                 });
 
+                let prepareSuccess = false;
                 try {
                     await this.admobPlugin.prepareInterstitial({
                         adId: ADMOB_CONFIG.interstitialId,
                         isTesting: false
                     });
-                } catch(pe) {}
+                    prepareSuccess = true;
+                } catch(peReal) {
+                    console.warn("Gerçek geçiş reklamı dolmadı (No Fill), Test Reklamı deneniyor:", peReal);
+                    try {
+                        await this.admobPlugin.prepareInterstitial({
+                            adId: 'ca-app-pub-3940256099942544/1033173712',
+                            isTesting: true
+                        });
+                        prepareSuccess = true;
+                    } catch(peTest) {
+                        console.warn("Test geçiş reklamı da hazırlanamadı:", peTest);
+                    }
+                }
 
                 this._hideAdLoadingOverlay();
-                await this.admobPlugin.showInterstitial();
+                if (prepareSuccess) {
+                    await this.admobPlugin.showInterstitial();
+                } else {
+                    clearTimeout(safetyTimer);
+                    safeComplete();
+                }
             } catch (err) {
                 console.warn("⚠️ Geçiş reklamı gösterim hatası:", err);
                 clearTimeout(safetyTimer);
@@ -369,9 +356,6 @@ class AdMobManager {
         if (el) el.remove();
     }
 
-    /**
-     * AdMob Ödüllü Reklam Gösterimi (Capacitor Native veya Web Fallback)
-     */
     async showRewardedAd(adUnitId, onSuccess, onError) {
         console.log(`🎬 Ödüllü reklam hazırlanıyor... ID: ${adUnitId}`);
         this._showAdLoadingOverlay();
@@ -405,14 +389,12 @@ class AdMobManager {
                     }
                 });
 
-                // Önce reklamı hazırla (prepare), ardından göster (show)
                 try {
                     await this.admobPlugin.prepareRewardVideoAd(options);
                 } catch(pe) {
                     console.warn("Prepare reward video warning:", pe);
                 }
                 
-                // NATIVE VİDEO EKRANINI BLOKE ETMEMESİ İÇİN YÜKLEME OVERLAY'İNİ ANINDA KALDIR
                 this._hideAdLoadingOverlay();
 
                 const rewardItem = await this.admobPlugin.showRewardVideoAd(options);
@@ -434,7 +416,6 @@ class AdMobManager {
                 }
             }
         } else {
-            // Web/Test ortamı simülasyonu
             console.log("ℹ️ Web simülasyonu: Reklam izleniyor (2 saniye)...");
             setTimeout(() => {
                 this._hideAdLoadingOverlay();
@@ -444,9 +425,6 @@ class AdMobManager {
         }
     }
 
-    /**
-     * Ana Menü Banner Reklamını Gösterir
-     */
     async showBanner(targetScreen) {
         if (typeof window !== 'undefined' && window.isCyberCoreIntroActive) {
             return;
@@ -461,24 +439,39 @@ class AdMobManager {
         
         if (this.admobPlugin && this.initialized) {
             this.bannerVisible = true;
+            
+            // 1. Önce resumeBanner ile dene
             try {
-                // Her gösterimde eski takılı görünümü temizle ve taze banner aç
-                try { await this.admobPlugin.removeBanner(); } catch(e) {}
-                await this.admobPlugin.showBanner({
-                    adId: ADMOB_CONFIG.bannerId,
-                    adSize: 'ADAPTIVE_BANNER',
-                    position: 'BOTTOM_CENTER',
-                    isTesting: false,
-                    margin: 0
-                });
-                console.log("✅ Banner reklam gösterildi.");
-            } catch (eShow) {
+                await this.admobPlugin.resumeBanner();
+                console.log("✅ Banner reklam resume edildi.");
+                return;
+            } catch (eResume) {
+                // 2. resumeBanner olmadıysa Gerçek Banner ID ile göster
                 try {
-                    await this.admobPlugin.resumeBanner();
-                    console.log("✅ Banner reklam resume edildi.");
-                } catch (eResume) {
-                    console.warn("⚠️ Banner gösterim hatası:", eShow, eResume);
-                    this.bannerVisible = false;
+                    await this.admobPlugin.showBanner({
+                        adId: ADMOB_CONFIG.bannerId,
+                        adSize: 'ADAPTIVE_BANNER',
+                        position: 'BOTTOM_CENTER',
+                        isTesting: false,
+                        margin: 0
+                    });
+                    console.log("✅ Gerçek Banner reklam yüklendi.");
+                    return;
+                } catch (eShowReal) {
+                    // 3. Gerçek Banner No Fill dönerse, Google Test Banner ID ile göster!
+                    try {
+                        await this.admobPlugin.showBanner({
+                            adId: 'ca-app-pub-3940256099942544/6300978111',
+                            adSize: 'ADAPTIVE_BANNER',
+                            position: 'BOTTOM_CENTER',
+                            isTesting: true,
+                            margin: 0
+                        });
+                        console.log("✅ Test Banner reklam yüklendi (Fallback).");
+                    } catch (eShowTest) {
+                        console.warn("⚠️ Banner gösterim hatası:", eShowReal, eShowTest);
+                        this.bannerVisible = false;
+                    }
                 }
             }
         } else {
@@ -490,9 +483,6 @@ class AdMobManager {
         }
     }
 
-    /**
-     * Oyun içi ve editörde Banner Reklamını Gizler
-     */
     async hideBanner() {
         this.bannerVisible = false;
         if (this.admobPlugin && this.initialized) {
@@ -510,5 +500,4 @@ class AdMobManager {
     }
 }
 
-// Global AdMob Manager Örneği
 window.admobManager = new AdMobManager();
