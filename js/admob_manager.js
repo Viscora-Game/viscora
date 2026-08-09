@@ -275,20 +275,34 @@ class AdMobManager {
         console.log("📺 Geçiş reklamı tetiklendi...");
         if (this.admobPlugin && this.initialized) {
             try {
-                await this.admobPlugin.prepareInterstitial({
-                    adId: ADMOB_CONFIG.interstitialId,
-                    isTesting: false
-                });
+                this._showAdLoadingOverlay();
+
+                // Banner çakışmasını engellemek için reklam öncesi banner'ı gizle
+                try { await this.admobPlugin.hideBanner(); } catch(e) {}
 
                 const dismissHandler = this.admobPlugin.addListener('onInterstitialAdDismissed', () => {
                     console.log("ℹ️ Geçiş reklamı kapatıldı.");
-                    dismissHandler.remove();
+                    this._hideAdLoadingOverlay();
+                    try { if (dismissHandler) dismissHandler.remove(); } catch(e){}
                     if (onComplete) onComplete();
                 });
+
+                try {
+                    await this.admobPlugin.prepareInterstitial({
+                        adId: ADMOB_CONFIG.interstitialId,
+                        isTesting: false
+                    });
+                } catch(pe) {
+                    console.warn("Prepare interstitial warning:", pe);
+                }
+
+                // Native video ekranını bloke etmemesi için yükleme overlay'ini anında kaldır
+                this._hideAdLoadingOverlay();
 
                 await this.admobPlugin.showInterstitial();
             } catch (err) {
                 console.warn("⚠️ Geçiş reklamı gösterim hatası:", err);
+                this._hideAdLoadingOverlay();
                 if (onComplete) onComplete();
             }
         } else {
