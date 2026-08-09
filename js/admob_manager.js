@@ -284,7 +284,7 @@ class AdMobManager {
     }
 
     /**
-     * Geçiş Reklamı (Interstitial) Tetikler (4s Güvenlik Zamanlayıcılı)
+     * Geçiş Reklamı (Interstitial) Tetikler (Multi-Event Listener Matrix & 4s Güvenlik Zamanlayıcılı)
      */
     async triggerInterstitialAd(onComplete) {
         console.log("📺 Geçiş reklamı tetiklendi...");
@@ -295,7 +295,6 @@ class AdMobManager {
             if (onComplete) onComplete();
         };
 
-        // 4 Saniyelik Güvenlik Zamanlayıcısı: Reklam yüklenmezse oyunu asla dondurma, menüye yumuşakça geç!
         const safetyTimer = setTimeout(() => {
             console.warn("⚠️ Reklam zaman aşımına uğradı, menüye geçiliyor.");
             this._hideAdLoadingOverlay();
@@ -304,16 +303,24 @@ class AdMobManager {
 
         if (this.admobPlugin && this.initialized) {
             try {
-                // Banner çakışmasını engellemek için reklam öncesi banner'ı gizle
                 try { await this.admobPlugin.hideBanner(); } catch(e) {}
 
-                const dismissHandler = this.admobPlugin.addListener('onInterstitialAdDismissed', () => {
-                    console.log("ℹ️ Geçiş reklamı kapatıldı.");
+                const eventNames = ['onInterstitialAdDismissed', 'interstitialAdDismissed', 'interstitialDismissed', 'dismissed'];
+                const handlers = [];
+                const handleAdClose = (evtName) => {
+                    console.log(`ℹ️ Geçiş reklamı kapatıldı (Etkinlik: ${evtName}).`);
                     clearTimeout(safetyTimer);
                     this._hideAdLoadingOverlay();
-                    try { if (dismissHandler) dismissHandler.remove(); } catch(e){}
-                    setTimeout(() => this.preloadInterstitial(), 500);
+                    handlers.forEach(h => { try { h.remove(); } catch(e){} });
+                    setTimeout(() => this.preloadInterstitial(), 400);
                     safeComplete();
+                };
+
+                eventNames.forEach(evt => {
+                    try {
+                        const h = this.admobPlugin.addListener(evt, () => handleAdClose(evt));
+                        if (h) handlers.push(h);
+                    } catch(e) {}
                 });
 
                 try {
@@ -438,7 +445,7 @@ class AdMobManager {
     }
 
     /**
-     * Ana Menü Banner Reklamını Gösterir (Kusursuz Resume -> Show Sıralaması)
+     * Ana Menü Banner Reklamını Gösterir
      */
     async showBanner(targetScreen) {
         if (typeof window !== 'undefined' && window.isCyberCoreIntroActive) {
@@ -447,7 +454,6 @@ class AdMobManager {
         const activeScreen = targetScreen || ((window.game && window.game.ui && typeof window.game.ui.getActiveScreenName === 'function') 
             ? window.game.ui.getActiveScreenName() : 'start');
             
-        // Banner SADECE oyun oynanışında ('hud') ve seviye tasarımcısında ('editor') gizlenir.
         if (activeScreen === 'hud' || activeScreen === 'editor') {
             this.hideBanner();
             return;
@@ -455,29 +461,27 @@ class AdMobManager {
         
         if (this.admobPlugin && this.initialized) {
             this.bannerVisible = true;
-            // 1. Önce gizlenmiş mevcut banner'ı resumeBanner ile ekrana geri getir
             try {
-                await this.admobPlugin.resumeBanner();
-                console.log("✅ Banner reklam resume edildi.");
-                return;
-            } catch (eResume) {
-                // 2. Eğer henüz hiç oluşturulmadıysa sıfırdan showBanner yap
+                // Her gösterimde eski takılı görünümü temizle ve taze banner aç
+                try { await this.admobPlugin.removeBanner(); } catch(e) {}
+                await this.admobPlugin.showBanner({
+                    adId: ADMOB_CONFIG.bannerId,
+                    adSize: 'ADAPTIVE_BANNER',
+                    position: 'BOTTOM_CENTER',
+                    isTesting: false,
+                    margin: 0
+                });
+                console.log("✅ Banner reklam gösterildi.");
+            } catch (eShow) {
                 try {
-                    await this.admobPlugin.showBanner({
-                        adId: ADMOB_CONFIG.bannerId,
-                        adSize: 'ADAPTIVE_BANNER',
-                        position: 'BOTTOM_CENTER',
-                        isTesting: false,
-                        margin: 0
-                    });
-                    console.log("✅ Banner reklam sıfırdan gösterildi.");
-                } catch (eShow) {
-                    console.warn("⚠️ Banner gösterim hatası:", eShow);
+                    await this.admobPlugin.resumeBanner();
+                    console.log("✅ Banner reklam resume edildi.");
+                } catch (eResume) {
+                    console.warn("⚠️ Banner gösterim hatası:", eShow, eResume);
                     this.bannerVisible = false;
                 }
             }
         } else {
-            // Web fallback — placeholder'ı göster
             const bannerContainer = document.getElementById('admob-banner-placeholder') || document.getElementById('admob-banner-container');
             if (bannerContainer) {
                 bannerContainer.style.display = 'flex';
