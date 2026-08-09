@@ -440,40 +440,44 @@ class AdMobManager {
         if (this.admobPlugin && this.initialized) {
             this.bannerVisible = true;
             
-            // 1. Önce resumeBanner ile dene
-            try {
-                await this.admobPlugin.resumeBanner();
-                console.log("✅ Banner reklam resume edildi.");
-                return;
-            } catch (eResume) {
-                // 2. resumeBanner olmadıysa Gerçek Banner ID ile göster
+            // 250ms gecikmeli temiz gösterim (Android Activity lifecycle çakışmasını engellemek için)
+            setTimeout(async () => {
+                if (!this.bannerVisible) return;
+                // 1. Önce resumeBanner ile dene
                 try {
-                    await this.admobPlugin.showBanner({
-                        adId: ADMOB_CONFIG.bannerId,
-                        adSize: 'ADAPTIVE_BANNER',
-                        position: 'BOTTOM_CENTER',
-                        isTesting: false,
-                        margin: 0
-                    });
-                    console.log("✅ Gerçek Banner reklam yüklendi.");
+                    await this.admobPlugin.resumeBanner();
+                    console.log("✅ Banner reklam resume edildi.");
                     return;
-                } catch (eShowReal) {
-                    // 3. Gerçek Banner No Fill dönerse, Google Test Banner ID ile göster!
+                } catch (eResume) {
+                    // 2. resumeBanner olmadıysa Gerçek Banner ID ile göster
                     try {
                         await this.admobPlugin.showBanner({
-                            adId: 'ca-app-pub-3940256099942544/6300978111',
+                            adId: ADMOB_CONFIG.bannerId,
                             adSize: 'ADAPTIVE_BANNER',
                             position: 'BOTTOM_CENTER',
-                            isTesting: true,
+                            isTesting: false,
                             margin: 0
                         });
-                        console.log("✅ Test Banner reklam yüklendi (Fallback).");
-                    } catch (eShowTest) {
-                        console.warn("⚠️ Banner gösterim hatası:", eShowReal, eShowTest);
-                        this.bannerVisible = false;
+                        console.log("✅ Gerçek Banner reklam yüklendi.");
+                        return;
+                    } catch (eShowReal) {
+                        // 3. Gerçek Banner No Fill dönerse, Google Test Banner ID ile göster!
+                        try {
+                            await this.admobPlugin.showBanner({
+                                adId: 'ca-app-pub-3940256099942544/6300978111',
+                                adSize: 'ADAPTIVE_BANNER',
+                                position: 'BOTTOM_CENTER',
+                                isTesting: true,
+                                margin: 0
+                            });
+                            console.log("✅ Test Banner reklam yüklendi (Fallback).");
+                        } catch (eShowTest) {
+                            console.warn("⚠️ Banner gösterim hatası:", eShowReal, eShowTest);
+                            this.bannerVisible = false;
+                        }
                     }
                 }
-            }
+            }, 250);
         } else {
             const bannerContainer = document.getElementById('admob-banner-placeholder') || document.getElementById('admob-banner-container');
             if (bannerContainer) {
