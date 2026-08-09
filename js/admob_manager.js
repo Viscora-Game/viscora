@@ -47,6 +47,7 @@ class AdMobManager {
                 });
                 this.initialized = true;
                 console.log("✅ AdMob SDK başarıyla başlatıldı (Capacitor Native).");
+                this.preloadInterstitial();
                 // İntro sırasında (0 - 2.3sn) reklam gösterilmesini kesinlikle engelle; 2.5 saniye sonra ana menüde aç!
                 setTimeout(() => {
                     if (!this.bannerVisible && !window.isCyberCoreIntroActive) {
@@ -269,41 +270,69 @@ class AdMobManager {
     }
 
     /**
-     * Geçiş Reklamı (Interstitial) Tetikler
+     * Geçiş Reklamını Arka Planda Önceden Yükler (0 Saniye Gecikme İçin)
+     */
+    async preloadInterstitial() {
+        if (this.admobPlugin && this.initialized) {
+            try {
+                await this.admobPlugin.prepareInterstitial({
+                    adId: ADMOB_CONFIG.interstitialId,
+                    isTesting: false
+                });
+                console.log("⚡ Geçiş reklamı arka planda hazırlandı (Preloaded).");
+            } catch (e) {
+                console.warn("Preload interstitial warning:", e);
+            }
+        }
+    }
+
+    /**
+     * Geçiş Reklamı (Interstitial) Tetikler (Önceden Yüklenmiş Reklamı Anında Gösterir)
      */
     async triggerInterstitialAd(onComplete) {
         console.log("📺 Geçiş reklamı tetiklendi...");
         if (this.admobPlugin && this.initialized) {
             try {
-                this._showAdLoadingOverlay();
-
                 // Banner çakışmasını engellemek için reklam öncesi banner'ı gizle
                 try { await this.admobPlugin.hideBanner(); } catch(e) {}
 
+                let adDismissed = false;
+
                 const dismissHandler = this.admobPlugin.addListener('onInterstitialAdDismissed', () => {
                     console.log("ℹ️ Geçiş reklamı kapatıldı.");
+                    adDismissed = true;
                     this._hideAdLoadingOverlay();
                     try { if (dismissHandler) dismissHandler.remove(); } catch(e){}
+                    // Sonraki reklam için arka planda önceden yükle
+                    this.preloadInterstitial();
                     if (onComplete) onComplete();
                 });
 
+                this._hideAdLoadingOverlay();
+                await this.admobPlugin.showInterstitial();
+
+                // Eğer reklam anında kapandıysa ve dinleyici tetiklenmediyse
+                setTimeout(() => {
+                    if (!adDismissed) {
+                        this._hideAdLoadingOverlay();
+                        this.preloadInterstitial();
+                    }
+                }, 1000);
+
+            } catch (err) {
+                console.warn("⚠️ Önceden yüklenmiş reklam bulunamadı, sıfırdan deneniyor:", err);
                 try {
                     await this.admobPlugin.prepareInterstitial({
                         adId: ADMOB_CONFIG.interstitialId,
                         isTesting: false
                     });
-                } catch(pe) {
-                    console.warn("Prepare interstitial warning:", pe);
+                    this._hideAdLoadingOverlay();
+                    await this.admobPlugin.showInterstitial();
+                } catch (err2) {
+                    this._hideAdLoadingOverlay();
+                    this.preloadInterstitial();
+                    if (onComplete) onComplete();
                 }
-
-                // Native video ekranını bloke etmemesi için yükleme overlay'ini anında kaldır
-                this._hideAdLoadingOverlay();
-
-                await this.admobPlugin.showInterstitial();
-            } catch (err) {
-                console.warn("⚠️ Geçiş reklamı gösterim hatası:", err);
-                this._hideAdLoadingOverlay();
-                if (onComplete) onComplete();
             }
         } else {
             console.log("ℹ️ Web fallback: Geçiş reklamı atlanıyor.");
