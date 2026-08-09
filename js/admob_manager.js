@@ -435,9 +435,21 @@ class AdMobManager {
                     await this.admobPlugin.resumeBanner();
                     this.bannerVisible = true;
                     console.log("✅ Banner reklam resume edildi.");
-                } catch (e) {
-                    this.bannerVisible = false;
-                    console.warn("⚠️ Banner gösterim hatası:", err);
+                } catch (e1) {
+                    try {
+                        await this.admobPlugin.removeBanner();
+                        await this.admobPlugin.showBanner({
+                            adId: ADMOB_CONFIG.bannerId,
+                            adSize: 'ADAPTIVE_BANNER',
+                            position: 'BOTTOM_CENTER',
+                            isTesting: false
+                        });
+                        this.bannerVisible = true;
+                        console.log("✅ Banner reklam recreate edildi.");
+                    } catch (e2) {
+                        this.bannerVisible = false;
+                        console.warn("⚠️ Banner gösterim hatası:", err);
+                    }
                 }
             }
         } else {
