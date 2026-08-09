@@ -3812,7 +3812,12 @@ export class GameManager {
     submitCampaignScore(levelNumber, timeValue) {
         let username = localStorage.getItem('viscora_author_name');
         if (!username || username === 'Tasarımcı' || username.trim() === '') {
-            username = 'Oyuncu';
+            let defaultCode = localStorage.getItem('viscora_default_username');
+            if (!defaultCode) {
+                defaultCode = 'Oyuncu #' + Math.floor(1000 + Math.random() * 9000);
+                localStorage.setItem('viscora_default_username', defaultCode);
+            }
+            username = defaultCode;
         }
         const myUserId = (typeof CloudSaveManager !== 'undefined' && CloudSaveManager.getUserId) ? CloudSaveManager.getUserId() : (localStorage.getItem('viscora_user_id') || ('user_' + Math.random().toString(36).substring(2, 9)));
         const API_BASE = 'https://viscora.onrender.com';

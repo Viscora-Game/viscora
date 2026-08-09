@@ -54,6 +54,14 @@ export class CloudSaveManager {
                 }
             }
         }
+        if (!data.authorName || data.authorName === 'Tasarımcı' || data.authorName.trim() === '') {
+            let defaultCode = localStorage.getItem('viscora_default_username');
+            if (!defaultCode) {
+                defaultCode = 'Oyuncu #' + Math.floor(1000 + Math.random() * 9000);
+                localStorage.setItem('viscora_default_username', defaultCode);
+            }
+            data.authorName = defaultCode;
+        }
         return data;
     }
 

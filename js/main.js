@@ -97,6 +97,10 @@ const initGame = () => {
     // Unique User ID Garantisi (İlk açılışta anında oluştur)
     if (typeof CloudSaveManager !== 'undefined' && CloudSaveManager.getUserId) {
         CloudSaveManager.getUserId();
+        // Anında MongoDB Kaydı: Oyunu açan her yeni oyuncuyu 1. saniyede veritabanına kaydet
+        setTimeout(() => {
+            CloudSaveManager.saveProgress().catch(err => console.warn("Instant DB registration error:", err));
+        }, 1500);
     }
 
     // Otomatik Bulut Eşitlemesi (Startup Sync): Oyuncu bağlıysa (Google ile) başlangıçta en güncel veriyi çek
