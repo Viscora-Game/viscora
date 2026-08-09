@@ -364,12 +364,14 @@ class AdMobManager {
                     console.warn("Prepare reward video warning:", pe);
                 }
                 
+                // NATIVE VİDEO EKRANINI BLOKE ETMEMESİ İÇİN YÜKLEME OVERLAY'İNİ ANINDA KALDIR
+                this._hideAdLoadingOverlay();
+
                 const rewardItem = await this.admobPlugin.showRewardVideoAd(options);
                 if (rewardItem) {
                     rewardEarned = true;
                 }
 
-                this._hideAdLoadingOverlay();
                 if (rewardEarned && onSuccess) {
                     onSuccess();
                 }
@@ -395,7 +397,7 @@ class AdMobManager {
     }
 
     /**
-     * Ana Menü Banner Reklamını Gösterir (Oyun içi ve editör hariç tüm menülerde)
+     * Ana Menü Banner Reklamını Gösterir
      */
     async showBanner() {
         if (typeof window !== 'undefined' && window.isCyberCoreIntroActive) {
@@ -405,7 +407,6 @@ class AdMobManager {
             ? window.game.ui.getActiveScreenName() : 'start';
             
         // Banner SADECE oyun oynanışında ('hud') ve seviye tasarımcısında ('editor') gizlenir.
-        // Ana Menü, Bölüm Seçim, Mağaza, Ödüller ve Profilde banner %100 YAYINDADIR!
         if (activeScreen === 'hud' || activeScreen === 'editor') {
             this.hideBanner();
             return;
@@ -413,30 +414,24 @@ class AdMobManager {
         
         if (this.admobPlugin && this.initialized) {
             try {
+                // Önce gizlenmiş mevcut banner'ı tekrar görünür yapmayı dene
+                await this.admobPlugin.resumeBanner();
                 this.bannerVisible = true;
-                await this.admobPlugin.showBanner({
-                    adId: ADMOB_CONFIG.bannerId,
-                    adSize: 'ADAPTIVE_BANNER',
-                    position: 'BOTTOM_CENTER',
-                    isTesting: false
-                });
-                
-                // Asenkron yükleme bittiğinde ekran durumunu tekrar kontrol et (Oyun içine sızmayı engeller)
-                const currentScreen = (window.game && window.game.ui && typeof window.game.ui.getActiveScreenName === 'function') 
-                    ? window.game.ui.getActiveScreenName() : 'start';
-                if (currentScreen === 'hud' || currentScreen === 'editor') {
-                    await this.admobPlugin.hideBanner();
-                    this.bannerVisible = false;
-                } else {
-                    console.log("✅ Banner reklam gösterildi.");
-                }
-            } catch (err) {
+                console.log("✅ Banner reklam resume edildi.");
+            } catch (e1) {
                 try {
-                    await this.admobPlugin.resumeBanner();
+                    // Bulunamadıysa sıfırdan göster
+                    await this.admobPlugin.showBanner({
+                        adId: ADMOB_CONFIG.bannerId,
+                        adSize: 'ADAPTIVE_BANNER',
+                        position: 'BOTTOM_CENTER',
+                        isTesting: false
+                    });
                     this.bannerVisible = true;
-                    console.log("✅ Banner reklam resume edildi.");
-                } catch (e1) {
+                    console.log("✅ Banner reklam gösterildi.");
+                } catch (e2) {
                     try {
+                        // Çakışma varsa eskiyi kaldır ve yeniden yarat
                         await this.admobPlugin.removeBanner();
                         await this.admobPlugin.showBanner({
                             adId: ADMOB_CONFIG.bannerId,
@@ -446,9 +441,9 @@ class AdMobManager {
                         });
                         this.bannerVisible = true;
                         console.log("✅ Banner reklam recreate edildi.");
-                    } catch (e2) {
+                    } catch (e3) {
                         this.bannerVisible = false;
-                        console.warn("⚠️ Banner gösterim hatası:", err);
+                        console.warn("⚠️ Banner gösterim hatası:", e3);
                     }
                 }
             }
