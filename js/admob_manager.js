@@ -414,37 +414,24 @@ class AdMobManager {
         
         if (this.admobPlugin && this.initialized) {
             try {
-                // Önce gizlenmiş mevcut banner'ı tekrar görünür yapmayı dene
-                await this.admobPlugin.resumeBanner();
+                // Her menüye dönüşte takılı kalan eski banner'ı temizle ve sıfırdan taze reklam çağır
+                try { await this.admobPlugin.removeBanner(); } catch(e) {}
+                await this.admobPlugin.showBanner({
+                    adId: ADMOB_CONFIG.bannerId,
+                    adSize: 'ADAPTIVE_BANNER',
+                    position: 'BOTTOM_CENTER',
+                    isTesting: false
+                });
                 this.bannerVisible = true;
-                console.log("✅ Banner reklam resume edildi.");
-            } catch (e1) {
+                console.log("✅ Taze Banner reklam gösterildi.");
+            } catch (err) {
                 try {
-                    // Bulunamadıysa sıfırdan göster
-                    await this.admobPlugin.showBanner({
-                        adId: ADMOB_CONFIG.bannerId,
-                        adSize: 'ADAPTIVE_BANNER',
-                        position: 'BOTTOM_CENTER',
-                        isTesting: false
-                    });
+                    await this.admobPlugin.resumeBanner();
                     this.bannerVisible = true;
-                    console.log("✅ Banner reklam gösterildi.");
+                    console.log("✅ Banner reklam resume edildi.");
                 } catch (e2) {
-                    try {
-                        // Çakışma varsa eskiyi kaldır ve yeniden yarat
-                        await this.admobPlugin.removeBanner();
-                        await this.admobPlugin.showBanner({
-                            adId: ADMOB_CONFIG.bannerId,
-                            adSize: 'ADAPTIVE_BANNER',
-                            position: 'BOTTOM_CENTER',
-                            isTesting: false
-                        });
-                        this.bannerVisible = true;
-                        console.log("✅ Banner reklam recreate edildi.");
-                    } catch (e3) {
-                        this.bannerVisible = false;
-                        console.warn("⚠️ Banner gösterim hatası:", e3);
-                    }
+                    this.bannerVisible = false;
+                    console.warn("⚠️ Banner gösterim hatası:", e2);
                 }
             }
         } else {
@@ -458,17 +445,18 @@ class AdMobManager {
     }
 
     /**
-     * Ana Menü Banner Reklamını Gizler
+     * Oyun içi ve editörde Banner Reklamını Kesin Olarak Temizler
      */
     async hideBanner() {
         this.bannerVisible = false;
         if (this.admobPlugin && this.initialized) {
             try {
                 await this.admobPlugin.hideBanner();
-                console.log("ℹ️ Banner reklam gizlendi.");
-            } catch (err) {
-                console.warn("⚠️ Banner gizleme hatası:", err);
-            }
+            } catch (err) {}
+            try {
+                await this.admobPlugin.removeBanner();
+            } catch (err) {}
+            console.log("ℹ️ Banner reklam tamamen temizlendi.");
         }
         const bannerContainer = document.getElementById('admob-banner-placeholder') || document.getElementById('admob-banner-container');
         if (bannerContainer) {
