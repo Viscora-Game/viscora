@@ -447,33 +447,23 @@ class AdMobManager {
         if (this.admobPlugin && this.initialized) {
             try {
                 this.bannerVisible = true;
-                // Önce gizli banner'ı tekrar görünür yapmayı dene
-                await this.admobPlugin.resumeBanner();
-                console.log("✅ Banner reklam resume edildi.");
+                // Önce showBanner ile reklam gösterimini dene
+                await this.admobPlugin.showBanner({
+                    adId: ADMOB_CONFIG.bannerId,
+                    adSize: 'ADAPTIVE_BANNER',
+                    position: 'BOTTOM_CENTER',
+                    isTesting: false,
+                    margin: 0
+                });
+                console.log("✅ Banner reklam gösterildi.");
             } catch (e1) {
                 try {
-                    // Evrensel standart 320x50 Banner boyutuyla sıfırdan yükle
-                    await this.admobPlugin.showBanner({
-                        adId: ADMOB_CONFIG.bannerId,
-                        adSize: 'BANNER',
-                        position: 'BOTTOM_CENTER',
-                        isTesting: false
-                    });
-                    console.log("✅ Standart Banner reklam yüklendi.");
+                    // Mevcut banner varsa resume et
+                    await this.admobPlugin.resumeBanner();
+                    console.log("✅ Banner reklam resume edildi.");
                 } catch (e2) {
-                    try {
-                        await this.admobPlugin.removeBanner();
-                        await this.admobPlugin.showBanner({
-                            adId: ADMOB_CONFIG.bannerId,
-                            adSize: 'BANNER',
-                            position: 'BOTTOM_CENTER',
-                            isTesting: false
-                        });
-                        console.log("✅ Banner reklam recreate edildi.");
-                    } catch (e3) {
-                        this.bannerVisible = false;
-                        console.warn("⚠️ Banner gösterim hatası:", e3);
-                    }
+                    console.warn("⚠️ Banner gösterim uyarısı:", e2);
+                    this.bannerVisible = false;
                 }
             }
         } else {
