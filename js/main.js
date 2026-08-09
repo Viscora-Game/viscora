@@ -89,6 +89,11 @@ const initGame = () => {
         }
     }
 
+    // Unique User ID Garantisi (İlk açılışta anında oluştur)
+    if (typeof CloudSaveManager !== 'undefined' && CloudSaveManager.getUserId) {
+        CloudSaveManager.getUserId();
+    }
+
     // Otomatik Bulut Eşitlemesi (Startup Sync): Oyuncu bağlıysa (Google ile) başlangıçta en güncel veriyi çek
     const syncCode = localStorage.getItem('viscora_sync_code');
     if (syncCode) {

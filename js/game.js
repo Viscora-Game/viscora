@@ -3814,7 +3814,7 @@ export class GameManager {
         if (!username || username === 'Tasarımcı' || username.trim() === '') {
             username = 'Oyuncu';
         }
-        const myUserId = localStorage.getItem('viscora_user_id') || 'user_anon';
+        const myUserId = (typeof CloudSaveManager !== 'undefined' && CloudSaveManager.getUserId) ? CloudSaveManager.getUserId() : (localStorage.getItem('viscora_user_id') || ('user_' + Math.random().toString(36).substring(2, 9)));
         const API_BASE = 'https://viscora.onrender.com';
         
         const boardList = document.getElementById('win-leaderboard-list');

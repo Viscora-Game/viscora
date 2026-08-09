@@ -109,12 +109,17 @@ export class CloudSaveManager {
         return true;
     }
 
-    static async saveProgress(force = false) {
+    static getUserId() {
         let myUserId = localStorage.getItem('viscora_user_id');
         if (!myUserId) {
             myUserId = 'user_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
             localStorage.setItem('viscora_user_id', myUserId);
         }
+        return myUserId;
+    }
+
+    static async saveProgress(force = false) {
+        const myUserId = this.getUserId();
 
         const saveData = this.getSaveData();
         
