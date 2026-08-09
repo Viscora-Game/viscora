@@ -253,15 +253,15 @@ class AdMobManager {
     }
 
     /**
-     * Dükkanda yapılan her 3 satın alımda bir geçiş reklamı açar
+     * Dükkanda yapılan her 2 satın alımda bir geçiş reklamı açar
      */
     trackShopPurchase(onComplete) {
         let count = parseInt(localStorage.getItem('viscora_shop_purchases_count')) || 0;
         count++;
         localStorage.setItem('viscora_shop_purchases_count', count.toString());
-        console.log(`🛍️ Dükkan satın alım sayısı: ${count}/3`);
+        console.log(`🛍️ Dükkan satın alım sayısı: ${count}/2`);
 
-        if (count >= 3) {
+        if (count >= 2) {
             localStorage.setItem('viscora_shop_purchases_count', '0');
             this.triggerInterstitialAd(onComplete);
         } else {
@@ -270,7 +270,7 @@ class AdMobManager {
     }
 
     /**
-     * Geçiş Reklamını Arka Planda Önceden Yükler (0 Saniye Gecikme İçin)
+     * Geçiş Reklamını Arka Planda Önceden Yükler
      */
     async preloadInterstitial() {
         if (this.admobPlugin && this.initialized) {
@@ -287,7 +287,7 @@ class AdMobManager {
     }
 
     /**
-     * Geçiş Reklamı (Interstitial) Tetikler (Önceden Yüklenmiş Reklamı Anında Gösterir)
+     * Geçiş Reklamı (Interstitial) Tetikler
      */
     async triggerInterstitialAd(onComplete) {
         console.log("📺 Geçiş reklamı tetiklendi...");
@@ -296,43 +296,32 @@ class AdMobManager {
                 // Banner çakışmasını engellemek için reklam öncesi banner'ı gizle
                 try { await this.admobPlugin.hideBanner(); } catch(e) {}
 
-                let adDismissed = false;
-
-                const dismissHandler = this.admobPlugin.addListener('onInterstitialAdDismissed', () => {
+                let isHandled = false;
+                const handleAdClose = () => {
+                    if (isHandled) return;
+                    isHandled = true;
                     console.log("ℹ️ Geçiş reklamı kapatıldı.");
-                    adDismissed = true;
                     this._hideAdLoadingOverlay();
                     try { if (dismissHandler) dismissHandler.remove(); } catch(e){}
-                    // Sonraki reklam için arka planda önceden yükle
-                    this.preloadInterstitial();
+                    setTimeout(() => this.preloadInterstitial(), 500);
                     if (onComplete) onComplete();
-                });
+                };
 
-                this._hideAdLoadingOverlay();
-                await this.admobPlugin.showInterstitial();
+                const dismissHandler = this.admobPlugin.addListener('onInterstitialAdDismissed', handleAdClose);
 
-                // Eğer reklam anında kapandıysa ve dinleyici tetiklenmediyse
-                setTimeout(() => {
-                    if (!adDismissed) {
-                        this._hideAdLoadingOverlay();
-                        this.preloadInterstitial();
-                    }
-                }, 1000);
-
-            } catch (err) {
-                console.warn("⚠️ Önceden yüklenmiş reklam bulunamadı, sıfırdan deneniyor:", err);
                 try {
                     await this.admobPlugin.prepareInterstitial({
                         adId: ADMOB_CONFIG.interstitialId,
                         isTesting: false
                     });
-                    this._hideAdLoadingOverlay();
-                    await this.admobPlugin.showInterstitial();
-                } catch (err2) {
-                    this._hideAdLoadingOverlay();
-                    this.preloadInterstitial();
-                    if (onComplete) onComplete();
-                }
+                } catch(pe) {}
+
+                this._hideAdLoadingOverlay();
+                await this.admobPlugin.showInterstitial();
+            } catch (err) {
+                console.warn("⚠️ Geçiş reklamı gösterim hatası:", err);
+                this._hideAdLoadingOverlay();
+                if (onComplete) onComplete();
             }
         } else {
             console.log("ℹ️ Web fallback: Geçiş reklamı atlanıyor.");
