@@ -241,9 +241,9 @@ class AdMobManager {
         let count = parseInt(localStorage.getItem('viscora_completed_levels_count')) || 0;
         count++;
         localStorage.setItem('viscora_completed_levels_count', count.toString());
-        console.log(`🎮 Tamamlanan bölüm sayısı: ${count}/3`);
+        console.log(`🎮 Tamamlanan bölüm sayısı: ${count}/2`);
 
-        if (count >= 3) {
+        if (count >= 2) {
             localStorage.setItem('viscora_completed_levels_count', '0');
             this.triggerInterstitialAd(onComplete);
         } else {
@@ -410,7 +410,6 @@ class AdMobManager {
             this.hideBanner();
             return;
         }
-        if (this.bannerVisible) return; // Zaten ekranda yayındaysa tekrar çağırma
         
         if (this.admobPlugin && this.initialized) {
             try {
