@@ -1407,6 +1407,84 @@ async def post_campaign_score(level_num: int, request: Request):
         'personalBest': personal_best
     }
 
+# -------------------------------------------------------------
+# EŞLE GİTSİN 3D - CANLI KÜRESEL SIRALAMA TABLOSU API UÇ NOKTALARI
+# -------------------------------------------------------------
+esle_client = None
+esle_players_collection = None
+
+def get_esle_collection():
+    global esle_client, esle_players_collection
+    if esle_players_collection is not None:
+        return esle_players_collection
+    try:
+        from pymongo import MongoClient
+        uri = os.environ.get('ESLE_MONGODB_URI') or os.environ.get('MONGODB_URI') or 'mongodb+srv://eslesme_game:HamzaKa@hamza.55azmjw.mongodb.net/EsleGitsin3D?retryWrites=true&w=majority&appName=Hamza'
+        esle_client = MongoClient(uri, serverSelectionTimeoutMS=5000)
+        esle_players_collection = esle_client['EsleGitsin3D']['players']
+        return esle_players_collection
+    except Exception as e:
+        print("[EsleGitsin3D] MongoDB connection error:", e)
+        return None
+
+@app.get("/api/esle-gitsin/leaderboard")
+async def get_esle_gitsin_leaderboard():
+    col = get_esle_collection()
+    if col is not None:
+        try:
+            players = list(col.find({}, {'_id': 0}).sort('overallScore', -1).limit(500))
+            return JSONResponse({'success': True, 'players': players})
+        except Exception as e:
+            print("[EsleGitsin3D] Fetch error:", e)
+    return JSONResponse({'success': False, 'players': []})
+
+@app.post("/api/esle-gitsin/sync")
+async def sync_esle_gitsin_player(request: Request):
+    try:
+        body = await request.json()
+        if not body or not body.get('fullTag'):
+            return JSONResponse({'error': 'Missing fullTag'}, status_code=400)
+
+        full_tag = body['fullTag']
+        col = get_esle_collection()
+        if col is not None:
+            existing = col.find_one({'fullTag': full_tag})
+
+            new_classic_score = int(body.get('classicScore', 0) or 0)
+            new_tt_score = int(body.get('ttScore', 0) or 0)
+            
+            existing_classic = int(existing.get('classicScore', 0) or 0) if existing else 0
+            existing_tt = int(existing.get('ttScore', 0) or 0) if existing else 0
+
+            classic_score = max(new_classic_score, existing_classic)
+            tt_score = max(new_tt_score, existing_tt)
+            overall = classic_score + tt_score
+
+            existing_classic_lvl = int(existing.get('classicLvl', 1) or 1) if existing else 1
+            existing_tt_lvl = int(existing.get('ttLvl', 1) or 1) if existing else 1
+            existing_puzzles = int(existing.get('puzzles', 0) or 0) if existing else 0
+
+            fields_to_set = {
+                'fullTag': full_tag,
+                'name': body.get('name') or full_tag.split('#')[0],
+                'tag': body.get('tag', '0001'),
+                'classicLvl': max(int(body.get('classicLvl', 1) or 1), existing_classic_lvl),
+                'classicScore': classic_score,
+                'ttLvl': max(int(body.get('ttLvl', 1) or 1), existing_tt_lvl),
+                'ttScore': tt_score,
+                'overallScore': overall,
+                'puzzles': max(int(body.get('puzzles', 0) or 0), existing_puzzles),
+                'puzzleDataStr': body.get('puzzleDataStr') or (existing.get('puzzleDataStr') if existing else ''),
+                'updatedAt': int(datetime.now(timezone.utc).timestamp() * 1000)
+            }
+            col.update_one({'fullTag': full_tag}, {'$set': fields_to_set}, upsert=True)
+            players = list(col.find({}, {'_id': 0}).sort('overallScore', -1).limit(500))
+            return JSONResponse({'success': True, 'players': players})
+        return JSONResponse({'success': False, 'players': []}, status_code=500)
+    except Exception as e:
+        print("[EsleGitsin3D] Sync error:", e)
+        return JSONResponse({'error': str(e)}, status_code=500)
+
 # Statik Dosya Kök Dizini
 root_dir = os.path.dirname(os.path.abspath(__file__))
 
